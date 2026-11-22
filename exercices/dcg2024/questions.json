@@ -89,6 +89,7 @@
     },
     {
       "id": "q05",
+      "cinema": {"+tables":"Avant d'écrire le filtre, regardez les valeurs réellement saisies dans ObjetAFinancer (double-clic sur DOSSIER) : les objets sont des libellés choisis par l'entreprise, ici « Achat véhicule neuf » et « Achat véhicule d'occasion ». C'est leur **début commun** qui permet de les retenir tous les deux.","+filtres":"`LIKE 'Achat véhicule%'` remplace deux égalités reliées par OR. Sans le %, `LIKE 'Achat véhicule'` se comporterait comme un `=` et ne trouverait rien. L'accent compte : 'Achat vehicule%' ne renvoie aucune ligne.","+resultat":"Vous devez obtenir 47 dossiers (26 d'occasion et 21 neufs). Les 4 dossiers « Camping-car » ne sont pas retenus : leur libellé ne commence pas par « Achat véhicule »."},
       "theme": "Une seule table",
       "enonce": "Afficher les dossiers (numéro, objet, montant à financer) dont l'objet est un achat de véhicule (neuf ou d'occasion).",
       "correction": [
@@ -108,6 +109,7 @@
     },
     {
       "id": "q06",
+      "cinema": {"+tables":"« Pas encore clos » n'est pas une valeur stockée : le contexte dit qu'un dossier est clos **lorsque DateCloture est renseignée**. Un dossier non clos est donc un dossier dont la date de clôture est vide.","+select":"Ne cherchez pas à compter la colonne DateCloture : `COUNT(DateCloture)` ne compte que les valeurs renseignées, c'est-à-dire les dossiers **clos** (120). Pour compter des lignes vides, on les sélectionne avec le WHERE, puis on écrit `COUNT(*)`.","+resultat":"Vous devez obtenir 30 (sur 150 dossiers). Contrôle : 30 + 120 dossiers clos = 150."},
       "theme": "Calculs et agrégats",
       "enonce": "Combien de dossiers ne sont pas encore clos ?",
       "correction": [
@@ -251,6 +253,7 @@
     },
     {
       "id": "q15",
+      "cinema": {"+tables":"Traduisez chaque mot de l'énoncé en colonne : « désignation », « date de réception » → PIECEJOINTE ; « numéro du dossier » → DOSSIER ; « chargé de clientèle **responsable du dossier** » → CHARGECLIENTELE. C'est le mot « responsable » qui indique le chemin : c'est le dossier qui connaît son chargé.","+select":"IdDoss est dans **deux tables**. Après la jointure, les deux valeurs sont égales, mais SQL refuse de choisir à votre place : sans préfixe, vous obtenez l'erreur « colonne ambiguë ». `PIECEJOINTE.IdDoss` aurait donné le même résultat.","+jointures.2":"On suit les flèches d'un bout à l'autre : PIECEJOINTE → DOSSIER → CHARGECLIENTELE. **Une jointure par flèche traversée**, jamais de raccourci : PIECEJOINTE ne contient pas IdChargeClientele.","+filtres":"« Non conformes » est une notion métier : regardez comment elle est **stockée** (double-clic sur PIECEJOINTE). Ici ConformitePJ vaut 'O' ou 'N' ; écrire 'Non' ou 'non conforme' donnerait un résultat vide."},
       "theme": "Jointures",
       "enonce": "Afficher les pièces jointes non conformes (désignation, date de réception) avec le numéro du dossier et le nom du chargé de clientèle responsable du dossier.",
       "correction": [
@@ -293,6 +296,7 @@
     },
     {
       "id": "q17",
+      "cinema": {"+select":"On compte les **offres de chaque dossier**, pas les offres de chaque chargé : le groupe, c'est le dossier. Le nom du chargé n'est affiché que pour information.","+groupe":"Pourquoi NomChargeClientele est-il aussi dans le GROUP BY ? Parce qu'il est affiché sans fonction de calcul. Cela ne crée pas de groupes supplémentaires : un dossier n'a qu'un seul chargé. C'est aussi pour cela que le même nom (MOULINIER, BENALI…) apparaît sur plusieurs lignes.","+groupe.2":"« Plus de 3 offres » : `> 3`. Avec `>= 3`, les 28 dossiers qui ont exactement 3 offres s'ajouteraient au résultat.","+resultat":"Vous devez obtenir 29 dossiers, en tête 2288, 2296, 2299 et 2323 avec 6 offres chacun."},
       "theme": "Jointures et regroupements",
       "enonce": "Afficher, pour chaque dossier (identifiant), le chargé de clientèle (nom) et le nombre d'offres, uniquement pour les dossiers ayant reçu plus de 3 offres. Le résultat sera trié par ordre décroissant du nombre d'offres.",
       "annale": "2024",
@@ -337,6 +341,7 @@
     },
     {
       "id": "q19",
+      "cinema": {"+filtres":"« Non clos » : DateCloture vide (IS NULL). Cette première condition est facile à oublier quand on se concentre sur la sous-requête : sans elle, vous obtenez 14 dossiers au lieu de 10, dont 4 dossiers déjà clôturés sans offre.","+filtres.2":"La sous-requête renvoie la liste des dossiers qui ont **au moins une** offre ; NOT IN garde les autres. Une jointure DOSSIER–OFFRE ne peut pas répondre : elle ne produit une ligne que pour les dossiers qui ont une offre.","+resultat":"Vous devez obtenir 10 dossiers. Plusieurs ont été créés début juin 2024 : ils sont simplement trop récents pour avoir déjà reçu une offre."},
       "theme": "Sous-requêtes",
       "enonce": "Donner la liste des dossiers non clos (numéro, date de création) n'ayant jamais fait l'objet d'une offre.",
       "annale": "2024",
@@ -385,6 +390,7 @@
     },
     {
       "id": "q22",
+      "cinema": {"+tables":"Cette question combine une jointure sur trois tables, un filtre sur un texte (« Refusé ») et un filtre sur une **date relative** (« il y a moins d'un an »). Commencez par traduire la date relative en date précise : moins d'un an avant le 15/06/2024, c'est après le 15/06/2023.","+select":"Un client a souvent refusé plusieurs offres dans l'année (105 offres refusées pour 27 clients) : sans DISTINCT, il apparaît une fois par offre refusée.","+filtres.2":"Écriture équivalente, qui fonctionne quelle que soit la date du jour : `DATEDIFF(NOW(), DateEmissionOffre) < 365`.\nPiège : `YEAR(DateEmissionOffre) = 2024` ne répond pas à la question, car il oublie les offres de juin à décembre 2023.","+resultat":"Vous devez obtenir 27 clients. Remarque : deux homonymes (même nom et même prénom) seraient fusionnés par DISTINCT ; afficher aussi CLIENT.IdCli serait plus sûr, mais ce n'est pas demandé."},
       "theme": "Dates",
       "enonce": "Lister sans doublon les clients (nom, prénom) ayant refusé une offre émise il y a moins d'un an (la date du jour est le 15/06/2024).",
       "correction": [
@@ -409,6 +415,7 @@
     },
     {
       "id": "q23",
+      "cinema": {"+tables":"Le supérieur hiérarchique est lui-même un chargé de clientèle : son nom est donc dans **la même table**. Pour afficher sur une même ligne le nom du chargé et celui de son supérieur, il faut deux lignes de CHARGECLIENTELE en même temps : la table est utilisée deux fois.","+alias":"Choisissez des alias qui disent le **rôle** : C pour le chargé, S pour le supérieur. Toutes les colonnes doivent ensuite être préfixées : `NomChargeClientele` seul serait ambigu, puisque les deux copies ont cette colonne.","+jointures":"Le sens de la jointure est le piège : la clé étrangère `IdChargeClienteleSupHierarchique` se lit dans la ligne du **chargé** (C) et désigne la clé primaire du **supérieur** (S). Si vous inversez (`S.IdChargeClienteleSupHierarchique = C.IdChargeClientele`), la colonne S.NomChargeClientele affiche un subordonné au lieu du supérieur.","+resultat":"Vous devez obtenir 11 lignes pour 12 chargés : BERTHIER, au sommet de la hiérarchie, n'a pas de supérieur (colonne vide) et disparaît de la jointure. C'est normal ici ; pour la garder, il faudrait une jointure externe (LEFT JOIN)."},
       "theme": "Auto-jointure",
       "enonce": "Afficher chaque chargé de clientèle (nom, prénom) avec le nom de son supérieur hiérarchique.",
       "correction": [
@@ -505,6 +512,7 @@
     },
     {
       "id": "q29",
+      "cinema": {"+table":"Supprimer un client, c'est supprimer une ligne de CLIENT. Avant un DELETE, regardez toujours les flèches qui **arrivent** sur la table : ici DOSSIER contient #IdCli, qui fait référence à CLIENT.","+ciblage":"On cible le client par son numéro (clé primaire) et non par son nom : `WHERE NomCli = 'BRUNET'` toucherait tous les BRUNET (il y a aussi un Julien BRUNET, qui a des dossiers).","+resultat":"Le client 1067 n'a aucun dossier : la suppression réussit (1 ligne). Le client 1064 (Antoine GIRARD) a 2 dossiers, qui portent 6 offres et 10 pièces jointes : la suppression est refusée par l'intégrité référentielle. Pour le supprimer, il faudrait effacer d'abord les offres et les pièces jointes, puis les dossiers, et enfin le client."},
       "theme": "Mises à jour",
       "type": "write",
       "enonce": "Supprimer le client n° 1067 (Olivier BRUNET), qui n'a jamais ouvert de dossier. Essayez ensuite de supprimer le client n° 1064 : que se passe-t-il, et pourquoi ?",

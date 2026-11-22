@@ -30,6 +30,7 @@
     },
     {
       "id": "q03",
+      "cinema": {"+select":"El email no se muestra, aunque el filtro trabaje sobre él: una columna puede usarse en el WHERE sin aparecer en el SELECT.","+filtres":"« No han indicado ninguna dirección » significa que la casilla está **vacía** (NULL), no que contenga un texto vacío. `Email = NULL` nunca devuelve nada, porque NULL no es igual a nada, ni siquiera a NULL: solo funciona `IS NULL`.","+resultat":"Comprobación: 5 clientes de 25 (Martín, Romero, Ferrer, Vila y Benali). La pregunta contraria (los clientes que sí dieron un email) usaría `IS NOT NULL`."},
       "theme": "Una sola tabla",
       "enonce": "Muestra los clientes (número, apellido, nombre, teléfono) que no han indicado ninguna dirección de correo electrónico.",
       "correction": ["SELECT IdCliente, Apellido, Nombre, Telefono", "FROM CLIENTE", "WHERE Email IS NULL;"],
@@ -45,6 +46,7 @@
     },
     {
       "id": "q05",
+      "cinema": {"+select":"Aquí no hay GROUP BY: las tres funciones trabajan sobre toda la tabla y cada una devuelve **un único valor**, así que el resultado es una fila con tres columnas. Si les das un nombre con AS (`AVG(TarifaDiaria) AS TarifaMedia`), el resultado se lee mejor.","+resultat":"Comprobación: media 25,83, mínimo 10 (Bicicleta infantil), máximo 40 (Bicicleta de carga). Es la media de las 6 categorías, no de las bicicletas: una categoría con muchas bicicletas no pesa más que una con pocas."},
       "theme": "Cálculos y agregados",
       "enonce": "Muestra la media, el mínimo y el máximo de la tarifa diaria estándar de las categorías de bicicletas.",
       "correction": ["SELECT AVG(TarifaDiaria), MIN(TarifaDiaria), MAX(TarifaDiaria)", "FROM CATEGORIA;"],
@@ -67,6 +69,7 @@
     },
     {
       "id": "q08",
+      "cinema": {"+select":"DATEDIFF(fin, inicio): la fecha **más reciente** va primero. Si las inviertes, `DATEDIFF(FechaInicio, FechaDevolucion)` da un número negativo y el filtro `>= 7` no conservaría nada.","+filtres":"« Alquileres ya devueltos »: no hace falta ninguna condición más. Un alquiler sin devolver tiene la FechaDevolucion vacía, así que DATEDIFF da NULL, y NULL >= 7 nunca es verdadero: los alquileres 1036, 1037 y 1038 quedan fuera automáticamente. Añadir `AND FechaDevolucion IS NOT NULL` también sería correcto, solo que redundante.","+tri":"Variante aceptada: nombra la columna `AS Duracion` en el SELECT y ordena con `ORDER BY Duracion DESC`.","+resultat":"Comprobación: 5 alquileres, dos de 10 días (1006, 1017) y tres de 7 días exactos (1018, 1019, 1030). Con `> 7` en lugar de `>= 7`, esos tres desaparecerían."},
       "theme": "Fechas",
       "enonce": "Muestra los alquileres ya devueltos que duraron 7 días o más: número de alquiler, fecha de inicio, fecha de devolución y duración en días, del más largo al más corto.",
       "ordered": [3],
@@ -95,6 +98,7 @@
     },
     {
       "id": "q11",
+      "cinema": {"+tables":"« Bicicleta eléctrica (categoría número 2) »: el número de categoría ya está en BICICLETA (IdCategoria). No hace falta añadir CATEGORIA al FROM; solo la necesitarías para filtrar por el nombre 'Bicicleta eléctrica'.","+passages":"Clientes y bicicletas no están unidos directamente: un cliente hace alquileres (ALQUILER) y cada alquiler incluye bicicletas (LINEA_ALQUILER). Las dos tablas tienen que estar en el FROM, aunque no se muestre ninguna de sus columnas.","+select":"¿Por qué DISTINCT? Un cliente aparece una vez por cada bicicleta eléctrica alquilada: sin DISTINCT obtienes 16 filas para solo 11 clientes distintos.","+jointures.3":"Cuatro tablas, tres combinaciones, una por cada flecha recorrida: CLIENTE → ALQUILER → LINEA_ALQUILER → BICICLETA. Si olvidas una, cada fila se combina con todas las filas de la otra tabla (producto cartesiano)."},
       "theme": "Combinaciones (JOIN)",
       "enonce": "Muestra, sin duplicados, el apellido y el nombre de los clientes que han alquilado al menos una bicicleta eléctrica (categoría número 2).",
       "correction": ["SELECT DISTINCT Apellido, Nombre", "FROM CLIENTE, ALQUILER, LINEA_ALQUILER, BICICLETA", "WHERE CLIENTE.IdCliente = ALQUILER.IdCliente", "AND ALQUILER.IdAlquiler = LINEA_ALQUILER.IdAlquiler", "AND LINEA_ALQUILER.IdBicicleta = BICICLETA.IdBicicleta", "AND IdCategoria = 2;"],
@@ -112,6 +116,7 @@
     },
     {
       "id": "q13",
+      "cinema": {"+jointures":"En rigor, ALQUILER bastaría para contar los alquileres de cada número de cliente: la combinación con CLIENTE solo sirve para mostrar el apellido.","+groupe":"Agrupa por `CLIENTE.IdCliente`, no solo por Apellido: si no, dos clientes con el mismo apellido se fundirían en un solo grupo. Apellido se añade al GROUP BY porque se muestra.","+groupe.2":"« Al menos 3 » se traduce por `>= 3`. La condición recae sobre un recuento, que solo existe después de agrupar: no puede ir en el WHERE.","+resultat":"Comprobación: 8 clientes. Etxeberria (n.º 4) es el más fiel, con 5 alquileres; los otros 7 tienen exactamente 3, así que con `> 3` solo quedaría él."},
       "theme": "Agrupaciones",
       "enonce": "Muestra los clientes (número, apellido) que han hecho al menos 3 alquileres, con su número de alquileres.",
       "correction": ["SELECT CLIENTE.IdCliente, Apellido, COUNT(*)", "FROM CLIENTE, ALQUILER", "WHERE CLIENTE.IdCliente = ALQUILER.IdCliente", "GROUP BY CLIENTE.IdCliente, Apellido", "HAVING COUNT(*) >= 3;"],
@@ -120,6 +125,7 @@
     },
     {
       "id": "q14",
+      "cinema": {"+tables":"Solo se muestran columnas de CLIENTE: ALQUILER aparece únicamente dentro de la subconsulta, no en el FROM principal.","+filtres":"« Nunca » se resuelve en dos pasos: la subconsulta da la lista de los clientes que **sí** tienen un alquiler, y NOT IN se queda con los demás. Una combinación con ALQUILER no sirve: solo produce filas para los clientes que tienen alquileres.","+resultat":"Comprobación: 10 clientes de 25, entre ellos Diego Moreno (n.º 25), al que borrarás en las Actualizaciones. Variante aceptada: `NOT EXISTS (…)`, con la condición `A.IdCliente = C.IdCliente` dentro de la subconsulta."},
       "theme": "Subconsultas",
       "enonce": "Muestra los clientes (número, apellido, nombre) que nunca han alquilado una bicicleta.",
       "correction": ["SELECT IdCliente, Apellido, Nombre", "FROM CLIENTE", "WHERE IdCliente NOT IN (SELECT IdCliente", "                        FROM ALQUILER);"],
@@ -128,6 +134,7 @@
     },
     {
       "id": "q15",
+      "cinema": {"+tables":"RecomendadoPor es una clave foránea que apunta a **la misma tabla**: quien recomienda también es un cliente. Para mostrar en la misma fila el nombre del cliente y el de quien lo recomendó, CLIENTE tiene que aparecer dos veces en el FROM.","+alias":"Elige alias que indiquen el papel: C para el cliente, R para quien lo recomendó. Sin ellos, `Apellido` sería ambiguo: SQL no sabría de qué copia hablas.","+jointures":"El sentido importa: `C.RecomendadoPor = R.IdCliente` significa « R es quien recomendó a C ». Al revés (`R.RecomendadoPor = C.IdCliente`), los dos nombres intercambian sus papeles.","+resultat":"Comprobación: 15 filas. Los 10 clientes a los que nadie recomendó (RecomendadoPor vacío) no aparecen: la combinación no les encuentra pareja. García recomendó a tres clientes, así que ese apellido aparece tres veces en la última columna."},
       "theme": "Autocombinación",
       "enonce": "Muestra cada cliente que fue recomendado por otro cliente: apellido y nombre del cliente, y apellido del cliente que lo recomendó.",
       "correction": ["SELECT C.Apellido, C.Nombre, R.Apellido", "FROM CLIENTE C, CLIENTE R", "WHERE C.RecomendadoPor = R.IdCliente;"],
@@ -156,6 +163,7 @@
     },
     {
       "id": "q18",
+      "cinema": {"+table":"DELETE borra filas enteras: sin lista de columnas ni SET. El cliente n.º 25 se puede borrar porque ninguna otra fila hace referencia a él: no tiene alquileres y no ha recomendado a nadie.","+ciblage":"Apunta siempre por la **clave primaria** (`IdCliente = 25`): una condición sobre el nombre podría borrar a varios clientes. Sin WHERE, DELETE vaciaría toda la tabla.","+resultat":"Segunda parte: borrar al cliente n.º 4 (Iker Etxeberria) se rechaza. Tiene 5 alquileres (ALQUILER.IdCliente) y recomendó a los clientes n.º 5 y 10 (CLIENTE.RecomendadoPor): borrarlo dejaría filas que apuntan a un cliente que ya no existe. Es la **integridad referencial**."},
       "theme": "Actualizaciones",
       "type": "write",
       "enonce": "El cliente n.º 25 (Diego Moreno), que nunca ha alquilado una bicicleta, pide que se borre su cuenta. Elimínalo. Después intenta eliminar al cliente n.º 4: ¿qué ocurre y por qué?",
@@ -165,6 +173,7 @@
     },
     {
       "id": "s01",
+      "cinema": {"lecture":"Recorro el enunciado regla por regla, buscando los dos objetos relacionados y el número en cada sentido:\n- « Todas las bicicletas de un mismo modelo tienen la misma marca y la misma categoría »: marca y categoría dependen del **modelo**, no de cada bicicleta. Hoy se repiten en todas las bicicletas del mismo modelo.\n- « registrar una sola vez la lista de modelos (código, nombre, marca, categoría) »: un objeto nuevo → nueva tabla **MODELO**. Un modelo tiene una categoría, una categoría abarca varios modelos → uno a varios → clave foránea #IdCategoria en MODELO.\n- « siendo cada bicicleta de un modelo »: una bicicleta tiene un modelo, un modelo lo comparten varias bicicletas → clave foránea #IdModelo en BICICLETA; Modelo, Marca e IdCategoria salen de BICICLETA.\n- « Cada accesorio tiene un código, un nombre y un precio diario »: un objeto nuevo → tabla **ACCESORIO**.\n- « qué accesorios se llevaron y en qué cantidad; un mismo accesorio puede formar parte de muchos alquileres »: un alquiler incluye varios accesorios, un accesorio aparece en varios alquileres → muchos a muchos, con una cantidad para cada pareja → tabla de relación **ALQUILER_ACCESORIO**.","retraits":"Modelo, Marca e IdCategoria salen de BICICLETA. La razón es la **redundancia**: estos tres datos dependen del modelo, así que se repiten en cada bicicleta de ese modelo, con riesgo de contradicción (dos bicicletas del mismo modelo con marcas distintas). Pasan a MODELO, donde se escriben una sola vez.","+entites":"El accesorio se describe con sus propios datos (código, nombre, precio diario): es un objeto en sí mismo. Su precio diario pertenece al accesorio, no a un alquiler.","+entites.2":"La trampa: crear MODELO pero dejar IdCategoria en BICICLETA. Todas las bicicletas de un modelo tienen la misma categoría, así que la categoría pertenece al modelo: #IdCategoria va en MODELO, y una bicicleta encuentra su categoría a través de su modelo (BICICLETA → MODELO → CATEGORIA).","+liens":"La clave foránea va en BICICLETA, en el lado « varios »: un modelo, muchas bicicletas. Una lista de números de bicicleta en MODELO exigiría varios valores en una misma casilla.","+associations":"La trampa: añadir #IdAccesorio en ALQUILER. Un alquiler solo podría incluir entonces un accesorio, y sin cantidad. Como un alquiler puede incluir varios accesorios, y un accesorio varios alquileres, necesitas una tabla de relación con una fila por cada pareja (alquiler, accesorio).","+associations.2":"Clave compuesta: IdAlquiler solo no basta (un alquiler tiene varios accesorios), ni IdAccesorio solo. La cantidad depende de los dos: va en ALQUILER_ACCESORIO, ni en ALQUILER ni en ACCESORIO.","+bilan":"Lista de comprobación:\n- MODELO (IdModelo, NombreModelo, Marca, #IdCategoria) y ACCESORIO (IdAccesorio, NombreAccesorio, PrecioDiario): tablas nuevas, cada una con su clave primaria;\n- BICICLETA: Modelo, Marca e IdCategoria eliminados, #IdModelo añadido;\n- ALQUILER_ACCESORIO (#IdAlquiler, #IdAccesorio, Cantidad): clave compuesta, dos flechas.\nEl error más frecuente: dejar IdCategoria en BICICLETA en lugar de pasarla a MODELO. Es la única « otra solución » de la corrección, y solo se acepta en parte (« Casi »)."},
       "type": "schema",
       "theme": "Evolución del esquema",
       "enonce": "PedalPoint quiere mejorar su base de datos. 1) Todas las bicicletas de un mismo modelo tienen la misma marca y la misma categoría: la empresa quiere registrar una sola vez la lista de modelos (código del modelo, nombre del modelo, marca, categoría), siendo cada bicicleta de un modelo. 2) Los clientes pueden ahora añadir accesorios a un alquiler (casco, candado, sillita infantil, alforjas…). Cada accesorio tiene un código, un nombre y un precio diario. Para cada alquiler, la empresa registra qué accesorios se llevaron y en qué cantidad; un mismo accesorio puede, por supuesto, formar parte de muchos alquileres. Actualiza el esquema relacional siguiente.",

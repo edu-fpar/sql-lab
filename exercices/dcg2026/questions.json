@@ -112,6 +112,7 @@
     },
     {
       "id": "q05",
+      "cinema": {"+tables":"La phrase d'introduction (« résiliation programmée ») est la vraie consigne : elle décrit une **situation à repérer dans les données**, pas une colonne. Traduisez-la : statut « En cours » **et** date de fin déjà renseignée.","+filtres.2":"Une date « connue » est une date **renseignée** : `IS NOT NULL`. N'écrivez pas `DateFinContrat <> NULL` : toute comparaison avec NULL donne « inconnu » et la requête ne renvoie rien.","+resultat":"Vérification : 17 contrats ont une date de fin, mais 15 sont déjà résiliés. Seuls 2 contrats (100005 et 100012) sont à la fois en cours et avec une date de fin : sans le filtre sur le statut, vous en obtiendriez 17."},
       "theme": "Une seule table",
       "enonce": "Certains contrats sont encore en cours alors que leur date de fin est déjà connue (résiliation programmée). Afficher l'identifiant du contrat, l'identifiant du client et la date de fin de ces contrats.",
       "correction": [
@@ -146,6 +147,7 @@
     },
     {
       "id": "q08",
+      "cinema": {"+select":"`COUNT(*)` et `SUM(MontantIndemnisation)` ne comptent pas les mêmes lignes : COUNT(*) compte **tous** les sinistres, SUM additionne seulement les montants renseignés (les sinistres « Déclaré » ou « En expertise » n'ont pas encore de montant). Les sinistres « Refusé » ont un montant de 0 : ils sont comptés et n'ajoutent rien au total.","+groupe":"« Pour chaque type de sinistre » : c'est le mot **chaque** qui appelle le GROUP BY. Sans GROUP BY, SQL refuserait d'afficher TypeSinistre à côté d'un calcul (ou n'afficherait qu'une ligne pour toute la table).","+resultat":"Vous devez obtenir 6 lignes, une par type. Contrôle : la Collision compte 40 sinistres pour 135 819,71 €, alors que 9 d'entre eux n'ont pas encore de montant ou ont été refusés."},
       "theme": "Calculs et agrégats",
       "enonce": "Afficher, pour chaque type de sinistre, le nombre de sinistres et le montant total des indemnisations.",
       "correction": [
@@ -175,6 +177,7 @@
     },
     {
       "id": "q10",
+      "cinema": {"+filtres":"L'ordre des arguments compte : `DATEDIFF(date la plus récente, date la plus ancienne)`. On déclare **après** le sinistre, donc DateDeclaration en premier ; inversées, les dates donnent un nombre négatif et le résultat est vide.\n« Plus de 5 jours » se traduit par `> 5`, pas `>= 5` : un sinistre de la base a été déclaré exactement 5 jours après et ne doit pas apparaître.","+resultat":"Vous devez obtenir 10 sinistres. Si vous en trouvez 11, vous avez écrit `>= 5`."},
       "theme": "Dates",
       "enonce": "Afficher les sinistres (identifiant, date du sinistre, date de déclaration) déclarés plus de 5 jours après leur survenance.",
       "correction": [
@@ -213,6 +216,7 @@
     },
     {
       "id": "q12",
+      "cinema": {"+tables":"Le point de départ est le **CONTRAT** : c'est lui qui relie le client, le véhicule et la formule. « Les véhicules assurés par le client » se lit donc « les contrats du client », et IDClient se trouve directement dans CONTRAT : inutile d'ajouter la table CLIENT.","+jointures.3":"Le chemin n'est pas une ligne droite : il part de CONTRAT dans **deux directions** (VEHICULE → MODELE_VEHICULE d'un côté, FORMULE de l'autre). La règle reste la même : une condition par flèche traversée, soit 3 jointures pour 4 tables.","+filtres":"IDClient est un texte (PR = professionnel, PA = particulier) : les apostrophes sont obligatoires, `IDClient = PR3426` provoquerait une erreur.","+resultat":"Le client PR3426 a 3 contrats, donc 3 véhicules (des utilitaires, tous en formule « Pro Utilitaire »). Une ligne en trop ou des lignes répétées signalent une condition de jointure oubliée."},
       "theme": "Jointures",
       "enonce": "Afficher les véhicules assurés par le client PR3426 : immatriculation, nom du modèle, marque, libellé de la formule et date de début du contrat.",
       "correction": [
@@ -326,6 +330,7 @@
     },
     {
       "id": "q17",
+      "cinema": {"+select":"Affichez l'identifiant **et** le nom, et regroupez sur les deux. Regrouper sur le nom seul fusionnerait des clients différents : il y a dans la base deux BERNARD, quatre DUPONT, etc.","+filtres":"« Sinistres durant l'année 2025 » : c'est la date de **survenance** (DateSinistre). Le sinistre 30071 a eu lieu le 27/12/2025 mais a été déclaré le 05/01/2026 : avec DateDeclaration, BERNARD (PA7525) disparaîtrait du résultat et MOREL (PA5065) y entrerait à tort.","+groupe.2":"Deux filtres, deux moments : l'année est une condition sur **chaque sinistre** (WHERE, avant le regroupement) ; « plus de 2 » est une condition sur le **nombre** (HAVING, après). « Plus de 2 » s'écrit `> 2` : un client avec exactement 2 sinistres n'est pas retenu.","+resultat":"Vous devez obtenir 4 clients : ESTEVE (PR3426) avec 4 sinistres, puis LUCAS, BERNARD et GUERIN avec 3. Certains ont plusieurs contrats : on compte bien les sinistres, tous contrats confondus."},
       "theme": "Jointures et regroupements",
       "enonce": "Afficher la liste des clients (identifiant, nom et nombre de sinistres) ayant eu plus de 2 sinistres durant l'année 2025, triée par nombre de sinistres décroissant.",
       "annale": "2026",
@@ -384,6 +389,7 @@
     },
     {
       "id": "q19",
+      "cinema": {"+tables":"L'information « a reçu un règlement pour 2026 » est dans la table **PAYER** (une ligne par échéance payée, avec l'année de la prime). Il n'est pas nécessaire d'aller dans REGLEMENT : l'année utile est `PAYER.Annee`, pas la date du règlement (une échéance 2023 a par exemple été réglée le 09/01/2024).","+filtres.2":"Une jointure CONTRAT–PAYER avec `Annee <> 2026` ne répond pas à la question : elle garderait les contrats qui ont payé **une autre année**, même s'ils ont aussi payé en 2026. « N'ayant pas encore reçu » est une absence : on construit la liste de ceux qui ont payé, puis on prend les autres avec NOT IN.","+resultat":"Vous devez obtenir 6 contrats. En remplaçant le statut par `DateFinContrat IS NULL`, vous en obtiendriez 10 : les 4 contrats en attente de signature s'ajouteraient."},
       "theme": "Sous-requêtes",
       "enonce": "Afficher la liste des contrats dont le statut est « En cours » (identifiant contrat, identifiant client) n'ayant pas encore reçu de règlement d'échéance pour 2026.",
       "annale": "2026",
@@ -471,6 +477,7 @@
     },
     {
       "id": "q23",
+      "cinema": {"+table":"La correction comporte **deux** requêtes, et l'ordre est imposé : une ligne de INCLURE fait référence à une formule ; supprimer la formule d'abord laisserait des lignes INCLURE « orphelines », ce que l'intégrité référentielle interdit. On supprime donc les enfants (INCLURE) avant le parent (FORMULE).","+ciblage":"INCLURE ne contient pas le libellé, seulement IDFormule : la sous-requête va chercher dans FORMULE les identifiants des formules visées.\n« Commence par » : `LIKE 'Tranquillité%'` (le % seulement à la fin). Avec `'%Tranquillité%'`, vous supprimeriez aussi « Pack Tranquillité Plus » (formule 6), utilisée par 8 contrats.","+resultat":"Contrôle : 9 lignes supprimées dans INCLURE (5 pour la formule 7, 4 pour la formule 8), puis 2 formules supprimées par la seconde requête."},
       "theme": "Mises à jour",
       "enonce": "Supprimer les formules dont le libellé commence par « Tranquillité », car elles viennent d'être créées par erreur. Aucun contrat ne les utilise, mais des garanties leur ont déjà été associées (table INCLURE).",
       "annale": "2026",
@@ -534,6 +541,7 @@
     },
     {
       "id": "s01",
+      "cinema": {"lecture":"Je reprends l'énoncé phrase par phrase et, pour chaque règle, je cherche les deux objets reliés et le nombre dans chaque sens :\n- « un boîtier est installé dans chaque véhicule… un véhicule a au plus un boîtier » : VEHICULE – BOITIER. Un véhicule a 0 ou 1 boîtier, un boîtier est installé dans un seul véhicule : lien **un à un**. Une seule clé étrangère suffit, d'un côté au choix (#RefBoitier dans VEHICULE, ou #IDVehicule dans le boîtier).\n- « chaque boîtier a une référence interne, un numéro de série » : un nouvel objet avec ses informations → table **BOITIER_TELEMETRIE**, clé primaire la référence interne.\n- « une référence de modèle… pour chaque modèle, on connaît son libellé, son constructeur et son type » : un boîtier a un seul modèle, un modèle équipe plusieurs boîtiers → table **MODELE_BOITIER** et clé étrangère #RefModeleB dans le boîtier (côté « plusieurs »).\n- « DV – démarrage véhicule, AV – arrêt complet… » : chaque type a un code et un libellé → table de référence **TYPE_EVENEMENT**.\n- « pour chaque évènement envoyé par un boîtier, on enregistre la date, l'heure… et le code du type » : un évènement vient d'un seul boîtier et a un seul type ; un boîtier envoie plusieurs évènements, un type concerne plusieurs évènements → table **EVENEMENT** avec deux clés étrangères (#RefBoitier, #CodeTypeEvt).\n- « un boîtier n'envoie jamais deux évènements à la même date et à la même heure » : c'est la définition de la clé primaire d'EVENEMENT : (date, heure, boîtier).","+entites.1":"Pourquoi une table à part pour le modèle ? Le libellé, le constructeur et le type dépendent de la **référence de modèle**, pas du boîtier : tous les boîtiers OBD-TLM-V3 ont le même libellé. Les laisser dans le boîtier obligerait à les répéter pour chaque boîtier du même modèle.\nAttention à ne pas réutiliser MODELE_VEHICULE : un modèle de véhicule (Clio, Trafic…) n'a rien à voir avec un modèle de boîtier.","+entites.2":"Le code (DV, AV, FB…) est une clé primaire naturelle : courte, stable, déjà utilisée par l'entreprise. Sans cette table, on stockerait le code dans EVENEMENT sans pouvoir retrouver sa signification (« freinage brutal »), et rien n'empêcherait d'enregistrer un code qui n'existe pas.","+entites.3":"La référence interne (TBX-…) et le numéro de série (TLMX…) identifient tous les deux le boîtier ; l'énoncé les cite tous les deux : on en prend un comme clé primaire (la référence interne, qui est celle de l'entreprise) et l'autre reste un attribut.","+entites.4":"La phrase « jamais deux évènements à la même date et à la même heure » **pour un boîtier** donne la clé : date et heure seules ne suffisent pas (deux boîtiers peuvent émettre au même instant), il faut ajouter #RefBoitier. C'est une **clé composée** de trois colonnes, dont une est aussi clé étrangère.\nUn identifiant artificiel (IDEvt) est aussi accepté, à condition de garder la date, l'heure et #RefBoitier dans la table.","liens":"Un véhicule a au plus un boîtier et un boîtier n'est installé que dans un véhicule : c'est un lien **un à un**, pas un lien un à plusieurs. Il suffit d'une seule clé étrangère : ici #RefBoitier dans VEHICULE, la flèche part de VEHICULE vers BOITIER_TELEMETRIE (elle reste vide pour un véhicule sans télémétrie).\nL'autre choix, #IDVehicule dans BOITIER_TELEMETRIE, est tout aussi juste. Ce qui est faux, c'est de mettre les deux : l'information serait enregistrée deux fois et pourrait se contredire.","+bilan":"Checklist :\n- 4 nouvelles tables : MODELE_BOITIER, BOITIER_TELEMETRIE, TYPE_EVENEMENT, EVENEMENT, chacune avec sa clé primaire ;\n- le lien véhicule–boîtier : une seule clé étrangère, dans VEHICULE **ou** dans le boîtier ;\n- EVENEMENT : clé (date, heure, #RefBoitier) et clé étrangère #CodeTypeEvt ;\n- aucune information du modèle (libellé, constructeur, type) dans le boîtier.\nL'erreur la plus fréquente : mettre libellé, constructeur et type dans BOITIER_TELEMETRIE, ou garder le code d'évènement sans table TYPE_EVENEMENT. Ces deux solutions sont signalées « presque » : elles fonctionnent, mais répètent des informations ou perdent les libellés. Une table CONSTRUCTEUR, ou une table DATE/HEURE, est tolérée sans être exigée."},
       "theme": "Évolution du schéma",
       "type": "schema",
       "annale": "2026",

@@ -74,6 +74,7 @@
     },
     {
       "id": "q03",
+      "cinema": {"+filtres":"« **Au moins une** coordonnée manquante » se traduit par OR. Avec AND, vous n'obtiendriez que les PDL où les **deux** coordonnées manquent : 2 lignes (Istres et Hénin-Beaumont) au lieu de 7.","+tri":"Le tri porte sur la ville, pas sur le code : lisez bien « ordre alphabétique **de la ville** ». ASC est la valeur par défaut, inutile de l'écrire.","+resultat":"Vérifiez sur les données : 3 PDL n'ont pas de latitude, 2 n'ont pas de longitude et 2 n'ont ni l'une ni l'autre. Chaque PDL n'apparaît qu'une fois, même s'il remplit les deux conditions."},
       "theme": "Une seule table",
       "annale": "2018",
       "enonce": "Afficher la liste des PDL (code et ville) dont au moins une coordonnée GPS (GPSLatPDL = latitude ; GPSLongPDL = longitude) n'a pas été renseignée. La liste sera affichée dans l'ordre alphabétique de la ville.",
@@ -103,6 +104,7 @@
     },
     {
       "id": "q05",
+      "cinema": {"+tables":"« Les tournées **qui en partent** » : l'entrepôt de départ est déjà noté dans TOURNEE (clé étrangère CodeEnt). L'énoncé demande le **code** de l'entrepôt, pas sa ville : inutile de joindre ENTREPOT.","+groupe":"« Pour chaque entrepôt » est le signal du GROUP BY. Sans lui, vous obtiendriez une seule ligne pour les 29 tournées au lieu d'une ligne par entrepôt (BER, BRE, CAV).","+resultat":"Écrire `SUM(NbKMTheor) / COUNT(*)` semble équivalent, mais la base divise ici des nombres entiers : on obtient 227 pour BER au lieu de 227,5. AVG est plus sûr et plus lisible."},
       "theme": "Calculs et agrégats",
       "enonce": "Afficher, pour chaque entrepôt (code), le nombre de tournées qui en partent et leur kilométrage théorique moyen.",
       "correction": [
@@ -114,6 +116,7 @@
     },
     {
       "id": "q06",
+      "cinema": {"+tables":"« Tournées **effectuées** » : c'est EFFECTUER, pas TOURNEE. TOURNEE décrit les tournées prévues (durée, kilométrage), sans chauffeur ni date ; chaque ligne de EFFECTUER est une tournée réalisée par un chauffeur un jour donné.","+filtres.2":"Une date s'écrit **entre apostrophes** : '12/03/2018' (comme dans le sujet) ou '2018-03-12' (format international, celui stocké dans la base). Sans apostrophes, 12/03/2018 serait lu comme une division.","+resultat":"Le résultat vaut 3 (tournées CAV02, CAV05 et CAV08) : un chauffeur peut faire plusieurs tournées le même jour, c'est pourquoi CodeTourn fait partie de la clé de EFFECTUER."},
       "theme": "Dates",
       "annale": "2018",
       "enonce": "Quel est le nombre de tournées effectuées par le chauffeur dont le numéro de salarié est 141, dans la journée du 12 mars 2018 ?",
@@ -276,6 +279,7 @@
     },
     {
       "id": "q13",
+      "cinema": {"+tables":"Le piège : sur le schéma, **aucune flèche** ne relie une tournée à un véhicule. Le véhicule est attribué au chauffeur pour une journée (AFFECTER) : pour savoir quel véhicule a servi à une tournée, on cherche « même chauffeur, même jour ».","+jointures.1":"Vérification sur les données : avec seulement `E.NumSal = A.NumSal`, chaque tournée du 12 mars est associée à **toutes** les affectations du chauffeur, quel que soit le jour : 231 lignes au lieu de 16. La condition `E.DateJour = A.DateJour` est indispensable.","+jointures.2":"Après la première jointure, E.NumSal et A.NumSal sont égaux : relier SALARIE à l'un ou à l'autre donne le même résultat. Inutile de passer par CHAUFFEUR : le nom est dans SALARIE.","+resultat":"16 lignes : un même chauffeur apparaît plusieurs fois (GARCIA fait 3 tournées avec XV-447-DP). C'est normal : l'énoncé demande une ligne **par tournée**, pas par chauffeur."},
       "theme": "Jointures",
       "enonce": "Pour la journée du 12 mars 2018, afficher chaque tournée effectuée (code de la tournée) avec le nom du chauffeur et l'immatriculation du véhicule qu'il conduisait ce jour-là.",
       "correction": [
@@ -319,6 +323,7 @@
     },
     {
       "id": "q15",
+      "cinema": {"+tables":"Le kilométrage est dans TOURNEE, mais le véhicule n'est pas lié à la tournée : il est lié au chauffeur pour une journée. Le chemin est donc TOURNEE → EFFECTUER → AFFECTER, et EFFECTUER rejoint AFFECTER par « même chauffeur, même jour ».","+select":"Un alias qui contient des espaces ou une apostrophe s'écrit entre **guillemets doubles** (\"Numéro d'immatriculation\"). Les apostrophes simples sont réservées aux valeurs (textes, dates).","+jointures.2":"Vérification : sans `E.DateJour = A.DateJour`, JP-451-JG totalise 162 165 km au lieu de 7 587, car chaque tournée est comptée pour toutes les affectations du chauffeur. Un total aberrant signale presque toujours une jointure incomplète.","+groupe.2":"« **Au moins** 5000 » s'écrit `>= 5000`. GH-302-KL a parcouru exactement 5000 km en mars : avec `> 5000`, il disparaîtrait du résultat (4 véhicules attendus)."},
       "theme": "Jointures et regroupements",
       "annale": "2018",
       "enonce": "Afficher le nombre de kilomètres théoriques effectués par véhicule au cours du mois de mars 2018. Seuls les véhicules ayant parcouru au moins 5000 km devront être affichés. La requête devra produire le tableau suivant : Numéro d'immatriculation | Kms théoriques parcourus en mars (par exemple XV-447-DP 6205 ; ER-784-AJ 5402 ; JP-451-JG 7587…).",
@@ -399,6 +404,7 @@
     },
     {
       "id": "q18",
+      "cinema": {"+tables":"« **Aucun** » ne se traduit pas par une jointure : AFFECTER ne contient que les affectations qui existent. Une jointure avec une date hors mars donnerait les véhicules affectés au moins une fois en dehors de mars (13 véhicules), ce qui ne répond pas à la question.","+filtres":"Le piège : la condition sur mars se place **dans** la sous-requête. Sans elle, `NOT IN (SELECT NumImmat FROM AFFECTER)` ne garde que DK-905-ZE (jamais affecté) et oublie FN-118-RT, affecté seulement en avril. Résultat attendu : 2 véhicules.","+resultat":"Écriture équivalente avec NOT EXISTS : la sous-requête cherche une affectation en mars de **ce** véhicule (`A.NumImmat = V.NumImmat`) ; le véhicule est gardé s'il n'en existe aucune."},
       "theme": "Sous-requêtes",
       "enonce": "Afficher l'immatriculation des véhicules qui n'ont été affectés à aucun chauffeur en mars 2018.",
       "correction": [
@@ -485,6 +491,7 @@
     },
     {
       "id": "q22",
+      "cinema": {"+tables":"Le nom du chef est un nom de salarié : il est dans **la même table** SALARIE, mais pour un autre rôle. MANUTENTIONNAIRE contient deux numéros de salarié : NumSal (le manutentionnaire lui-même) et NumSalChef (son chef).","+jointures.2":"Ici, pas de colonne au même nom : la deuxième copie est reliée par `M.NumSalChef = CH.NumSal`. Erreur fréquente : écrire `M.NumSal = CH.NumSal` ; le « chef » affiché serait alors le manutentionnaire lui-même.","+resultat":"9 lignes et non 10 : CLEMENT (n° 103) n'a pas de chef (NumSalChef vide), la jointure l'écarte, ce qui correspond à « qui ont un chef ». CHEVALIER apparaît des deux côtés : il a un chef et dirige lui-même d'autres manutentionnaires."},
       "theme": "Auto-jointure",
       "enonce": "Chaque manutentionnaire peut être dirigé par un autre manutentionnaire, son chef (NumSalChef). Pour les manutentionnaires de l'entrepôt CAV qui ont un chef, afficher leur nom et prénom ainsi que le nom et le prénom de leur chef.",
       "correction": [
@@ -546,6 +553,7 @@
     },
     {
       "id": "q25",
+      "cinema": {"+table":"DELETE supprime des **lignes entières** : on n'indique pas de colonne (`DELETE NumImmat FROM …` est une erreur fréquente).","+ciblage":"Le WHERE porte sur la clé primaire NumImmat : une seule ligne est visée, sans risque de supprimer un autre véhicule.","+resultat":"Deuxième partie : `DELETE FROM VEHICULE WHERE NumImmat = 'ER-784-AJ'` est **refusée** (contrainte de clé étrangère), car 27 lignes de AFFECTER font référence à ce véhicule. DK-905-ZE n'apparaît dans aucune affectation : sa suppression passe. L'intégrité référentielle protège l'historique."},
       "theme": "Mises à jour",
       "type": "write",
       "enonce": "Le véhicule DK-905-ZE, qui n'a jamais été affecté à un chauffeur, vient d'être vendu : le supprimer de la base. Essayez ensuite de supprimer le véhicule ER-784-AJ : que se passe-t-il, et pourquoi ?",
@@ -558,6 +566,7 @@
     },
     {
       "id": "s01",
+      "cinema": {"lecture":"Je reprends l'énoncé règle par règle :\n- « un manutentionnaire est un salarié » : MANUTENTIONNAIRE est une catégorie de SALARIE, comme CHAUFFEUR. Un salarié est au plus un manutentionnaire, un manutentionnaire est exactement un salarié : nouvelle table dont la clé NumSal est aussi clé étrangère vers SALARIE ; elle porte NumCACES.\n- « rattaché à un seul entrepôt » : un manutentionnaire → 1 entrepôt ; un entrepôt → plusieurs manutentionnaires. Clé étrangère #CodeEnt dans MANUTENTIONNAIRE (côté « plusieurs »).\n- « dirigé par un autre manutentionnaire, son chef d'équipe » : un manutentionnaire → 0 ou 1 chef ; un chef → plusieurs manutentionnaires. Clé étrangère de MANUTENTIONNAIRE **vers elle-même**, sous un autre nom : #NumSalChef.\n- « jamais à la fois chauffeur et manutentionnaire » : c'est une contrainte sur les données, rien à ajouter au schéma.\n- « véhicules décrits par leur immatriculation… » : nouvel objet → table VEHICULE (clé NumImmat ; NbEssieu, Volume, PTRA).\n- « chaque jour, un chauffeur est affecté à un seul véhicule » : une affectation (chauffeur, jour) → 1 véhicule ; un véhicule → plusieurs affectations. NumImmat est déjà dans AFFECTER : il suffit d'en faire une clé étrangère vers VEHICULE.\n- « une tournée dessert plusieurs PDL, un PDL est desservi par plusieurs tournées » : plusieurs à plusieurs → table de liaison (CodeTourn + CodePDL).","+entites":"NumImmat est la clé naturelle du véhicule : l'immatriculation est unique. VEHICULE doit exister pour que la colonne NumImmat de AFFECTER puisse y faire référence.","+entites.2":"Comme CHAUFFEUR : NumSal est à la fois clé primaire et clé étrangère vers SALARIE ; le nom et le prénom restent dans SALARIE (ne les recopiez pas). Le chef est un manutentionnaire comme les autres : pas de table CHEF, mais une colonne #NumSalChef (elle ne peut pas s'appeler NumSal, déjà pris) qui reste vide pour un chef sans supérieur.","+liens":"Piège : NumImmat **existe déjà** dans AFFECTER, mais sans flèche c'est une simple colonne : rien n'empêche d'y saisir une immatriculation inconnue. N'ajoutez pas une deuxième colonne : déclarez la colonne existante clé étrangère vers VEHICULE. Elle ne fait pas partie de la clé : chauffeur + jour suffisent, puisqu'un chauffeur n'a qu'un véhicule par jour.","+associations":"« Plusieurs » des deux côtés : CodePDL ne peut pas aller dans TOURNEE (une tournée a plusieurs PDL), ni CodeTourn dans PDL. Le nom de la table est libre (CONCERNER, DESSERVIR, TOURNEE_PDL… sont acceptés) ; la base de l'application l'appelle TOURNEE_PDL et y ajoute OrdrePassage, facultatif ici puisque l'énoncé n'en parle pas.","+associations.2":"La clé est **composée** : CodeTourn seul ne suffit pas (une tournée revient sur plusieurs lignes), CodePDL seul non plus. C'est le couple qui est unique : une tournée ne dessert un PDL donné qu'une fois.","+bilan":"Checklist :\n- MANUTENTIONNAIRE : clé NumSal → SALARIE, NumCACES, #CodeEnt → ENTREPOT, #NumSalChef → MANUTENTIONNAIRE ;\n- VEHICULE : NumImmat, NbEssieu, Volume, PTRA ;\n- AFFECTER : flèche de NumImmat vers VEHICULE ;\n- table de liaison : clé CodeTourn + CodePDL, deux flèches.\nErreur la plus fréquente : oublier la flèche de AFFECTER vers VEHICULE, parce que la colonne était déjà là. Autre solution acceptée : #NumSalChef pointant vers SALARIE (le chef reste un salarié) ; vers MANUTENTIONNAIRE est plus précis, puisque le chef d'équipe est lui-même manutentionnaire. Une table calendrier (DATE, JOUR) est tolérée mais pas demandée."},
       "type": "schema",
       "theme": "Évolution du schéma",
       "annale": "2018",
@@ -788,6 +797,7 @@
     },
     {
       "id": "s02",
+      "cinema": {"lecture":"Je reprends l'énoncé règle par règle :\n- « date d'installation du dispositif… date de sa dernière vérification » : un dispositif par véhicule, sans identifiant propre → deux attributs de plus dans VEHICULE, pas de nouvelle table.\n- « quais numérotés de 1 à n dans l'entrepôt » : un quai → 1 entrepôt ; un entrepôt → plusieurs quais. Le numéro seul n'identifie pas un quai (le n° 3 existe à Cavaillon et à Brebières) : nouvelle table QUAI à **clé composée** (CodeEnt, CodeQuai), CodeEnt étant aussi clé étrangère vers ENTREPOT.\n- « un chargement a un numéro unique, une date et une heure » : nouvel objet → table CHARGEMENT, clé NumCharge.\n- « effectué sur un seul quai » : un chargement → 1 quai ; un quai → plusieurs chargements. Clé étrangère dans CHARGEMENT : la clé **entière** du quai (CodeEnt + CodeQuai).\n- « transporté par un seul véhicule » : un chargement → 1 véhicule ; un véhicule → plusieurs chargements. Clé étrangère #NumImmat dans CHARGEMENT.\n- « réalisé par un manutentionnaire et contrôlé par un autre » : deux rôles, un manutentionnaire chacun par chargement → deux clés étrangères vers MANUTENTIONNAIRE, de noms différents.\n- « réparti sur plusieurs PDL, heure de passage à chaque PDL » : un chargement → plusieurs PDL ; un PDL → plusieurs chargements ; l'heure dépend des deux → table de liaison (NumCharge + CodePDL) qui porte l'heure.","+entites":"C'est un **identifiant relatif** : un quai n'est identifié qu'à l'intérieur de son entrepôt. Erreur fréquente : prendre CodeQuai seul comme clé ; dès que deux entrepôts auraient un quai n° 3, la base refuserait la deuxième ligne (doublon de clé).","+entites.2":"Le quai est identifié par deux colonnes : pour le désigner, CHARGEMENT en reprend **deux**, CodeEnt et CodeQuai, qui pointent **ensemble** vers QUAI. Les deux manutentionnaires donnent deux clés étrangères vers la même table, qui doivent porter deux noms différents (#NumSalRealise, #NumSalControle). L'heure du chargement est acceptée mais pas exigée par la vérification.","+liens":"Il y a un dispositif par véhicule et on ne lui connaît ni numéro ni autre information : deux colonnes dans VEHICULE suffisent, une table DISPOSITIF serait inutile. Il en faudrait une si le dispositif avait un numéro de série et pouvait changer de véhicule.","+associations":"Le lien se fait avec **CHARGEMENT** (c'est le chargement qui est « réparti »), pas avec VEHICULE ni avec TOURNEE. La table de liaison reprend la clé de CHARGEMENT et celle de PDL.","+associations.2":"Vérifiez la place de l'heure de passage : pas dans CHARGEMENT (un chargement passe à plusieurs PDL, donc à plusieurs heures), pas dans PDL (un PDL reçoit plusieurs chargements). Seule la table de liaison a une ligne par couple (chargement, PDL).","+bilan":"Checklist :\n- VEHICULE : les deux nouvelles dates ;\n- QUAI : clé (CodeEnt, CodeQuai), #CodeEnt → ENTREPOT, longueur et capacité de relevage ;\n- CHARGEMENT : NumCharge, date, #(CodeEnt, CodeQuai) → QUAI, #NumImmat → VEHICULE, deux clés étrangères vers MANUTENTIONNAIRE ;\n- table de liaison : clé (NumCharge, CodePDL) et heure de passage.\nErreur la plus fréquente : dans CHARGEMENT, faire pointer CodeEnt vers ENTREPOT et CodeQuai seul vers QUAI. Cette solution est reconnue comme « presque » juste (partielle) : le quai n'est désigné que par le **couple** (CodeEnt, CodeQuai), les deux colonnes doivent donc référencer QUAI ensemble."},
       "type": "schema",
       "theme": "Évolution du schéma",
       "annale": "2018",

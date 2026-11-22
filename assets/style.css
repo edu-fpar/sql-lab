@@ -548,3 +548,14 @@ a.btn, a.btn:hover { text-decoration: none; }
 /* sélecteur de langue */
 .lang-select { font: inherit; font-size: .82rem; font-weight: 600; padding: .3rem .45rem; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); color: var(--text); cursor: pointer; }
 .lang-select:hover, .lang-select:focus-visible { border-color: var(--accent); }
+
+/* correction pas à pas : point de méthode de l'enseignant */
+.cn-note { margin-top: .7rem; padding: .55rem .75rem; border-radius: 10px; border: 1px solid color-mix(in srgb, var(--warn) 45%, var(--border)); background: var(--warn-soft); font-size: .9rem; line-height: 1.5; animation: cn-in .35s ease; }
+.cn-note p { margin: .25rem 0; }
+.cn-note ul { margin: .25rem 0; padding-left: 1.2rem; }
+.cn-note .cn-note-title { margin: 0 0 .2rem; font-weight: 700; color: var(--warn); }
+.cn-comment p { margin: .3rem 0; }
+#questionList .tag.cn-tag { color: var(--accent); }
+
+/* énoncé long dans la fenêtre pas à pas : hauteur limitée, défilement */
+#cnEnonce { max-height: 4.6em; overflow-y: auto; padding-right: .3rem; }

@@ -37,12 +37,18 @@ están en el idioma del ejercicio. El ejemplo completo más sencillo es
 | `type` | para actualizaciones | `"write"` para INSERT / UPDATE / DELETE |
 | `verif` | para actualizaciones | `SELECT * FROM <tabla>`: se compara la tabla antes/después |
 | `annale` | no | año del examen (etiqueta) |
-| `cinema` | no | sustituye comentarios de la solución paso a paso: `{ "passages": "…", "filtres.2": "…" }` |
+| `cinema` | no | comentarios del profesor sobre la solución paso a paso: `{ "+jointures.2": "…", "lecture": "…" }` |
 
 Los nombres de paso para `cinema` son `tables`, `passages` (tablas intermedias), `alias`,
-`select`, `jointures`, `filtres`, `groupe`, `tri`, `resultat`; para las preguntas de esquema,
-`lecture`, `retraits`, `entites`, `liens`, `associations`, `bilan`. `paso.n` designa el n-ésimo
-paso de una fase. Solo texto plano.
+`select`, `jointures`, `filtres`, `groupe`, `tri`, `resultat` (actualizaciones: `table`, `valeurs`,
+`ciblage`); para las preguntas de esquema, `lecture`, `retraits`, `entites`, `liens`,
+`associations`, `bilan`. `+paso` (o `+paso.n`, el n-ésimo paso de una fase) **añade** un recuadro
+«Consejo de método» bajo el comentario automático; `paso` (o `paso.n`) lo **sustituye**. Texto plano
+con `**negrita**`, `` `código` `` y líneas `- ` para una lista. La pregunta queda marcada con una
+claqueta en la lista («Solución comentada paso a paso»). Herramientas:
+`node tools/cinema_plan.js <ejercicio> <pregunta>` muestra los pasos generados y sus claves;
+`node tools/set_cinema.js <ejercicio> <pregunta> comentarios.json` escribe el campo sin
+reformatear el archivo.
 
 ## Pregunta de esquema
 

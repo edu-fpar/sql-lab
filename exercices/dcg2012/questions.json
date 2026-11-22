@@ -67,6 +67,7 @@
     },
     {
       "id": "q03",
+      "cinema": {"+tables":"« Pas encore commencé » est une notion métier : il faut savoir comment elle est enregistrée. Le contexte l'indique : les dates réelles restent **vides** tant que la tâche n'a pas commencé.","+filtres":"Le test porte sur la date de début **réelle**. Erreur fréquente : tester `DateFinReelle IS NULL`, qui sélectionne aussi les tâches commencées mais pas encore terminées (13 tâches au lieu de 10). Comparer DateDebutPrevue à la date du jour ne convient pas non plus : une tâche peut être en retard sur son début prévu.","+resultat":"10 tâches. Vérification possible : aucune de ces lignes ne doit avoir de DateFinReelle (une tâche ne peut pas être terminée sans avoir commencé)."},
       "theme": "Une seule table",
       "enonce": "Afficher les tâches qui n'ont pas encore commencé : numéro de chantier, numéro de tâche, description et date de début prévue.",
       "correction": [
@@ -114,6 +115,7 @@
     },
     {
       "id": "q06",
+      "cinema": {"+filtres":"« Salariés présents » : le WHERE `DateSortie IS NULL` élimine les salariés sortis **avant** le regroupement. Les lignes écartées ne sont comptées dans aucun groupe.","+groupe":"Ordre d'exécution à retenir : FROM, puis WHERE (on retire les lignes), puis GROUP BY (on forme les groupes), puis COUNT. Une condition sur une colonne ordinaire comme DateSortie va dans le WHERE, pas dans le HAVING.","+resultat":"6 qualifications. Sans le filtre, plusieurs nombres changent : 4 conducteurs de travaux au lieu de 3, 12 ouvriers professionnels au lieu de 10… Contrôle : la somme des nombres doit redonner 32, le résultat de la question q05."},
       "theme": "Calculs et agrégats",
       "enonce": "Afficher, pour chaque qualification, le nombre de salariés présents qui l'ont.",
       "correction": [
@@ -168,6 +170,7 @@
     },
     {
       "id": "q09",
+      "cinema": {"+select":"La durée réelle n'est stockée nulle part : on la **calcule** dans le SELECT et on lui donne un nom avec AS. « Les deux comptant » explique le `+ 1` : une tâche commencée et finie le même jour dure 1 jour, alors que DATEDIFF donne 0.","+filtres":"« Tâches terminées » : DateFinReelle doit être renseignée. Ce filtre rend la requête plus lisible ; sans lui, DATEDIFF avec une date vide donne NULL, et la comparaison avec NULL n'est jamais vraie.","+filtres.2":"On ne peut pas écrire `DureeReelle > DureePrevue` dans le WHERE : l'alias défini dans le SELECT n'existe pas encore quand le WHERE est évalué. Il faut répéter le calcul. Sans le `+ 1`, on trouverait 16 tâches au lieu de 18 : celles qui dépassent d'un jour exactement disparaîtraient."},
       "theme": "Dates",
       "enonce": "Afficher les tâches terminées dont la durée réelle a dépassé la durée prévue : numéro de chantier, numéro de tâche, durée prévue et durée réelle en jours (du jour de début au jour de fin réels, les deux comptant).",
       "correction": [
@@ -255,6 +258,7 @@
     },
     {
       "id": "q13",
+      "cinema": {"+passages":"L'énoncé précise « affectations prévues » : c'est AFFECTER qu'il faut traverser, pas EFFECTUER (les heures réellement faites). Les deux tables relient SALARIE et TACHE, mais ne racontent pas la même chose.","+select":"DISTINCT est nécessaire même si l'énoncé ne dit pas « sans doublon » : un salarié affecté à plusieurs tâches de plomberie apparaîtrait une fois par affectation (33 lignes pour 5 salariés). Attention aux homonymes : la base compte deux Kevin MARTIN ; ici un seul est concerné, mais un DISTINCT sur le seul nom et prénom les aurait fusionnés.","+jointures.2":"Piège principal : une tâche est identifiée par le **couple** (NumChantier, NumTache). Avec `AFFECTER.NumTache = TACHE.NumTache` seul, la tâche T002 d'un chantier est reliée aux T002 de tous les autres chantiers : 1 160 lignes et 28 salariés au lieu de 5.","+filtres":"La valeur est stockée en minuscules ('plomberie') dans CATEGORIE_TACHE. Le filtre porte sur Designation, d'où la jointure jusqu'à CATEGORIE_TACHE : TACHE ne contient que le numéro de catégorie."},
       "theme": "Jointures",
       "annale": "2012",
       "enonce": "Liste des salariés (prénom, nom) affectés à des travaux de plomberie, triée par ordre alphabétique (nom puis prénom). On s'intéresse aux affectations prévues (AFFECTER), et non aux heures effectuées.",
@@ -374,6 +378,7 @@
     },
     {
       "id": "q17",
+      "cinema": {"+tables":"Prévu et réalisé sont dans deux tables différentes : la durée prévue (Duree) dans AFFECTER, les heures effectuées (NombreHeures) dans EFFECTUER. « Pour chaque salarié affecté qui y a effectué des heures » : il faut une ligne dans les **deux** tables, c'est exactement ce que fait la jointure.","+jointures.2":"AFFECTER et EFFECTUER partagent trois colonnes, et il faut les égaliser **toutes les trois**. Oublier `AFFECTER.NumTache = EFFECTUER.NumTache` ajoute les heures faites par le salarié sur les autres tâches du chantier : LECOMTE passerait de 47,5 h à 79 h.","+groupe":"Duree figure dans le GROUP BY alors qu'on ne « regroupe » pas par durée : c'est la règle (toute colonne affichée sans calcul). Ce n'est pas gênant, car un salarié n'a qu'une durée prévue par tâche. Surtout, ne mettez pas `SUM(Duree)` : la durée prévue serait additionnée autant de fois qu'il y a de jours travaillés.","+resultat":"5 salariés, tous prévus pour 42 h. Lecture métier : LECOMTE (47,5 h) et COUSIN (45 h) ont dépassé le prévu, BERGER (36 h) est en dessous."},
       "theme": "Jointures et regroupements",
       "enonce": "Comparer le prévu et le réalisé sur la tâche T003 du chantier C120301 : pour chaque salarié affecté à cette tâche qui y a effectué des heures, afficher son matricule, son nom, la durée prévue de son affectation (en heures) et le total des heures qu'il y a effectuées.",
       "correction": [
@@ -434,6 +439,7 @@
     },
     {
       "id": "q20",
+      "cinema": {"+tables":"D'abord, la requête erronée : chaque couple (NumChantier, NumTache) est unique dans TACHE, donc GROUP BY forme **un groupe par tâche**. MAX(DureePrevue) calcule le maximum d'un groupe d'une seule ligne, c'est-à-dire la durée de la tâche elle-même : on obtient les 74 tâches, pas les plus longues.","+filtres":"La bonne démarche se fait en deux temps : la sous-requête calcule le maximum sur **toute** la table (23 jours), puis la requête principale garde les tâches qui ont cette durée. Ici, pas de GROUP BY du tout.","+resultat":"2 tâches à égalité avec 23 jours (plancher chauffant de C120401, ravalement de façade de C120403). C'est pour cela que l'énoncé parle « des » tâches les plus longues : la sous-requête les garde toutes, alors qu'un tri suivi de « la première ligne » n'en montrerait qu'une."},
       "theme": "Sous-requêtes",
       "annale": "2012",
       "enonce": "Pour obtenir la liste des tâches les plus longues, la requête suivante a été écrite : SELECT NumChantier, NumTache, MAX(DureePrevue) FROM TACHE GROUP BY NumChantier, NumTache. Le résultat obtenu est erroné : exécutez-la et expliquez pourquoi. Écrivez ensuite la requête correcte : les tâches (numéro de chantier, numéro de tâche, description) dont la durée prévue est la plus longue, avec cette durée.",
@@ -526,6 +532,7 @@
     },
     {
       "id": "q24",
+      "cinema": {"+table":"Pourquoi le premier DELETE est refusé : des lignes d'autres tables font référence aux salariés sortis par leur Matricule. Supprimer le salarié laisserait ces lignes pointer vers un matricule qui n'existe plus : c'est ce qu'interdit l'**intégrité référentielle**.","+ciblage":"Il faut une condition par table qui fait référence à SALARIE, avec le bon nom de colonne : Matricule dans AFFECTER et EFFECTUER, mais **MatriculeEncadrant** dans CHANTIER. Sur la base, MOULIN (1004) n'a ni affectation ni heures, mais encadre un chantier : sans la troisième condition, la requête serait encore refusée.","+resultat":"Sur les 5 salariés sortis, 2 sont supprimés (PETIT et DIALLO) ; les 3 autres restent dans SALARIE, car ils sont encore référencés. L'archivage de la question précédente garantit qu'on ne perd pas leurs informations."},
       "theme": "Mises à jour",
       "type": "write",
       "annale": "2012",
@@ -573,6 +580,7 @@
     },
     {
       "id": "s01",
+      "cinema": {"lecture":"Quatre règles à traduire :\n- « chaque catégorie de tâches nécessite un certain nombre de compétences (code, libellé) » : nouvel objet COMPETENCE, avec ses propres informations, d'où une nouvelle table.\n- « … une même compétence peut être nécessaire à plusieurs catégories » : CATEGORIE_TACHE et COMPETENCE. Une catégorie → plusieurs compétences ; une compétence → plusieurs catégories. Plusieurs à plusieurs : table de liaison NECESSITER.\n- « certains salariés sont spécialisés dans une compétence (une seule au plus) » : SALARIE et COMPETENCE. Un salarié → au plus une spécialité ; une compétence → plusieurs salariés spécialistes. Un à plusieurs : clé étrangère vers COMPETENCE dans SALARIE, laissée vide pour les non-spécialistes.\n- « tout salarié doit maîtriser au moins une compétence, et le plus souvent plusieurs » : SALARIE et COMPETENCE à nouveau, plusieurs dans les deux sens. Table de liaison MAITRISER.\nBilan : 3 tables à créer et 1 table à modifier (SALARIE). Attention, SALARIE et COMPETENCE sont reliées **deux fois**, pour deux raisons différentes.","+entites.1":"COMPETENCE est créée seule, sans clé étrangère : une compétence sert à plusieurs catégories et à plusieurs salariés, aucune case unique ne pourrait les désigner.","+liens.1":"« Une seule au plus » : c'est le « une seule » qui décide, une clé étrangère suffit. « Au plus » signifie qu'elle peut rester vide. Le nom de la colonne doit dire son rôle (spécialité), pour ne pas la confondre avec les compétences maîtrisées.","+associations.1":"Erreur fréquente : mettre #NumCategorie dans COMPETENCE. Ce serait juste si une compétence ne servait qu'à une seule catégorie, mais l'énoncé dit le contraire (« une même compétence peut être nécessaire à plusieurs catégories »).","+associations.3":"Spécialité et maîtrise ne se confondent pas : la spécialité est **unique** (clé étrangère dans SALARIE), les compétences maîtrisées sont **multiples** (table MAITRISER). Il faut les deux.","+associations.4":"« Au moins une compétence » ne se voit pas dans le schéma : rien n'empêche un salarié d'avoir zéro ligne dans MAITRISER. C'est une règle à faire respecter à la saisie, pas une clé.","+bilan":"Checklist :\n- COMPETENCE avec sa clé et son libellé ;\n- NECESSITER et MAITRISER, chacune avec une clé composée de deux colonnes, qui sont aussi des clés étrangères ;\n- une clé étrangère « spécialité » dans SALARIE.\nVariante acceptée en partie : le schéma sans la spécialité. Les compétences maîtrisées sont bien traduites, mais la règle « spécialisés dans une compétence (une seule au plus) » est oubliée : c'est l'erreur la plus fréquente ici."},
       "type": "schema",
       "theme": "Évolution du schéma",
       "annale": "2012",
@@ -712,6 +720,7 @@
     },
     {
       "id": "s02",
+      "cinema": {"lecture":"Cinq règles à traduire :\n- « un stage est identifié par un code ; on enregistre sa date et sa durée » : nouvel objet STAGE, nouvelle table.\n- « chaque stage porte sur une seule compétence » : STAGE et COMPETENCE. Un stage → une seule compétence ; une compétence → plusieurs stages. Un à plusieurs : #CodeCompetence dans STAGE.\n- « soit en interne, animé par un salarié, soit en externe : lieu et nom de l'intervenant » : deux catégories de stages, avec des informations propres. Spécialisation : STAGE garde le commun, STAGE_INTERNE reçoit l'animateur (un seul salarié par stage : clé étrangère vers SALARIE), STAGE_EXTERNE reçoit le lieu et l'intervenant.\n- « les salariés inscrits à chaque stage » : SALARIE et STAGE, plusieurs dans les deux sens. Table de liaison INSCRIRE.\n- « ceux qui l'ont réellement suivi (il faut y avoir été inscrit) » : SALARIE et STAGE à nouveau, plusieurs dans les deux sens. Table de liaison ASSISTER, dont chaque ligne doit correspondre à une inscription.\nBilan : 5 tables à créer ; SALARIE et COMPETENCE ne changent pas.","+entites.1":"STAGE contient ce qui est **commun** à tous les stages : code, date, durée, compétence. L'animateur, le lieu et l'intervenant n'y figurent pas, car ils ne concernent qu'une des deux catégories.","+entites.2":"CodeStage est à la fois clé primaire et clé étrangère : un stage externe est d'abord un stage, avec le même code. L'intervenant est un simple nom (attribut), pas une clé étrangère : ce n'est pas un salarié de l'entreprise.","+entites.3":"Ici l'animateur **est** un salarié : on ne recopie pas son nom, on met son matricule en clé étrangère vers SALARIE. Le nom #MatriculeAnimateur évite de le confondre avec les salariés inscrits.","+associations.1":"Un salarié s'inscrit à plusieurs stages, un stage accueille plusieurs salariés : table de liaison. Ne la confondez pas avec STAGE_INTERNE : animer un stage et y être inscrit sont deux liens différents entre les mêmes tables.","+associations.3":"Pourquoi une deuxième table et pas seulement INSCRIRE ? Un salarié peut être inscrit sans venir : « inscrit » et « a suivi » sont deux listes différentes. ASSISTER a la même clé (Matricule, CodeStage) que INSCRIRE.","+associations.4":"« Pour suivre un stage, il faut y avoir été inscrit » : chaque couple de ASSISTER doit exister dans INSCRIRE. Les flèches vers SALARIE et STAGE ne le garantissent pas à elles seules ; c'est une contrainte d'inclusion à faire respecter.","+bilan":"Checklist :\n- STAGE avec #CodeCompetence ;\n- STAGE_INTERNE (avec #MatriculeAnimateur) et STAGE_EXTERNE (lieu, intervenant), dont la clé CodeStage renvoie à STAGE ;\n- INSCRIRE et ASSISTER, clé (Matricule, CodeStage).\nAutres solutions acceptées : une seule table STAGE avec l'animateur, le lieu et l'intervenant en colonnes facultatives ; ou une seule table INSCRIRE avec une colonne « présent » à la place d'ASSISTER (cette écriture garantit même qu'on ne peut avoir suivi qu'un stage où l'on était inscrit).\nErreur la plus fréquente : mettre #CodeStage dans SALARIE. Un salarié suit plusieurs stages au fil du temps : une seule case ne suffit pas, il faut les tables de liaison."},
       "type": "schema",
       "theme": "Évolution du schéma",
       "annale": "2012",

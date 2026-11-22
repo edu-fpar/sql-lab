@@ -21,6 +21,23 @@
   /** singulier / pluriel : en français 0 et 1 au singulier, en anglais seul 1 */
   const trn = (n, one, many, v) => tr((I18N.lang === "fr" ? n > 1 : n !== 1) ? many : one, { n, ...(v || {}) });
   I18N.add({
+    "Point de méthode": "Method tip",
+    "comparaison de dates : la date s'écrit entre apostrophes, au format jj/mm/aaaa ou aaaa-mm-jj.": "date comparison: the date goes between quotes, as dd/mm/yyyy or yyyy-mm-dd.",
+    "Je relie {a} et {b} en égalisant {x} et {y}.": "I link {a} and {b} by matching {x} and {y}.",
+    "Il s'agit d'ajouter des lignes calculées par une requête : INSERT INTO … SELECT. Je repère la table touchée : {t}. Une requête de mise à jour ne modifie qu'<strong>une seule table</strong>.": "The task is to add rows computed by a query: INSERT INTO … SELECT. I identify the table affected: {t}. An update query changes <strong>only one table</strong>.",
+    "{c} quitte {t} : avec les nouvelles règles, cette information n'est plus à sa place dans cette table (elle dépend d'autre chose, ou ne concerne plus toutes ses lignes).": "{c} leaves {t}: with the new rules, this information no longer belongs in this table (it depends on something else, or no longer concerns all its rows).",
+    "{c} quittent {t} : avec les nouvelles règles, ces informations ne sont plus à leur place dans cette table (elles dépendent d'autre chose, ou ne concernent plus toutes ses lignes).": "{c} leave {t}: with the new rules, this information no longer belongs in this table (it depends on something else, or no longer concerns all its rows).",
+    "{k} → {t}": "{k} → {t}",
+    " Sa clé reprend l'identifiant d'une autre table ({k}) : chaque ligne de {t} se rattache à une ligne de cette table.": " Its key includes the identifier of another table ({k}): each row of {t} belongs to a row of that table.",
+    " Clé étrangère hors de la clé : {k}, d'où la flèche.": " Foreign key outside the key: {k}, hence the arrow.",
+    "<p>Chaque ligne de {t} renvoie à <em>une seule</em> ligne (au plus) de la table liée : une <strong>clé étrangère</strong> suffit, placée dans {t}. J'ajoute {k} : la flèche part de {t}.</p>": "<p>Each row of {t} refers to <em>one</em> row (at most) of the linked table: a <strong>foreign key</strong> is enough, placed in {t}. I add {k}: the arrow starts from {t}.</p>",
+    "Une ligne de {a} peut être liée à plusieurs lignes de {b}, et inversement : relation <strong>plusieurs à plusieurs</strong>. ": "A row of {a} can be linked to several rows of {b}, and vice versa: a <strong>many-to-many</strong> relationship. ",
+    "Les parties de la clé qui viennent des tables reliées sont aussi des <strong>clés étrangères</strong> : {list}. D'où les flèches.": "The parts of the key that come from the linked tables are also <strong>foreign keys</strong>: {list}. Hence the arrows.",
+    " {p} fait aussi partie de la clé, sans être une clé étrangère.": " {p} is also part of the key, without being a foreign key.",
+    " {k} est une simple clé étrangère, hors de la clé.": " {k} is a plain foreign key, outside the key.",
+    " {a} dépend de toute la clé ({pk}) : l'attribut se place dans {t}, la table du lien.": " {a} depends on the whole key ({pk}): the attribute goes in {t}, the junction table.",
+    " {a} dépendent de toute la clé ({pk}) : les attributs se placent dans {t}, la table du lien.": " {a} depend on the whole key ({pk}): the attributes go in {t}, the junction table.",
+    "<p class=\"muted small\">Une solution proche est acceptée en partie : voir la correction.</p>": "<p class=\"muted small\">A close solution is partly accepted: see the solution.</p>",
     // listes
     "{a} et {b}": "{a} and {b}",
     // expressions du SELECT
@@ -61,7 +78,7 @@
     "Jointures": "Joins", "Filtres": "Filters", "Regroupement": "Grouping", "Tri": "Sorting", "Résultat": "Result",
     "Table": "Table", "Valeurs": "Values", "Lignes visées": "Targeted rows",
     "Règles de gestion": "Business rules", "Ce qui ne tient plus": "What no longer fits", "Nouvelles tables": "New tables",
-    "Clés étrangères (1 → n)": "Foreign keys (1 → n)", "Tables de liaison (n ↔ n)": "Junction tables (n ↔ n)", "Schéma final": "Final schema",
+    "Clés étrangères": "Foreign keys", "Tables de liaison (n ↔ n)": "Junction tables (n ↔ n)", "Schéma final": "Final schema",
     // 1. tables évidentes
     " (ce sont ses lignes que l'on compte)": " (its rows are the ones being counted)",
     "Je lis l'énoncé et je cherche où se trouvent les informations demandées : tout est dans la table {t}{cols}. Une seule table, donc <strong>pas de jointure</strong>.": "I read the question and look for where the requested information is: everything is in the {t} table{cols}. Only one table, so <strong>no join</strong>.",
@@ -539,8 +556,8 @@
     if (/\b(YEAR|ANNEE)\s*\(/i.test(k)) return tr("YEAR() extrait l'année de la date.");
     if (/\b(MONTH|MOIS)\s*\(/i.test(k)) return tr("MONTH() extrait le mois de la date.");
     if (/\bOR\b/i.test(s)) return tr("l'une <em>ou</em> l'autre condition suffit : les parenthèses évitent de mélanger OR et AND.");
+    if (/[#']\d{2}\/\d{2}\/\d{4}|'\d{4}-\d{2}-\d{2}/.test(c.p.t)) return tr("comparaison de dates : la date s'écrit entre apostrophes, au format jj/mm/aaaa ou aaaa-mm-jj.");
     if (/'/.test(s) || /"/.test(s)) return tr("le texte entre apostrophes doit être écrit exactement comme dans la base.");
-    if (/[#]\d|\d{2}\/\d{2}\/\d{4}/.test(c.p.t)) return tr("comparaison de dates.");
     return "";
   }
 
@@ -706,7 +723,7 @@
         } else {
           text += linked
             ? tr("Je relie {a} et {b} : la clé étrangère <i>#{fk}</i> de {a} pointe vers la clé primaire <u>{pk}</u> de {b}.", { a: tb(fk.e.table), b: tb(pk.e.table), fk: esc(fk.col), pk: esc(pk.col) })
-            : tr("Je relie {a} et {b} par leur colonne commune.", { a: tb(j.a.e.table), b: tb(j.b.e.table) });
+            : tr("Je relie {a} et {b} en égalisant {x} et {y}.", { a: tb(j.a.e.table), b: tb(j.b.e.table), x: code(name(j.a.e) + "." + j.a.col), y: code(name(j.b.e) + "." + j.b.col) });
           if (low(fk.col) === low(pk.col)) text += tr(" La colonne porte le même nom dans les deux tables : je la préfixe ({c}).", { c: code(name(fk.e) + "." + fk.col) });
         }
         if (g.a.table === g.b.table) text += tr(" C'est la même table utilisée deux fois (relation réflexive) : les alias distinguent les deux rôles.");
@@ -778,7 +795,8 @@
       update: "Il s'agit de modifier des lignes existantes : UPDATE. Je repère la table touchée : {t}. Une requête de mise à jour ne modifie qu'<strong>une seule table</strong>.",
       delete: "Il s'agit de supprimer des lignes : DELETE. Je repère la table touchée : {t}. Une requête de mise à jour ne modifie qu'<strong>une seule table</strong>.",
       insert: "Il s'agit d'ajouter une ligne : INSERT INTO. Je repère la table touchée : {t}. Une requête de mise à jour ne modifie qu'<strong>une seule table</strong>.",
-    }[W.kind];
+      insertSelect: "Il s'agit d'ajouter des lignes calculées par une requête : INSERT INTO … SELECT. Je repère la table touchée : {t}. Une requête de mise à jour ne modifie qu'<strong>une seule table</strong>.",
+    }[W.kind === "insert" && W.select ? "insertSelect" : W.kind] || "";
     snap("table", tr("La table concernée"), tr(intro, { t: tb(t) }), ["head"]);
     if (W.kind === "update") {
       const lis = W.sets.map((s) => {
@@ -832,19 +850,42 @@
   // ------------------------------------------------------------ évolution d'un schéma
   const PHASES_SCHEMA = [
     ["lecture", "Règles de gestion"], ["retraits", "Ce qui ne tient plus"], ["entites", "Nouvelles tables"],
-    ["liens", "Clés étrangères (1 → n)"], ["associations", "Tables de liaison (n ↔ n)"], ["bilan", "Schéma final"],
+    ["liens", "Clés étrangères"], ["associations", "Tables de liaison (n ↔ n)"], ["bilan", "Schéma final"],
   ];
 
   /** Commentaires remplacés par l'enseignant : { "jointures": "…", "filtres.2": "…" } (texte brut, échappé) */
+  /** Texte d'enseignant → HTML sûr : **gras**, `code`, lignes « - » en liste, paragraphes */
+  function mini(src) {
+    const inline = (x) => x.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>").replace(/`([^`]+)`/g, "<code>$1</code>");
+    let html = "", list = false;
+    for (const line of esc(src).split(/\r?\n/)) {
+      const m = /^\s*[-•]\s+(.*)$/.exec(line);
+      if (m) { if (!list) { html += "<ul>"; list = true; } html += `<li>${inline(m[1])}</li>`; continue; }
+      if (list) { html += "</ul>"; list = false; }
+      if (line.trim()) html += `<p>${inline(line)}</p>`;
+    }
+    return list ? html + "</ul>" : html;
+  }
+
+  /**
+   * Commentaires de l'enseignant (champ « cinema » de la question) :
+   *   "phase" ou "phase.n"   remplace le commentaire automatique (toutes les étapes de la phase, ou la n-ième)
+   *   "+phase" ou "+phase.n" ajoute un « point de méthode » sous le commentaire (1re étape de la phase par défaut)
+   * Texte brut, avec **gras**, `code` et listes « - ».
+   */
   function override(out, q) {
     const over = q && q.cinema;
     if (!over || typeof over !== "object") return;
-    for (const st of out.steps) if (typeof over[st.phase] === "string") st.text = esc(over[st.phase]);
     for (const [k, v] of Object.entries(over)) {
-      const m = /^(\w+)\.(\d+)$/.exec(k);
+      const m = /^(\+?)([a-z]+)(?:\.(\d+))?$/.exec(k);
       if (!m || typeof v !== "string") continue;
-      const list = out.steps.filter((s) => s.phase === m[1]);
-      if (list[+m[2] - 1]) list[+m[2] - 1].text = esc(v);
+      const list = out.steps.filter((s) => s.phase === m[2]);
+      const targets = m[3] ? [list[+m[3] - 1]].filter(Boolean) : m[1] ? list.slice(0, 1) : list;
+      for (const st of targets) {
+        if (m[1]) st.notes = (st.notes || "") + mini(v);
+        else st.text = mini(v);
+      }
+      out.enriched = true;
     }
   }
 
@@ -868,6 +909,12 @@
       focus: { main: [], inter: [], sub: [], cols: {}, aliases: {}, links: [], now: [], ...focus },
     });
     const colsMap = (t, list, kind) => ({ [t]: Object.fromEntries(list.map((c) => [c, kind])) });
+    /** [[col, ref], …] → texte « #a → T, #(b, c) → U » regroupé par table */
+    const fkText = (list) => {
+      const by = new Map();
+      for (const [k, r] of list) { const n = refName(r); if (!by.has(n)) by.set(n, []); by.get(n).push(k); }
+      return listFr([...by].map(([r, ks]) => tr("{k} → {t}", { k: `<i>#${ks.length > 1 ? "(" + ks.map(esc).join(", ") + ")" : esc(ks[0])}</i>`, t: tb(r) })));
+    };
     const refName = (ref) => { const t = cur.tables.find((x) => norm(x.name) === norm(ref)); return t ? t.name : ref; };
 
     const info = sol.tables.map((t) => {
@@ -875,7 +922,8 @@
       const pk = (t.pk || []).map(first);
       const fk = Object.entries(t.fk || {}).map(([k, v]) => [first(k), v]);
       const fkInPk = fk.filter(([k]) => pk.some((p) => norm(p) === norm(k)));
-      const kind = existing ? "modif" : pk.length >= 2 && fkInPk.length >= 2 ? "assoc" : "entite";
+      const distinctRefs = new Set(fkInPk.map(([, r]) => norm(r))).size;
+      const kind = existing ? "modif" : pk.length >= 2 && distinctRefs >= 2 ? "assoc" : "entite";
       return { t, existing, pk, fk, fkInPk, kind, name: existing ? existing.name : t.nom,
         attrs: (t.attributs || []).map(first), interdits: t.interdits || [], role: t.role || "" };
     });
@@ -899,8 +947,8 @@
       const gone = T.cols.filter((c) => x.interdits.some((spec) => same(spec, c.name))).map((c) => c.name);
       if (!gone.length) continue;
       const where = info.filter((o) => o !== x && gone.some((g) => o.pk.some((p) => norm(p) === norm(g)) || o.fk.some(([k]) => norm(k) === norm(g)) || o.attrs.some((a) => norm(a) === norm(g))));
-      let text = trn(gone.length, "{c} ne peut plus rester dans {t} : dans une ligne, une colonne ne contient qu'<em>une seule</em> valeur, or la nouvelle règle en demande plusieurs.",
-        "{c} ne peuvent plus rester dans {t} : dans une ligne, une colonne ne contient qu'<em>une seule</em> valeur, or la nouvelle règle en demande plusieurs.", { c: listFr(gone.map((g) => code(g))), t: tb(x.name) });
+      let text = trn(gone.length, "{c} quitte {t} : avec les nouvelles règles, cette information n'est plus à sa place dans cette table (elle dépend d'autre chose, ou ne concerne plus toutes ses lignes).",
+        "{c} quittent {t} : avec les nouvelles règles, ces informations ne sont plus à leur place dans cette table (elles dépendent d'autre chose, ou ne concernent plus toutes ses lignes).", { c: listFr(gone.map((g) => code(g))), t: tb(x.name) });
       if (where.length) text += tr(" L'information sera reprise dans {t}.", { t: listFr(where.map((o) => tb(o.name))) });
       snap("retraits", tr("Ce qui ne tient plus"), text, { main: [x.name], cols: colsMap(x.name, gone, "del") });
       T.cols = T.cols.filter((c) => !gone.includes(c.name));
@@ -914,9 +962,27 @@
       for (const t of cur.tables) for (const c of t.cols) if (c.fk && norm(c.fk) === norm(T.name)) c.fk = null;
     }
 
-    // 3. nouvelles tables (objets à décrire) : d'abord celles qui ne dépendent de rien
-    const ents = info.filter((x) => x.kind === "entite").sort((a, b) => a.fk.length - b.fk.length);
-    for (const x of ents) {
+    // 3. nouvelles tables (objets à décrire), dans l'ordre de leurs dépendances : une table n'est
+    //    créée qu'après les nouvelles tables qu'elle référence ; celles qui référencent une table de
+    //    liaison viennent après les tables de liaison
+    const assocNames = new Set(info.filter((x) => x.kind === "assoc").map((x) => norm(x.name)));
+    const entsAll = info.filter((x) => x.kind === "entite").sort((a, b) => a.fk.length - b.fk.length);
+    const entNames = new Set(entsAll.map((x) => norm(x.name)));
+    const order = (list, done) => {
+      const out = [], rest = list.slice();
+      while (rest.length) {
+        const i = rest.findIndex((x) => x.fk.every(([, r]) => norm(r) === norm(x.name) || !entNames.has(norm(r)) || done.has(norm(r))));
+        const x = rest.splice(i < 0 ? 0 : i, 1)[0];
+        done.add(norm(x.name));
+        out.push(x);
+      }
+      return out;
+    };
+    const needsAssoc = (x) => x.fk.some(([, r]) => assocNames.has(norm(r)));
+    const doneEnt = new Set();
+    const entsBefore = order(entsAll.filter((x) => !needsAssoc(x)), doneEnt);
+    const entsAfter = order(entsAll.filter(needsAssoc), doneEnt);
+    const doEntity = (x) => {
       cur = SC.solutionSchema(cur, { tables: [x.t] });
       const own = x.fk.filter(([k]) => !x.pk.some((p) => norm(p) === norm(k)));
       const weak = x.fkInPk;
@@ -925,17 +991,16 @@
       text += x.attrs.length
         ? tr(" Sa clé primaire {pk} identifie chaque ligne ; elle porte {a}.", { pk: pkList, a: listFr(x.attrs.map(code)) })
         : tr(" Sa clé primaire {pk} identifie chaque ligne.", { pk: pkList });
-      if (weak.length) text += trn(weak.length, " Sa clé contient {k} : une ligne de {t} n'existe qu'à l'intérieur de cette table.", " Sa clé contient {k} : une ligne de {t} n'existe qu'à l'intérieur de ces tables.",
-        { k: listFr(weak.map(([k, r]) => `<i>#${esc(k)}</i> (${tb(refName(r))})`)), t: tb(x.name) });
-      if (own.length) text += tr(" Chaque ligne est rattachée à un seul {r} : relation un à plusieurs, d'où la clé étrangère {k} et la flèche.",
-        { r: listFr(own.map(([, r]) => tb(refName(r)))), k: listFr(own.map(([k]) => `<i>#${esc(k)}</i>`)) });
+      if (weak.length) text += tr(" Sa clé reprend l'identifiant d'une autre table ({k}) : chaque ligne de {t} se rattache à une ligne de cette table.", { k: fkText(weak), t: tb(x.name) });
+      if (own.length) text += tr(" Clé étrangère hors de la clé : {k}, d'où la flèche.", { k: fkText(own) });
       const links = x.fk.map(([, r]) => [x.name, refName(r)]);
       snap("entites", tr("Une nouvelle table"), text, {
         main: [x.name], inter: x.fk.map(([, r]) => refName(r)),
         cols: { [x.name]: { ...Object.fromEntries(x.pk.map((p) => [p, "add"])), ...Object.fromEntries(x.attrs.map((a) => [a, "sel"])), ...Object.fromEntries(x.fk.map(([k]) => [k, "join"])) } },
         links, now: links,
       }, [x.name]);
-    }
+    };
+    entsBefore.forEach(doEntity);
 
     // 4. tables existantes qui gagnent une clé étrangère ou un attribut
     for (const x of info.filter((i) => i.kind === "modif")) {
@@ -947,10 +1012,7 @@
       cur = SC.solutionSchema(cur, { tables: [x.t] });
       if (!newFk.length && !newAttrs.length) continue;
       let text = "";
-      for (const [k, r] of newFk) {
-        text += tr("<p>Chaque ligne de {t} est liée à <em>un seul</em> {r}, qui peut l'être à plusieurs : relation <strong>un à plusieurs</strong>. " +
-          "J'ajoute la clé étrangère <i>#{k}</i> dans {t}, du côté « plusieurs » : la flèche part de {t} vers {r}.</p>", { t: tb(x.name), r: tb(refName(r)), k: esc(k) });
-      }
+      if (newFk.length) text += tr("<p>Chaque ligne de {t} renvoie à <em>une seule</em> ligne (au plus) de la table liée : une <strong>clé étrangère</strong> suffit, placée dans {t}. J'ajoute {k} : la flèche part de {t}.</p>", { t: tb(x.name), k: fkText(newFk) });
       if (newAttrs.length) text += trn(newAttrs.length, "<p>J'ajoute {a} dans {t} : c'est une information sur chaque ligne de cette table.</p>", "<p>J'ajoute {a} dans {t} : ce sont des informations sur chaque ligne de cette table.</p>", { a: listFr(newAttrs.map(code)), t: tb(x.name) });
       const links = newFk.map(([, r]) => [x.name, refName(r)]);
       snap("liens", newFk.length ? tr("Une clé étrangère") : tr("Un nouvel attribut"), text, {
@@ -968,23 +1030,28 @@
       let text = x.role ? tr("Règle : il faut {r}. ", { r: esc(x.role) }) : "";
       text += refs.length >= 3
         ? tr("Le lien concerne {n} tables à la fois ({list}). ", { n: refs.length, list: listFr(refs.map(tb)) })
-        : tr("Un {a} peut être lié à plusieurs {b}, et inversement : relation <strong>plusieurs à plusieurs</strong>. ", { a: tb(refs[0] || "?"), b: tb(refs[1] || refs[0] || "?") });
+        : tr("Une ligne de {a} peut être liée à plusieurs lignes de {b}, et inversement : relation <strong>plusieurs à plusieurs</strong>. ", { a: tb(refs[0] || "?"), b: tb(refs[1] || refs[0] || "?") });
       text += tr("Une clé étrangère ne suffit pas (il faudrait plusieurs valeurs dans une case) : je crée la table {t}. Sa clé primaire <strong>associe</strong> les clés des tables reliées : {pk}.", { t: tb(x.name), pk: pkTxt });
       snap("associations", tr("Une table de liaison"), text, {
         main: [x.name], inter: refs, cols: { [x.name]: Object.fromEntries(x.pk.map((p) => [p, "add"])) },
       }, [x.name]);
       cur = SC.solutionSchema(cur, { tables: [x.t] });
       const links = x.fk.map(([, r]) => [x.name, refName(r)]);
-      let t2 = trn(links.length, "Chaque partie de la clé est aussi une <strong>clé étrangère</strong> : {list}. D'où la flèche.", "Chaque partie de la clé est aussi une <strong>clé étrangère</strong> : {list}. D'où les flèches.",
-        { list: listFr(x.fk.map(([k, r]) => tr("<i>#{k}</i> renvoie à {t}", { k: esc(k), t: tb(refName(r)) }))) });
-      if (x.attrs.length) t2 += trn(x.attrs.length, " {a} dépend à la fois de {r} : l'attribut se place dans {t}, la table du lien.", " {a} dépendent à la fois de {r} : les attributs se placent dans {t}, la table du lien.",
-        { a: listFr(x.attrs.map(code)), r: listFr(refs.map(tb)), t: tb(x.name) });
+      const inPk = (k) => x.pk.some((p) => norm(p) === norm(k));
+      let t2 = tr("Les parties de la clé qui viennent des tables reliées sont aussi des <strong>clés étrangères</strong> : {list}. D'où les flèches.", { list: fkText(x.fkInPk) });
+      const plain = x.pk.filter((p) => !x.fk.some(([k]) => norm(k) === norm(p)));
+      if (plain.length) t2 += tr(" {p} fait aussi partie de la clé, sans être une clé étrangère.", { p: listFr(plain.map(code)) });
+      const outFk = x.fk.filter(([k]) => !inPk(k));
+      if (outFk.length) t2 += tr(" {k} est une simple clé étrangère, hors de la clé.", { k: fkText(outFk) });
+      if (x.attrs.length) t2 += trn(x.attrs.length, " {a} dépend de toute la clé ({pk}) : l'attribut se place dans {t}, la table du lien.", " {a} dépendent de toute la clé ({pk}) : les attributs se placent dans {t}, la table du lien.",
+        { a: listFr(x.attrs.map(code)), pk: x.pk.map(esc).join(" + "), t: tb(x.name) });
       snap("associations", tr("Les clés étrangères de la table de liaison"), t2, {
         main: [x.name], inter: refs,
         cols: { [x.name]: { ...Object.fromEntries(x.fk.map(([k]) => [k, "join"])), ...Object.fromEntries(x.attrs.map((a) => [a, "sel"])) } },
         links, now: links,
       });
     }
+    entsAfter.forEach(doEntity);
 
     // 6. bilan
     cur = SC.solutionSchema(depart, sol);
@@ -993,7 +1060,9 @@
     let text = trn(changed.length, "Le schéma final : {t} a été créée ou modifiée.", "Le schéma final : {t} ont été créées ou modifiées.", { t: listFr(changed.map(tb)) }) +
       tr("<p>Pour vérifier : chaque nouvelle règle est-elle traduite ? chaque table a-t-elle une clé primaire ? chaque flèche part-elle d'une clé étrangère vers une clé primaire ?</p>") +
       tr('<p class="muted small">Les noms peuvent varier : la vérification accepte les noms équivalents et reconnaît une table à sa clé primaire.</p>');
-    if ((q.variantes || []).length) text += tr('<p class="muted small">Une autre solution est aussi acceptée : voir la correction.</p>');
+    const vars = q.variantes || [];
+    if (vars.some((v) => !v.partiel)) text += tr('<p class="muted small">Une autre solution est aussi acceptée : voir la correction.</p>');
+    else if (vars.length) text += tr('<p class="muted small">Une solution proche est acceptée en partie : voir la correction.</p>');
     snap("bilan", tr("Le schéma final"), text, { main: changed, links: allLinks });
 
     const out = { kind: "schema", phases: PHASES_SCHEMA, steps };
@@ -1165,7 +1234,8 @@
       this.i = Math.max(0, Math.min(P.steps.length - 1, i));
       const st = P.steps[this.i];
       const els = this.els;
-      els.comment.innerHTML = `<h3>${esc(st.title)}</h3><div>${st.text}</div>`;
+      els.comment.innerHTML = `<h3>${esc(st.title)}</h3><div>${st.text}</div>` +
+        (st.notes ? `<aside class="cn-note"><p class="cn-note-title"><i class="i i-lightbulb" aria-hidden="true"></i> ${esc(tr("Point de méthode"))}</p>${st.notes}</aside>` : "");
       els.sql.innerHTML = P.kind === "schema" ? renderSchemaText(st) : renderSql(P, st);
       if (st.schema) this.diagram.load(st.schema, null, "cinema-schema");
       els.count.textContent = `${this.i + 1} / ${P.steps.length}`;

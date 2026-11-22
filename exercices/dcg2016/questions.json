@@ -93,6 +93,7 @@
     },
     {
       "id": "q04",
+      "cinema": {"+tables":"L'état d'une location n'est écrit nulle part en toutes lettres : il se **déduit** des kilométrages. Pas encore remis → KmsRemise vide ; remis mais pas rendu → KmsRemise rempli et KmsRetour vide ; terminé → les deux remplis.","+filtres":"Ce premier filtre est indispensable : sans lui, vous obtenez 13 contrats au lieu de 6, car les 7 contrats jamais devenus effectifs n'ont pas non plus de kilométrage de retour.","+filtres.2":"Un kilométrage non relevé n'est pas 0, c'est une case vide (NULL). `KmsRetour = 0` ou `KmsRetour = NULL` ne trouverait aucune ligne : seul IS NULL teste l'absence de valeur."},
       "theme": "Une seule table",
       "enonce": "Quelles sont les locations en cours ? Afficher le numéro d'agence, le numéro de contrat, la date de début et le numéro du véhicule des contrats dont le véhicule a été remis au client (kilométrage de remise relevé) mais pas encore rendu (kilométrage de retour non relevé).",
       "correction": [
@@ -105,6 +106,7 @@
     },
     {
       "id": "q05",
+      "cinema": {"+groupe":"TypeLocation ne prend que deux valeurs ('Avec chauffeur', 'Sans chauffeur') : le GROUP BY donne donc 2 lignes. Une ligne par valeur différente de la colonne de regroupement.","+resultat":"17 véhicules avec chauffeur, 30 sans : 47 en tout, le nombre de lignes de VEHICULE. Regardez aussi la table : ForfaitJour n'est rempli que pour les 17 véhicules avec chauffeur, NumCategorie que pour les 30 autres (voir la question s01 sur ce choix)."},
       "theme": "Calculs et agrégats",
       "enonce": "Afficher le nombre de véhicules de chaque type de location (avec ou sans chauffeur).",
       "correction": [
@@ -134,6 +136,7 @@
     },
     {
       "id": "q07",
+      "cinema": {"+filtres":"On compare des **années**, pas des dates. `DateDebut > DateContrat` est vrai pour presque tous les contrats (441 sur 492), puisqu'on signe avant de prendre le véhicule. Seul `YEAR(DateDebut) > YEAR(DateContrat)` répond à « signé une année, débutant l'année suivante ».","+resultat":"12 contrats, tous signés en décembre et débutant en janvier. L'écriture `YEAR(DateDebut) = YEAR(DateContrat) + 1` donne ici le même résultat ; elle exclurait un contrat débutant deux ans après sa signature."},
       "theme": "Dates",
       "enonce": "Certains contrats sont signés une année pour une location qui débute l'année suivante. Afficher le numéro d'agence, le numéro de contrat, la date de signature et la date de début de ces contrats.",
       "correction": [
@@ -258,6 +261,7 @@
     },
     {
       "id": "q12",
+      "cinema": {"+tables":"Le nom du client n'est pas dans CONTENTIEUX : un contentieux porte sur un contrat, et c'est le contrat qui connaît son client. Chemin : CONTENTIEUX → CONTRAT → CLIENT.","+jointures.1":"Le piège : les contrats sont numérotés **dans chaque agence** (le contrat n° 14 existe dans plusieurs agences). Vérification : avec seulement `CONTENTIEUX.NumContrat = CONTRAT.NumContrat`, chaque contentieux est rattaché à tous les contrats de même numéro : 102 lignes au lieu de 12.","+select":"NumAgence et NumContrat existent dans CONTENTIEUX et dans CONTRAT : il faut les préfixer. NumDossier et DateOuverture n'existent que dans CONTENTIEUX, pas besoin de préfixe.","+resultat":"12 lignes : le contrat n° 14 de l'agence 5 apparaît deux fois (dossiers n° 1 et n° 2). Un contrat peut donner lieu à plusieurs contentieux, d'où NumDossier dans la clé de CONTENTIEUX."},
       "theme": "Jointures",
       "enonce": "Afficher les contentieux ouverts en 2015 : nom du client, numéro d'agence, numéro de contrat, numéro de dossier et date d'ouverture.",
       "correction": [
@@ -306,6 +310,7 @@
     },
     {
       "id": "q14",
+      "cinema": {"+select":"« Véhicules **différents** » : `COUNT(DISTINCT CONTRAT.NumVeh)`. Avec `COUNT(*)`, on compterait les contrats : l'agence de Nancy (3 véhicules, mais 4 contrats) passerait à tort le seuil de 4.","+filtres.2":"« Devenues effectives » : le kilométrage de remise est relevé. Vérification : sans ce filtre, l'agence de Reims compte 4 véhicules au lieu de 3 (un contrat d'avril jamais effectif) et apparaît à tort.","+groupe.2":"« Au moins 4 » : `>= 4` (ou `> 3`). Résultat attendu : 2 agences, Strasbourg Gare (5 véhicules) et Metz Gare (exactement 4, qui disparaîtrait avec `> 4`)."},
       "theme": "Jointures et regroupements",
       "annale": "2016",
       "enonce": "Afficher la liste des agences (numéro et nom) qui ont eu, au mois d'avril 2016, au moins 4 véhicules différents loués avec chauffeur, avec ce nombre de véhicules. On retient les locations qui ont débuté en avril 2016 et qui sont devenues effectives (le kilométrage de remise n'est relevé que lorsque la location devient effective). Le sujet d'origine fixait le seuil à 50 véhicules.",
@@ -466,6 +471,7 @@
     },
     {
       "id": "q20",
+      "cinema": {"+filtres":"On ne peut pas écrire `WHERE ForfaitJour = MAX(ForfaitJour)` : une fonction de calcul ne s'utilise pas dans le WHERE. La sous-requête calcule d'abord le maximum (520 €), puis on cherche le véhicule qui l'atteint.","+tables":"Erreur fréquente : `SELECT Immatriculation, Modele, MAX(ForfaitJour) FROM VEHICULE`. Mélanger des colonnes simples et une fonction de calcul sans GROUP BY est refusé en SQL standard : la sous-requête est la façon correcte de retrouver la ligne qui porte le maximum.","+resultat":"Une seule ligne : FH-520-AD, Mercedes Classe S, 520 €. L'autre Mercedes Classe S est à 495 € : un même modèle n'a pas forcément le même forfait, c'est le véhicule qu'on cherche. La sous-requête n'a pas besoin de filtrer 'Avec chauffeur' ici, car seuls ces véhicules ont un forfait (MAX ignore les cases vides)."},
       "theme": "Sous-requêtes",
       "enonce": "Quel est le véhicule avec chauffeur dont le forfait journalier est le plus élevé ? Afficher son immatriculation, son modèle et son forfait.",
       "correction": [
@@ -528,6 +534,7 @@
     },
     {
       "id": "q23",
+      "cinema": {"+table":"Contrairement à un INSERT … VALUES, qui ajoute une ligne, INSERT … SELECT ajoute **autant de lignes que le SELECT en renvoie**. LITIGES_ANCIENS a la même structure que CONTENTIEUX : `SELECT *` fournit les colonnes dans le bon ordre.","+valeurs":"Pas de VALUES, et pas de parenthèses autour du SELECT. Conseil : exécutez d'abord le SELECT seul pour vérifier les lignes qui seront copiées (5 contentieux ici).","+resultat":"« Avant le 1er janvier 2015 » : `<`, pas `<=`. Un contentieux non clos a été ouvert le 01/01/2015 : avec `<=`, il serait copié à tort (6 lignes au lieu de 5). Les contentieux ne sont pas supprimés de CONTENTIEUX : ils sont **copiés**."},
       "theme": "Mises à jour",
       "type": "write",
       "annale": "2016",
@@ -579,6 +586,7 @@
     },
     {
       "id": "s01",
+      "cinema": {"lecture":"Je reprends l'énoncé règle par règle :\n- « une spécialisation de VEHICULE en deux sous-types » : un véhicule avec chauffeur est un véhicule (1 à 1), un véhicule sans chauffeur aussi. Chaque sous-type devient une table dont la clé NumVeh est aussi clé étrangère vers VEHICULE.\n- « au forfait journalier propre à chaque véhicule » : ForfaitJour ne concerne que les véhicules avec chauffeur → il va dans AVEC_CHAUFFEUR.\n- « facturé au kilomètre selon sa catégorie » : un véhicule sans chauffeur → 1 catégorie ; une catégorie → plusieurs véhicules. La clé étrangère #NumCategorie va dans SANS_CHAUFFEUR.\n- « contrainte de partition (XT) » : tout véhicule est dans exactement un des deux sous-types. C'est une contrainte sur les données : elle ne se voit pas dans les tables.\n- Ce qui reste commun (immatriculation, modèle, date d'achat, capacité, caution) reste dans VEHICULE.","retraits":"ForfaitJour et NumCategorie quittent VEHICULE : chacune ne concerne qu'**un** des deux sous-types. Dans la table unique, elles sont vides pour la moitié des véhicules (ForfaitJour pour les 30 véhicules sans chauffeur, NumCategorie pour les 17 avec chauffeur). Elles seront reprises dans AVEC_CHAUFFEUR et SANS_CHAUFFEUR.","+entites":"La clé NumVeh de AVEC_CHAUFFEUR est **aussi** une clé étrangère vers VEHICULE : un véhicule avec chauffeur ne peut exister que s'il est d'abord un véhicule. Ne recopiez pas Modele ou Immatriculation : ils restent dans VEHICULE.","+entites.2":"SANS_CHAUFFEUR n'a pas d'attribut propre, mais elle porte la flèche vers CATEGORIE. Erreur fréquente : laisser #NumCategorie dans VEHICULE ; un véhicule avec chauffeur pourrait alors recevoir une catégorie, ce que le modèle interdit.","+bilan":"Checklist :\n- VEHICULE : ne contient plus ni ForfaitJour ni NumCategorie (TypeLocation devient redondant avec les sous-types) ;\n- AVEC_CHAUFFEUR : clé NumVeh → VEHICULE, ForfaitJour ;\n- SANS_CHAUFFEUR : clé NumVeh → VEHICULE, #NumCategorie → CATEGORIE.\nErreur la plus fréquente : déplacer le forfait mais oublier la catégorie. Cette solution est reconnue comme « presque » juste (partielle) : la catégorie, donc le tarif kilométrique, ne concerne que les véhicules sans chauffeur."},
       "type": "schema",
       "theme": "Évolution du schéma",
       "annale": "2016",
@@ -699,6 +707,7 @@
     },
     {
       "id": "s02",
+      "cinema": {"lecture":"Je reprends l'énoncé règle par règle :\n- « chaque véhicule appartient à un type de véhicule (code, libellé) » : un véhicule → 1 type ; un type → plusieurs véhicules. Nouvelle table TYPE_VEHICULE et clé étrangère dans VEHICULE.\n- « une intervention (numéro, date, objet, durée, origine, montant) » : nouvel objet → table INTERVENTION.\n- « concerne un seul véhicule et est réalisée par un seul garagiste » : une intervention → 1 véhicule et 1 garagiste ; un véhicule (ou un garagiste) → plusieurs interventions. Deux clés étrangères dans INTERVENTION.\n- « un garagiste (numéro, nom, adresse…) est spécialisé dans un seul type de véhicule » : nouvelle table GARAGE ; un garagiste → 1 type ; un type → plusieurs garagistes. Clé étrangère dans GARAGE.\n- « un expert (numéro, nom, prénom…) » : nouvelle table EXPERT.\n- « un rapport numéroté, daté, montant, hors d'usage » : nouvelle table RAPPORT ; « rédigé par un seul expert » : un rapport → 1 expert ; un expert → plusieurs rapports. Clé étrangère dans RAPPORT.\n- « chaque rapport prévoit une intervention, une intervention fait suite à au plus un rapport » : un rapport → exactement 1 intervention ; une intervention → 0 ou 1 rapport. Clé étrangère du côté « exactement 1 » : #NumIntervention dans RAPPORT.","+entites":"Le type (tourisme, utilitaire, poids lourd) devient une table et non un simple texte dans VEHICULE : il sert à deux endroits (le véhicule et la spécialité du garagiste), et la flèche garantit qu'on parle des mêmes types.","+entites.2":"EXPERT et GARAGE ont presque les mêmes coordonnées. Les regrouper dans une table générique (INTERVENANT) dont EXPERT et GARAGE seraient des sous-types est aussi accepté ; deux tables séparées restent la solution la plus simple.","+entites.3":"« Spécialisé dans **un seul** type » : la clé étrangère #CodeTypeVehicule va dans GARAGE (un type a plusieurs garagistes). S'il pouvait être spécialisé dans plusieurs types, il faudrait une table de liaison.","+entites.4":"L'origine (maintenance ou réparation) est acceptée mais pas exigée par la vérification. Ne mettez pas ici le numéro de rapport : voir l'étape suivante.","+entites.5":"Le piège de la question : le lien 1 à 1 entre rapport et intervention. Une intervention de maintenance n'a pas de rapport : NumRapport dans INTERVENTION serait souvent vide. Un rapport, lui, prévoit **toujours** une intervention : #NumIntervention dans RAPPORT est toujours rempli. On place la clé étrangère du côté où elle est obligatoire.","+liens":"VEHICULE existait déjà : on ajoute seulement la colonne #CodeTypeVehicule et sa flèche. Côté « plusieurs » : un type regroupe plusieurs véhicules, chaque véhicule a un seul type.","+bilan":"Checklist :\n- 5 nouvelles tables : TYPE_VEHICULE, GARAGE, EXPERT, INTERVENTION, RAPPORT ;\n- VEHICULE.#CodeTypeVehicule et GARAGE.#CodeTypeVehicule → TYPE_VEHICULE ;\n- INTERVENTION : #NumVeh → VEHICULE, #NumGarage → GARAGE ;\n- RAPPORT : #NumExpert → EXPERT, #NumIntervention → INTERVENTION.\nErreur la plus fréquente : placer #NumRapport dans INTERVENTION. C'est reconnu comme « presque » juste (partiel) : le lien est traduit, mais la clé étrangère serait vide pour toutes les interventions de maintenance. Le regroupement des experts et des garagistes dans une table INTERVENANT est accepté. Un NumVeh dans RAPPORT est toléré, mais inutile : le véhicule se retrouve par l'intervention."},
       "type": "schema",
       "theme": "Évolution du schéma",
       "annale": "2016",

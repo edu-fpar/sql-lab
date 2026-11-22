@@ -37,12 +37,17 @@ language. The simplest complete example is
 | `type` | for updates | `"write"` for INSERT / UPDATE / DELETE |
 | `verif` | for updates | `SELECT * FROM <table>`: the table is compared before/after |
 | `annale` | no | exam year (badge) |
-| `cinema` | no | replaces step-by-step comments: `{ "passages": "…", "filtres.2": "…" }` |
+| `cinema` | no | the teacher's comments on the step-by-step solution: `{ "+jointures.2": "…", "lecture": "…" }` |
 
 The step names for `cinema` are `tables`, `passages` (linking tables), `alias`, `select`,
-`jointures`, `filtres`, `groupe`, `tri`, `resultat`; for schema questions `lecture`,
-`retraits`, `entites`, `liens`, `associations`, `bilan`. `step.n` targets the n-th step of a
-phase. Plain text only.
+`jointures`, `filtres`, `groupe`, `tri`, `resultat` (updates: `table`, `valeurs`, `ciblage`); for
+schema questions `lecture`, `retraits`, `entites`, `liens`, `associations`, `bilan`.
+`+step` (or `+step.n`, the n-th step of a phase) **adds** a "Method tip" box under the automatic
+comment; `step` (or `step.n`) **replaces** it. Plain text with `**bold**`, `` `code` `` and `- `
+list lines. The question is then marked with a clapperboard in the list ("Annotated step-by-step
+solution"). Tools: `node tools/cinema_plan.js <exercise> <question>` shows the generated steps and
+their keys; `node tools/set_cinema.js <exercise> <question> comments.json` writes the field without
+reformatting the file.
 
 ## Schema question
 

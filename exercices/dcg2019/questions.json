@@ -69,6 +69,7 @@
     },
     {
       "id": "q04",
+      "cinema": {"+filtres":"« Saisonniers » au pluriel dans l'énoncé, mais la valeur stockée est `'Saisonnier'`, au singulier (les deux valeurs possibles de StatutEmp sont 'Permanent' et 'Saisonnier'). Regardez toujours le contenu de la table avant d'écrire la valeur.","+filtres.2":"Les deux conditions doivent être vraies en même temps : AND. Avec OR, on obtiendrait tous les saisonniers **et** tous les employés à 2 000 € ou plus : 272 lignes au lieu de 13.\n« Au moins 2 000 » → `>= 2000`, sans espace ni symbole € : FONTAINE et CASAS, payés exactement 2 000 €, doivent apparaître.","+resultat":"13 saisonniers, de LE GALL Laurent (2 320 €) à FONTAINE et CASAS (2 000 €)."},
       "theme": "Une seule table",
       "enonce": "Afficher le nom, le prénom et le salaire des employés saisonniers dont le salaire mensuel est d'au moins 2 000 €, du salaire le plus élevé au plus faible.",
       "ordered": [
@@ -85,6 +86,7 @@
     },
     {
       "id": "q05",
+      "cinema": {"+tables":"Pas de fonction d'agrégat ici : le calcul se fait **ligne par ligne**, pour chaque type de lodge. Donc pas de GROUP BY, et autant de lignes de résultat que de types de lodge (6).","+select":"Dans `TarifNuitee * 7 - TarifSemaine`, la multiplication passe avant la soustraction, comme en mathématiques. Attention au sens : `TarifSemaine - TarifNuitee * 7` donnerait une économie négative.\nOn ne réutilise pas l'alias `Prix7Nuitees` dans la colonne suivante : la plupart des SGBD ne le connaissent pas encore à ce moment-là. On réécrit le calcul `TarifNuitee * 7`.","+resultat":"Vérification sur le Bungalow toilé : 7 × 65 = 455 €, soit 65 € d'économie sur un tarif semaine de 390 €. La Cabane perchée offre la plus forte économie (135 €)."},
       "theme": "Calculs et agrégats",
       "enonce": "Pour chaque type de lodge, afficher le libellé, le tarif à la semaine, le prix de 7 nuitées et l'économie réalisée en louant à la semaine plutôt qu'à la nuitée (prix de 7 nuitées moins tarif semaine).",
       "correction": [
@@ -175,6 +177,7 @@
     },
     {
       "id": "q11",
+      "cinema": {"+tables":"La phrase d'introduction donne la clé : CONCERNER relie un secteur à un hôtel **et** indique son responsable. C'est la table centrale : une ligne = un secteur d'un hôtel, avec le code de son responsable.","+jointures.2":"Piège : il existe deux chemins entre CONCERNER et EMPLOYE. Le responsable se trouve par `CONCERNER.CodeEmpResponsable = EMPLOYE.CodeEmp`. Joindre sur NumSecteur et NumHotel donnerait **tous les employés** du secteur : 23 lignes au lieu de 7 pour La Plage. Le nom de la colonne, CodeEmpResponsable, dit justement le rôle de l'employé dans ce lien.","+resultat":"7 secteurs pour La Plage, chacun avec un seul responsable. Deux responsables s'appellent DUBOIS (Romain et Marc) : le prénom montre qu'il s'agit bien de deux personnes."},
       "theme": "Jointures",
       "enonce": "Les secteurs d'un hôtel sont ceux enregistrés dans la table CONCERNER, qui indique aussi leur responsable. Afficher, pour l'hôtel « La Plage », le nom de chaque secteur ainsi que le nom et le prénom de son responsable.",
       "correction": [
@@ -225,6 +228,7 @@
     },
     {
       "id": "q13",
+      "cinema": {"+filtres":"« Hôtels trois étoiles » porte sur chaque hôtel, avant tout calcul : WHERE. « Au moins cinq secteurs » porte sur le résultat du comptage : HAVING. Une même requête utilise souvent les deux.","+groupe":"Chaque ligne de CONCERNER est un secteur d'un hôtel : compter les lignes du groupe revient à compter ses secteurs. Pas besoin de la table SECTEUR, puisqu'on n'affiche pas le nom des secteurs.","+groupe.2":"« Au moins cinq » → `>= 5`. Les Églantines et Los Girasoles ont exactement 5 secteurs : avec `> 5`, ils disparaîtraient.","+resultat":"4 hôtels : Les Flots Bleus (6), Les Églantines (5), Les Hortensias (7) et Los Girasoles (5). La Plage a aussi 7 secteurs, mais 4 étoiles : le WHERE l'a écartée avant le regroupement."},
       "theme": "Jointures et regroupements",
       "annale": "2019",
       "enonce": "Quels sont les hôtels trois étoiles (numéro et nom de l'hôtel) qui comportent au moins cinq secteurs ? Afficher aussi leur nombre de secteurs. Les secteurs d'un hôtel sont ceux enregistrés dans la table CONCERNER.",
@@ -356,6 +360,7 @@
     },
     {
       "id": "q18",
+      "cinema": {"+select":"« Le salarié » au singulier, mais l'énoncé prévient : attendez-vous à plusieurs lignes. Le salaire n'est pas demandé à l'affichage, il sert seulement au filtre.","+filtres":"On ne peut pas écrire `WHERE Salaire = MAX(Salaire)` : le WHERE examine une ligne à la fois, alors que MAX a besoin de toutes les lignes. La sous-requête calcule d'abord le maximum (4 250 €), puis chaque employé est comparé à cette valeur.\nTrier par salaire décroissant et ne garder que la première ligne (`LIMIT 1`) ne montrerait qu'un seul des ex aequo : la sous-requête les retrouve tous.","+resultat":"2 employés à 4 250 € : LAMBERT Yanis et DAVID Yanis."},
       "theme": "Sous-requêtes",
       "annale": "2019",
       "enonce": "Quel est le salarié (nom, prénom) qui a le salaire le plus élevé ? Attention : il peut y en avoir plusieurs.",
@@ -414,6 +419,7 @@
     },
     {
       "id": "q21",
+      "cinema": {"+alias":"Une auto-jointure, c'est la même table utilisée dans deux **rôles** : E = l'employé, R = son responsable. Choisissez des alias parlants. Sans alias, une condition comme `EMPLOYE.Salaire > EMPLOYE.Salaire` ne voudrait rien dire.","+jointures":"Pour trouver le responsable d'un employé, on passe par la ligne de CONCERNER de **son** secteur dans **son** hôtel : deux égalités (NumSecteur et NumHotel). Avec NumSecteur seul, on comparerait l'employé aux responsables du même secteur dans tous les hôtels : 663 lignes au lieu de 6.","+filtres":"On compare deux colonnes entre elles, pas une colonne à une valeur : `E.Salaire > R.Salaire`. Le responsable fait lui-même partie des employés de son secteur, mais il ne gagne pas plus que lui-même : il est écarté d'office.","+resultat":"6 employés. Une ligne associe FONT Javier à sa responsable, FONT Carmen : même nom, deux personnes (codes 392 et 391). C'est exactement ce que les alias E et R permettent de distinguer."},
       "theme": "Auto-jointure",
       "enonce": "Certains employés gagnent plus que le responsable de leur secteur (dans leur hôtel). Les retrouver : nom, prénom et salaire de l'employé, puis nom et salaire de son responsable. Le responsable d'un secteur d'un hôtel est indiqué dans CONCERNER.",
       "correction": [
@@ -498,6 +504,7 @@
     },
     {
       "id": "q25",
+      "cinema": {"+table":"Le script contient **deux** requêtes, dans un ordre imposé ; les étapes détaillent la première (l'UPDATE de CONCERNER, comme à la question précédente). La seconde, `DELETE FROM EMPLOYE …`, ne passe qu'une fois la première exécutée.","+ciblage":"Pourquoi la suppression directe est-elle refusée ? Le code 108 de M. LORDINO figure dans `CONCERNER.CodeEmpResponsable`, clé étrangère vers EMPLOYE.CodeEmp. Supprimer l'employé laisserait le secteur Restauration de l'hôtel n° 1 avec un responsable inexistant : l'**intégrité référentielle** l'interdit.","+resultat":"Après l'UPDATE, plus aucune ligne ne pointe vers le code 108 : le DELETE passe. Supprimer plutôt la ligne de CONCERNER ne convient pas : le secteur disparaîtrait, alors que d'autres employés y sont rattachés (dont Emma ROUSSEAU).\nPour cibler l'employé, `WHERE CodeEmp = 108` est plus sûr que le nom et le prénom : un homonyme serait supprimé aussi."},
       "theme": "Mises à jour",
       "type": "write",
       "annale": "2019",
@@ -525,6 +532,7 @@
     },
     {
       "id": "s01",
+      "cinema": {"lecture":"Je lis le bulletin de réservation, information par information :\n- « numéro du client (C1967), nom, adresse (rue, code postal, ville), téléphone portable » : nouvel objet → table CLIENT, clé NumCli.\n- « numéro de la réservation (R65832), sa date, les dates d'arrivée et de départ » : nouvel objet → table RESERVATION, clé NumResa.\n- Un bulletin = un seul client ; un client peut revenir et réserver plusieurs fois. Un à plusieurs → #NumCli dans RESERVATION, côté « plusieurs ».\n- « le lodge réservé (n° 4812 de l'hôtel …) » : une réservation → un lodge ; un lodge → plusieurs réservations. Un à plusieurs → clé étrangère vers LODGE dans RESERVATION. La clé de LODGE est **composée** (NumLodge + NumHotel) : il faut les deux colonnes.\n- « les montants sont calculés et n'ont pas à être stockés » : aucune colonne pour la location, la TVA ou l'acompte.\n- « une facture identifiée par un numéro et datée … une facture par réservation » : nouvel objet → table FACTURE ; lien un à un avec RESERVATION → une clé étrangère d'un seul côté (#NumFact dans RESERVATION dans la correction).","+entites":"Le client a son propre numéro (C1967) : c'est sa clé. L'adresse est découpée en trois colonnes (rue, code postal, ville), comme sur le bulletin : on pourra trier ou filtrer par ville.","+entites.2":"FACTURE ne contient que son numéro et sa date : le séjour se retrouve par la réservation, et les montants se recalculent. N'y stockez pas de total.","entites.3":"Il faut enregistrer les réservations : je crée la table RESERVATION. Sa clé primaire NumResa identifie chaque ligne ; elle porte DateResa, DateArrivee et DateDepart. Chaque réservation concerne un seul client, un seul lodge et donne lieu à une seule facture : d'où les clés étrangères #NumCli (vers CLIENT), #NumFact (vers FACTURE) et le couple #NumLodge + #NumHotel (vers LODGE), avec une flèche pour chacune.","+entites.3":"Piège : le numéro du lodge seul ne suffit pas, car la clé de LODGE est le couple (NumLodge, NumHotel) : le lodge n° 5, par exemple, existe dans 14 hôtels. RESERVATION contient donc les deux colonnes, qui forment **ensemble** une seule clé étrangère vers LODGE. Inutile d'ajouter un lien séparé vers HOTEL.","+bilan":"Checklist :\n- 3 nouvelles tables : CLIENT, RESERVATION, FACTURE ;\n- RESERVATION contient #NumCli, #NumFact et le couple #NumLodge + #NumHotel ;\n- aucun montant stocké.\nErreur la plus fréquente, jugée « presque juste » : oublier NumHotel dans RESERVATION ; le lodge réservé n'est alors pas identifié.\nAussi accepté : #NumResa dans FACTURE au lieu de #NumFact dans RESERVATION. Pour « une facture par réservation », la clé étrangère peut aller d'un côté ou de l'autre ; placée dans FACTURE, elle évite une case vide tant que le séjour n'est pas terminé."},
       "theme": "Évolution du schéma",
       "type": "schema",
       "annale": "2019",
@@ -751,6 +759,7 @@
     },
     {
       "id": "s02",
+      "cinema": {"lecture":"Je lis l'énoncé et la fiche de synthèse :\n- « chaque activité a un code (EQ1…), un descriptif et un prix unitaire » : nouvel objet → table ACTIVITE, clé CodeActivite.\n- « une fiche liste, pour une réservation, les activités choisies » : une réservation → plusieurs activités ; une activité → choisie lors de plusieurs réservations. Plusieurs à plusieurs → table de liaison CHOISIR.\n- « pour chaque ligne, la date et la quantité » : ces informations dépendent de la réservation **et** de l'activité → elles vont dans CHOISIR.\n- L'exemple R65832 : EQ1 apparaît trois fois (13/07, 20/07, 21/07). Le couple (réservation, activité) se répète : seule la date distingue les lignes → elle entre dans la clé de CHOISIR.\n- Le prix unitaire ne dépend que de l'activité → il reste dans ACTIVITE ; le montant (quantité × prix) se calcule.","+entites":"Le prix unitaire est une propriété de l'activité (une heure d'équitation coûte le même prix pour tous) : il va dans ACTIVITE, pas dans la table de liaison.","+associations":"Pourquoi trois colonnes dans la clé ? Avec (NumResa, CodeActivite) seulement, R65832 ne pourrait avoir qu'une ligne pour EQ1, alors que la fiche en montre trois. Ajouter DateActivite rend chaque ligne unique : (R65832, EQ1, 13/07), (R65832, EQ1, 20/07)…","+associations.2":"Qte reste hors de la clé : c'est la valeur notée sur chaque ligne (2 le 13/07, 1 le 20/07). DateActivite fait partie de la clé sans être une clé étrangère : il n'y a pas de table des dates.","+bilan":"Checklist :\n- ACTIVITE : CodeActivite, descriptif, prix unitaire ;\n- CHOISIR : clé NumResa + CodeActivite + DateActivite, flèches vers RESERVATION et ACTIVITE, Qte hors clé ;\n- aucun montant stocké.\nErreur la plus fréquente, jugée « presque juste » : laisser la date hors de la clé. La même activité ne pourrait alors être choisie qu'une fois par réservation, ce que dément l'exemple de la fiche."},
       "theme": "Évolution du schéma",
       "type": "schema",
       "annale": "2019",

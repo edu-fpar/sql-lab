@@ -73,6 +73,7 @@
     },
     {
       "id": "q04",
+      "cinema": {"+select":"« Chaque ville n'apparaissant qu'une seule fois » → DISTINCT, juste après SELECT. Sans lui, Dijon apparaîtrait 23 fois (une fois par client). DISTINCT porte sur la **ligne entière** : si vous ajoutiez nomCli, les villes se répéteraient de nouveau.","+tri":"Écriture alternative : `GROUP BY villeCli` donne aussi une ligne par ville. Mais quand on ne calcule rien, DISTINCT est la traduction directe de « sans doublon ».","+resultat":"Vérification : 10 villes pour 52 clients."},
       "theme": "Une seule table",
       "enonce": "Afficher la liste des villes où eRecycle a des clients, chaque ville n'apparaissant qu'une seule fois, par ordre alphabétique.",
       "ordered": [
@@ -97,6 +98,7 @@
     },
     {
       "id": "q06",
+      "cinema": {"+groupe":"« Nombre de clients **par** ville » : le mot « par » annonce le `GROUP BY villeCli` ; COUNT(*) compte alors les lignes, donc les clients, de chaque ville. Sans GROUP BY, villeCli et COUNT(*) ne peuvent pas cohabiter dans le SELECT.","+tri":"On trie sur le résultat du calcul : `ORDER BY COUNT(*) DESC` (ou par l'alias `nbClients`). « Du plus au moins » → DESC ; sans DESC, la ville qui a le moins de clients viendrait en premier.","+resultat":"Dijon arrive en tête (23 clients sur 52), Auxonne ferme la marche (1). Quetigny, Nuits-Saint-Georges et Chenôve sont à égalité (4 clients) : leur ordre entre elles n'est pas imposé par l'énoncé."},
       "theme": "Calculs et agrégats",
       "enonce": "Afficher le nombre de clients par ville, de la ville qui compte le plus de clients à celle qui en compte le moins.",
       "ordered": [
@@ -165,6 +167,7 @@
     },
     {
       "id": "q10",
+      "cinema": {"+filtres":"« Les 30 derniers jours » : l'écart entre aujourd'hui et la date de collecte doit être d'au plus 30 jours. L'ordre des arguments compte : `DATEDIFF(NOW(), dateCollecte)` = aujourd'hui − date, positif pour une date passée. Inversé, l'écart serait négatif pour toutes les collectes, donc toujours ≤ 30 : vous obtiendriez les 392 collectes.\nIci « aujourd'hui » est le 15/12/2020 : la requête garde les collectes depuis le 15/11/2020. Écrire cette date en dur donne le même résultat, mais la requête ne serait plus juste demain ; NOW() la rend réutilisable.","+tri":"« De la plus récente à la plus ancienne » → `DESC` : les dates les plus grandes d'abord.","+resultat":"Vérification : 18 collectes, la plus récente le 11/12/2020."},
       "theme": "Dates",
       "enonce": "Afficher les collectes réalisées au cours des 30 derniers jours (date, numéro d'abonnement, numéro de collecte), de la plus récente à la plus ancienne. Utiliser la date du jour.",
       "ordered": [
@@ -292,6 +295,7 @@
     },
     {
       "id": "q15",
+      "cinema": {"+jointures":"Piège principal : la clé de COLLECTE est **composée** (idCollecte + idAbo). Le n° 7 ne désigne pas une collecte unique : chaque abonnement a sa propre collecte n° 7 (25 abonnements en ont une). En n'égalisant que idCollecte, la collecte 7 de l'abonnement 42 serait associée aux détails de toutes les collectes n° 7 : 64 lignes au lieu de 7.","+filtres":"Même logique dans le WHERE : « collecte n° 7 de l'abonnement n° 42 » → deux conditions, `idAbo = 42` **et** `idCollecte = 7`. Ces colonnes existent dans COLLECTE et dans DETAIL_COLLECTE : préfixez-les.","+resultat":"7 lignes, une par type de déchets collecté le 23/11/2020. La date se répète sur chaque ligne : c'est normal, elle appartient à la collecte, et la collecte a 7 lignes de détail."},
       "theme": "Jointures",
       "enonce": "Afficher le détail de la collecte n° 7 de l'abonnement n° 42 : date de la collecte, libellé de chaque type de déchets collecté et poids collecté.",
       "correction": [
@@ -318,6 +322,7 @@
     },
     {
       "id": "q16",
+      "cinema": {"+select":"On affiche le nom, mais l'énoncé prévient : deux clients s'appellent « Pharmacie du Centre » (n° 211 à Dijon et n° 251 à Beaune). Le nom n'identifie pas un client ; seul idCli le fait.","+jointures":"Du poids (DETAIL_COLLECTE) au nom (CLIENT), on remonte toute la chaîne : DETAIL_COLLECTE → COLLECTE → ABONNEMENT → CLIENT. COLLECTE sert deux fois : pour la date (filtre 2019) et pour le chemin. La première jointure se fait sur la clé composée : deux égalités.","+groupe":"Regroupez par `CLIENT.idCli` (et nomCli, puisqu'il est affiché). Avec `GROUP BY nomCli` seul, les deux pharmacies seraient additionnées : une ligne à 73,7 kg au lieu de deux (42,2 kg et 31,5 kg), soit 32 lignes au lieu de 33.","+resultat":"33 clients collectés en 2019. Les deux « Pharmacie du Centre » apparaissent sur deux lignes distinctes : c'est le signe que le regroupement est juste."},
       "theme": "Jointures et regroupements",
       "annale": "2021",
       "enonce": "Obtenir le poids total collecté par client en 2019 (nom du client et poids total en kg). Attention : deux clients différents portent le même nom.",
@@ -448,6 +453,7 @@
     },
     {
       "id": "q21",
+      "cinema": {"+filtres":"La sous-requête doit donner la liste des clients **déjà collectés**. COLLECTE ne contient pas idCli : il faut la joindre à ABONNEMENT, qui relie la collecte au client. Erreur fréquente : `idCli NOT IN (SELECT idAbo FROM COLLECTE)` compare des numéros de clients à des numéros d'abonnements et renvoie les 52 clients.\nPourquoi NOT IN plutôt qu'une jointure ? Un client sans abonnement n'a aucune ligne dans ABONNEMENT : une jointure le ferait disparaître. NOT IN part de CLIENT et garde tous ceux qui ne sont pas dans la liste, y compris eux.","+resultat":"8 clients : 5 sans aucun abonnement (dont le n° 231, Électricité Générale Moreau) et 3 qui ont un abonnement mais n'ont jamais été collectés (Hôtel des Remparts, Courtage Assur'Plus, Cabinet RH Talents)."},
       "theme": "Sous-requêtes",
       "annale": "2021",
       "enonce": "Quels sont les clients (nom et ville) qui n'ont jamais été collectés ? Un client sans abonnement n'a, bien sûr, jamais été collecté.",
@@ -547,6 +553,7 @@
     },
     {
       "id": "q25",
+      "cinema": {"+ciblage":"Le client 231 n'a aucun abonnement : aucune ligne d'une autre table ne pointe vers lui, la suppression passe. Ciblez-le par sa clé (`idCli = 231`) plutôt que par son nom : la clé désigne une ligne et une seule.","+resultat":"Le client 212 (Cabinet médical Darcy), lui, a 2 abonnements (n° 14 et 15), qui ont donné 14 collectes. ABONNEMENT.idCli fait référence à CLIENT.idCli : le SGBD refuse la suppression, sinon ces abonnements pointeraient vers un client qui n'existe plus. C'est l'**intégrité référentielle**.\nPour le supprimer malgré tout, il faudrait effacer en remontant les flèches : DETAIL_COLLECTE, puis COLLECTE, puis ABONNEMENT, enfin CLIENT (ou prévoir une suppression en cascade)."},
       "theme": "Mises à jour",
       "type": "write",
       "annale": "2021",
@@ -560,6 +567,7 @@
     },
     {
       "id": "s01",
+      "cinema": {"lecture":"Je lis l'énoncé règle par règle :\n- « un client possède un ou plusieurs lieux de prélèvement » et « un lieu ne fait référence qu'à un seul client » : CLIENT (1) — LIEU (plusieurs). Un à plusieurs → clé étrangère #idCli dans LIEU, côté « plusieurs ».\n- Dictionnaire idLieu, adresseLieu, cpLieu, villeLieu : un nouvel objet avec ses propres informations → nouvelle table LIEU, clé idLieu.\n- « une collecte se fasse sur un lieu de prélèvement » : une collecte → un seul lieu ; un lieu → plusieurs collectes au fil du temps. Un à plusieurs → clé étrangère #idLieu dans COLLECTE.\n- « l'adresse du siège social, que l'on souhaite conserver » : rueCli et villeCli restent dans CLIENT.\n- Conséquence : le lieu de la collecte désigne déjà le client. idCli dans ABONNEMENT ferait double emploi : il doit partir.","retraits":"idCli quitte ABONNEMENT. Une fois le lieu de la collecte connu, le client l'est aussi (un lieu n'appartient qu'à un seul client) : garder idCli dans ABONNEMENT enregistrerait deux fois la même information, avec un risque d'incohérence (un abonnement d'un client collecté sur le lieu d'un autre client).","+entites":"La flèche va de LIEU vers CLIENT, pas l'inverse : un client a plusieurs lieux, un idLieu dans CLIENT demanderait plusieurs valeurs dans une case. idLieu est un numéro auto-incrémenté : un identifiant simple et stable, contrairement à une adresse.","+liens":"Pourquoi dans COLLECTE ? L'énoncé dit que c'est **une collecte** qui se fait sur un lieu. La clé de COLLECTE reste (idCollecte, idAbo) : idLieu s'ajoute comme une colonne ordinaire, hors de la clé primaire.","+bilan":"Checklist :\n- LIEU : idLieu, adresseLieu, cpLieu, villeLieu et #idCli ;\n- #idLieu dans COLLECTE, hors de la clé primaire ;\n- idCli retiré d'ABONNEMENT ;\n- rueCli et villeCli toujours dans CLIENT (siège social).\nErreur la plus fréquente : mettre idLieu dans CLIENT, ce qui limiterait chaque client à un seul lieu.\nAussi acceptés : #idLieu dans ABONNEMENT plutôt que dans COLLECTE (toutes les collectes d'un abonnement au même lieu) ; ou le siège déplacé dans LIEU, avec un attribut qui indique quel lieu est le siège. Garder idCli dans ABONNEMENT est jugé « presque juste » : c'est la redondance décrite à l'étape du retrait."},
       "theme": "Évolution du schéma",
       "type": "schema",
       "annale": "2021",

@@ -48,6 +48,7 @@
     },
     {
       "id": "q02",
+      "cinema": {"+tables":"« Affectés à aucun groupe » : l'appartenance se lit dans PERSONNEL.GrpCode. Ne vous laissez pas tromper par GROUPE.PersNum : il désigne le **chef** du groupe, pas ses membres. La table GROUPE n'est donc pas utile ici.","+filtres":"Un salarié sans groupe a une case GrpCode **vide** (NULL). `GrpCode = NULL` ou `GrpCode = ''` ne renvoient rien : seul `IS NULL` teste une case vide.","+resultat":"Contrôle : 3 personnes, comme l'annonce le contexte : le directeur (Henri CASTAGNE, poste DI), la secrétaire de direction (Monique LEBLANC, SD) et la juriste (Anne VIDAL, CJ)."},
       "theme": "Une seule table",
       "enonce": "Certains membres du personnel ne sont affectés à aucun groupe (le directeur, la secrétaire de direction…). Afficher leur numéro, leur nom, leur prénom et le code de leur poste.",
       "correction": [
@@ -59,6 +60,7 @@
     },
     {
       "id": "q03",
+      "cinema": {"+filtres":"BETWEEN inclut les deux bornes : c'est la traduction exacte de « les deux dates sont incluses ». Ici, cela compte : Jeanne ALOUI a été embauchée le 01/05/2007 et Kévin PONS le 01/05/2008. Avec `>` et `<`, tous deux disparaîtraient.\nÉcriture équivalente acceptée : `>= '01/05/2007' AND <= '01/05/2008'`.","+tri":"« Ordre chronologique » = de la date la plus ancienne à la plus récente : `ORDER BY PersDateEmbauche`, sans DESC. Le tri porte sur la date, pas sur le nom, même si le nom est affiché en premier.","+resultat":"Contrôle : 5 salariés, d'ALOUI (01/05/2007) à PONS (01/05/2008). Si vous n'en trouvez que 3, vos bornes sont exclues."},
       "theme": "Dates",
       "annale": "2008",
       "enonce": "Quelle est la liste des personnels classés par ordre chronologique (nom, prénom, date d'embauche) recrutés entre le 1er mai 2007 et le 1er mai 2008 ? Les deux dates sont incluses.",
@@ -112,6 +114,7 @@
     },
     {
       "id": "q06",
+      "cinema": {"+filtres":"Sans ce filtre, les 3 salariés sans groupe (directeur, secrétaire de direction, juriste) formeraient un groupe à part, au GrpCode vide : une 9e ligne que l'énoncé exclut. La condition porte sur chaque salarié, avant le regroupement : c'est un WHERE, pas un HAVING.","+groupe":"On affiche le **code** du groupe, qui est déjà dans PERSONNEL : pas besoin de la table GROUPE. Pour afficher le nom (« Groupe 2 »), il faudrait une jointure avec GROUPE.","+resultat":"Contrôle : 8 lignes, de 6 salariés (G3) à 8 (G2, G4, G6 et G7), soit 59 salariés sur 62."},
       "theme": "Calculs et agrégats",
       "enonce": "Afficher, pour chaque groupe (code du groupe), le nombre de salariés qui le composent. Les salariés qui n'appartiennent à aucun groupe ne doivent pas apparaître.",
       "correction": [
@@ -151,6 +154,7 @@
     },
     {
       "id": "q08",
+      "cinema": {"+tables":"GROUPE et PERSONNEL sont reliées **deux fois** : PERSONNEL.GrpCode indique le groupe dont on est membre, GROUPE.PersNum indique le chef (association « Diriger »). Le mot « chef » de l'énoncé désigne le second lien.","+jointures":"Le piège : joindre par `PERSONNEL.GrpCode = GROUPE.GrpCode`. La requête fonctionne, mais elle affiche **tous les membres** de chaque groupe (59 lignes) au lieu du seul chef (8 lignes). Choisissez le lien qui correspond à la question.","+resultat":"Contrôle : 8 lignes, une par groupe, de Pascal SIMON (Groupe 1) à Philippe BOYER (Groupe 8). Deux chefs s'appellent SIMON (Pascal et Julie) : ce sont deux personnes différentes."},
       "theme": "Jointures",
       "enonce": "Afficher, pour chaque groupe, son nom ainsi que le nom et le prénom de son chef de groupe. Le chef d'un groupe est le salarié dont le numéro figure dans GROUPE.PersNum (association « Diriger »).",
       "correction": [
@@ -288,6 +292,7 @@
     },
     {
       "id": "q14",
+      "cinema": {"+passages":"Le taux horaire n'est pas une propriété du salarié mais de son **poste** : il est dans POSTE. Pour aller du groupe au taux : GROUPE → PERSONNEL (les membres) → POSTE (le taux de chacun).","+jointures":"On relie par `PERSONNEL.GrpCode` (les **membres**), pas par GROUPE.PersNum (le chef seul) : la moyenne porte sur tout le groupe. Les 3 salariés sans groupe disparaissent d'eux-mêmes : leur GrpCode vide ne correspond à aucun groupe.","+groupe":"Regrouper par `GROUPE.GrpCode, GrpNom` est la précaution habituelle : le code garantit un groupe par ligne de GROUPE, le nom est ajouté parce qu'il est affiché. Comme les noms sont tous différents, `GROUP BY GrpNom` seul donnerait ici le même résultat.","+resultat":"Contrôle : 8 groupes ; le Groupe 3 arrive en tête avec 40 € de moyenne, le Groupe 6 ferme la marche avec 35,25 €. Variante acceptée : `ORDER BY TauxMoyen DESC`, avec le nom donné par AS."},
       "theme": "Jointures et regroupements",
       "enonce": "Afficher, pour chaque groupe (nom du groupe), le taux horaire moyen de ses membres, du groupe le plus cher au moins cher.",
       "ordered": [
@@ -359,6 +364,7 @@
     },
     {
       "id": "q17",
+      "cinema": {"+tables":"Le résultat ne contient que des compétences : COMPETENCE suffit dans la requête principale. CARACTERISER n'intervient que dans la sous-requête, pour savoir qui possède quoi et jusqu'à quand.","+filtres":"Le raisonnement se fait à l'envers : la sous-requête cherche les compétences **actuellement assurées**, puis NOT IN garde les autres. Le OR est indispensable : sans `DateFin IS NULL`, les compétences reconnues « sans limite » ne compteraient pas comme assurées, et l'on trouverait 10 compétences au lieu de 3.","+resultat":"Contrôle : 3 compétences, C11 « Évaluation d'entreprise », C12 « Fiscalité internationale » et C13 « Normes IFRS ». Sans aucune condition de date, C12 serait oubliée : elle a deux titulaires, mais leurs compétences ont expiré (31/12/2007 et 30/06/2006)."},
       "theme": "Sous-requêtes",
       "annale": "2008",
       "enonce": "Quelle est la liste des compétences (code et titre) qui ne sont actuellement assurées par aucun membre du personnel ? Une compétence est actuellement assurée par un salarié si sa date de fin est vide ou n'est pas encore dépassée (postérieure ou égale à la date du jour).",
@@ -422,6 +428,7 @@
     },
     {
       "id": "q20",
+      "cinema": {"+tables":"La même table PERSONNEL joue **deux rôles** : le salarié et son chef. Pour comparer deux dates d'embauche sur une même ligne du résultat, il faut deux exemplaires de la table dans le FROM.","+passages":"GROUPE fait le pont entre les deux rôles : le salarié y est rattaché par son GrpCode (il est membre), le chef par GROUPE.PersNum (il dirige). Chacun des deux liens sert une fois.","+jointures.2":"Le piège : relier le second exemplaire par le même lien que le premier (`C.GrpCode = G.GrpCode`). C serait alors n'importe quel membre du groupe, pas son chef. C'est `G.PersNum = C.PersNum` qui désigne le chef.","+filtres":"Le filtre compare deux colonnes de même nom, l'une de S, l'autre de C : sans les alias, il serait impossible de l'écrire. Le chef n'apparaît pas face à lui-même, car `<` est strict.","+resultat":"Contrôle : 3 salariés, MORIN (Groupe 2), MARTIN (Groupe 4) et COLIN (Groupe 6), tous embauchés avant leur chef."},
       "theme": "Auto-jointure",
       "enonce": "Quels salariés ont été embauchés avant le chef du groupe dont ils sont membres ? Afficher le nom, le prénom et la date d'embauche du salarié, puis le nom et la date d'embauche de son chef de groupe.",
       "correction": [
@@ -486,6 +493,7 @@
     },
     {
       "id": "q23",
+      "cinema": {"+table":"Le chef d'un groupe est enregistré dans GROUPE.PersNum (association « Diriger »). Le piège : modifier PERSONNEL. BOYER et LEROY sont déjà membres du Groupe 8, leur GrpCode ne change pas : seule la colonne « chef » de GROUPE est concernée.","+ciblage":"Variante acceptée : `WHERE PersNum = 56` (le groupe dont BOYER est le chef). Les deux conditions visent la même ligne ; `GrpCode = 'G8'` suit plus directement l'énoncé.","+resultat":"Contrôle : une seule ligne modifiée, dans GROUPE. PERSONNEL ne change pas : BOYER reste membre du Groupe 8, simplement il n'en est plus le chef."},
       "theme": "Mises à jour",
       "type": "write",
       "enonce": "Philippe BOYER (n° 56) cède la direction du « Groupe 8 » (code G8) à Éric LEROY (n° 57), réviseur et membre du même groupe. Enregistrer ce changement de chef de groupe.",
@@ -520,6 +528,7 @@
     },
     {
       "id": "s01",
+      "cinema": {"lecture":"Je reprends l'énoncé règle par règle, en cherchant les deux objets reliés et le nombre dans chaque sens :\n- « chaque client est identifié par un numéro (CltNum) et décrit par son nom et son adresse » : un nouvel objet → table **CLIENT**.\n- « chaque client appartient à une seule catégorie (SARL, SNC, EURL…), identifiée par un code » : un client a une catégorie, une catégorie regroupe plusieurs clients → un à plusieurs → table **CATEGORIE**, clé étrangère #CatCode dans CLIENT.\n- « chaque client est affecté à un groupe du cabinet » : un client a un groupe, un groupe suit plusieurs clients → clé étrangère #GrpCode dans CLIENT (GROUPE existe déjà).\n- « un dossier, identifié par un code, ne concerne qu'un seul client » : un dossier a un client, un client a plusieurs dossiers → table **DOSSIER**, clé étrangère #CltNum dans DOSSIER.\n- « chaque dossier est classé dans une nature (social, fiscal, comptable…) » : un dossier a une nature, une nature concerne plusieurs dossiers → table **NATURE**, clé étrangère #NatCode dans DOSSIER.\nToutes les règles sont des « un seul » : 4 nouvelles tables, 4 clés étrangères, aucune table de liaison.","+entites":"SARL, SNC, EURL sont des **lignes** de CATEGORIE, pas des colonnes ni des tables. Cette catégorie est celle du **client** (sa forme juridique) ; elle n'a rien à voir avec les postes du personnel.","+entites.2":"Même raisonnement : « social, fiscal, comptable » sont des valeurs. Une table NATURE évite de réécrire l'intitulé dans chaque dossier et garantit qu'on n'utilise que des natures prévues.","+entites.3":"Le piège de cet énoncé : « chaque client est affecté à un groupe » place #GrpCode dans **CLIENT**. On est tenté de le mettre dans DOSSIER (c'est le groupe qui traite les dossiers), mais l'énoncé rattache le groupe au client : tous ses dossiers sont alors suivis par ce groupe, sans qu'il faille le répéter.","+entites.4":"« Un dossier ne concerne qu'un seul client » : #CltNum va dans DOSSIER, côté « plusieurs ». Un numéro de dossier dans CLIENT limiterait chaque client à un seul dossier.\nDOSSIER n'a pas d'autre attribut dans l'énoncé que son code et ses deux clés étrangères : ce n'est pas un oubli.","+bilan":"Checklist :\n- 4 nouvelles tables : CATEGORIE, NATURE, CLIENT, DOSSIER, chacune avec sa clé primaire ;\n- CLIENT porte #CatCode et #GrpCode ; DOSSIER porte #CltNum et #NatCode ;\n- aucune table de liaison : toutes les règles sont des « un seul ».\nL'erreur la plus fréquente : #GrpCode dans DOSSIER au lieu de CLIENT. C'est la seule « autre solution » de la correction, et elle n'est acceptée qu'en partie (« presque ») : elle ne traduit pas la règle telle qu'elle est écrite."},
       "type": "schema",
       "theme": "Évolution du schéma",
       "annale": "2008",
@@ -679,6 +688,7 @@
     },
     {
       "id": "s02",
+      "cinema": {"lecture.1":"Je reprends l'énoncé règle par règle :\n- « pour chaque mission (type de mission du catalogue MISSION) prévue sur un dossier, la date d'échéance » : un type de mission peut être prévu sur plusieurs dossiers, un dossier demande plusieurs missions → plusieurs à plusieurs MISSION–DOSSIER → table de liaison **PLANNING**, clé (#MisCode, #DosCode). La date d'échéance dépend du couple : elle va dans PLANNING.\n- « la personne à qui cette mission est confiée (une seule personne par mission d'un dossier) » : une mission d'un dossier a une seule personne, une personne a plusieurs missions planifiées → un à plusieurs → clé étrangère #PersNum dans PLANNING, **hors** de la clé primaire.\n- « le salarié saisit chaque jour, pour la mission du dossier concerné, le nombre d'heures et un commentaire » : une mission planifiée donne lieu à plusieurs saisies, une par jour → nouvelle table **TACHES**, clé (#MisCode, #DosCode, DateJour), qui porte NbHeures et Commentaire.\n- « Début », « En cours », « Fin » : de simples valeurs du commentaire, pas une table.","+associations.1":"Le planning ne décrit pas un objet nouveau : il relie un type de mission du catalogue et un dossier. La date d'échéance n'a de sens que pour ce couple (la même mission n'a pas la même échéance sur deux dossiers) : elle va dans PLANNING, ni dans MISSION ni dans DOSSIER.","associations.2":"Les deux parties de la clé sont aussi des clés étrangères : #MisCode renvoie à MISSION et #DosCode renvoie à DOSSIER. PLANNING reçoit en plus une troisième clé étrangère, **#PersNum** vers PERSONNEL, qui ne fait **pas** partie de la clé : « une seule personne par mission d'un dossier ». D'où trois flèches. DateEcheance dépend du couple (mission, dossier) : elle se place dans PLANNING.\nLe piège : mettre PersNum dans la clé primaire. On pourrait alors confier la même mission du même dossier à deux personnes, ce que la règle interdit (réponse signalée « presque »).","+entites.1":"Règle : le salarié saisit **chaque jour** ses heures et un commentaire, pour une mission planifiée d'un dossier. Une même mission planifiée donne donc lieu à plusieurs saisies, une par jour : je crée la table TACHES. Sa clé primaire reprend la clé du planning et ajoute la date : MisCode + DosCode + DateJour.\nSans DateJour dans la clé, on ne pourrait enregistrer qu'une seule saisie par mission et par dossier (réponse signalée « presque »).\nLe couple (#MisCode, #DosCode) de TACHES est une clé étrangère **composée** vers PLANNING : on ne peut saisir des heures que sur une mission réellement planifiée pour ce dossier. NbHeures et Commentaire dépendent de la mission planifiée **et** du jour : ils se placent dans TACHES. DateJour n'est pas une clé étrangère : une table DATE n'est pas nécessaire.","+bilan.1":"Checklist :\n- PLANNING (#MisCode, #DosCode, DateEcheance, #PersNum) : clé de deux colonnes, trois flèches ;\n- TACHES (#MisCode, #DosCode, DateJour, NbHeures, Commentaire) : la date dans la clé ;\n- le salarié n'est **pas** dans la clé de PLANNING.\nSont aussi acceptées : des flèches de TACHES directement vers MISSION et DOSSIER (au lieu de PLANNING), ou #PersNum ajouté à la clé de TACHES (pour savoir qui a saisi). Sont signalées « presque » : PersNum dans la clé de PLANNING, et DateJour hors de la clé de TACHES. Une table DATE est tolérée sans être exigée."},
       "type": "schema",
       "theme": "Évolution du schéma",
       "annale": "2008",

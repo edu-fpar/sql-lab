@@ -71,6 +71,7 @@
     },
     {
       "id": "q03",
+      "cinema": {"+filtres":"« Contient le mot » → `%` **avant et après** : le mot peut être n'importe où dans la raison sociale. Avec `LIKE 'Céréales%'` (commence par), on ne trouverait que « Céréales de Gascogne » et l'on raterait « Atlantique Céréales ».\nSans joker, `LIKE 'Céréales'` revient à une égalité stricte : aucune ligne.","+resultat":"Vérification : 2 clients (n° 101 et 129). Recopiez le mot avec ses accents : ici, `'%Cereales%'` sans accent ne trouve rien."},
       "theme": "Une seule table",
       "enonce": "Afficher l'identifiant et la raison sociale des clients dont la raison sociale contient le mot « Céréales ».",
       "correction": [
@@ -98,6 +99,7 @@
     },
     {
       "id": "q05",
+      "cinema": {"+tables":"Pas besoin de la table AgentConsignataire : l'énoncé ne demande que l'**identifiant** de l'agent, qui est déjà dans Escale (clé étrangère idAgent). Une ligne d'Escale = une escale prise en charge par un agent : il suffit de les compter.","+groupe":"« Pour chaque agent » → `GROUP BY idAgent`. La précision « ayant pris en charge au moins une escale » est obtenue d'office : un agent sans escale n'a aucune ligne dans Escale, il ne forme donc aucun groupe. Inutile d'ajouter un HAVING.","+resultat":"10 agents sur les 13 de la base. Les 3 autres (ALKA, OCEA, FMER) n'ont aucune escale : ils sont absents du résultat, et non affichés avec 0. SOGEBRAS arrive en tête avec 20 escales."},
       "theme": "Calculs et agrégats",
       "enonce": "Afficher, pour chaque agent consignataire ayant pris en charge au moins une escale, son identifiant et le nombre d'escales qu'il a prises en charge.",
       "correction": [
@@ -153,6 +155,7 @@
     },
     {
       "id": "q08",
+      "cinema": {"+select":"La durée n'est stockée nulle part : c'est une **colonne calculée**, `DATEDIFF(dateFin, dateDebut)`, renommée avec AS. L'ordre compte : la date la plus récente en premier, sinon la durée est négative.","+filtres.2":"On répète le calcul dans le WHERE : l'alias `duree` du SELECT n'est pas reconnu dans le WHERE par la plupart des SGBD. « Au moins 5 jours » → `>= 5` : l'escale 20200524006, qui dure exactement 5 jours, doit apparaître.\nLes 3 escales encore en cours (dateFin vide) donnent une durée NULL : la comparaison n'est ni vraie ni fausse, elles sont écartées sans qu'on l'écrive.","+resultat":"Vérification : 3 escales en 2020 (5, 6 et 6 jours)."},
       "theme": "Dates",
       "enonce": "Afficher l'identifiant, la date de début, la date de fin et la durée en jours (date de fin moins date de début) des escales débutées en 2020 qui ont duré au moins 5 jours.",
       "correction": [
@@ -254,6 +257,7 @@
     },
     {
       "id": "q12",
+      "cinema": {"+tables":"CompositionCargaison est la table centrale : une ligne = une marchandise chargée ou déchargée pour un client lors d'une escale. Elle porte le tonnage et les trois codes ; les libellés et la raison sociale sont dans les trois tables autour.","+jointures":"Les trois flèches partent de la même table : chaque jointure relie CompositionCargaison à une autre table (jamais Operation à Marchandise, qui n'ont aucune colonne commune). Oubliez-en une, et chaque ligne de cargaison est recopiée pour toutes les lignes de la table non reliée : avec Client, on passerait de 4 à 116 lignes (4 × 29 clients).","+filtres":"idEscale = 20200524007 : un numéro, donc sans apostrophes. idEscale n'existe que dans CompositionCargaison parmi les 4 tables du FROM : pas besoin de préfixe ici.","+resultat":"4 lignes : un chargement de ferraille (2 900 t) et trois déchargements (engrais pour deux clients, bois). Le même libellé « Engrais » apparaît deux fois : ce sont deux clients différents, donc deux lignes de cargaison."},
       "theme": "Jointures",
       "enonce": "Afficher le détail de la cargaison de l'escale n° 20200524007 : libellé de l'opération, libellé de la marchandise, raison sociale du client et tonnage.",
       "correction": [
@@ -404,6 +408,7 @@
     },
     {
       "id": "q18",
+      "cinema": {"+select":"Calcul en deux temps : `DATEDIFF(dateFin, dateDebut)` donne la durée de **chaque** escale, puis AVG en fait la moyenne pour chaque agent. On peut imbriquer une fonction de date dans une fonction d'agrégat.","+filtres":"« Escales **terminées** » = date de fin renseignée : `dateFin IS NOT NULL`. AVG ignorerait de toute façon les durées vides, mais écrire le filtre rend la requête fidèle à l'énoncé et la protège (un COUNT, lui, compterait les escales en cours). WORMS MTTM et SEA-INVEST ont des escales en cours.","+groupe":"On regroupe par `A.idAgent` (l'identifiant garantit un groupe par agent) et par raisonSocialeAgent, affichée. Ici aucune raison sociale n'est en double : regrouper par la seule raison sociale est aussi accepté.","+resultat":"10 lignes. « Pour chaque agent » : les 3 agents sans escale (ALKA MARINE, OCEA, FINIST'MER) n'apparaissent pas, la jointure ne garde que les agents qui ont des escales. SOMALOIR a la durée moyenne la plus longue (environ 3,7 jours)."},
       "theme": "Jointures et regroupements",
       "enonce": "Afficher, pour chaque agent consignataire, sa raison sociale et la durée moyenne (en jours) des escales terminées qu'il a prises en charge.",
       "correction": [
@@ -497,6 +502,7 @@
     },
     {
       "id": "q21",
+      "cinema": {"+filtres":"Piège : `WHERE idOperation = 'C' AND idOperation = 'D'` ne renvoie rien. Le WHERE examine **une ligne à la fois**, et une même ligne de cargaison ne peut pas être à la fois un chargement et un déchargement. Avec OR, on obtiendrait les clients qui ont l'un **ou** l'autre (27 clients) : ce n'est pas la question.","+filtres.2":"La solution : deux listes distinctes, calculées chacune par une sous-requête (les clients qui ont chargé, ceux qui ont déchargé), et un client retenu s'il est **dans les deux** : `IN (…) AND IN (…)`. Autre écriture acceptée : regrouper par client et garder `HAVING COUNT(DISTINCT idOperation) = 2`.","+resultat":"Vérification : 11 clients sur les 27 qui ont une cargaison ont à la fois chargé et déchargé."},
       "theme": "Sous-requêtes",
       "enonce": "Afficher l'identifiant et la raison sociale des clients pour lesquels des marchandises ont été à la fois chargées et déchargées (au moins une opération de chaque sorte).",
       "correction": [
@@ -583,6 +589,7 @@
     },
     {
       "id": "q25",
+      "cinema": {"+ciblage":"Reprise de la sous-requête « agents sans escale » : `NOT IN (SELECT idAgent FROM Escale)`. Elle est plus sûre qu'une liste écrite à la main (`IN ('ALKA', 'OCEA', 'FMER')`, acceptée aussi) : elle reste juste si les données changent.","+resultat":"3 agents supprimés : ALKA, OCEA et FMER.\nSOGEBRAS, lui, a 20 escales : Escale.idAgent fait référence à AgentConsignataire.idAgent. Le supprimer laisserait 20 escales rattachées à un agent qui n'existe plus : l'**intégrité référentielle** l'interdit, la base refuse la suppression."},
       "theme": "Mises à jour",
       "type": "write",
       "enonce": "Le port fait le ménage dans son fichier : supprimer les agents consignataires qui n'ont jamais pris en charge d'escale. (Essayez aussi de supprimer l'agent « SOGEBRAS » : pourquoi la base refuse-t-elle ?)",
@@ -608,6 +615,7 @@
     },
     {
       "id": "s01",
+      "cinema": {"lecture":"Je lis l'énoncé règle par règle :\n- « un intervenant … identifié par un numéro ; raison sociale, mail, téléphone, site web » : nouvel objet → table Intervenant.\n- « chaque prestation … identifiée par un code et a un libellé » : nouvel objet → table Prestation. Il s'agit du **type** de prestation (pilotage, remorquage…), pas d'une intervention datée.\n- « un intervenant peut offrir plusieurs prestations et une même prestation est offerte par plusieurs intervenants » : plusieurs à plusieurs, dit explicitement → table de liaison Offrir (l'annuaire du port).\n- « pour chaque escale, l'agent sélectionne les prestations nécessaires » : une escale → plusieurs prestations ; une prestation → plusieurs escales. Plusieurs à plusieurs → table de liaison Commander (escale, prestation), qui porte la date et l'heure prévues.\n- « une prestation est effectuée par un intervenant unique lors d'une escale » : pour un couple (escale, prestation), un seul intervenant → clé étrangère #idIntervenant dans Commander, **hors de la clé**.\n- AgentConsignataire ne reçoit rien : c'est lui qui fait le choix, mais l'escale connaît déjà son agent (idAgent dans Escale).","+entites":"Intervenant est un objet indépendant : son numéro (54, 68, 14…) suffit à l'identifier. Ce n'est pas un agent consignataire : ne le confondez pas avec la table AgentConsignataire déjà présente.","+entites.2":"Prestation ne contient que le code et le libellé. Ni intervenant ni escale ici : une même prestation (le pilotage) est proposée par plusieurs intervenants et commandée lors de nombreuses escales.","+associations":"Offrir n'a pas d'attribut : la table dit seulement « cet intervenant propose cette prestation » (CMA CGM – Royan apparaît sur deux lignes : Manutention et Stockage).","+associations.3":"Ce qui identifie une commande : **une escale et une prestation**. Pour ce couple, il n'y a qu'un intervenant et qu'une date prévue : la clé de Commander est donc (idPrestation, idEscale), et rien de plus.","+associations.4":"Piège : mettre idIntervenant **dans la clé** de Commander. On pourrait alors retenir deux intervenants pour le même pilotage de la même escale, ce que l'énoncé interdit. idIntervenant est une simple clé étrangère, comme datePrevue et heurePrevue sont de simples attributs.","+bilan":"Checklist :\n- 4 nouvelles tables : Intervenant, Prestation, Offrir, Commander ;\n- Offrir : clé composée idIntervenant + idPrestation ;\n- Commander : clé idPrestation + idEscale, avec #idIntervenant, datePrevue et heurePrevue hors clé ;\n- aucune modification d'AgentConsignataire ni d'Escale.\nErreurs fréquentes, jugées « presque justes » : idIntervenant dans la clé de Commander, ou oubli de la table Offrir (l'annuaire disparaît). Aussi accepté : faire pointer le couple (idIntervenant, idPrestation) de Commander vers Offrir, ce qui garantit que l'intervenant retenu propose bien cette prestation."},
       "type": "schema",
       "theme": "Évolution du schéma",
       "annale": "2020",

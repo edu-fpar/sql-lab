@@ -102,6 +102,7 @@
     },
     {
       "id": "q04",
+      "cinema": {"+tables":"« Quelle que soit la couleur ou la cuvée » est l'indice : dans la base, l'appellation n'est jamais écrite « Saint-Joseph » tout court, mais « Saint-Joseph rouge », « Saint-Joseph blanc » ou « Saint-Joseph rouge Vieilles Vignes ». Regardez les valeurs de NomAppellationVin avant d'écrire le filtre.","+filtres":"`NomAppellationVin = 'Saint-Joseph'` donnerait un résultat **vide** : l'égalité exige le texte exact. LIKE avec le % final retient tout ce qui commence par « Saint-Joseph ».","+resultat":"Vous devez obtenir 13 vins (5 rouges, 4 blancs et 4 Vieilles Vignes). Les Crozes-Hermitage, Condrieu et IGP ne doivent pas apparaître."},
       "theme": "Une seule table",
       "enonce": "Afficher les vins d'appellation Saint-Joseph, quelle que soit la couleur ou la cuvée (identifiant, nom de l'appellation, millésime, prix de la bouteille).",
       "correction": [
@@ -139,6 +140,7 @@
     },
     {
       "id": "q07",
+      "cinema": {"+tables":"Attention au mot « pour chaque » : ici il ne demande **pas** de GROUP BY. Chaque ligne de VIN est déjà un vin : on veut une ligne par vin, avec un calcul fait sur cette ligne, et non un total par groupe.","+select":"La valeur du stock se calcule **dans le SELECT**, ligne par ligne : `NbBouteillesVin * PrixBouteilleVin`. Ce n'est pas une fonction d'agrégat : pas de SUM ici. `SUM(NbBouteillesVin * PrixBouteilleVin)` donnerait la valeur du stock de **tous** les vins 2021 sur une seule ligne.\nVous pouvez nommer la colonne calculée : `… AS ValeurStock`.","+filtres":"Le millésime est une année enregistrée comme un nombre : `Millesime = 2021`, sans apostrophes et sans fonction YEAR() (ce n'est pas une date).","+resultat":"Vous devez obtenir 7 vins, de 9 347 € (IGP blanc) à 24 311 € (Saint-Joseph rouge)."},
       "theme": "Calculs et agrégats",
       "enonce": "Afficher, pour chaque vin du millésime 2021, son identifiant, le nom de l'appellation, le nombre de bouteilles en stock et la valeur de ce stock (nombre de bouteilles × prix de la bouteille).",
       "correction": [
@@ -201,6 +203,7 @@
     },
     {
       "id": "q11",
+      "cinema": {"+filtres":"« Encore en préparation » est un **état** de la commande : il se lit dans EtatCommande. Sans ce filtre, la condition sur les 7 jours retiendrait aussi les commandes livrées depuis longtemps.","+filtres.2":"« Plus de 7 jours après » se mesure entre la date de la commande et **aujourd'hui** : `DATEDIFF(NOW(), DateCommande)`, la date la plus récente en premier. Inversez les arguments et le nombre devient négatif : aucune ligne.\nÉcriture équivalente avec une date fixe : `DateCommande < '24/05/2023'`, mais elle devient fausse dès le lendemain.","+resultat":"Vous devez obtenir 2 commandes (C158 du 18/05 et C160 du 21/05). Les 2 autres commandes en préparation ont été passées il y a moins d'une semaine."},
       "theme": "Dates",
       "enonce": "Afficher les commandes (numéro, date) encore « En préparation » plus de 7 jours après avoir été passées (la date du jour est le 31/05/2023).",
       "correction": [
@@ -290,6 +293,7 @@
     },
     {
       "id": "q15",
+      "cinema": {"+passages":"Le client ne commande pas directement un vin : il passe une COMMANDE, et c'est PASSER qui dit quels vins sont dans la commande (une commande contient plusieurs vins, un vin figure dans plusieurs commandes). Le chemin traverse donc deux tables qui n'apportent aucune colonne au résultat.","+select":"Pourquoi des doublons ? Une ligne est produite pour **chaque ligne de commande** de Condrieu : un client qui en a commandé deux fois apparaît deux fois. Ici, 15 lignes pour 14 clients sans DISTINCT.\nPréfixez IdClient (`CLIENT.IdClient`) : la colonne existe aussi dans COMMANDE.","+filtres":"« Tous millésimes confondus » : on filtre sur le nom de l'appellation, pas sur un IdVin. Le Condrieu existe en trois millésimes (vins n° 18, 19 et 20) : `PASSER.IdVin = 18` en oublierait deux."},
       "theme": "Jointures",
       "enonce": "Afficher sans doublon les clients (identifiant, nom, prénom) ayant déjà commandé du Condrieu (tous millésimes confondus).",
       "correction": [
@@ -314,6 +318,7 @@
     },
     {
       "id": "q16",
+      "cinema": {"+tables":"Chaque morceau du montant vient d'une table différente : le prix est une caractéristique du **vin** (VIN), la quantité dépend de la **ligne de commande** (PASSER), les frais de livraison sont fixés une fois par **commande** (COMMANDE). C'est ce niveau différent qui rend la formule délicate.","+select":"Les frais s'ajoutent **en dehors** du SUM : `SUM(prix × quantité) + frais`. Écrire `SUM(PrixBouteilleVin * QuantiteCommande + FraisLivraisonCommande)` ajouterait les frais autant de fois que la commande compte de vins : pour la commande C111 (2 vins, 18 € de frais), vous trouveriez 252 € au lieu de 234 €.","+groupe":"FraisLivraisonCommande doit aussi figurer dans le GROUP BY : elle est utilisée **hors** de la fonction SUM. Cela ne change pas les groupes, puisqu'une commande n'a qu'un seul montant de frais. La règle à retenir : toute colonne qui n'est pas à l'intérieur d'une fonction de calcul va dans le GROUP BY.","+resultat":"Vous devez obtenir 55 lignes, une par commande de 2023. Si vous en avez davantage, vous avez oublié de regrouper (une ligne par vin commandé)."},
       "theme": "Jointures et regroupements",
       "enonce": "Madame Morange souhaite le tableau de suivi de ses ventes 2023 : pour chaque commande passée en 2023, afficher le numéro de la commande, sa date, la ville du client et le montant HT de la commande (somme des prix des bouteilles × quantités commandées, plus les frais de livraison). Trier le tableau par ville.",
       "annale": "2023",
@@ -417,6 +422,7 @@
     },
     {
       "id": "q20",
+      "cinema": {"+tables":"« Aucune critique » se traduit par « absent de la table EVALUER » : c'est elle qui enregistre qu'un critique a noté un vin. Inutile de passer par la table CRITIQUE : seul IdVin compte.","+filtres":"Une jointure VIN–EVALUER ne peut pas trouver ces vins : elle ne garde que les vins qui ont une note. Et `WHERE Note IS NULL` après la jointure ne donne rien, car un vin sans critique n'a tout simplement **pas de ligne** dans EVALUER. D'où la sous-requête : la liste des vins notés, puis NOT IN.","+resultat":"Vous devez obtenir 7 vins, presque tous du millésime 2022 : des vins jeunes, pas encore dégustés par les critiques. Le Condrieu 2022 (vin n° 20) en fait partie : c'est lui que la question 25 fait noter."},
       "theme": "Sous-requêtes",
       "enonce": "Afin d'organiser des séances de dégustation, afficher la liste des vins (identifiant et nom) n'ayant fait l'objet d'aucune critique.",
       "annale": "2023",
@@ -514,6 +520,7 @@
     },
     {
       "id": "q25",
+      "cinema": {"+table":"Une évaluation n'est ni un critique ni un vin : c'est le **lien** entre les deux, avec ce qu'il porte (la note et l'appréciation). C'est donc dans la table de liaison EVALUER qu'on ajoute une ligne ; CRITIQUE et VIN ne changent pas.","+valeurs":"Sans liste de colonnes, les valeurs doivent suivre exactement l'ordre de la table (IdCritique, IdVin, Note, Appreciation). Plus sûr : `INSERT INTO EVALUER (IdCritique, IdVin, Note, Appreciation) VALUES (…)`.\nLa note s'écrit `17.5` : avec une virgule (17,5), SQL croirait recevoir deux valeurs différentes, 17 et 5.","+resultat":"Une ligne ajoutée. La clé primaire d'EVALUER est le couple (IdCritique, IdVin) : un critique ne note un vin qu'une fois. Exécutez la requête une seconde fois et elle sera refusée (doublon de clé primaire)."},
       "theme": "Mises à jour",
       "type": "write",
       "enonce": "Lors d'une séance de dégustation, la critique n° 3 (Marion Lacroix) a goûté le Condrieu 2022 (vin n° 20) : elle lui attribue la note de 17,5 avec l'appréciation « Très prometteur, abricot et fleurs blanches ». Enregistrer cette évaluation.",
@@ -532,6 +539,7 @@
     },
     {
       "id": "s01",
+      "cinema": {"lecture":"Je reprends l'énoncé phrase par phrase :\n- « chaque type de travail a une référence et un libellé (TRA-001 Travail du sol…) » : un nouvel objet décrit par ses propres informations → table de référence **TYPE_TRAVAUX**, clé primaire la référence.\n- « un produit est identifié par son numéro AMM ; on connaît aussi son nom, sa dose maximum et sa date de péremption » : un autre objet → table **PRODUIT**, clé primaire NumeroAMM (l'énoncé dit lui-même « identifié par »).\n- « pour un travail réalisé sur une parcelle à une date donnée… » : l'objet central n'est ni le type de travail ni la parcelle, c'est **le travail réalisé**, qui relie une parcelle, un type de travail et une date. Une parcelle reçoit plusieurs types de travaux, un type de travail est fait sur plusieurs parcelles : lien plusieurs à plusieurs → table de liaison **REALISER**.\n- « on enregistre un seul type de travail, le produit utilisé et la dose appliquée » : un travail réalisé utilise **un seul** produit, un produit sert à plusieurs travaux → clé étrangère #NumeroAMM dans REALISER (simple clé étrangère, pas dans la clé primaire). La dose dépend de ce travail précis → attribut de REALISER.\n- « le même travail peut être refait sur la même parcelle à des dates différentes » : la date doit entrer dans la clé primaire de REALISER, sinon on ne pourrait enregistrer la taille d'une parcelle qu'une seule fois.\n- « une table DATE n'est pas attendue » : la date est une simple colonne de REALISER.","+entites.1":"Pourquoi une table plutôt qu'une colonne « TypeTravail » dans REALISER ? Parce que le type a un **libellé** : sans table, il faudrait le recopier à chaque travail réalisé, avec un risque de fautes (« Désherbage », « désherbage »…). Avec TYPE_TRAVAUX, le libellé est écrit une seule fois.","+entites.2":"Attention à ne pas confondre les deux doses : la **dose maximum d'emploi** est une caractéristique du produit (même valeur à chaque utilisation), elle reste dans PRODUIT ; la **dose appliquée** change à chaque travail, elle ira dans REALISER.","+associations":"Pourquoi la date dans la clé ? Une clé (type, parcelle) seule interdirait de refaire la taille de la même parcelle l'année suivante : c'est la variante signalée « presque ». Avec la date, chaque passage du même travail sur la même parcelle devient une ligne différente.","associations.2":"#RefTypeTravaux et #IdParcelle font partie de la clé primaire et sont aussi des clés étrangères (vers TYPE_TRAVAUX et PARCELLE). La Date fait partie de la clé mais n'est **pas** une clé étrangère : aucune table DATE n'est demandée.\n#NumeroAMM est une clé étrangère vers PRODUIT, **en dehors** de la clé primaire : un travail donné n'utilise qu'un seul produit. Le mettre dans la clé laisserait croire qu'on peut enregistrer plusieurs produits pour le même travail (variante « presque »).\nDoseAppliquee dépend du travail réalisé (ce type, sur cette parcelle, à cette date) : elle se place dans REALISER.","+bilan":"Checklist :\n- TYPE_TRAVAUX (référence, libellé) et PRODUIT (AMM, nom, dose maximum, péremption) ont chacune leur clé primaire ;\n- REALISER a pour clé (#RefTypeTravaux, Date, #IdParcelle), une clé étrangère #NumeroAMM hors de la clé, et l'attribut DoseAppliquee ;\n- trois flèches partent de REALISER : vers TYPE_TRAVAUX, PARCELLE et PRODUIT.\nLes deux erreurs fréquentes sont signalées « presque » : oublier la date dans la clé, ou y ajouter le numéro AMM. Un identifiant artificiel (IdRealisation) est accepté, à condition de garder la date et les trois clés étrangères dans REALISER."},
       "theme": "Évolution du schéma",
       "type": "schema",
       "annale": "2023",

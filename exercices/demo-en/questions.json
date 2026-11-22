@@ -30,6 +30,7 @@
     },
     {
       "id": "q03",
+      "cinema": {"+select":"The email is not displayed, even though the filter is on it: a column can be used in the WHERE without appearing in the SELECT.","+filtres":"« Have not given an email address » means the cell is **empty** (NULL), not an empty text. `Email = NULL` never returns anything, because NULL is equal to nothing, not even to NULL: only `IS NULL` works.","+resultat":"Check: 5 customers out of 25 (Martin, Hughes, Murphy, Thompson and Ali). The opposite question (customers who did give an email) would use `IS NOT NULL`."},
       "theme": "Single table",
       "enonce": "Display the customers (number, last name, first name, phone) who have not given an email address.",
       "correction": ["SELECT CustomerId, LastName, FirstName, Phone", "FROM CUSTOMER", "WHERE Email IS NULL;"],
@@ -45,6 +46,7 @@
     },
     {
       "id": "q05",
+      "cinema": {"+select":"No GROUP BY here: the three functions work on the whole table and each returns **a single value**, so the result is one row with three columns. Naming them with AS (`AVG(DailyRate) AS AverageRate`) makes the result easier to read.","+resultat":"Check: average 25.83, minimum 10 (Kids bike), maximum 40 (Cargo bike). This is the average of the 6 categories, not of the bikes: a category with many bikes counts no more than a category with few."},
       "theme": "Aggregates",
       "enonce": "Display the average, the lowest and the highest standard daily rate of the bike categories.",
       "correction": ["SELECT AVG(DailyRate), MIN(DailyRate), MAX(DailyRate)", "FROM CATEGORY;"],
@@ -67,6 +69,7 @@
     },
     {
       "id": "q08",
+      "cinema": {"+select":"DATEDIFF(end, start): the **later** date comes first. Reversed, `DATEDIFF(StartDate, ReturnDate)` gives a negative number, and the filter `>= 7` would keep nothing.","+filtres":"« Returned rentals »: no extra condition is needed. A rental not yet returned has an empty ReturnDate, so DATEDIFF gives NULL, and NULL >= 7 is never true: rentals 1036, 1037 and 1038 are left out automatically. Adding `AND ReturnDate IS NOT NULL` would also be correct, just redundant.","+tri":"Variant accepted: name the column `AS Duration` in the SELECT, then sort with `ORDER BY Duration DESC`.","+resultat":"Check: 5 rentals, two of 10 days (1006, 1017) and three of exactly 7 days (1018, 1019, 1030). With `> 7` instead of `>= 7`, those three would disappear."},
       "theme": "Dates",
       "enonce": "Display the returned rentals that lasted 7 days or more: rental number, start date, return date and duration in days, from the longest to the shortest.",
       "ordered": [3],
@@ -95,6 +98,7 @@
     },
     {
       "id": "q11",
+      "cinema": {"+tables":"« Electric bike (category number 2) »: the category number is already in BIKE (CategoryId). There is no need to add CATEGORY to the FROM; you would need it only to filter on the name 'Electric bike'.","+passages":"Customers and bikes are not linked directly: a customer makes rentals (RENTAL), and each rental includes bikes (RENTAL_LINE). Both tables are needed in the FROM, even though none of their columns is displayed.","+select":"Why DISTINCT? A customer appears once per electric bike rented: without DISTINCT, you get 16 rows for only 11 different customers.","+jointures.3":"Four tables, three joins, one per arrow followed: CUSTOMER → RENTAL → RENTAL_LINE → BIKE. If you forget one, every row is combined with every row of the other table (Cartesian product)."},
       "theme": "Joins",
       "enonce": "Display, without duplicates, the last name and first name of the customers who have rented at least one electric bike (category number 2).",
       "correction": ["SELECT DISTINCT LastName, FirstName", "FROM CUSTOMER, RENTAL, RENTAL_LINE, BIKE", "WHERE CUSTOMER.CustomerId = RENTAL.CustomerId", "AND RENTAL.RentalId = RENTAL_LINE.RentalId", "AND RENTAL_LINE.BikeId = BIKE.BikeId", "AND CategoryId = 2;"],
@@ -112,6 +116,7 @@
     },
     {
       "id": "q13",
+      "cinema": {"+jointures":"Strictly speaking, RENTAL alone would be enough to count the rentals of each customer number: the join with CUSTOMER is there only to display the last name.","+groupe":"Group by `CUSTOMER.CustomerId`, not only by LastName: two customers with the same last name would otherwise be merged into one group. LastName is added to the GROUP BY because it is displayed.","+groupe.2":"« At least 3 » translates as `>= 3`. The condition is on a count, which only exists after grouping: it cannot go in the WHERE.","+resultat":"Check: 8 customers. Campbell (no. 4) is the most loyal, with 5 rentals; the 7 others have exactly 3, so `> 3` would keep only him."},
       "theme": "Grouping",
       "enonce": "Display the customers (number, last name) who have made at least 3 rentals, with their number of rentals.",
       "correction": ["SELECT CUSTOMER.CustomerId, LastName, COUNT(*)", "FROM CUSTOMER, RENTAL", "WHERE CUSTOMER.CustomerId = RENTAL.CustomerId", "GROUP BY CUSTOMER.CustomerId, LastName", "HAVING COUNT(*) >= 3;"],
@@ -120,6 +125,7 @@
     },
     {
       "id": "q14",
+      "cinema": {"+tables":"Only CUSTOMER columns are displayed: RENTAL appears only inside the subquery, not in the main FROM.","+filtres":"« Never » is answered in two steps: the subquery lists the customers who **do** have a rental, then NOT IN keeps the others. A join with RENTAL cannot do it: a join only produces rows for customers who have rentals.","+resultat":"Check: 10 customers out of 25, including Rhys Morgan (no. 25), whom you will delete in the Updates. Variant accepted: `NOT EXISTS (…)`, with the condition `R.CustomerId = C.CustomerId` inside the subquery."},
       "theme": "Subqueries",
       "enonce": "Display the customers (number, last name, first name) who have never rented a bike.",
       "correction": ["SELECT CustomerId, LastName, FirstName", "FROM CUSTOMER", "WHERE CustomerId NOT IN (SELECT CustomerId", "                         FROM RENTAL);"],
@@ -128,6 +134,7 @@
     },
     {
       "id": "q15",
+      "cinema": {"+tables":"ReferredBy is a foreign key that points to **the same table**: the referrer is also a customer. To show the customer's name and the referrer's name on the same row, CUSTOMER must appear twice in the FROM.","+alias":"Choose aliases that tell the role: C for the customer, R for the referrer. Without them, `LastName` would be ambiguous: SQL could not tell which copy you mean.","+jointures":"The direction matters: `C.ReferredBy = R.CustomerId` means « R is the one who referred C ». Reversed (`R.ReferredBy = C.CustomerId`), the two names swap roles.","+resultat":"Check: 15 rows. The 10 customers referred by nobody (empty ReferredBy) do not appear: the join finds no match for them. Taylor referred three customers, so that name appears three times in the last column."},
       "theme": "Self-join",
       "enonce": "Display each customer who was referred by another customer: last name and first name of the customer, and last name of the customer who referred them.",
       "correction": ["SELECT C.LastName, C.FirstName, R.LastName", "FROM CUSTOMER C, CUSTOMER R", "WHERE C.ReferredBy = R.CustomerId;"],
@@ -156,6 +163,7 @@
     },
     {
       "id": "q18",
+      "cinema": {"+table":"DELETE removes whole rows: no column list, no SET. Customer no. 25 can be deleted because no other row refers to him: he has no rental and has referred nobody.","+ciblage":"Always target by the **primary key** (`CustomerId = 25`): a condition on the name could delete several customers. Without a WHERE, DELETE would empty the whole table.","+resultat":"Second part: deleting customer no. 4 (Ross Campbell) is refused. He has 5 rentals (RENTAL.CustomerId) and referred customers no. 5 and 10 (CUSTOMER.ReferredBy): deleting him would leave rows pointing to a customer who no longer exists. This is **referential integrity**."},
       "theme": "Updates",
       "type": "write",
       "enonce": "Customer no. 25 (Rhys Morgan), who has never rented a bike, asks for his account to be deleted. Delete him. Then try to delete customer no. 4: what happens, and why?",
@@ -165,6 +173,7 @@
     },
     {
       "id": "s01",
+      "cinema": {"lecture":"I go through the statement rule by rule, looking for the two objects linked and the number in each direction:\n- « All the bikes of a given model have the same brand and the same category »: brand and category depend on the **model**, not on the individual bike. Today they are repeated in every bike of the same model.\n- « record the list of models once (model code, model name, brand, category) »: a new object → new table **MODEL**. A model has one category, a category covers several models → one-to-many → foreign key #CategoryId in MODEL.\n- « each bike being of one model »: a bike has one model, a model is shared by several bikes → foreign key #ModelId in BIKE; Model, Brand and CategoryId leave BIKE.\n- « Each accessory has a code, a name and a daily price »: a new object → table **ACCESSORY**.\n- « which accessories were taken and in what quantity; the same accessory can be part of many rentals »: a rental includes several accessories, an accessory appears in several rentals → many-to-many, with a quantity for each pair → link table **RENTAL_ACCESSORY**.","retraits":"Model, Brand and CategoryId leave BIKE. The reason is **redundancy**: these three pieces of information depend on the model, so they are repeated for every bike of that model, with a risk of contradiction (two bikes of the same model with different brands). They move to MODEL, where they are written only once.","+entites":"The accessory is described by its own information (code, name, daily price): it is an object in its own right. Its daily price belongs to the accessory, not to a rental.","+entites.2":"The trap: creating MODEL but leaving CategoryId in BIKE. Every bike of a model has the same category, so the category belongs to the model: #CategoryId goes in MODEL, and a bike finds its category through its model (BIKE → MODEL → CATEGORY).","+liens":"The foreign key goes in BIKE, on the « many » side: one model, many bikes. A list of bike numbers in MODEL would require several values in one cell.","+associations":"The trap: adding #AccessoryId in RENTAL. A rental could then include only one accessory, with no quantity. Since a rental can include several accessories, and an accessory several rentals, you need a link table with one row per (rental, accessory) pair.","+associations.2":"Composite key: RentalId alone is not enough (a rental has several accessories), nor is AccessoryId alone. The quantity depends on both: it goes in RENTAL_ACCESSORY, neither in RENTAL nor in ACCESSORY.","+bilan":"Checklist:\n- MODEL (ModelId, ModelName, Brand, #CategoryId) and ACCESSORY (AccessoryId, AccessoryName, DailyPrice): new tables, each with its primary key;\n- BIKE: Model, Brand and CategoryId removed, #ModelId added;\n- RENTAL_ACCESSORY (#RentalId, #AccessoryId, Quantity): composite key, two arrows.\nThe most common mistake: CategoryId left in BIKE instead of moving to MODEL. It is the only « other solution » of the answer key, and it is accepted only in part (« Almost »)."},
       "type": "schema",
       "theme": "Schema design",
       "enonce": "PedalPoint wants to improve its database. 1) All the bikes of a given model have the same brand and the same category: the company wants to record the list of models once (model code, model name, brand, category), each bike being of one model. 2) Customers can now add accessories to a rental (helmet, lock, child seat, panniers…). Each accessory has a code, a name and a daily price. For each rental, the company records which accessories were taken and in what quantity; the same accessory can of course be part of many rentals. Update the schema below.",

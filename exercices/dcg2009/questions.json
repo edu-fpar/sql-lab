@@ -63,6 +63,7 @@
     },
     {
       "id": "q03",
+      "cinema": {"+tables":"Il n'existe pas de colonne « type de valeur » : c'est la phrase d'introduction qui donne la règle. Une action se reconnaît à l'**absence** de date d'échéance ; c'est donc sur DateEcheance que portera le filtre.","+filtres":"« Sans date d'échéance » = la case est **vide** (NULL), ni zéro ni texte. `DateEcheance = NULL` ne renvoie jamais aucune ligne, car NULL n'est égal à rien, pas même à NULL : seul `IS NULL` fonctionne.","+resultat":"Contrôle : 12 valeurs sur 17, ce sont bien les actions (Total, BNP Paribas, AXA…). Les 5 autres sont des obligations (OAT, CADES), dont l'échéance figure d'ailleurs dans le libellé."},
       "theme": "Une seule table",
       "enonce": "Les actions n'ont pas de date d'échéance (contrairement aux obligations). Afficher le code et le libellé des valeurs sans date d'échéance.",
       "correction": [
@@ -74,6 +75,7 @@
     },
     {
       "id": "q04",
+      "cinema": {"+filtres":"« Opérations de vente » : le sens est stocké en toutes lettres dans SensOperation, avec deux valeurs possibles, 'Achat' et 'Vente'. Vérifiez toujours comment une notion métier est stockée avant d'écrire le filtre.","+filtres.2":"Les deux conditions sont reliées par AND : on veut les opérations qui sont **à la fois** des ventes et de 2008. Écriture équivalente : `DateOperation BETWEEN '01/01/2008' AND '31/12/2008'` (les deux bornes sont incluses).","+tri":"« Par ordre chronologique » = du plus ancien au plus récent : ordre croissant, donc pas de DESC.","+resultat":"Contrôle : 17 ventes. Si vous obtenez 41 lignes, vous avez oublié le filtre sur le sens (41 opérations en 2008, achats et ventes confondus)."},
       "theme": "Dates",
       "enonce": "Afficher le numéro, la date, le code de la valeur, la quantité et le cours des opérations de vente réalisées en 2008, par ordre chronologique.",
       "ordered": [
@@ -99,6 +101,7 @@
     },
     {
       "id": "q05",
+      "cinema": {"+select":"Le montant n'est stocké dans aucune table : il se **calcule** ligne par ligne, `QuantiteNegociee * CoursNegocie`. `AS Montant` ne change pas le calcul, il donne seulement un nom lisible à la colonne du résultat.\nCe n'est pas une somme : on veut le montant de **chaque** opération, donc ni SUM ni GROUP BY.","+filtres":"« Mars 2009 » demande **deux** conditions. `MONTH(DateOperation) = 3` seule garderait les mois de mars de toutes les années : 18 opérations de 2004 à 2009, au lieu de 3.","+filtres.2":"Écriture alternative acceptée : `DateOperation BETWEEN '01/03/2009' AND '31/03/2009'`. Une seule condition, mais attention à bien écrire le dernier jour du mois.","+resultat":"Contrôle : 3 opérations (n° 1369850, 1369862 et 1369867), de 11 695 € à 62 230 €."},
       "theme": "Calculs et agrégats",
       "enonce": "Le montant négocié d'une opération est égal à la quantité négociée multipliée par le cours négocié. Afficher le numéro, la date et le montant négocié des opérations du mois de mars 2009.",
       "correction": [
@@ -140,6 +143,7 @@
     },
     {
       "id": "q08",
+      "cinema": {"+passages":"La catégorie de risque est une propriété du **compte**, pas du client : c'est COMPTE qui porte #NumCategorie. Un client a autant de catégories que de comptes ; pour aller du client à sa catégorie, il faut donc passer par COMPTE.","+select":"Pourquoi DISTINCT ? Un client qui a deux comptes « Risque modéré » apparaîtrait deux fois, une fois par compte. Ici, la requête sans DISTINCT renvoie 26 lignes pour seulement 21 clients différents.","+filtres":"Le libellé s'écrit avec son accent : 'Risque modéré'. Filtrer sur `COMPTE.NumCategorie = 2` éviterait la jointure avec CATEGORIE, mais suppose de connaître le code ; l'énoncé donne le libellé, c'est lui qu'on utilise."},
       "theme": "Jointures",
       "annale": "2009",
       "enonce": "Afficher le nom et le prénom des clients possédant au moins un compte titre de la catégorie « Risque modéré ». Chaque client ne doit apparaître qu'une fois.",
@@ -270,6 +274,7 @@
     },
     {
       "id": "q14",
+      "cinema": {"+tables":"Le piège : prendre `QuantiteNegociee` (OPERATION) au lieu de `QuantiteAff` (AFFECTER). La quantité négociée est celle de toute l'opération, partagée entre plusieurs comptes ; la part du client est la quantité **affectée** à son compte. Le cours, lui, est le même pour tous : il est dans OPERATION.","+jointures.2":"On ne peut pas aller directement de CLIENT à AFFECTER : AFFECTER ne connaît que le numéro de **compte**. Le chemin complet est CLIENT → COMPTE → AFFECTER → OPERATION, une jointure par flèche.","+filtres":"« Achats » : la condition `SensOperation = 'Achat'` porte sur chaque opération, elle va dans le WHERE. On écarte ainsi les ventes **avant** de faire la somme ; dans le HAVING, ce serait trop tard.","+groupe":"Regroupez par `CLIENT.NumClient`, pas seulement par nom : deux clients s'appellent DUMAS (Charles, n° 1024, et Hélène, n° 1037). Nom et Prenom figurent aussi dans le GROUP BY parce qu'ils sont affichés.","+tri":"Variante acceptée : `ORDER BY TotalAchats DESC`, en réutilisant le nom donné par AS. Contrôle : François DESCHAMPS arrive en tête avec 285 136 €."},
       "theme": "Jointures et regroupements",
       "enonce": "Afficher, pour chaque client, son numéro, son nom, son prénom et le montant total de ses achats (tous comptes confondus), du plus gros acheteur au plus petit. Le montant revenant à un compte est la quantité affectée multipliée par le cours négocié.",
       "ordered": [
@@ -301,6 +306,7 @@
     },
     {
       "id": "q15",
+      "cinema": {"+tables":"« Répartie sur des comptes » : la répartition est enregistrée dans AFFECTER, une ligne par couple (opération, compte). Compter les comptes d'une opération revient donc à compter ses lignes dans AFFECTER : ni OPERATION ni COMPTE ne sont nécessaires.","+groupe.2":"« Au moins 4 » se traduit par `>= 4`. Avec `> 4`, vous perdriez les 8 opérations réparties sur exactement 4 comptes.\nLe WHERE est impossible ici : avant le regroupement, chaque ligne ne concerne qu'un compte, le nombre de comptes n'existe pas encore.","+resultat":"Contrôle : 15 opérations, réparties sur 4 ou 5 comptes. On y retrouve l'opération 1366474 de la question 10 (5 comptes)."},
       "theme": "Regroupements",
       "enonce": "Quelles opérations (numéro) ont été réparties sur au moins 4 comptes ? Afficher aussi le nombre de comptes concernés.",
       "correction": [
@@ -335,6 +341,7 @@
     },
     {
       "id": "q17",
+      "cinema": {"+tables":"Seules les colonnes de CLIENT sont affichées : COMPTE et CATEGORIE ne servent qu'à fabriquer la liste des clients à exclure. Elles apparaissent dans la sous-requête, pas dans le FROM principal.","+filtres":"Le piège classique : une jointure avec `LibCategorie <> 'Risque élevé'`. Elle garde tout client qui a **au moins un** compte d'une autre catégorie, même s'il a aussi un compte « Risque élevé » : 29 clients au lieu de 24.\n« Ne possède pas » se traduit en deux temps : je cherche ceux qui en possèdent un (sous-requête), puis je garde les autres (NOT IN).","+resultat":"Contrôle : 24 clients sur 37. Écriture alternative acceptée : `NOT EXISTS (…)`, avec dans la sous-requête la condition `COMPTE.NumClient = CLIENT.NumClient`."},
       "theme": "Sous-requêtes",
       "annale": "2009",
       "enonce": "Afficher le numéro et le nom des clients ne possédant pas de compte de la catégorie « Risque élevé ».",
@@ -453,6 +460,7 @@
     },
     {
       "id": "q22",
+      "cinema": {"+table":"Pourquoi le premier DELETE est refusé : AFFECTER contient la clé étrangère #NumOperation. Supprimer une opération encore affectée laisserait des lignes d'AFFECTER pointer vers une opération qui n'existe plus : l'**intégrité référentielle** l'interdit.\nOn supprime donc d'abord les lignes qui font référence (AFFECTER), puis les lignes référencées (OPERATION).","+ciblage":"AFFECTER ne contient pas la date : la sous-requête sur OPERATION fournit les numéros des opérations antérieures à 2005, et IN cible leurs affectations. Cette requête doit passer **avant** la suppression des opérations : après, la sous-requête ne trouverait plus rien.","+resultat":"Contrôle : 57 affectations supprimées, puis 34 opérations (toutes celles de 2004). Inversez les deux requêtes et le script échoue dès la première."},
       "theme": "Mises à jour",
       "type": "write",
       "enonce": "Les opérations antérieures au 1er janvier 2005 ayant été archivées, il faut maintenant les supprimer de la table OPERATION. Essayez d'abord : DELETE FROM OPERATION WHERE DateOperation < '01/01/2005'. La suppression est refusée : pourquoi ? Écrivez ensuite un script qui supprime d'abord leurs affectations aux comptes, puis les opérations elles-mêmes. Chaque exécution repart de la base d'origine : les deux requêtes doivent figurer dans votre script, séparées par un point-virgule.",
@@ -492,6 +500,7 @@
     },
     {
       "id": "s01",
+      "cinema": {"lecture":"Je reprends l'énoncé règle par règle, en cherchant les deux objets reliés et le nombre dans chaque sens :\n- « chaque OPCVM (code, libellé, date de création) » : un nouvel objet décrit par ses informations → table **OPCVM**.\n- « appartient à une seule famille (code, libellé) » : un OPCVM a une seule famille, une famille regroupe plusieurs OPCVM → un à plusieurs. La famille a son code et son libellé → table **FAMILLE_OPC**, clé étrangère #CodeFam dans OPCVM.\n- « est confié à un seul gestionnaire (code, nom) » : un OPCVM a un gestionnaire, un gestionnaire gère plusieurs OPCVM → table **GESTIONNAIRE**, clé étrangère #CodeGest dans OPCVM.\n- « chaque titre appartient à une seule catégorie » : un titre a une catégorie, une catégorie contient plusieurs titres → table **CATEGORIE**, clé étrangère #CodeCat dans TITRE.\n- « une opération porte sur un seul titre » : un titre peut faire l'objet de plusieurs opérations → clé étrangère #CodeTitre dans OPERATION (TITRE existe déjà).\n- « négociée avec une seule contrepartie agréée (code, libellé, montant maximal) » : une contrepartie traite plusieurs opérations → table **CONTREPARTIE**, clé étrangère #CodeCont dans OPERATION.\n- « une même opération peut être répartie entre plusieurs OPCVM » et un OPCVM reçoit plusieurs opérations → plusieurs à plusieurs, avec une quantité propre à chaque couple → table de liaison **AFFECTER**.","+entites":"« Monétaires, obligataires, actions… » sont des **valeurs** possibles, pas des tables : une seule table FAMILLE_OPC, avec une ligne par famille. Elle évite de répéter le libellé de la famille pour chaque fonds.","+entites.2":"Le gestionnaire est une personne décrite par un code et un nom : c'est un objet à part entière. Écrire son nom dans OPCVM le répéterait pour chaque fonds qu'il gère, et une faute de frappe créerait un « faux » gestionnaire.","+entites.3":"Ne confondez pas les deux classements : CATEGORIE classe les **titres** (actions, obligations, titres participatifs), FAMILLE_OPC classe les **fonds**. Deux classements, deux tables, reliées à deux tables différentes.","+entites.4":"Le montant maximal d'engagement caractérise la contrepartie, il ne change pas d'une opération à l'autre : il va dans CONTREPARTIE, pas dans OPERATION.","+entites.5":"Les deux clés étrangères sont dans OPCVM, du côté « plusieurs » : c'est le fonds qui connaît sa famille et son gestionnaire. L'inverse (un code d'OPCVM dans GESTIONNAIRE) ne permettrait qu'un seul fonds par gestionnaire.","+liens":"La clé étrangère va dans TITRE, pas dans CATEGORIE : une case de CATEGORIE devrait sinon contenir la liste de tous ses titres. Repère pratique : elle se place dans la table de la phrase « **un seul** » (« chaque titre appartient à une seule catégorie »).","+liens.2":"OPERATION reçoit deux clés étrangères, une par règle « un seul » : #CodeTitre et #CodeCont. Une table peut avoir autant de clés étrangères que nécessaire ; chacune donne une flèche.","+associations":"Le piège : mettre #CodeOpc dans OPERATION. Ce serait juste si une opération allait à un seul OPCVM ; mais elle peut être **répartie entre plusieurs**, et il faudrait alors plusieurs codes dans une même case. D'où une table de liaison, une ligne par couple (opération, OPCVM), exactement comme AFFECTER entre OPERATION et COMPTE dans la base de cet exercice.","+associations.2":"La clé primaire est **composée** : NumOpe seul ne suffit pas (une opération a plusieurs lignes), CodeOpc seul non plus. La quantité affectée dépend des deux : elle va dans AFFECTER, ni dans OPERATION (qui garde la quantité négociée totale), ni dans OPCVM.","+bilan":"Checklist :\n- 5 nouvelles tables décrites par leur code : FAMILLE_OPC, GESTIONNAIRE, OPCVM, CATEGORIE, CONTREPARTIE ;\n- 5 clés étrangères « un seul » : #CodeFam et #CodeGest dans OPCVM, #CodeCat dans TITRE, #CodeTitre et #CodeCont dans OPERATION ;\n- la table de liaison AFFECTER, clé (#NumOpe, #CodeOpc), qui porte QteAff.\nL'erreur la plus fréquente : #CodeOpc dans OPERATION au lieu de la table AFFECTER. C'est la seule « autre solution » de la correction, et elle n'est acceptée qu'en partie (« presque ») : tout le reste est juste, mais une opération ne pourrait plus être répartie."},
       "type": "schema",
       "theme": "Évolution du schéma",
       "annale": "2009",
@@ -736,6 +745,7 @@
     },
     {
       "id": "s02",
+      "cinema": {"lecture":"Je reprends l'énoncé règle par règle :\n- « on relève quotidiennement le cours de chaque titre (un seul cours par titre et par jour) » : le cours dépend du **titre** et du **jour**. Un titre a plusieurs cours (un par jour), un même jour concerne plusieurs titres. Le cours ne peut donc pas rester une simple colonne de TITRE → nouvelle table **COTER**, clé (#CodeTitre, DateJour), qui porte le cours.\n- « la quantité de chaque titre détenue en portefeuille par chaque OPCVM » (relevée chaque jour) : un OPCVM détient plusieurs titres, un titre est détenu par plusieurs OPCVM, et la quantité change d'un jour à l'autre → plusieurs à plusieurs **daté** → table de liaison **COMPOSER**, clé (#CodeOpc, #CodeTitre, DateJour), qui porte la quantité.\n- « le total et la valeur de la part sont calculés et ne sont pas stockés » : aucune colonne à créer pour eux.\n- L'exemple aide à voir qui dépend de quoi : la quantité (50 000 000) est propre à l'OPCVM 013, le cours (1,00 €) est le même pour tous les OPCVM qui détiennent ce titre ce jour-là.","+entites":"La date fait partie de la clé : sans elle, un titre n'aurait qu'un seul cours, écrasé chaque matin. « Un seul cours par titre et par jour » est exactement la définition de la clé (CodeTitre, DateJour).\nDateJour n'est pas une clé étrangère : il n'y a rien à décrire sur un jour, une table DATE n'est pas nécessaire.","+associations":"COMPOSER relie OPCVM et TITRE, mais la clé (CodeOpc, CodeTitre) ne suffit pas : la composition est relevée **chaque jour**, il faut une ligne par OPCVM, par titre **et** par jour. D'où une clé composée de trois colonnes.","+associations.2":"Le piège : mettre le cours dans COMPOSER, à côté de la quantité. Le cours ne dépend pas de l'OPCVM : il serait répété pour chaque fonds qui détient le titre (avec un risque de valeurs différentes) et inconnu pour un titre détenu par aucun fonds. Seule la quantité dépend des trois colonnes de la clé.","+bilan":"Checklist :\n- COTER (#CodeTitre, DateJour, Cours) : flèche vers TITRE ;\n- COMPOSER (#CodeOpc, #CodeTitre, DateJour, QtePort) : flèches vers OPCVM et TITRE ;\n- la date dans les **deux** clés primaires ;\n- ni total ni valeur de la part stockés.\nLes deux « autres solutions » de la correction ne sont acceptées qu'en partie (« presque ») : la date hors de la clé de COMPOSER (pas d'historique) et le cours placé dans COMPOSER (redondance). Une table DATE (ou JOUR, CALENDRIER) est tolérée sans être exigée."},
       "type": "schema",
       "theme": "Évolution du schéma",
       "annale": "2009",

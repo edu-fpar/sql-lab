@@ -5,6 +5,9 @@
   const tr = I18N.t, trn = I18N.n;
   I18N.add({
     "📖 Aide": "📖 Help",
+    "🎬 Correction commentée pas à pas": "🎬 Annotated step-by-step solution",
+    "🎬 Construction commentée pas à pas": "🎬 Annotated step-by-step build",
+    "Correction commentée pas à pas": "Annotated step-by-step solution",
     "Copier le lien de cette question": "Copy the link to this question",
     "{t} questions": "{t} questions",
     "Question {n} / {t}": "Question {n} / {t}",
@@ -808,7 +811,7 @@
       const short = q.enonce.length > 70 ? q.enonce.slice(0, 68) + "…" : q.enonce;
       const cls = [done.has(q.id) ? "done" : "", i === state.index ? "current" : "", isIntro(q) ? "intro-item" : ""].filter(Boolean).join(" ");
       h += `<li><a href="#${esc(state.ex.id)}/${esc(q.id)}" data-i="${i}" class="${cls}">` +
-        `<span class="num">${qNumber(i)}</span><span class="txt">${esc(short)}</span>${q.type === "write" ? '<span class="tag">✎</span>' : q.type === "schema" ? `<span class="tag" title="${esc(tr("Construction de schéma"))}">◫</span>` : q.type === "processus" ? `<span class="tag" title="${esc(tr("Processus"))}">⇄</span>` : ""}</a></li>`;
+        `<span class="num">${qNumber(i)}</span><span class="txt">${esc(short)}</span>${q.type === "write" ? '<span class="tag">✎</span>' : q.type === "schema" ? `<span class="tag" title="${esc(tr("Construction de schéma"))}">◫</span>` : q.type === "processus" ? `<span class="tag" title="${esc(tr("Processus"))}">⇄</span>` : ""}${q.cinema ? `<span class="tag cn-tag" title="${esc(tr("Correction commentée pas à pas"))}">🎬</span>` : ""}</a></li>`;
     });
     h += "</ol>";
     $("questionList").innerHTML = h;
@@ -1136,7 +1139,7 @@
     if (isSchema(q)) {
       const depart = schemaDepart(q);
       const sols = [q.solution, ...(q.variantes || [])];
-      const cineS = window.SQLCinema ? `<button class="btn small cn-launch" type="button" data-cinema>${tr("🎬 Construction pas à pas")}</button>` : "";
+      const cineS = window.SQLCinema ? `<button class="btn small cn-launch" type="button" data-cinema>${tr(q.cinema ? "🎬 Construction commentée pas à pas" : "🎬 Construction pas à pas")}</button>` : "";
       $("correction").innerHTML = cineS + sols.map((sol, i) =>
         `<p class="muted small">${i === 0 ? tr("Correction") : sol.partiel ? tr("Réponse acceptée seulement en partie") : tr("Autre solution acceptée")}</p>` +
         `<div class="schema-text">${SQLSchemaCheck.toText(SQLSchemaCheck.solutionSchema(depart, sol), true).split("\n").map((l) => `<div>${l}</div>`).join("")}</div>`).join("") +
@@ -1145,7 +1148,7 @@
     }
     const blocks = [q.correction, ...(q.variantes || [])];
     const cine = window.SQLCinema && SQLCinema.plan(lines(q.correction), state.schema, q)
-      ? `<button class="btn small cn-launch" type="button" data-cinema>${tr("🎬 Correction pas à pas")}</button>` : "";
+      ? `<button class="btn small cn-launch" type="button" data-cinema>${tr(q.cinema ? "🎬 Correction commentée pas à pas" : "🎬 Correction pas à pas")}</button>` : "";
     $("correction").innerHTML = cine + blocks.map((b, i) =>
       `<p class="muted small">${i === 0 ? tr("Correction") : tr("Autre écriture possible")}</p><pre><code>${esc(lines(b))}</code></pre>`).join("");
   }

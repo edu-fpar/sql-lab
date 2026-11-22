@@ -55,6 +55,7 @@
     },
     {
       "id": "q02",
+      "cinema": {"+tables":"Le département n'est enregistré nulle part : il se **lit** dans les deux premiers chiffres du code postal. Le code postal est stocké comme un texte (CPHotel), ce qui permet de chercher son début avec LIKE.","+filtres":"`CPHotel = '29%'` ne trouverait rien : avec =, le % est un caractère ordinaire. Seul LIKE donne au % le sens de « n'importe quelle suite de caractères ». Le % se place **après** 29 : on veut les codes qui **commencent** par 29.","+resultat":"5 hôtels : Brest, Camaret-sur-Mer, Roscoff, Concarneau et Bénodet. Contrôlez en affichant tous les hôtels triés par code postal : les codes 29… forment un bloc entre les 22… (Côtes-d'Armor) et les 35… (Ille-et-Vilaine)."},
       "theme": "Une seule table",
       "enonce": "Afficher le nom, la ville et le code postal des hôtels situés dans le Finistère (code postal commençant par 29).",
       "correction": [
@@ -95,6 +96,7 @@
     },
     {
       "id": "q05",
+      "cinema": {"+tables":"Le nombre de nuits est déjà calculé dans NbNuitRes : inutile de le recalculer à partir de DateDebRes et DateFinRes.","+filtres":"Le filtre se place **avant** le calcul : AVG ne porte que sur les lignes gardées par le WHERE. Sans lui, la moyenne porte sur les 469 réservations au lieu des 408 non annulées (4,07 au lieu de 4,05 nuits).","+resultat":"Une moyenne s'affiche souvent avec beaucoup de décimales (4,0465…). C'est normal ; ROUND(AVG(NbNuitRes), 1) arrondirait l'affichage à une décimale."},
       "theme": "Calculs et agrégats",
       "enonce": "Quelle est la durée moyenne (en nombre de nuits) des réservations qui n'ont pas été annulées ?",
       "correction": [
@@ -164,6 +166,7 @@
     },
     {
       "id": "q09",
+      "cinema": {"+filtres":"« Séjour en cours » combine trois conditions, toutes reliées par AND. N'oubliez pas les annulations : la réservation 1380 couvre la date du jour mais a été annulée.","+filtres.2":"« Commencé **au plus tard** aujourd'hui » : `<=`. La réservation 1382 commence le 15/05/2015, jour même : elle est bien en cours et doit apparaître.","+filtres.3":"« Date de fin **postérieure** à la date du jour » : `>`, strictement. La réservation 1379 se termine aujourd'hui : le client part ce matin, elle n'est plus « en cours ». Avec `>=`, vous obtiendriez 5 lignes au lieu de 4."},
       "theme": "Dates",
       "enonce": "Quels sont les séjours en cours à la date du jour ? Afficher le numéro, la date de début et la date de fin des réservations non annulées qui ont commencé au plus tard aujourd'hui et dont la date de fin est postérieure à la date du jour.",
       "correction": [
@@ -263,6 +266,7 @@
     },
     {
       "id": "q13",
+      "cinema": {"+tables":"Cinq tables, chacune pour une raison : le prix (TARIF), le taux (REDUCTION), le libellé (TYPECHAMBRE), et deux tables qui ne servent qu'à **filtrer** sur un nom : HOTEL (« Hôtel des Remparts ») et PERIODE (« Basse saison »).","+jointures.1":"Le piège : un taux de réduction concerne un hôtel **et** un type de chambre. Vérification : avec seulement `TARIF.NumHotel = REDUCTION.NumHotel`, chaque prix est combiné avec les taux de tous les types : 16 lignes au lieu de 4.","+select":"TxReduction est en points (15 = 15 %) : il faut le diviser par 100. `PrixHT * (1 - TxReduction)` donnerait un prix négatif. Écriture équivalente : `PrixHT - PrixHT * TxReduction / 100`.","+resultat":"4 lignes, une par type de chambre. Contrôle : la chambre Double à 80 € avec 15 % de réduction passe à 68 € (80 × 0,85)."},
       "theme": "Jointures",
       "enonce": "Pour l'« Hôtel des Remparts » en « Basse saison », afficher pour chaque type de chambre : le libellé du type, le prix HT, le taux de réduction et le prix HT après réduction. Rappel : TxReduction est exprimé en points de pourcentage (15 signifie 15 %).",
       "correction": [
@@ -292,6 +296,7 @@
     },
     {
       "id": "q14",
+      "cinema": {"+filtres":"La condition « annulées » porte sur **chaque réservation** : elle va dans le WHERE, avant le regroupement. Dans le HAVING, elle n'aurait plus de sens : après le regroupement, on ne manipule plus des réservations mais des groupes.","+groupe":"Regroupez sur le **numéro** du client, pas seulement sur son nom : la base contient de nombreux homonymes (cinq clients s'appellent BERTRAND, six TANGUY). Grouper sur NomCli seul additionnerait les annulations de personnes différentes.","+groupe.2":"« **Plus de** 3 » : `> 3` (ou `>= 4`). KERMARREC a exactement 3 annulations : il ne doit pas apparaître. Résultat attendu : 3 clients (LE BRIS 6, THOLLAS 5, HERBERT 4), conformes aux exemples de l'énoncé."},
       "theme": "Jointures et regroupements",
       "annale": "2015",
       "enonce": "Afficher les informations permettant de compléter le tableau suivant : numéro du client, nom du client, nombre de réservations annulées. Seuls les clients ayant plus de 3 réservations annulées doivent figurer (exemples : 411001208 HERBERT 4 ; 411000825 THOLLAS 5 ; …).",
@@ -394,6 +399,7 @@
     },
     {
       "id": "q18",
+      "cinema": {"+filtres":"Trois conditions sur la même réservation. Une réservation annulée n'est jamais facturée : sans `AnnuleRes = 'N'`, toutes les annulations passées apparaîtraient comme « à facturer ».","+filtres.2":"« Antérieure à la date du jour » : `<`, strictement. La réservation 1379 se termine aujourd'hui et n'est pas encore facturée : elle n'est pas retenue, le séjour vient juste de finir. Sans ce filtre sur la date, vous obtiendriez 89 réservations au lieu de 4, car les séjours futurs n'ont pas encore de facture.","+filtres.3":"« Aucune facture » → NOT IN sur FACTURE.NumRes. Une jointure RESERVATION–FACTURE ne peut pas répondre : elle ne garde que les réservations qui **ont** une facture."},
       "theme": "Sous-requêtes",
       "enonce": "Le service comptable recherche les séjours à facturer : afficher le numéro, la date de fin et le numéro du client des réservations non annulées dont la date de fin est antérieure à la date du jour et qui n'ont donné lieu à aucune facture.",
       "correction": [
@@ -498,6 +504,7 @@
     },
     {
       "id": "q23",
+      "cinema": {"+table":"HOTEL a 9 colonnes. En nommant les colonnes après le nom de la table, on peut n'en donner que 7 : TelHotel et NomRespHotel, non nommés, restent vides (NULL). Sans liste de colonnes, il faut 9 valeurs, avec NULL pour les deux inconnues.","+valeurs":"Deux pièges d'écriture : l'apostrophe de « l'Océan » se **double** à l'intérieur du texte ('28 boulevard de l''Océan'), sinon SQL croit que le texte s'arrête après « l ». Et le code postal '56750' s'écrit entre apostrophes : c'est un texte (CPHotel), pas un nombre.","+resultat":"Contrôle : HOTEL passe de 14 à 15 lignes. Si un hôtel n° 15 existait déjà, l'insertion serait refusée : NumHotel est la clé primaire, deux hôtels ne peuvent pas avoir le même numéro."},
       "theme": "Mises à jour",
       "type": "write",
       "annale": "2015",
@@ -550,6 +557,7 @@
     },
     {
       "id": "s01",
+      "cinema": {"lecture":"Je reprends l'énoncé règle par règle :\n- « chambres numérotées dans l'hôtel : la chambre n° 12 existe dans plusieurs hôtels » : une chambre → 1 hôtel ; un hôtel → plusieurs chambres ; le numéro seul n'identifie pas la chambre → nouvelle table CHAMBRE à **clé composée** (NumHotel, NumChambre), NumHotel étant aussi clé étrangère vers HOTEL.\n- « baignoire, douche, WC, téléphone, nombre de couchages » : informations sur chaque chambre → colonnes de CHAMBRE.\n- « chaque chambre est d'un seul type » : une chambre → 1 type ; un type → plusieurs chambres. Clé étrangère #NumType dans CHAMBRE.\n- « pour chaque date et chaque chambre, le nombre de personnes » : une date → plusieurs chambres ; une chambre → plusieurs dates ; le nombre de personnes dépend des deux → table de liaison PLANNING (Date + chambre) qui porte NbPersonne.\n- « à une date donnée, une chambre n'est associée qu'à une seule réservation ; une réservation porte sur plusieurs chambres et plusieurs dates » : un couple (date, chambre) → 1 réservation ; une réservation → plusieurs couples. Simple clé étrangère #NumRes dans PLANNING, **hors** de la clé.","+entites":"Un **identifiant relatif** : la chambre n'est identifiée qu'à l'intérieur de son hôtel. Erreur fréquente : NumChambre seul comme clé ; la base refuserait la chambre n° 12 du deuxième hôtel. Cette solution est reconnue comme « presque » juste (partielle).","+associations":"PLANNING relie DATE et CHAMBRE. Comme la clé de CHAMBRE a deux colonnes, la clé de PLANNING en a **trois** : Date, NumHotel et NumChambre.","associations.2":"Date renvoie à DATE ; NumHotel et NumChambre renvoient **ensemble** à CHAMBRE (le couple désigne une chambre, donc les deux flèches vont vers CHAMBRE, pas NumHotel vers HOTEL). #NumRes renvoie à RESERVATION, mais ne fait **pas** partie de la clé : à une date, une chambre n'a qu'une réservation. NbPersonne dépend de la date et de la chambre : il se place dans PLANNING.","+bilan":"Checklist :\n- CHAMBRE : clé (NumHotel, NumChambre), #NumHotel → HOTEL, #NumType → TYPECHAMBRE, les cinq caractéristiques ;\n- PLANNING : clé (Date, NumHotel, NumChambre), NbPersonne, (NumHotel, NumChambre) → CHAMBRE, #NumRes → RESERVATION.\nTrois erreurs fréquentes, reconnues comme « presque » justes (partielles) : NumChambre seul comme clé de CHAMBRE ; NumHotel de PLANNING pointant vers HOTEL au lieu de CHAMBRE ; NumRes ajouté à la clé de PLANNING. À noter : dans ce schéma, l'hôtel d'une réservation se retrouve par PLANNING → CHAMBRE ; la base d'entraînement a simplifié en plaçant NumHotel dans RESERVATION."},
       "type": "schema",
       "theme": "Évolution du schéma",
       "annale": "2015",
@@ -786,6 +794,7 @@
     },
     {
       "id": "s02",
+      "cinema": {"lecture":"Je reprends l'énoncé règle par règle :\n- « pour chaque hôtel et chaque type proposé, le prix HT et le nombre de chambres » : un hôtel → plusieurs types ; un type → plusieurs hôtels ; prix et nombre dépendent des deux → table de liaison TARIF (NumHotel + NumType).\n- « une réduction accordée par un hôtel, pour une période et un type de chambre » : le taux dépend de **trois** objets à la fois → table de liaison REDUCTION à clé triple (NumHotel + NumPeriode + NumType).\n- « une facture est réglée par un seul moyen de paiement » et « chèques et cartes sont deux spécialisations de la facture » : une facture par chèque est une facture (1 à 1), de même pour la carte → deux tables CHEQUE et CARTE dont la clé NumFac est aussi clé étrangère vers FACTURE.\n- « par chèque : numéro et banque ; par carte : numéro et date de fin de validité » : ces informations vont dans la table du sous-type concerné.\n- « virement ou espèces : pas d'information complémentaire » : pas de table nécessaire.","+entites":"CHEQUE ne contient que les factures payées par chèque. Sa clé NumFac est en même temps une clé étrangère vers FACTURE : un chèque n'existe que pour une facture existante, et une facture n'a qu'un chèque.","+entites.2":"Même construction pour CARTE. Pourquoi pas tout dans FACTURE ? Quatre colonnes (NumCh, BanqueCh, NumC, DateFinC) y seraient vides pour la plupart des factures. Cette solution est reconnue comme « presque » juste (partielle), mais ne traduit pas la spécialisation.","+associations":"Le mot « pour chaque hôtel **et** chaque type » signale une information portée par le couple : dans la base d'entraînement, une chambre Double coûte de 54 € à 99 € HT selon l'hôtel. Le prix ne peut donc aller ni dans HOTEL ni dans TYPECHAMBRE.","+associations.3":"Une association à **trois** pattes : le taux dépend de l'hôtel, de la période **et** du type. Avec une clé à deux colonnes, par exemple (NumHotel, NumType), un hôtel ne pourrait pas accorder un taux différent en basse et en haute saison.","+associations.4":"REDUCTION ne passe pas par TARIF : ses trois flèches vont directement vers HOTEL, PERIODE et TYPECHAMBRE. C'est pourquoi, en SQL (question q13), il faut relier TARIF et REDUCTION sur NumHotel **et** NumType.","+bilan":"Checklist :\n- TARIF : clé (NumType, NumHotel), PrixHT, NbChambreTyp, deux flèches ;\n- REDUCTION : clé (NumHotel, NumPeriode, NumType), TxReduction, trois flèches ;\n- CHEQUE et CARTE : clé NumFac = clé étrangère vers FACTURE, avec leurs deux colonnes chacune.\nErreur la plus fréquente : ajouter les colonnes du chèque et de la carte dans FACTURE (accepté comme partiel). Des tables VIREMENT ou ESPECES sont tolérées, mais inutiles : elles n'auraient aucune information propre."},
       "type": "schema",
       "theme": "Évolution du schéma",
       "annale": "2015",

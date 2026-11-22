@@ -200,13 +200,31 @@ Le diagramme évolue à chaque étape.
 
 Rien à écrire : les étapes sont **générées à partir de la correction** (ou de la solution du
 schéma) par `assets/cinema.js`.
-Pour remplacer un commentaire automatique, ajouter à la question un champ facultatif :
+**Correction commentée.** Pour quelques questions choisies (une par thème dans chaque exercice,
+et toutes les questions de schéma), l'enseignant ajoute ses propres commentaires avec le champ
+facultatif `cinema`. La question est alors marquée d'un clap dans la liste, et le bouton devient
+« Correction commentée pas à pas ».
 
 ```json
-"cinema": { "passages": "DOSSIER est le pivot du modèle…", "filtres.2": "…" }
+"cinema": {
+  "+tables": "C'est le mot « responsable » qui indique le chemin : le dossier connaît son chargé.",
+  "+jointures.2": "Une jointure **par flèche traversée**, jamais de raccourci.",
+  "lecture": "- Règle 1 : un dossier a **plusieurs** emprunteurs → table de liaison\n- Règle 2 : …"
+}
 ```
 
-(clé = phase, ou `phase.n` pour la n-ième étape d'une phase ; texte brut).
+- `+phase` ou `+phase.n` **ajoute** un encadré « Point de méthode » sous le commentaire automatique
+  (première étape de la phase, ou la n-ième) ;
+- `phase` ou `phase.n` **remplace** le commentaire automatique ;
+- texte brut, avec `**gras**`, `` `code` `` et des lignes `- ` pour une liste.
+
+Phases SQL : `tables`, `passages`, `alias`, `select`, `jointures`, `filtres`, `groupe`, `tri`,
+`resultat` (mises à jour : `table`, `valeurs`, `ciblage`). Phases schéma : `lecture`, `retraits`,
+`entites`, `liens`, `associations`, `bilan`.
+
+Outils : `node tools/cinema_plan.js <exercice> <question>` affiche les étapes générées et leurs clés ;
+`node tools/set_cinema.js <exercice> <question> commentaires.json` écrit le champ sans reformater le
+fichier ; `node tools/test_exercice.js` signale toute clé qui ne vise aucune étape.
 
 ## Format d'une question (`questions.json`)
 

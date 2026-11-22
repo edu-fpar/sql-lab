@@ -55,6 +55,7 @@
     },
     {
       "id": "q02",
+      "cinema": {"+tables":"Le « département » n'est pas une colonne de PATIENT : il faut le **déduire** du code postal (ses deux premiers chiffres). CPPatient est un texte, c'est pour cela qu'on peut le tester avec LIKE.","+filtres":"Le % se place **seulement à la fin** : `'57%'` signifie « commence par 57 ». Avec `'%57%'`, les 4 patients de Foug (54570) seraient retenus à tort.\nAvec OR, une seule des trois conditions suffit ; avec AND, il faudrait qu'un même code postal commence à la fois par 67, 68 et 57 : résultat vide.","+resultat":"Vous devez obtenir 46 patients sur 84. Si vous en trouvez 50, un % de trop s'est glissé au début du motif."},
       "theme": "Une seule table",
       "enonce": "Les patients relevant du régime d'assurance maladie « Alsace-Lorraine » habitent dans le Bas-Rhin (67), le Haut-Rhin (68) ou la Moselle (57). Afficher le code, le nom et le prénom des patients habitant dans l'un de ces trois départements.",
       "annale": "2025",
@@ -116,6 +117,7 @@
     },
     {
       "id": "q05",
+      "cinema": {"+select":"Les quatre fonctions ne portent pas sur le même nombre de lignes : `COUNT(*)` compte les 26 véhicules, mais SUM, AVG et MAX ignorent le VSL loué (HE 412 KL), dont le prix est vide. La moyenne est donc calculée sur **25** véhicules : 1 480 500 / 25 = 59 220 €.","+resultat":"Piège de vérification : diviser le total par le nombre de véhicules affiché (1 480 500 / 26 ≈ 56 942 €) ne redonne pas la moyenne SQL. Ce n'est pas une erreur : un véhicule loué n'a pas de prix d'acquisition, il ne doit pas faire baisser la moyenne. `COUNT(PrixAcquisition)` donnerait 25."},
       "theme": "Calculs et agrégats",
       "enonce": "Afficher le nombre de véhicules du parc, le prix d'acquisition total, le prix d'acquisition moyen et le prix d'acquisition le plus élevé.",
       "correction": [
@@ -176,6 +178,7 @@
     },
     {
       "id": "q09",
+      "cinema": {"+filtres":"« Février 2025 » contient **deux** informations : le mois et l'année. La base contient aussi février 2024 : avec `MONTH(Date) = 2` seul, vous obtiendriez 29 transports au lieu de 18.","+filtres.3":"Cette condition compare **deux colonnes de la même ligne**, sans aucune valeur entre apostrophes : c'est permis. « Partis plus tard que prévu » se traduit par « heure réelle > heure prévue ».\nLa comparaison fonctionne parce que les heures sont écrites sur 5 caractères ('07:30', '09:05') : comme textes, elles se rangent alors dans l'ordre chronologique.","+resultat":"Vous devez obtenir 18 transports. Un transport parti exactement à l'heure n'est pas retenu : `>` et non `>=`."},
       "theme": "Dates",
       "enonce": "Afficher le code, la date, l'heure de départ prévue et l'heure de départ réelle des transports de février 2025 partis plus tard que prévu.",
       "correction": [
@@ -289,6 +292,7 @@
     },
     {
       "id": "q14",
+      "cinema": {"+passages":"« Les salariés qui ont transporté le patient » : le salarié ne connaît pas le patient, ni même le transport. C'est EFFECTUER (qui a fait quel transport) puis TRANSPORT (pour quel patient) qui font le chemin. Plusieurs salariés pour un transport : c'est pour cela qu'il existe une table de liaison.","+select":"Pourquoi des doublons ? Le patient a fait 8 transports, souvent avec un équipage de deux, et certains salariés l'ont transporté plusieurs fois (BENSAID 3 fois). Sans DISTINCT, vous obtenez 9 lignes pour seulement 5 salariés.","+filtres.2":"Le prénom n'est pas facultatif : filtrer sur `NomPatient = 'BERNARD'` seul suffit avec les données actuelles, mais deviendrait faux dès qu'un autre BERNARD serait enregistré. On identifie une personne par son nom **et** son prénom (ou, mieux, par son code : P1044).","+resultat":"Vous devez obtenir 5 salariés : ROSSI, KOWALSKI, MULLER Kevin, BENSAID et KLEIN."},
       "theme": "Jointures",
       "enonce": "Afficher le nom et le prénom des salariés qui ont déjà transporté le patient André BERNARD (sans doublon).",
       "correction": [
@@ -339,6 +343,7 @@
     },
     {
       "id": "q16",
+      "cinema": {"+tables":"« Nombre de transports effectués **par un salarié** » : on compte les lignes de EFFECTUER (une ligne = un salarié sur un transport), pas les lignes de TRANSPORT. TRANSPORT n'est là que pour la date.","+groupe":"Le regroupement se fait sur le **numéro** : deux salariés s'appellent MULLER (Kevin, n° 114, et Inès, n° 125). Regroupés sur le nom seul, ils seraient fusionnés en un seul « MULLER » avec 60 transports au lieu de 57.","+groupe.2":"« Plus de 50 » s'écrit `> 50` : BECKER (n° 115) a effectué exactement 50 transports et ne doit pas apparaître. La condition sur l'année reste dans le WHERE : elle porte sur chaque transport, avant le comptage.","+resultat":"Vous devez obtenir 5 salariés, de ROSSI (95 transports) à HOFFMANN (56)."},
       "theme": "Jointures et regroupements",
       "enonce": "Monsieur ATTOUMANE souhaite connaître les salariés les plus sollicités. Afficher le numéro, le nom et le nombre de transports effectués des salariés ayant effectué plus de 50 transports en 2024, classés par nombre de transports décroissant.",
       "annale": "2025",
@@ -455,6 +460,7 @@
     },
     {
       "id": "q21",
+      "cinema": {"+tables":"« Attribué à un transport » : c'est la colonne Immatriculation de TRANSPORT qui enregistre l'attribution. On cherche donc les véhicules **absents** de cette colonne : une jointure ne le peut pas, car elle ne garde que les lignes qui se correspondent.","+filtres":"Pourquoi `IS NOT NULL` dans la sous-requête ? 8 transports futurs n'ont pas encore de véhicule. Si la liste contient un NULL, SQL ne peut jamais affirmer qu'une immatriculation « n'est pas dans la liste » (elle pourrait être égale à la valeur inconnue) : NOT IN ne renvoie alors **aucune** ligne, sans message d'erreur.\nÉcriture équivalente, insensible au piège : `WHERE NOT EXISTS (SELECT * FROM TRANSPORT WHERE TRANSPORT.Immatriculation = VEHICULE.Immatriculation)`.","+resultat":"Vous devez obtenir 2 véhicules (la Skoda Octavia HR 057 VW et le Sprinter SMUR HL 321 JK). Un résultat vide est le signe du piège du NULL."},
       "theme": "Sous-requêtes",
       "enonce": "Afficher l'immatriculation, la marque et le modèle des véhicules qui n'ont encore jamais été attribués à un transport.",
       "correction": [
@@ -491,6 +497,7 @@
     },
     {
       "id": "q23",
+      "cinema": {"+table":"Deux tables à modifier, donc deux requêtes : un DELETE ne supprime que dans **une** table. L'ordre suit les flèches du schéma : EQUIPER fait référence à EQUIPEMENT, on supprime donc d'abord les lignes d'EQUIPER (les « enfants »), puis l'équipement (le « parent »).","+ciblage":"On cible le **code** RP123 et non le nom : « Respirateur portable » désigne aussi le modèle RP200, qui reste en service. `WHERE NomEquip = 'Respirateur portable'` supprimerait les deux modèles (et NomEquip n'existe d'ailleurs pas dans EQUIPER).","+resultat":"Contrôle : la première requête supprime 3 lignes d'EQUIPER (BZ 225 AX, DF 118 GH, FA 346 RT), la seconde 1 ligne d'EQUIPEMENT. Comparez avec la question précédente : retirer RP123 d'un seul véhicule ne touche qu'EQUIPER."},
       "theme": "Mises à jour",
       "type": "write",
       "enonce": "Ambulance Est abandonne complètement le modèle de respirateur RP123 : le retirer de tous les véhicules, puis le supprimer de la liste des équipements. Écrire les requêtes nécessaires, dans le bon ordre.",
@@ -536,6 +543,7 @@
     },
     {
       "id": "s01",
+      "cinema": {"lecture":"Ici, pas de nouvel objet extérieur : l'énoncé découpe un objet existant (SALARIE) en **deux catégories**. Je reprends les phrases une à une :\n- « séparer les salariés exerçant une activité sanitaire… des salariés des services administratifs » : un salarié sanitaire **est** un salarié, un salarié administratif aussi. Chaque catégorie devient une table « fille » (SALARIE_SANITAIRE, SALARIE_ADMINISTRATIF) ; un salarié de la table fille correspond à **un seul** salarié de SALARIE, et inversement : même numéro, qui sert à la fois de clé primaire et de clé étrangère.\n- « les informations communes (nom, prénom, adresse, téléphone…) restent dans SALARIE » : on ne les recopie pas dans les tables filles.\n- « un salarié sanitaire doit justifier d'un diplôme (numéro, nom, grade) » : le diplôme est déjà décrit par la table DIPLOME. Un salarié sanitaire a un diplôme, un diplôme est détenu par plusieurs salariés : clé étrangère #NumDipl, mais dans SALARIE_SANITAIRE.\n- « et de la date de sa dernière visite médicale » : un attribut propre aux sanitaires.\n- « pour un salarié administratif, on enregistre le nom de son service… et son numéro de carte » : deux attributs propres aux administratifs.\n- « seuls les titulaires d'un DEA ou d'un DAA peuvent assurer le transport » : la règle qui touche EFFECTUER. Un transport est effectué par des salariés **sanitaires** : la clé étrangère d'EFFECTUER doit viser SALARIE_SANITAIRE.","retraits":"TypeSal et NumDipl quittent SALARIE, pour deux raisons différentes :\n- **TypeSal** devient inutile : la catégorie se lit désormais dans la table où se trouve le salarié (présent dans SALARIE_SANITAIRE = sanitaire). Le garder, ce serait enregistrer deux fois la même information, avec un risque de contradiction.\n- **NumDipl** ne concerne plus que les salariés sanitaires : l'énoncé ne demande le diplôme que pour eux. Il est déplacé dans SALARIE_SANITAIRE.","+entites.1":"La clé primaire NumSalAdm est **le même numéro** que dans SALARIE (clé primaire et clé étrangère à la fois) : c'est ce qui permet de retrouver le nom ou le téléphone d'un administratif par une jointure. Ne créez pas de nouveau numéro, et ne recopiez pas nom et prénom ici.\nLe nom du service peut rester un simple attribut ; une table SERVICE référencée par une clé étrangère est aussi acceptée.","+entites.2":"Même principe : NumSalSanit est le numéro du salarié dans SALARIE. La flèche vers DIPLOME part maintenant de SALARIE_SANITAIRE : c'est l'ancienne clé étrangère de SALARIE qui a changé de table.\nSi l'on veut garder plusieurs diplômes par salarié (DEA puis DAA, par exemple), une table de liaison entre SALARIE_SANITAIRE et DIPLOME est aussi acceptée.","+liens":"C'est l'étape la plus souvent oubliée : la spécialisation n'a d'intérêt que si le schéma **applique** la règle « seuls les sanitaires transportent ». Tant que #NumSal d'EFFECTUER pointe vers SALARIE, rien n'empêche d'affecter un comptable à un transport. En la faisant pointer vers SALARIE_SANITAIRE, la base refuse tout numéro qui n'est pas celui d'un sanitaire.","+bilan":"Checklist :\n- SALARIE ne contient plus TypeSal ni NumDipl, mais garde nom, prénom, adresse, téléphone ;\n- chaque table fille a pour clé primaire le numéro du salarié, qui est aussi clé étrangère vers SALARIE ;\n- les attributs propres sont dans la bonne table (visite médicale et diplôme côté sanitaire ; service et carte de restauration côté administratif) ;\n- EFFECTUER pointe vers SALARIE_SANITAIRE.\nL'erreur la plus fréquente est justement la dernière : un schéma où EFFECTUER pointe encore vers SALARIE est jugé « presque ». Sont acceptés : une table SERVICE pour le service d'affectation, et une table de liaison salarié sanitaire–diplôme."},
       "theme": "Évolution du schéma",
       "type": "schema",
       "annale": "2025",

@@ -116,7 +116,13 @@ initSqlJs().then((SQL) => {
     const fks = new Map((db.exec(`PRAGMA foreign_key_list("${t}")`)[0] || { values: [] }).values.map((r) => [r[3], r[2]]));
     return { name: t, cols: db.exec(`PRAGMA table_info("${t}")`)[0].values.map((c) => ({ name: c[1], pk: c[5] > 0, fk: fks.get(c[1]) || null })) };
   }));
+  // commentaires de la correction pas à pas (champ « cinema ») : chaque clé doit viser une étape existante
+  const dschema = require("./cinema_plan.js").diagramSchema(db);
   db.close();
+  const { checkCinema } = require("./cinema_plan.js");
+  for (const q of data.questions) {
+    for (const p of checkCinema(q, dschema)) { console.log(`✗ ${q.id} cinema : ${p}`); fails++; }
+  }
 
   for (const q of data.questions) {
     if (q.type === "schema") { fails += testSchema(q, base); continue; }

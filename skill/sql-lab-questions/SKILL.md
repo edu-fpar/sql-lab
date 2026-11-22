@@ -71,7 +71,7 @@ Uniquement un objet JSON (dans un bloc ```json), au format suivant :
 | `type` | pour les modifications | `"write"` pour INSERT / UPDATE / DELETE (déduit automatiquement sinon). |
 | `verif` | pour les modifications | `SELECT * FROM <table modifiée>` : l'application compare la table avant/après. |
 | `annale` | non | Année de l'annale dont la question s'inspire (affiche un badge). |
-| `cinema` | non | Remplace des commentaires de la « correction pas à pas », générée automatiquement à partir de la correction : `{ "passages": "…", "filtres.2": "…" }` (phases : `tables`, `passages`, `alias`, `select`, `jointures`, `filtres`, `groupe`, `tri`, `resultat` ; `.n` = n-ième étape de la phase). À n'utiliser que si le commentaire automatique ne convient pas. |
+| `cinema` | non | Commentaires de l'enseignant sur la « correction pas à pas », générée automatiquement à partir de la correction : `{ "+jointures.2": "…" }`. `+phase` (ou `+phase.n`, n-ième étape) **ajoute** un « point de méthode » sous le commentaire automatique ; `phase` le **remplace**. Phases : `tables`, `passages`, `alias`, `select`, `jointures`, `filtres`, `groupe`, `tri`, `resultat` (mises à jour : `table`, `valeurs`, `ciblage` ; schéma : `lecture`, `retraits`, `entites`, `liens`, `associations`, `bilan`). Texte brut avec `**gras**`, `` `code` ``, lignes `- `. À réserver aux questions où une subtilité mérite d'être expliquée. |
 
 ### Questions de construction de schéma (`"type": "schema"`)
 

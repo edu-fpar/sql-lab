@@ -66,6 +66,7 @@
     },
     {
       "id": "q03",
+      "cinema": {"+tables":"Les deux diplômes sont dans FORMATION, sous forme de clés étrangères : CodeDiplomeDelivre (le diplôme obtenu) et CodeDiplomeNecessaire (le diplôme exigé). Pas besoin de DIPLOME : on ne demande pas le libellé, on teste seulement si la case est remplie.","+filtres":"« Permettent d'obtenir un diplôme » : la case CodeDiplomeDelivre est **remplie**, d'où IS NOT NULL. Écrire `<> NULL` ne marche pas : toute comparaison avec NULL est « inconnue » et n'est jamais vraie.","+filtres.2":"« Sans en exiger aucun » : CodeDiplomeNecessaire est vide. Attention à bien associer chaque condition à sa colonne : inverser les deux donnerait les formations qui exigent un diplôme sans en délivrer.","+resultat":"6 formations sur 16. Vérification : 11 formations délivrent un diplôme ; 5 d'entre elles en exigent aussi un (ce sont celles de la question q13)."},
       "theme": "Une seule table",
       "enonce": "Afficher les formations (code et libellé) qui permettent d'obtenir un diplôme sans en exiger aucun pour s'inscrire.",
       "correction": [
@@ -93,6 +94,7 @@
     },
     {
       "id": "q05",
+      "cinema": {"+select":"Toute la question tient dans la parenthèse : `COUNT(*)` compte les **lignes** (28 formateurs), `COUNT(CodeSport)` compte les cases **remplies** de cette colonne (24). Les 4 médecins et psychologues, dont CodeSport est vide, sont ainsi écartés sans WHERE.","+resultat":"Résultat : 24. Écriture équivalente, plus explicite : `SELECT COUNT(*) FROM FORMATEUR WHERE CodeSport IS NOT NULL`. Ne confondez pas avec `COUNT(DISTINCT CodeSport)` (9), qui compterait les **sports** différents, pas les formateurs."},
       "theme": "Calculs et agrégats",
       "enonce": "Combien de formateurs ont une spécialité sportive ? (Les médecins et les psychologues n'en ont pas.)",
       "correction": [
@@ -143,6 +145,7 @@
     },
     {
       "id": "q08",
+      "cinema": {"+filtres":"« Date limite non dépassée » : la date limite est aujourd'hui ou plus tard, d'où `>=` (et non `>`, qui exclurait une session dont c'est le dernier jour d'inscription). NOW() renvoie ici la date simulée du 15/05/2011 : on ne l'écrit pas en dur, pour que la requête reste juste demain.","+resultat":"5 sessions. Ne confondez pas la date limite d'inscription avec la date de début : 6 sessions n'ont pas encore commencé, mais pour l'une d'elles les inscriptions sont déjà closes."},
       "theme": "Dates",
       "enonce": "Nous sommes le 15/05/2011. Afficher les sessions auxquelles il est encore possible de s'inscrire (date limite d'inscription non dépassée) : code de la formation, numéro de session, date de début et date limite d'inscription.",
       "correction": [
@@ -246,6 +249,7 @@
     },
     {
       "id": "q13",
+      "cinema": {"+tables":"FORMATION est reliée **deux fois** à DIPLOME : une flèche pour le diplôme exigé, une pour le diplôme obtenu. Pour afficher deux libellés différents, il faut deux lignes de DIPLOME à la fois : on met donc la table deux fois dans le FROM.","+alias":"Les alias sont ici **obligatoires** : DN (diplôme nécessaire) et DD (diplôme délivré) sont deux copies de la même table. Sans eux, SQL ne saurait pas de quel LibelleDiplome vous parlez. Choisissez des alias qui disent le rôle, pas D1 et D2.","+jointures.2":"Erreur fréquente : une seule copie de DIPLOME avec les deux conditions (`CodeDiplomeNecessaire = CodeDiplome AND CodeDiplomeDelivre = CodeDiplome`). Elle cherche un diplôme qui serait à la fois exigé et délivré par la formation : 0 ligne.","+resultat":"5 formations. Les jointures suffisent à écarter celles qui n'exigent ou ne délivrent rien : une case vide ne correspond à aucun CodeDiplome. On lit bien la progression : initiateur FFSA → 1er degré → 2e degré."},
       "theme": "Jointures",
       "enonce": "Pour les formations qui exigent un diplôme pour s'inscrire et qui en délivrent un, afficher le libellé de la formation, le libellé du diplôme exigé et le libellé du diplôme obtenu.",
       "correction": [
@@ -347,6 +351,7 @@
     },
     {
       "id": "q17",
+      "cinema": {"+groupe":"Le regroupement se fait sur le **numéro** du formateur, pas seulement sur son nom : la base compte deux GIRARD (n° 103 et 110). Avec `GROUP BY NomFormateur`, leurs heures seraient additionnées (10 + 23 = 33 h) dans une seule ligne.","+groupe.2":"« À condition que ce **total** soit supérieur à 20 » : la condition porte sur le résultat du calcul, donc HAVING. `WHERE NBH > 20` testerait chaque intervention séparément ; or aucune ne dépasse 20 h, le résultat serait vide.","+resultat":"11 formateurs. « Supérieur à 20 » est strict : BRUNET et HUET, qui totalisent exactement 20 h, n'apparaissent pas. Le formateur n° 113 (19,5 h) rappelle que NBH n'est pas toujours un nombre entier."},
       "theme": "Jointures et regroupements",
       "annale": "2011",
       "enonce": "Liste des formateurs (numéro et nom) et du total de leur nombre d'heures d'intervention, à condition que ce total soit supérieur à 20.",
@@ -392,6 +397,7 @@
     },
     {
       "id": "q19",
+      "cinema": {"+filtres":"Le `WHERE CodeSport IS NOT NULL` de la sous-requête n'est pas décoratif. Les médecins et psychologues ont un CodeSport vide : sans ce filtre, la liste contient un NULL, et `NOT IN` avec un NULL dans la liste ne renvoie **jamais** de ligne (SQL ne peut pas affirmer qu'une valeur est différente d'une valeur inconnue).","+resultat":"3 sports : Escalade, Ski alpin, Tir à l'arc. Sans le IS NOT NULL, le résultat serait vide, sans message d'erreur : c'est ce qui rend le piège dangereux. `NOT EXISTS` n'a pas ce problème et constitue une écriture alternative sûre."},
       "theme": "Sous-requêtes",
       "annale": "2011",
       "enonce": "Liste des sports (libellé) qui n'ont pas de formateur, c'est-à-dire qui ne sont la spécialité d'aucun formateur.",
@@ -517,6 +523,7 @@
     },
     {
       "id": "q25",
+      "cinema": {"+table":"Pourquoi le premier DELETE est refusé : Aurélie ROBIN possède 3 diplômes, enregistrés dans POSSEDER avec son numéro. La supprimer laisserait ces lignes pointer vers une formatrice inexistante, ce que l'intégrité référentielle interdit. Le script comporte donc **deux** requêtes, une par table : cette étape montre la première.","+ciblage":"L'**ordre** compte : d'abord les lignes qui font référence (POSSEDER), ensuite la formatrice (FORMATEUR). Dans l'ordre inverse, la première requête serait refusée comme à l'essai initial. INTERVENIR fait aussi référence à FORMATEUR, mais l'énoncé précise qu'elle n'est jamais intervenue : rien à y supprimer.","+resultat":"Contrôle : 3 lignes supprimées dans POSSEDER (diplômes D02, D05 et D10), puis 1 ligne dans FORMATEUR. On ne supprime pas les diplômes eux-mêmes dans DIPLOME : d'autres formateurs peuvent les posséder."},
       "theme": "Mises à jour",
       "type": "write",
       "enonce": "Aurélie ROBIN (formatrice n° 125) quitte le CREF SA ; elle n'est jamais intervenue dans une session. Essayez d'abord : DELETE FROM FORMATEUR WHERE NumFormateur = 125. La suppression est refusée : pourquoi ? Écrivez ensuite un script qui supprime d'abord les lignes qui la référencent, puis la formatrice (chaque exécution repart de la base d'origine : les deux requêtes doivent figurer dans votre script, séparées par un point-virgule).",
@@ -531,6 +538,7 @@
     },
     {
       "id": "s01",
+      "cinema": {"lecture":"Huit règles à traduire :\n- « un sportif est identifié par son numéro CREF ; nom, prénom, licences FFSA et FF » : nouvel objet, nouvelle table SPORTIF.\n- « un stage a un numéro, un libellé, une heure de début et une heure de fin » : nouvelle table STAGE.\n- « il concerne un ou plusieurs sports » : STAGE et SPORT. Un stage → plusieurs sports ; un sport → plusieurs stages. Plusieurs à plusieurs : table de liaison CONCERNER.\n- « une salle a un code et un nom » : nouvelle table SALLE.\n- « chaque jour, il a lieu dans une seule salle, mais la salle peut changer d'un jour à l'autre » : la salle ne dépend ni du stage seul, ni du jour seul, mais du **couple** (stage, jour). Pour un stage et un jour → une seule salle : nouvelle table AVOIR_LIEU, clé (NumSt, DateJour), avec #CodeS en simple clé étrangère.\n- « plusieurs formateurs encadrent un stage, chacun pour un nombre d'heures » : FORMATEUR et STAGE, plusieurs dans les deux sens (un formateur encadre plusieurs stages). Table de liaison INTERVENIR_STAGE, qui porte le nombre d'heures.\n- « l'un d'eux est le coordonnateur du stage » : un stage → un seul coordonnateur ; un formateur peut coordonner plusieurs stages. Clé étrangère #NumFormateurCoord dans STAGE.\n- « les sportifs s'inscrivent aux stages ; un commentaire pour chaque sportif et chaque stage » : SPORTIF et STAGE, plusieurs dans les deux sens. Table de liaison INSCRIRE, qui porte le commentaire.\nBilan : 7 tables à créer ; SPORT et FORMATEUR ne changent pas.","+entites.1":"Les deux numéros de licence sont de simples attributs du sportif : FFSA et FF ne sont pas des tables du schéma, rien à relier. Le nom des colonnes doit les distinguer clairement (LicenceFFSA, LicenceFF).","+entites.2":"SALLE n'a aucune clé étrangère : la même salle sert à plusieurs stages et à plusieurs dates. C'est la table AVOIR_LIEU qui dira où se tient chaque journée.","+entites.3":"Le coordonnateur est « l'un d'eux » : un seul par stage, d'où une simple clé étrangère vers FORMATEUR. Nommez-la selon son rôle (#NumFormateurCoord) : STAGE est relié deux fois à FORMATEUR (coordination ici, encadrement dans INTERVENIR_STAGE), et il ne faut pas confondre les deux liens.","+entites.4":"Le point délicat de l'exercice. Clé (NumSt, DateJour) : pour un stage et un jour donnés, il n'y a qu'**une** salle, donc CodeS n'entre pas dans la clé. Si CodeS faisait partie de la clé, un stage pourrait avoir deux salles le même jour, ce que l'énoncé interdit.","+associations.1":"« Un **ou plusieurs** sports » : c'est le « plusieurs » qui impose la table de liaison. Une clé étrangère #CodeSport dans STAGE limiterait chaque stage à un seul sport.","+associations.3":"Le nombre d'heures n'est ni une information sur le formateur (il en a un par stage), ni sur le stage (il en a un par formateur) : il dépend du **couple**, d'où sa place dans la table de liaison.","+associations.5":"Même raisonnement pour le commentaire : il porte sur « chaque sportif » **et** « chaque stage ». Dans SPORTIF, il faudrait un commentaire par stage suivi ; dans STAGE, un par sportif : seule la table de liaison convient.","+bilan":"Checklist :\n- SPORTIF, SALLE et STAGE (avec #NumFormateurCoord) ;\n- CONCERNER, INTERVENIR_STAGE (NBH) et INSCRIRE (Commentaire), chacune avec une clé de deux colonnes ;\n- AVOIR_LIEU, clé (NumSt, DateJour), #CodeS hors de la clé.\nAcceptés en partie : CodeS dans la clé d'AVOIR_LIEU (permettrait deux salles le même jour), ou la salle dans STAGE (le stage aurait toujours la même salle). C'est la règle de la salle qui distingue les copies.\nUne table DATE (ou JOUR) est tolérée mais inutile : une date n'a pas d'autre information à décrire, elle reste une colonne de la clé d'AVOIR_LIEU."},
       "type": "schema",
       "theme": "Évolution du schéma",
       "annale": "2011",

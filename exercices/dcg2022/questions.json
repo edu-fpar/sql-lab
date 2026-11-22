@@ -66,6 +66,7 @@
     },
     {
       "id": "q03",
+      "cinema": {"+select":"MailClient sert au filtre mais n'est pas demandé à l'affichage : une colonne peut figurer dans le WHERE sans figurer dans le SELECT (ici, elle ne montrerait que des cases vides).","+filtres":"« Non renseignée » = case vide = valeur **NULL**. NULL n'est égal à rien, pas même à NULL : `MailClient = NULL` ne renvoie aucune ligne, sans message d'erreur. Seul `IS NULL` fonctionne.","+resultat":"Vérification : 9 clients sur 125 n'ont pas de mail. Pour la question inverse (clients qui ont un mail), on écrirait `IS NOT NULL`, jamais `<> NULL`."},
       "theme": "Une seule table",
       "enonce": "Afficher les clients (numéro, nom, prénom et téléphone) dont l'adresse mail n'est pas renseignée.",
       "correction": [
@@ -109,6 +110,7 @@
     },
     {
       "id": "q07",
+      "cinema": {"+tables":"« Par salon » : le code du salon est déjà dans SOIN (clé étrangère #CodeSalon). Inutile de joindre SALON : la jointure ne serait nécessaire que pour afficher le **libellé** du salon.","+filtres":"La condition porte sur **chaque soin** (sa durée), pas sur le groupe : elle va dans le WHERE, qui élimine les soins courts **avant** le comptage. HAVING servirait pour une condition sur le résultat du calcul (ex. « les salons qui ont plus de 2 soins »).\n« Supérieure à 60 » est strict : `> 60`. Les 3 soins qui durent exactement 60 minutes ne sont pas comptés.","+resultat":"Seuls 3 salons apparaissent (CEZ : 2, CHA : 1, SPA : 4). ALG, CON et SOL n'ont aucun soin de plus de 60 minutes : un groupe sans ligne n'est pas affiché avec 0, il disparaît du résultat."},
       "theme": "Calculs et agrégats",
       "enonce": "Afficher le nombre de soins par salon (code du salon, nombre de soins), en ne comptant que les soins dont la durée est supérieure à 60 minutes.",
       "annale": "2022",
@@ -157,6 +159,7 @@
     },
     {
       "id": "q10",
+      "cinema": {"+select":"« Combien » → `COUNT(*)`, une seule ligne de résultat. N'ajoutez pas DateSoin ou HeureSoin dans le SELECT : il faudrait un GROUP BY et vous obtiendriez plusieurs nombres au lieu d'un seul.","+filtres":"HeureSoin est stockée en texte au format `HH:MM` (toujours deux chiffres pour l'heure) : la comparaison `>= '18:00'` suit donc l'ordre chronologique. « À partir de 18:00 » inclut 18:00 : `>=` et non `>` (7 soins commencent à 18:00 pile en février).","+filtres.3":"N'oubliez pas l'année : `MONTH(DateSoin) = 2` seul prendrait le mois de février de toutes les années. La base ne couvrant que janvier à mars 2022, le résultat serait identique aujourd'hui, mais la requête deviendrait fausse l'an prochain. Écriture acceptée aussi : `DateSoin BETWEEN '01/02/2022' AND '28/02/2022'`.","+resultat":"Vérification : 22 soins. Sans le filtre sur février, on en compterait 63."},
       "theme": "Dates et heures",
       "enonce": "Combien de soins ont été planifiés en fin de journée (heure de début à partir de 18:00) au cours du mois de février 2022 ?",
       "correction": [
@@ -246,6 +249,7 @@
     },
     {
       "id": "q14",
+      "cinema": {"+tables":"« Cliente n° 1012 » : le numéro suffit, et il est déjà dans PLANIFIER (NumClient). Inutile d'ajouter CLIENT : on n'affiche ni son nom ni son prénom. PLANIFIER est le cœur de la requête : une ligne = un soin, à une date et une heure, pour un client, avec un membre du personnel.","+jointures":"On ne relie pas les tables dans l'ordre de l'énoncé mais en suivant les flèches : deux flèches partent de PLANIFIER (vers SOIN et vers PERSONNEL), la troisième part de SOIN vers SALON. 4 tables, 3 jointures.","+jointures.3":"Piège : PERSONNEL contient aussi une colonne CodeSalon, le salon d'**affectation** du membre du personnel. Le salon demandé est celui où se déroule **le soin** : on passe par `SOIN.CodeSalon`. Dans cette base les deux coïncident, mais rien dans le schéma ne le garantit.","+resultat":"Vérification : 4 soins ce jour-là, de 09:00 (masque corporel avec SEGERS, au Spa) à 12:00 (Bain Jets avec PIEPLU, au Salon Solidor)."},
       "theme": "Jointures",
       "enonce": "Reconstituer le planning de la cliente n° 1012 pour la journée du 27/01/2022 : heure, libellé du soin, nom du membre du personnel et libellé du salon, triés par heure.",
       "ordered": [
@@ -302,6 +306,7 @@
     },
     {
       "id": "q16",
+      "cinema": {"+passages":"Le nombre de clients ne se lit nulle part : il se **calcule** en comptant les lignes de RESERVER (une ligne = un client qui réserve un séjour à une date de début). D'où la jointure, même si aucune colonne de RESERVER n'est affichée.","+groupe":"On regroupe par `SEJOUR.CodeSejour` **et** `LibelleSejour` : le libellé est affiché sans fonction de calcul, il doit donc être dans le GROUP BY. Un code n'ayant qu'un libellé, cet ajout ne change pas les groupes.","+groupe.2":"« Plus de 20 » est strict : `> 20`. Le séjour MCS (MER & CAPITAL SOMMEIL), réservé exactement 20 fois, est exclu ; avec `>= 20` il apparaîtrait à tort.","+resultat":"2 séjours : MDT (MER & DÉTENTE, 22 réservations) et MRF (MER & REMISE EN FORME, 24). `COUNT(*)` compte des réservations ; ici aucun client n'a réservé deux fois le même séjour, donc cela revient à compter des clients. `COUNT(DISTINCT NumClient)` serait plus rigoureux."},
       "theme": "Jointures et regroupements",
       "enonce": "Afficher la liste des séjours (code et libellé) réservés par plus de 20 clients.",
       "annale": "2022",
@@ -384,6 +389,7 @@
     },
     {
       "id": "q19",
+      "cinema": {"+filtres":"Lisez d'abord la sous-requête seule : elle donne la liste des 13 codes de soins planifiés le 27/01/2022. La requête principale garde les soins de SOIN qui ne sont **pas** dans cette liste.\nPiège classique : une jointure avec `DateSoin <> '27/01/2022'` garde les soins planifiés **un autre jour**, même s'ils le sont aussi le 27 : on obtient 31 soins au lieu de 19.","+resultat":"Vérification : 32 soins au catalogue, 13 planifiés ce jour-là, il en reste bien 19. Le contrôle « total − présents = absents » est un bon réflexe pour toutes les questions en NOT IN."},
       "theme": "Sous-requêtes",
       "enonce": "Afficher la liste des soins (code et libellé) qui ne sont pas planifiés le 27 janvier 2022.",
       "annale": "2022",
@@ -491,6 +497,7 @@
     },
     {
       "id": "q25",
+      "cinema": {"+table":"« Supprimer ces soins du planning » : on supprime des lignes de PLANIFIER, pas le client (CLIENT) ni les soins du catalogue (SOIN). DELETE supprime des lignes entières : aucune liste de colonnes après DELETE.","+ciblage":"Les deux conditions sont indispensables, reliées par AND. Le client 1098 a 24 soins planifiés du 14 au 19/03/2022 : sans la condition sur la date, vous les supprimeriez tous, alors qu'il n'annule que les 4 du 16/03.","+resultat":"Contrôle : 4 lignes supprimées. Bon réflexe : écrire d'abord `SELECT * FROM PLANIFIER WHERE …` avec le même WHERE pour voir les lignes visées, puis remplacer `SELECT *` par `DELETE`."},
       "theme": "Mises à jour",
       "type": "write",
       "enonce": "Souffrant, le client n° 1098 annule tous ses soins prévus le 16/03/2022. Supprimer ces soins du planning.",
@@ -504,6 +511,7 @@
     },
     {
       "id": "s01",
+      "cinema": {"lecture":"Je lis l'énoncé règle par règle :\n- « soit des hydrothérapeutes, soit des esthéticiennes » : deux catégories de PERSONNEL, avec des informations propres → deux tables HYDROTHERAPEUTE et ESTHETICIENNE, dont la clé primaire est **aussi** une clé étrangère vers PERSONNEL (même numéro).\n- « seulement la date de sa dernière formation » : une seule date par hydrothérapeute → simple attribut de HYDROTHERAPEUTE.\n- « date de première affectation d'un hydrothérapeute dans chaque salon » : un hydrothérapeute → plusieurs salons (il peut changer après une formation) ; un salon → plusieurs hydrothérapeutes. Plusieurs à plusieurs → table de liaison AFFECTATION, qui porte la date.\n- « dispensent leurs soins dans un seul spa » : une esthéticienne → un seul spa ; un spa → plusieurs esthéticiennes. Un à plusieurs → clé étrangère #CodeSpa dans ESTHETICIENNE (côté « plusieurs »).\n- « pour chaque spa, son code, son nom et sa surface » : nouvel objet → table SPA.\n- « un spa peut proposer des produits cosmétiques (code, nom, prix) » : nouvel objet → table PRODUIT ; un spa → plusieurs produits, et un même produit peut être vendu dans plusieurs spas → plusieurs à plusieurs → table de liaison PROPOSER.","+entites":"SPA et PRODUIT sont des objets **indépendants** : leur propre code suffit à les identifier. On les crée en premier, car les autres tables vont pointer vers eux.","+entites.2":"Ne mettez pas #CodeSpa dans PRODUIT : un produit ne pourrait alors être vendu que dans un seul spa. Le lien SPA–PRODUIT sera traité par une table de liaison.","+entites.3":"Un hydrothérapeute **est** un membre du personnel : on ne recopie ni son nom ni son prénom (déjà dans PERSONNEL), la table ne garde que ce qui lui est propre. Sa clé est le numéro du personnel, à la fois clé primaire et clé étrangère.\n« Seulement la dernière » formation : une seule date, donc un simple attribut ; pas besoin d'une table FORMATION.","+entites.4":"Même principe que HYDROTHERAPEUTE, avec en plus le spa : « un seul spa » → une seule valeur par esthéticienne → #CodeSpa dans ESTHETICIENNE. L'inverse (un numéro d'esthéticienne dans SPA) est impossible : un spa a plusieurs esthéticiennes.","+associations":"La date de **première** affectation dépend du couple (hydrothérapeute, salon) : chaque salon fréquenté a sa propre date. Elle ne peut aller ni dans HYDROTHERAPEUTE (une seule date possible) ni dans SALON.","+associations.2":"AFFECTATION pointe vers HYDROTHERAPEUTE et non vers PERSONNEL : la règle ne concerne que les hydrothérapeutes. Clé composée NumPersonnelHydro + CodeSalon : aucune des deux colonnes ne suffit seule.","+associations.3":"Le prix unitaire reste dans PRODUIT si un produit a le même prix dans tous les spas (correction principale). S'il peut varier d'un spa à l'autre, il dépend du couple (spa, produit) et va dans PROPOSER : cette lecture est aussi acceptée.","+associations.4":"Clé composée CodeSpa + CodeProduit : un même couple ne peut être enregistré qu'une fois, ce qui suffit, puisque la table dit seulement « ce spa propose ce produit ».","+bilan":"Checklist :\n- 6 nouvelles tables, chacune avec une clé primaire ;\n- HYDROTHERAPEUTE et ESTHETICIENNE : clé = numéro du personnel, flèche vers PERSONNEL, ni nom ni prénom recopiés ;\n- #CodeSpa dans ESTHETICIENNE ;\n- DateDernFormation dans HYDROTHERAPEUTE, date de première affectation dans AFFECTATION ;\n- deux tables de liaison à clé composée.\nErreur la plus fréquente : #CodeSpa dans PRODUIT. Elle est signalée « presque juste » : un produit ne pourrait être proposé que par un seul spa. Autre solution acceptée : PrixUnitaire dans PROPOSER (chaque spa fixe son prix)."},
       "theme": "Évolution du schéma",
       "type": "schema",
       "annale": "2022",
