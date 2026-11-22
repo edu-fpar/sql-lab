@@ -85,7 +85,7 @@ Automatic check, without a single model answer:
 
 ## Step-by-step solution ("cinema mode")
 
-In the solution of an SQL question, the **🎬 Step by step** button replays the reasoning in the
+In the solution of an SQL question, the **🎬 Step-by-step solution** button replays the reasoning in the
 order we actually think (which is not the order we write): obvious tables → linking tables →
 aliases → columns to display → joins → filters → grouping → sorting → result. A strip shows where
 we are (steps not needed for this query are struck out), the diagram is animated (tables lit up,
@@ -95,7 +95,7 @@ rows, result.
 
 ![Step-by-step solution: the current join is animated on the diagram](docs/img/en/cinema-sql.png)
 
-Schema questions have the same mode (**🎬 Build step by step**): business rules → what no longer
+Schema questions have the same mode (**🎬 Step-by-step build**): business rules → what no longer
 fits (struck-out column) → new tables → foreign keys (one-to-many) → junction tables
 (many-to-many: composite key, then arrows) → final schema. The diagram evolves at each step.
 
