@@ -450,3 +450,79 @@ svg.pe-svg { display: block; user-select: none; touch-action: none; font: 12.5px
 .autoeval { list-style: none; padding: 0; margin: .4rem 0; display: grid; gap: .3rem; }
 .autoeval label { display: flex; gap: .4rem; align-items: flex-start; }
 .process-solution .pe-canvas { height: auto; max-height: 620px; resize: none; }
+
+/* ---------- mode cinéma : correction pas à pas ---------- */
+.cinema-dialog { width: min(1280px, 96vw); height: min(860px, 94vh); --cn-sub: #7b4bc4; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .cinema-dialog { --cn-sub: #b892ff; } }
+.cn-head { min-width: 0; flex: 1 1 420px; }
+.cn-head p { max-width: 80ch; }
+.cn-strip { display: flex; flex-wrap: wrap; gap: .3rem; list-style: none; margin: 0; padding: .55rem 1rem; border-bottom: 1px solid var(--border); background: var(--surface-2); }
+.cn-strip li { display: inline-flex; align-items: center; gap: .35rem; padding: .22rem .6rem .22rem .3rem; border-radius: 999px; font-size: .8rem; border: 1px solid var(--border); background: var(--surface); color: var(--muted); cursor: pointer; transition: background .25s, color .25s, border-color .25s; }
+.cn-strip li .n { display: inline-grid; place-items: center; width: 1.25rem; height: 1.25rem; border-radius: 50%; background: var(--surface-2); font-size: .7rem; font-weight: 700; }
+.cn-strip li.done { color: var(--ok); border-color: color-mix(in srgb, var(--ok) 45%, var(--border)); }
+.cn-strip li.done .n { background: var(--ok); color: #fff; }
+.cn-strip li.now { color: var(--accent); border-color: var(--accent); background: var(--accent-soft); font-weight: 600; }
+.cn-strip li.now .n { background: var(--accent); color: #fff; }
+.cn-strip li.skip { opacity: .45; cursor: default; text-decoration: line-through; text-decoration-color: color-mix(in srgb, var(--muted) 60%, transparent); }
+.cn-body { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr) minmax(320px, 420px); }
+.cn-body .diagram-wrap { border-right: 1px solid var(--border); }
+.cn-side { overflow: auto; padding: .9rem 1rem; display: flex; flex-direction: column; gap: .7rem; }
+.cn-comment h3 { margin: 0 0 .35rem; font-size: 1.02rem; color: var(--accent); }
+.cn-comment { line-height: 1.5; font-size: .93rem; animation: cn-in .35s ease; }
+.cn-comment ul { margin: .35rem 0; padding-left: 1.2rem; }
+.cn-comment p { margin: .4rem 0; }
+.cn-comment code { font-size: .86em; }
+.cn-t { color: var(--accent); letter-spacing: .01em; }
+.cn-sql { margin: 0; white-space: pre-wrap; line-height: 1.55; font-size: .86rem; }
+.cn-sql .kw { color: var(--accent); font-weight: 700; }
+.cn-sql .cn-ph { color: var(--muted); }
+.cn-sql mark.cn-new { background: color-mix(in srgb, var(--warn) 22%, transparent); color: inherit; border-radius: 3px; padding: 0 .1rem; animation: cn-flash 1.2s ease; }
+.cn-result .table-wrap { max-height: 260px; }
+.cn-controls { display: flex; align-items: center; flex-wrap: wrap; gap: .5rem; padding: .65rem 1rem; border-top: 1px solid var(--border); }
+.cn-count { min-width: 4.5rem; text-align: center; font-variant-numeric: tabular-nums; color: var(--muted); }
+.cn-legend { margin-left: auto; display: inline-flex; align-items: center; gap: .3rem; flex-wrap: wrap; }
+.cn-legend .lg { display: inline-block; width: .9rem; height: .7rem; border-radius: 3px; margin-left: .4rem; }
+.lg.sel { background: color-mix(in srgb, var(--accent) 30%, transparent); }
+.lg.filt { background: color-mix(in srgb, var(--warn) 35%, transparent); }
+.lg.join { background: color-mix(in srgb, var(--ok) 35%, transparent); }
+.lg.inter { border: 2px dashed var(--warn); }
+@keyframes cn-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+@keyframes cn-flash { 0% { background: color-mix(in srgb, var(--warn) 55%, transparent); } 100% { background: color-mix(in srgb, var(--warn) 22%, transparent); } }
+@media (max-width: 860px) {
+  .cn-body { grid-template-columns: 1fr; grid-template-rows: minmax(220px, 45%) 1fr; }
+  .cn-body .diagram-wrap { border-right: 0; border-bottom: 1px solid var(--border); }
+  .cn-legend { display: none; }
+}
+
+/* diagramme mis en évidence */
+svg.dg .dg-box, svg.dg .dg-link { transition: opacity .35s ease; }
+svg.dg.cn-on .dg-box:not(.cn-main):not(.cn-inter):not(.cn-sub) { opacity: .28; }
+svg.dg.cn-on .dg-link:not(.cn-link) { opacity: .22; }
+.dg-box.cn-main .dg-frame { stroke: var(--accent); stroke-width: 2.6; filter: drop-shadow(0 0 6px color-mix(in srgb, var(--accent) 45%, transparent)); }
+.dg-box.cn-main .dg-title { fill: var(--accent); }
+.dg-box.cn-inter .dg-frame { stroke: var(--warn); stroke-width: 2.4; stroke-dasharray: 7 4; }
+.dg-box.cn-inter .dg-title { fill: var(--warn); }
+.dg-box.cn-sub .dg-frame { stroke: var(--cn-sub, #7b4bc4); stroke-width: 2.2; stroke-dasharray: 2 3; }
+.cn-mark { transition: fill .3s; }
+.cn-mark.cn-sel { fill: color-mix(in srgb, var(--accent) 16%, transparent); }
+.cn-mark.cn-filt { fill: color-mix(in srgb, var(--warn) 22%, transparent); }
+.cn-mark.cn-join { fill: color-mix(in srgb, var(--ok) 20%, transparent); }
+.cn-mark.cn-grp, .cn-mark.cn-ord { fill: color-mix(in srgb, var(--cn-sub, #7b4bc4) 18%, transparent); }
+.cn-mark.cn-set { fill: color-mix(in srgb, var(--ko) 16%, transparent); }
+.cn-mark.cn-hot { stroke: currentColor; stroke-width: 1.4; animation: cn-pulse 1.6s ease-in-out 2; }
+.cn-mark.cn-hot.cn-sel { color: var(--accent); fill: color-mix(in srgb, var(--accent) 32%, transparent); }
+.cn-mark.cn-hot.cn-filt { color: var(--warn); fill: color-mix(in srgb, var(--warn) 40%, transparent); }
+.cn-mark.cn-hot.cn-join { color: var(--ok); fill: color-mix(in srgb, var(--ok) 36%, transparent); }
+.cn-mark.cn-hot.cn-grp, .cn-mark.cn-hot.cn-ord { color: var(--cn-sub, #7b4bc4); fill: color-mix(in srgb, var(--cn-sub, #7b4bc4) 32%, transparent); }
+.cn-mark.cn-hot.cn-set { color: var(--ko); fill: color-mix(in srgb, var(--ko) 30%, transparent); }
+@keyframes cn-pulse { 50% { opacity: .55; } }
+.dg-link.cn-link { stroke: var(--ok); stroke-width: 2.4; }
+.dg-link.cn-now { stroke-width: 3.2; stroke-dasharray: 9 6; animation: cn-flow 1s linear infinite; }
+@keyframes cn-flow { to { stroke-dashoffset: -15; } }
+.dg-arrowhead.cn { fill: var(--ok); }
+.cn-alias rect { fill: var(--warn); }
+.cn-alias text { fill: #fff; font-weight: 700; font-size: 12px; }
+@media (prefers-reduced-motion: reduce) {
+  .dg-link.cn-now, .cn-mark.cn-hot, .cn-sql mark.cn-new, .cn-comment { animation: none; }
+}
+.cn-launch { float: right; margin: 0 0 .4rem .6rem; }

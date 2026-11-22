@@ -71,6 +71,7 @@ Uniquement un objet JSON (dans un bloc ```json), au format suivant :
 | `type` | pour les modifications | `"write"` pour INSERT / UPDATE / DELETE (déduit automatiquement sinon). |
 | `verif` | pour les modifications | `SELECT * FROM <table modifiée>` : l'application compare la table avant/après. |
 | `annale` | non | Année de l'annale dont la question s'inspire (affiche un badge). |
+| `cinema` | non | Remplace des commentaires de la « correction pas à pas », générée automatiquement à partir de la correction : `{ "passages": "…", "filtres.2": "…" }` (phases : `tables`, `passages`, `alias`, `select`, `jointures`, `filtres`, `groupe`, `tri`, `resultat` ; `.n` = n-ième étape de la phase). À n'utiliser que si le commentaire automatique ne convient pas. |
 
 ### Questions de construction de schéma (`"type": "schema"`)
 

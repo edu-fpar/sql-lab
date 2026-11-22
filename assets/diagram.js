@@ -208,6 +208,7 @@
           "data-from": l.from.name, "data-to": l.to.name,
         }, this.gLinks);
       });
+      if (this.focusState) this.applyLinkFocus();
     }
 
     resize() {
@@ -235,6 +236,8 @@
       el("path", { d: "M0 0 L10 5 L0 10 z", class: "dg-arrowhead" }, m);
       const mh = el("marker", { id: this.uid + "-arrow-hl", viewBox: "0 0 10 10", refX: "9", refY: "5", markerWidth: "8", markerHeight: "8", orient: "auto-start-reverse" }, defs);
       el("path", { d: "M0 0 L10 5 L0 10 z", class: "dg-arrowhead hl" }, mh);
+      const mc = el("marker", { id: this.uid + "-arrow-cn", viewBox: "0 0 10 10", refX: "9", refY: "5", markerWidth: "8", markerHeight: "8", orient: "auto-start-reverse" }, defs);
+      el("path", { d: "M0 0 L10 5 L0 10 z", class: "dg-arrowhead cn" }, mc);
       this.gLinks = el("g", {}, svg);
       const gBoxes = el("g", {}, svg);
 
@@ -267,6 +270,70 @@
       }
       this.drawLinks();
       this.resize();
+      if (this.focusState) this.applyFocus();
+    }
+
+    /**
+     * Mise en évidence pour la correction pas à pas.
+     * f = { main:[T], inter:[T], sub:[T], cols:{T:{col:"sel"|"filt"|"join"|"grp"|"ord"|"set"}},
+     *       aliases:{T:"a"}, links:[[T1,T2]], now:[[T1,T2]] }
+     */
+    focus(f) {
+      this.focusState = f || null;
+      if (this.svg) this.applyFocus();
+    }
+
+    clearFocus() { this.focus(null); }
+
+    applyFocus() {
+      const svg = this.svg, f = this.focusState;
+      for (const e of svg.querySelectorAll(".cn-mark, .cn-alias")) e.remove();
+      svg.classList.toggle("cn-on", !!f);
+      const low = (x) => String(x).toLowerCase();
+      const has = (arr, n) => !!arr && arr.some((x) => low(x) === low(n));
+      for (const t of this.tables) {
+        const g = svg.querySelector(`[data-table="${t.name}"]`);
+        if (!g) continue;
+        g.classList.remove("cn-main", "cn-inter", "cn-sub");
+        if (!f) continue;
+        const role = has(f.main, t.name) ? "main" : has(f.inter, t.name) ? "inter" : has(f.sub, t.name) ? "sub" : null;
+        if (role) g.classList.add("cn-" + role);
+        const key = f.cols && Object.keys(f.cols).find((k) => low(k) === low(t.name));
+        if (key) {
+          const first = g.querySelector(".dg-col");
+          for (const [col, kind] of Object.entries(f.cols[key])) {
+            const i = t.cols.findIndex((c) => low(c.name) === low(col));
+            if (i < 0) continue;
+            const isHot = !!f.hot && f.hot.some(([a, b]) => low(a) === low(t.name) && low(b) === low(col));
+            const r = el("rect", { x: 2, y: HEAD + PADY + i * ROW + 1, width: t.w - 4, height: ROW - 2, rx: 3, class: "cn-mark cn-" + kind + (isHot ? " cn-hot" : "") });
+            g.insertBefore(r, first);
+          }
+        }
+        const akey = f.aliases && Object.keys(f.aliases).find((k) => low(k) === low(t.name));
+        if (akey) {
+          const label = f.aliases[akey];
+          const w = Math.max(24, textWidth(label, FONT_HEAD) + 14);
+          const b = el("g", { class: "cn-alias", transform: `translate(${t.w - w + 6} -12)` }, g);
+          el("rect", { x: 0, y: 0, width: w, height: 20, rx: 10 }, b);
+          el("text", { x: w / 2, y: 14, "text-anchor": "middle" }, b).textContent = label;
+        }
+      }
+      this.applyLinkFocus();
+    }
+
+    applyLinkFocus() {
+      const f = this.focusState;
+      const low = (x) => String(x).toLowerCase();
+      const match = (list, a, b) => !!list && list.some(([x, y]) =>
+        (low(x) === low(a) && low(y) === low(b)) || (low(x) === low(b) && low(y) === low(a)));
+      for (const p of this.gLinks.querySelectorAll(".dg-link")) {
+        const a = p.dataset.from, b = p.dataset.to;
+        const on = !!f && match(f.links, a, b);
+        p.classList.toggle("cn-link", on);
+        p.classList.toggle("cn-now", on && match(f.now, a, b));
+        p.setAttribute("marker-end", `url(#${this.uid}-arrow${on ? "-cn" : ""})`);
+        if (on) this.gLinks.appendChild(p);
+      }
     }
 
     place(t) {
@@ -307,6 +374,7 @@
         p.setAttribute("marker-end", `url(#${this.uid}-arrow${on ? "-hl" : ""})`);
         if (on) this.gLinks.appendChild(p); // liaison mise en évidence au premier plan
       }
+      if (!on && this.focusState) this.applyLinkFocus();
     }
 
     bindDrag(g, t) {

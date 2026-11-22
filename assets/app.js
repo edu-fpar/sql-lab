@@ -946,8 +946,22 @@
       return;
     }
     const blocks = [q.correction, ...(q.variantes || [])];
-    $("correction").innerHTML = blocks.map((b, i) =>
+    const cine = window.SQLCinema && SQLCinema.plan(lines(q.correction), state.schema, q)
+      ? `<button class="btn small cn-launch" type="button" data-cinema>🎬 Correction pas à pas</button>` : "";
+    $("correction").innerHTML = cine + blocks.map((b, i) =>
       `<p class="muted small">${i === 0 ? "Correction" : "Autre écriture possible"}</p><pre><code>${esc(lines(b))}</code></pre>`).join("");
+  }
+
+  /** Mode cinéma : la correction expliquée étape par étape, avec le schéma animé */
+  function openCinema() {
+    const q = current();
+    if (!state.cinema) {
+      const ids = { dialog: "cinemaDialog", title: "cnTitle", enonce: "cnEnonce", strip: "cnStrip", diagram: "cnDiagram", comment: "cnComment",
+        sql: "cnSql", result: "cnResult", count: "cnCount", first: "cnFirst", prev: "cnPrev", next: "cnNext", play: "cnPlay", close: "cnClose" };
+      const els = Object.fromEntries(Object.entries(ids).map(([k, id]) => [k, $(id)]));
+      state.cinema = new SQLCinema.Player(els, { store: diagramStore });
+    }
+    state.cinema.open({ q, schema: state.schema, engine: state.engine, ex: state.ex, sql: lines(q.correction) });
   }
 
   function autoGrow() {
@@ -983,6 +997,7 @@
         $("expectedCard").scrollIntoView({ behavior: "smooth", block: "nearest" });
       }
     });
+    $("correction").addEventListener("click", (e) => { if (e.target.closest("[data-cinema]")) openCinema(); });
     // ----- diagramme
     const dlg = $("diagramDialog");
     $("btnDiagram").addEventListener("click", openDiagram);

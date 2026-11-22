@@ -15,6 +15,7 @@
     "assets/compare.js",
     "assets/engine.js",
     "assets/diagram.js",
+    "assets/cinema.js",
     "assets/packs.js",
     "assets/library.js",
     "assets/scorm.js",
