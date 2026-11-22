@@ -7,6 +7,16 @@
 (function (global) {
   "use strict";
 
+  const I18N = global.I18N || { lang: "fr", add() {}, t: (s, v) => (v ? s.replace(/\{(\w+)\}/g, (m, k) => (v[k] !== undefined ? v[k] : m)) : s) };
+  const tr = I18N.t;
+  I18N.add({
+    "Schéma relationnel": "Relational schema",
+    "Glisser pour déplacer · cliquer pour modifier · tirer le rond ● d'un attribut vers une table pour créer une clé étrangère": "Drag to move · click to edit · drag an attribute's ● handle onto a table to create a foreign key",
+    "Glisser pour déplacer · double-clic pour voir le contenu": "Drag to move · double-click to see the contents",
+    "Tirer vers une table pour faire de cet attribut une clé étrangère": "Drag onto a table to make this attribute a foreign key",
+    "clé étrangère → {fk}": "foreign key → {fk}",
+  });
+
   const NS = "http://www.w3.org/2000/svg";
   const ROW = 21, HEAD = 30, PADX = 14, PADY = 7, MARGIN = 24, GAPX = 96, GAPY = 64;
   const FONT = "13px system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif";
@@ -229,7 +239,7 @@
 
     render() {
       this.host.textContent = "";
-      const svg = el("svg", { class: "dg", role: "img", "aria-label": "Schéma relationnel" }, this.host);
+      const svg = el("svg", { class: "dg", role: "img", "aria-label": tr("Schéma relationnel") }, this.host);
       this.svg = svg;
       const defs = el("defs", {}, svg);
       const m = el("marker", { id: this.uid + "-arrow", viewBox: "0 0 10 10", refX: "9", refY: "5", markerWidth: "8", markerHeight: "8", orient: "auto-start-reverse" }, defs);
@@ -244,8 +254,8 @@
       for (const t of this.tables) {
         const g = el("g", { class: "dg-box", "data-table": t.name, tabindex: "0" }, gBoxes);
         el("title", {}, g).textContent = this.opts.editable
-          ? "Glisser pour déplacer · cliquer pour modifier · tirer le rond ● d'un attribut vers une table pour créer une clé étrangère"
-          : "Glisser pour déplacer · double-clic pour voir le contenu";
+          ? tr("Glisser pour déplacer · cliquer pour modifier · tirer le rond ● d'un attribut vers une table pour créer une clé étrangère")
+          : tr("Glisser pour déplacer · double-clic pour voir le contenu");
         const sel = this.opts.selected && this.opts.selected.table === t.name ? this.opts.selected : null;
         if (sel) g.classList.add("dg-selected");
         el("rect", { x: 0, y: 0, width: t.w, height: t.h, rx: 6, class: "dg-frame" }, g);
@@ -256,14 +266,14 @@
           if (sel && sel.row === i) el("rect", { x: 1, y: HEAD + PADY + i * ROW, width: t.w - 2, height: ROW, class: "dg-rowsel" }, g);
           if (this.opts.editable) {
             const h = el("circle", { cx: t.w, cy: HEAD + PADY + i * ROW + ROW / 2, r: 5, class: "dg-handle" + (c.fk ? " linked" : ""), "data-row": i }, g);
-            el("title", {}, h).textContent = "Tirer vers une table pour faire de cet attribut une clé étrangère";
+            el("title", {}, h).textContent = tr("Tirer vers une table pour faire de cet attribut une clé étrangère");
           }
           const tx = el("text", {
             x: PADX, y: HEAD + PADY + i * ROW + ROW / 2 + 4.5,
             class: "dg-col" + (c.pk ? " dg-pk" : "") + (c.fk ? " dg-fk" : ""),
           }, g);
           tx.textContent = t.labels[i];
-          if (c.fk) el("title", {}, tx).textContent = `clé étrangère → ${c.fk}`;
+          if (c.fk) el("title", {}, tx).textContent = tr("clé étrangère → {fk}", { fk: c.fk });
         });
         this.place(t);
         this.bindDrag(g, t);

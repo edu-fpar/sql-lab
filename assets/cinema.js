@@ -14,6 +14,213 @@
 (function (global) {
   "use strict";
 
+  // ------------------------------------------------------------ traductions
+  // tr / trn plutôt que t (t désigne souvent une table dans ce fichier).
+  const I18N = global.I18N || { lang: "fr", add() {}, t: (s, v) => (v ? s.replace(/\{(\w+)\}/g, (m, k) => (v[k] !== undefined ? v[k] : m)) : s) };
+  const tr = I18N.t;
+  /** singulier / pluriel : en français 0 et 1 au singulier, en anglais seul 1 */
+  const trn = (n, one, many, v) => tr((I18N.lang === "fr" ? n > 1 : n !== 1) ? many : one, { n, ...(v || {}) });
+  I18N.add({
+    // listes
+    "{a} et {b}": "{a} and {b}",
+    // expressions du SELECT
+    "toutes les colonnes": "all columns",
+    "compte les lignes": "counts the rows",
+    "compte les valeurs <em>différentes</em>": "counts the <em>distinct</em> values",
+    "compte les lignes où la colonne est renseignée": "counts the rows where the column is filled in",
+    "fait la somme": "adds up the values",
+    "calcule la moyenne": "calculates the average",
+    "retient la plus petite valeur": "keeps the smallest value",
+    "retient la plus grande valeur": "keeps the largest value",
+    "extrait l'année de la date": "extracts the year from the date",
+    "extrait le mois de la date": "extracts the month from the date",
+    "nombre de jours entre deux dates": "number of days between two dates",
+    "calcul à partir d'un regroupement": "calculation based on a grouping",
+    "colonne calculée": "calculated column",
+    // conditions
+    " sur {t}": " on {t}",
+    "<strong>sous-requête</strong>{sub} : je garde les lignes pour lesquelles elle ne renvoie <em>rien</em> (NOT EXISTS).": "<strong>subquery</strong>{sub}: I keep the rows for which it returns <em>nothing</em> (NOT EXISTS).",
+    "<strong>sous-requête</strong>{sub} : je garde les lignes pour lesquelles elle renvoie au moins une ligne (EXISTS).": "<strong>subquery</strong>{sub}: I keep the rows for which it returns at least one row (EXISTS).",
+    "<strong>sous-requête</strong>{sub} : elle calcule d'abord une liste, puis je garde les lignes qui n'y figurent <em>pas</em> (NOT IN). C'est la traduction de « n'a jamais… », « aucun… ».": "<strong>subquery</strong>{sub}: it first computes a list, then I keep the rows that are <em>not</em> in it (NOT IN). This is how you express “has never…”, “no…”.",
+    "<strong>sous-requête</strong>{sub} : elle calcule d'abord une liste, puis je garde les lignes qui y figurent (IN).": "<strong>subquery</strong>{sub}: it first computes a list, then I keep the rows that are in it (IN).",
+    "la valeur de comparaison est calculée par une <strong>sous-requête</strong>{sub}, exécutée d'abord.": "the comparison value is computed by a <strong>subquery</strong>{sub}, which runs first.",
+    "valeur <em>renseignée</em> : IS NOT NULL.": "the value is <em>filled in</em>: IS NOT NULL.",
+    "valeur <em>vide</em> (non renseignée) : IS NULL — jamais <code>= NULL</code>.": "the value is <em>empty</em> (not filled in): IS NULL — never <code>= NULL</code>.",
+    "la valeur ne doit être aucune de celles de la liste (NOT IN).": "the value must not be any of those in the list (NOT IN).",
+    "la valeur doit être l'une de celles de la liste (IN).": "the value must be one of those in the list (IN).",
+    "BETWEEN … AND … : bornes comprises.": "BETWEEN … AND …: both bounds are included.",
+    "LIKE : <code>%</code> remplace n'importe quelle suite de caractères.": "LIKE: <code>%</code> stands for any sequence of characters.",
+    "on extrait le mois et l'année de la date.": "I extract the month and the year from the date.",
+    "YEAR() extrait l'année de la date.": "YEAR() extracts the year from the date.",
+    "MONTH() extrait le mois de la date.": "MONTH() extracts the month from the date.",
+    "l'une <em>ou</em> l'autre condition suffit : les parenthèses évitent de mélanger OR et AND.": "one condition <em>or</em> the other is enough: the parentheses keep OR and AND from getting mixed up.",
+    "le texte entre apostrophes doit être écrit exactement comme dans la base.": "the text between quotes must be written exactly as it is in the database.",
+    "comparaison de dates.": "date comparison.",
+    // phases
+    "Tables": "Tables", "Tables de passage": "Linking tables", "Alias": "Aliases", "Colonnes": "Columns",
+    "Jointures": "Joins", "Filtres": "Filters", "Regroupement": "Grouping", "Tri": "Sorting", "Résultat": "Result",
+    "Table": "Table", "Valeurs": "Values", "Lignes visées": "Targeted rows",
+    "Règles de gestion": "Business rules", "Ce qui ne tient plus": "What no longer fits", "Nouvelles tables": "New tables",
+    "Clés étrangères (1 → n)": "Foreign keys (1 → n)", "Tables de liaison (n ↔ n)": "Junction tables (n ↔ n)", "Schéma final": "Final schema",
+    // 1. tables évidentes
+    " (ce sont ses lignes que l'on compte)": " (its rows are the ones being counted)",
+    "Je lis l'énoncé et je cherche où se trouvent les informations demandées : tout est dans la table {t}{cols}. Une seule table, donc <strong>pas de jointure</strong>.": "I read the question and look for where the requested information is: everything is in the {t} table{cols}. Only one table, so <strong>no join</strong>.",
+    "Je lis l'énoncé et je repère les tables qui contiennent les informations demandées (à afficher ou à filtrer) : {list}.": "I read the question and spot the tables that hold the requested information (to display or to filter on): {list}.",
+    " Sur le schéma, elles sont reliées directement par une flèche : pas besoin de table intermédiaire.": " On the diagram, they are linked directly by an arrow: no intermediate table is needed.",
+    " Sur le schéma, elles sont reliées directement par des flèches : pas besoin de table intermédiaire.": " On the diagram, they are linked directly by arrows: no intermediate table is needed.",
+    "Les tables évidentes": "The obvious tables",
+    // 2. tables de passage
+    "{t} fait le lien entre {list}": "{t} links {list}",
+    "{t} est nécessaire pour atteindre {list}": "{t} is needed to reach {list}",
+    "les autres tables": "the other tables",
+    " ; ": "; ",
+    "Ces tables ne sont pas reliées directement : je suis les flèches du schéma. {why}. ": "These tables are not linked directly: I follow the arrows on the diagram. {why}. ",
+    "Elle n'apporte aucune colonne au résultat, mais elle doit figurer dans le FROM pour faire le chemin.": "It adds no column to the result, but it must appear in the FROM to complete the path.",
+    "Elles n'apportent aucune colonne au résultat, mais elles doivent figurer dans le FROM pour faire le chemin.": "They add no columns to the result, but they must appear in the FROM to complete the path.",
+    "Les tables de passage": "The linking tables",
+    // 3. alias
+    "{a} pour {t}": "{a} for {t}",
+    "colonne": "column",
+    "Pour éviter de répéter les noms complets, je donne un surnom (alias) à la table dans le FROM : {list}. Ensuite j'écris {ex} au lieu du nom complet.": "To avoid repeating full names, I give the table a nickname (alias) in the FROM: {list}. Then I write {ex} instead of the full name.",
+    "Pour éviter de répéter les noms complets, je donne un surnom (alias) à chaque table dans le FROM : {list}. Ensuite j'écris {ex} au lieu du nom complet.": "To avoid repeating full names, I give each table a nickname (alias) in the FROM: {list}. Then I write {ex} instead of the full name.",
+    " Ici la table {t} est utilisée deux fois : les alias sont <strong>obligatoires</strong> pour distinguer ses deux rôles.": " Here the {t} table is used twice: aliases are <strong>required</strong> to tell its two roles apart.",
+    "Les alias": "Aliases",
+    // 4. SELECT
+    "{t} figure deux fois : l'alias {a} dit de quelle copie il s'agit": "{t} appears twice: the alias {a} says which copy is meant",
+    "{c} existe aussi dans {list} : je précise la table": "{c} also exists in {list}: I specify the table",
+    "colonne renommée « {a} »": "column renamed “{a}”",
+    "Je liste ce que je veux voir apparaître, dans l'ordre de l'énoncé :<ul>{lis}</ul>": "I list what I want to see, in the order given in the question:<ul>{lis}</ul>",
+    "<p>« Sans doublon » : {d} supprime les lignes identiques du résultat.</p>": "<p>“Without duplicates”: {d} removes identical rows from the result.</p>",
+    "<p>Pas de GROUP BY : le calcul porte sur toutes les lignes retenues, le résultat tient en <strong>une ligne</strong>.</p>": "<p>No GROUP BY: the calculation covers all the rows kept, so the result fits on <strong>a single row</strong>.</p>",
+    "<p class=\"muted small\">Le SELECT s'écrit en premier, mais on le remplit une fois qu'on sait d'où viennent les données.</p>": "<p class=\"muted small\">The SELECT is written first, but you fill it in once you know where the data comes from.</p>",
+    "Ce que je veux voir": "What I want to see",
+    // 5. jointures
+    "{t} tables, donc {n} jointure, écrites ici avec {c} : chaque ON égalise une clé étrangère et la clé primaire qu'elle référence.": "{t} tables, so {n} join, written here with {c}: each ON matches a foreign key with the primary key it references.",
+    "{t} tables, donc {n} jointures, écrites ici avec {c} : chaque ON égalise une clé étrangère et la clé primaire qu'elle référence.": "{t} tables, so {n} joins, written here with {c}: each ON matches a foreign key with the primary key it references.",
+    "Les jointures": "The joins",
+    "Avec {t} tables dans le FROM, il faut {n} jointure (une de moins que de tables), sinon chaque ligne serait combinée avec toutes les autres (produit cartésien). ": "With {t} tables in the FROM, I need {n} join (one fewer than the number of tables); otherwise every row would be combined with every other row (Cartesian product). ",
+    "Avec {t} tables dans le FROM, il faut {n} jointures (une de moins que de tables), sinon chaque ligne serait combinée avec toutes les autres (produit cartésien). ": "With {t} tables in the FROM, I need {n} joins (one fewer than the number of tables); otherwise every row would be combined with every other row (Cartesian product). ",
+    "Je relie {a} et {b}. La clé est <strong>composée</strong> de {n} colonnes ({list}) : il faut égaliser <em>chacune</em> d'elles, sinon la jointure associe des lignes qui ne vont pas ensemble.": "I link {a} and {b}. The key is <strong>composite</strong>, made of {n} columns ({list}): <em>each</em> of them must be matched, otherwise the join pairs up rows that don't belong together.",
+    "Je relie {a} et {b} : la clé étrangère <i>#{fk}</i> de {a} pointe vers la clé primaire <u>{pk}</u> de {b}.": "I link {a} and {b}: the foreign key <i>#{fk}</i> in {a} points to the primary key <u>{pk}</u> of {b}.",
+    "Je relie {a} et {b} par leur colonne commune.": "I link {a} and {b} through the column they share.",
+    " La colonne porte le même nom dans les deux tables : je la préfixe ({c}).": " The column has the same name in both tables: I prefix it ({c}).",
+    " C'est la même table utilisée deux fois (relation réflexive) : les alias distinguent les deux rôles.": " It is the same table used twice (self-referencing relationship): the aliases tell the two roles apart.",
+    "Jointure {i} / {n}": "Join {i} / {n}",
+    "La jointure": "The join",
+    // 6. filtres
+    "{c} : {d}": "{c}: {d}",
+    "Je ne garde que les lignes qui répondent à l'énoncé. {b}": "I keep only the rows that match the question. {b}",
+    "J'ajoute une condition avec AND : {b}": "I add a condition with AND: {b}",
+    "Filtre {i} / {n}": "Filter {i} / {n}",
+    "Le filtre": "The filter",
+    // 7. regroupement
+    "fonction": "function",
+    "Le calcul est demandé « par » {g} : je regroupe les lignes avec <code>GROUP BY</code>. Le calcul ({c}) est alors fait pour chaque groupe.": "The calculation is asked for “per” {g}: I group the rows with <code>GROUP BY</code>. The calculation ({c}) is then done for each group.",
+    " Règle : chaque colonne affichée <em>sans</em> fonction de calcul ({list}) doit figurer dans le GROUP BY.": " Rule: every column displayed <em>without</em> an aggregate function ({list}) must appear in the GROUP BY.",
+    "Le regroupement": "Grouping",
+    "La condition {h} porte sur le <em>résultat d'un calcul</em> : elle ne peut pas aller dans le WHERE (qui filtre les lignes avant le regroupement) ; elle se place dans <code>HAVING</code>, après le GROUP BY.": "The condition {h} applies to the <em>result of a calculation</em>: it cannot go in the WHERE (which filters rows before grouping); it goes in <code>HAVING</code>, after the GROUP BY.",
+    " La valeur de comparaison vient d'une sous-requête sur {list}.": " The comparison value comes from a subquery on {list}.",
+    "La condition sur les groupes": "The condition on groups",
+    // 8. tri
+    "{c} par ordre <strong>décroissant</strong> (DESC)": "{c} in <strong>descending</strong> order (DESC)",
+    "{c} par ordre croissant (par défaut)": "{c} in ascending order (the default)",
+    "L'énoncé demande un tri : {list}. Le second critère départage les égalités du premier. <code>ORDER BY</code> se place toujours à la fin.": "The question asks for sorting: {list}. The second criterion breaks ties in the first. <code>ORDER BY</code> always goes at the end.",
+    "L'énoncé demande un tri : {list}. <code>ORDER BY</code> se place toujours à la fin.": "The question asks for sorting: {list}. <code>ORDER BY</code> always goes at the end.",
+    "Le tri": "Sorting",
+    "Le résultat": "The result",
+    "J'exécute la requête et je vérifie que le résultat répond bien à l'énoncé (nombre de lignes, colonnes, valeurs).": "I run the query and check that the result really answers the question (number of rows, columns, values).",
+    // requêtes de mise à jour
+    "Il s'agit de modifier des lignes existantes : UPDATE. Je repère la table touchée : {t}. Une requête de mise à jour ne modifie qu'<strong>une seule table</strong>.": "The task is to change existing rows: UPDATE. I identify the table affected: {t}. A data-modification query only changes <strong>one table</strong>.",
+    "Il s'agit de supprimer des lignes : DELETE. Je repère la table touchée : {t}. Une requête de mise à jour ne modifie qu'<strong>une seule table</strong>.": "The task is to delete rows: DELETE. I identify the table affected: {t}. A data-modification query only changes <strong>one table</strong>.",
+    "Il s'agit de ajouter une ligne : INSERT INTO. Je repère la table touchée : {t}. Une requête de mise à jour ne modifie qu'<strong>une seule table</strong>.": "The task is to add a row: INSERT INTO. I identify the table affected: {t}. A data-modification query only changes <strong>one table</strong>.",
+    "La table concernée": "The target table",
+    " — la nouvelle valeur est calculée à partir de l'ancienne": " — the new value is calculated from the old one",
+    "Après <code>SET</code>, j'indique chaque colonne à changer et sa nouvelle valeur :<ul>{lis}</ul>": "After <code>SET</code>, I give each column to change and its new value:<ul>{lis}</ul>",
+    "Les nouvelles valeurs": "The new values",
+    "Les valeurs proviennent d'une requête <code>SELECT</code> : chaque ligne qu'elle renvoie est ajoutée.": "The values come from a <code>SELECT</code> query: every row it returns is added.",
+    "Les valeurs sont données dans le même ordre que les colonnes :<ul>{lis}</ul>": "The values are given in the same order as the columns:<ul>{lis}</ul>",
+    " {c} est une clé étrangère : la valeur doit déjà exister dans {t}.": " {c} is a foreign key: the value must already exist in {t}.",
+    " {c} sont des clés étrangères : la valeur doit déjà exister dans {t}.": " {c} are foreign keys: their values must already exist in {t}.",
+    " Les textes et les dates s'écrivent entre apostrophes, pas les nombres.": " Text and dates go between single quotes; numbers don't.",
+    "Les valeurs à ajouter": "The values to add",
+    "Le <code>WHERE</code> cible les lignes concernées :<ul>{lis}</ul><strong>Sans WHERE, toutes les lignes seraient supprimées.</strong>": "The <code>WHERE</code> targets the rows concerned:<ul>{lis}</ul><strong>Without WHERE, every row would be deleted.</strong>",
+    "Le <code>WHERE</code> cible les lignes concernées :<ul>{lis}</ul><strong>Sans WHERE, toutes les lignes seraient modifiées.</strong>": "The <code>WHERE</code> targets the rows concerned:<ul>{lis}</ul><strong>Without WHERE, every row would be changed.</strong>",
+    " Attention : si des lignes de {t} font référence aux lignes supprimées, l'intégrité référentielle bloque la suppression.": " Watch out: if rows in {t} refer to the deleted rows, referential integrity blocks the deletion.",
+    "Les lignes visées": "The targeted rows",
+    "Pas de <code>WHERE</code> : <strong>toutes les lignes</strong> de {t} sont concernées. C'est voulu ici, mais à vérifier à chaque fois.": "No <code>WHERE</code>: <strong>every row</strong> of {t} is affected. That is intended here, but always check it.",
+    "J'exécute la requête (sur une copie de la base) et je contrôle les lignes touchées.": "I run the query (on a copy of the database) and check the rows affected.",
+    // schéma : lecture
+    "Je lis les règles de gestion": "I read the business rules",
+    "Je repère, dans le schéma de départ, les tables concernées par les nouvelles règles. Pour chaque règle, je cherche le <strong>type de lien</strong> :<ul><li>« un … est lié à <em>un seul</em> … » : relation un à plusieurs, une <strong>clé étrangère</strong> suffit (du côté « plusieurs ») ;</li><li>« un … peut être lié à <em>plusieurs</em> …, et inversement » : relation plusieurs à plusieurs, il faut une <strong>nouvelle table</strong> ;</li><li>un nouvel objet à décrire, avec ses propres informations : une nouvelle table.</li></ul>": "In the starting schema, I spot the tables affected by the new rules. For each rule, I look for the <strong>type of relationship</strong>:<ul><li>“a … is linked to <em>only one</em> …”: a one-to-many relationship, a <strong>foreign key</strong> is enough (on the “many” side);</li><li>“a … can be linked to <em>several</em> …, and vice versa”: a many-to-many relationship, a <strong>new table</strong> is needed;</li><li>a new object to describe, with its own information: a new table.</li></ul>",
+    "<p>Ici, {n} nouvelle table à créer.</p>": "<p>Here, there is {n} new table to create.</p>",
+    "<p>Ici, {n} nouvelles tables à créer.</p>": "<p>Here, there are {n} new tables to create.</p>",
+    // schéma : retraits
+    "{c} ne peut plus rester dans {t} : dans une ligne, une colonne ne contient qu'<em>une seule</em> valeur, or la nouvelle règle en demande plusieurs.": "{c} can no longer stay in {t}: in a row, a column holds only <em>one</em> value, but the new rule calls for several.",
+    "{c} ne peuvent plus rester dans {t} : dans une ligne, une colonne ne contient qu'<em>une seule</em> valeur, or la nouvelle règle en demande plusieurs.": "{c} can no longer stay in {t}: in a row, a column holds only <em>one</em> value, but the new rule calls for several.",
+    " L'information sera reprise dans {t}.": " This information moves to {t}.",
+    "Une table disparaît": "A table disappears",
+    "La table {t} n'a plus lieu d'être avec les nouvelles règles : je la supprime, avec les flèches qui y mènent.": "The {t} table is no longer needed under the new rules: I delete it, along with the arrows leading to it.",
+    // schéma : nouvelles tables
+    "Il faut {r} : je crée la table {t}.": "I need to {r}: I create the {t} table.",
+    "je crée la table {t}.": "I create the {t} table.",
+    " Sa clé primaire {pk} identifie chaque ligne ; elle porte {a}.": " Its primary key {pk} identifies each row; it holds {a}.",
+    " Sa clé primaire {pk} identifie chaque ligne.": " Its primary key {pk} identifies each row.",
+    " Sa clé contient {k} : une ligne de {t} n'existe qu'à l'intérieur de cette table.": " Its key contains {k}: a row of {t} only exists within that table.",
+    " Sa clé contient {k} : une ligne de {t} n'existe qu'à l'intérieur de ces tables.": " Its key contains {k}: a row of {t} only exists within those tables.",
+    " Chaque ligne est rattachée à un seul {r} : relation un à plusieurs, d'où la clé étrangère {k} et la flèche.": " Each row is attached to a single {r}: a one-to-many relationship, hence the foreign key {k} and the arrow.",
+    "Une nouvelle table": "A new table",
+    // schéma : clés étrangères
+    "<p>Chaque ligne de {t} est liée à <em>un seul</em> {r}, qui peut l'être à plusieurs : relation <strong>un à plusieurs</strong>. J'ajoute la clé étrangère <i>#{k}</i> dans {t}, du côté « plusieurs » : la flèche part de {t} vers {r}.</p>": "<p>Each row of {t} is linked to <em>only one</em> {r}, which can be linked to several: a <strong>one-to-many</strong> relationship. I add the foreign key <i>#{k}</i> to {t}, on the “many” side: the arrow goes from {t} to {r}.</p>",
+    "<p>J'ajoute {a} dans {t} : c'est une information sur chaque ligne de cette table.</p>": "<p>I add {a} to {t}: it is information about each row of this table.</p>",
+    "<p>J'ajoute {a} dans {t} : ce sont des informations sur chaque ligne de cette table.</p>": "<p>I add {a} to {t}: they are information about each row of this table.</p>",
+    "Une clé étrangère": "A foreign key",
+    "Un nouvel attribut": "A new attribute",
+    // schéma : tables de liaison
+    "Règle : il faut {r}. ": "Rule: we need to {r}. ",
+    "Le lien concerne {n} tables à la fois ({list}). ": "The relationship involves {n} tables at once ({list}). ",
+    "Un {a} peut être lié à plusieurs {b}, et inversement : relation <strong>plusieurs à plusieurs</strong>. ": "One {a} can be linked to several {b}, and vice versa: a <strong>many-to-many</strong> relationship. ",
+    "Une clé étrangère ne suffit pas (il faudrait plusieurs valeurs dans une case) : je crée la table {t}. Sa clé primaire <strong>associe</strong> les clés des tables reliées : {pk}.": "A foreign key is not enough (one cell would need several values): I create the {t} table. Its primary key <strong>combines</strong> the keys of the linked tables: {pk}.",
+    "Une table de liaison": "A junction table",
+    "<i>#{k}</i> renvoie à {t}": "<i>#{k}</i> refers to {t}",
+    "Chaque partie de la clé est aussi une <strong>clé étrangère</strong> : {list}. D'où la flèche.": "Each part of the key is also a <strong>foreign key</strong>: {list}. Hence the arrow.",
+    "Chaque partie de la clé est aussi une <strong>clé étrangère</strong> : {list}. D'où les flèches.": "Each part of the key is also a <strong>foreign key</strong>: {list}. Hence the arrows.",
+    " {a} dépend à la fois de {r} : l'attribut se place dans {t}, la table du lien.": " {a} depends jointly on {r}: the attribute goes in {t}, the junction table.",
+    " {a} dépendent à la fois de {r} : les attributs se placent dans {t}, la table du lien.": " {a} depend jointly on {r}: the attributes go in {t}, the junction table.",
+    "Les clés étrangères de la table de liaison": "The junction table's foreign keys",
+    // schéma : bilan
+    "Le schéma final : {t} a été créée ou modifiée.": "The final schema: {t} was created or modified.",
+    "Le schéma final : {t} ont été créées ou modifiées.": "The final schema: {t} were created or modified.",
+    "<p>Pour vérifier : chaque nouvelle règle est-elle traduite ? chaque table a-t-elle une clé primaire ? chaque flèche part-elle d'une clé étrangère vers une clé primaire ?</p>": "<p>To check: is every new rule reflected? Does every table have a primary key? Does every arrow go from a foreign key to a primary key?</p>",
+    "<p class=\"muted small\">Les noms peuvent varier : la vérification accepte les noms équivalents et reconnaît une table à sa clé primaire.</p>": "<p class=\"muted small\">Names may vary: the check accepts equivalent names and recognises a table by its primary key.</p>",
+    "<p class=\"muted small\">Une autre solution est aussi acceptée : voir la correction.</p>": "<p class=\"muted small\">Another solution is also accepted: see the solution.</p>",
+    "Le schéma final": "The final schema",
+    // lecteur
+    "Construction du schéma pas à pas": "Building the schema step by step",
+    "Correction pas à pas": "Step-by-step solution",
+    "Pas nécessaire ici": "Not needed here",
+    "<i class=\"lg add\"></i>nouveau <i class=\"lg join\"></i>clé étrangère <i class=\"lg del\"></i>retiré <i class=\"lg inter\"></i>table reliée": "<i class=\"lg add\"></i>new <i class=\"lg join\"></i>foreign key <i class=\"lg del\"></i>removed <i class=\"lg inter\"></i>linked table",
+    "<i class=\"lg sel\"></i>affiché <i class=\"lg filt\"></i>filtre <i class=\"lg join\"></i>jointure <i class=\"lg inter\"></i>table de passage": "<i class=\"lg sel\"></i>displayed <i class=\"lg filt\"></i>filter <i class=\"lg join\"></i>join <i class=\"lg inter\"></i>linking table",
+    "<strong>{n}</strong> ligne": "<strong>{n}</strong> row",
+    "<strong>{n}</strong> lignes": "<strong>{n}</strong> rows",
+    " (les {m} premières)": " (first {m} shown)",
+    "<strong>{n}</strong> ligne touchée (sur une copie : la base n'est pas modifiée).": "<strong>{n}</strong> row affected (on a copy: the database is not changed).",
+    "<strong>{n}</strong> lignes touchées (sur une copie : la base n'est pas modifiée).": "<strong>{n}</strong> rows affected (on a copy: the database is not changed).",
+    "<p class=\"muted small\">La correction contient {n} requêtes : seule la première est détaillée ici.</p>": "<p class=\"muted small\">The solution contains {n} queries: only the first one is explained here.</p>",
+    "Exécution impossible : {e}": "Cannot run the query: {e}",
+    "⏸ Pause": "⏸ Pause",
+    "⏵ Lecture auto": "⏵ Autoplay",
+    // textes statiques du dialogue #cinemaDialog (index.html, traduits par I18N.dom)
+    "Fermer": "Close",
+    "Étapes de construction de la requête": "Steps for building the query",
+    "Revenir au début": "Back to the start",
+    "◀ Précédent": "◀ Previous",
+    "Suivant ▶": "Next ▶",
+    "affiché": "displayed",
+    "filtre": "filter",
+    "jointure": "join",
+    "table de passage": "linking table",
+  });
+
   // ------------------------------------------------------------ masques
   // Deux masques de même longueur que la requête :
   //  - « split » : chaînes et contenu des parenthèses neutralisés (découpage au niveau 0)
@@ -290,50 +497,50 @@
   const tb = (s) => `<b class="cn-t">${esc(s)}</b>`;
   function listFr(a) {
     if (a.length <= 1) return a.join("");
-    return a.slice(0, -1).join(", ") + " et " + a[a.length - 1];
+    return tr("{a} et {b}", { a: a.slice(0, -1).join(", "), b: a[a.length - 1] });
   }
-  const plural = (n, one, many) => (n > 1 ? many : one);
 
   function describeExpr(p) {
     const s = p.s, t = p.t;
     let m;
-    if (/^\*$/.test(t.trim())) return "toutes les colonnes";
-    if ((m = /^COUNT\s*\(\s*\*\s*\)$/i.exec(t.trim()))) return "compte les lignes";
-    if ((m = /^COUNT\s*\(\s*DISTINCT\b/i.exec(t))) return "compte les valeurs <em>différentes</em>";
-    if (/^COUNT\s*\(/i.test(s)) return "compte les lignes où la colonne est renseignée";
-    if (/^SUM\s*\(/i.test(s)) return "fait la somme";
-    if (/^AVG\s*\(/i.test(s)) return "calcule la moyenne";
-    if (/^MIN\s*\(/i.test(s)) return "retient la plus petite valeur";
-    if (/^MAX\s*\(/i.test(s)) return "retient la plus grande valeur";
-    if (/^(YEAR|ANNEE)\s*\(/i.test(s)) return "extrait l'année de la date";
-    if (/^(MONTH|MOIS)\s*\(/i.test(s)) return "extrait le mois de la date";
-    if (/^DATEDIFF\s*\(/i.test(s)) return "nombre de jours entre deux dates";
-    if (AGG.test(s)) return "calcul à partir d'un regroupement";
-    if (/[-+*/]/.test(s.replace(/[\wÀ-ÿ]+\.[\wÀ-ÿ]+/g, ""))) return "colonne calculée";
+    if (/^\*$/.test(t.trim())) return tr("toutes les colonnes");
+    if ((m = /^COUNT\s*\(\s*\*\s*\)$/i.exec(t.trim()))) return tr("compte les lignes");
+    if ((m = /^COUNT\s*\(\s*DISTINCT\b/i.exec(t))) return tr("compte les valeurs <em>différentes</em>");
+    if (/^COUNT\s*\(/i.test(s)) return tr("compte les lignes où la colonne est renseignée");
+    if (/^SUM\s*\(/i.test(s)) return tr("fait la somme");
+    if (/^AVG\s*\(/i.test(s)) return tr("calcule la moyenne");
+    if (/^MIN\s*\(/i.test(s)) return tr("retient la plus petite valeur");
+    if (/^MAX\s*\(/i.test(s)) return tr("retient la plus grande valeur");
+    if (/^(YEAR|ANNEE)\s*\(/i.test(s)) return tr("extrait l'année de la date");
+    if (/^(MONTH|MOIS)\s*\(/i.test(s)) return tr("extrait le mois de la date");
+    if (/^DATEDIFF\s*\(/i.test(s)) return tr("nombre de jours entre deux dates");
+    if (AGG.test(s)) return tr("calcul à partir d'un regroupement");
+    if (/[-+*/]/.test(s.replace(/[\wÀ-ÿ]+\.[\wÀ-ÿ]+/g, ""))) return tr("colonne calculée");
     return "";
   }
 
   function describeCond(c) {
     const s = c.p.s, k = c.p.k;
     const subT = (c.subs || []).flatMap((q) => (q.from || (q.e ? [q.e] : [])).map((e) => e.table));
-    const subTxt = subT.length ? ` sur ${listFr([...new Set(subT)].map(tb))}` : "";
-    if (/\bNOT\s+EXISTS\s*\(/i.test(s)) return `<strong>sous-requête</strong>${subTxt} : je garde les lignes pour lesquelles elle ne renvoie <em>rien</em> (NOT EXISTS).`;
-    if (/\bEXISTS\s*\(/i.test(s)) return `<strong>sous-requête</strong>${subTxt} : je garde les lignes pour lesquelles elle renvoie au moins une ligne (EXISTS).`;
-    if (/\bNOT\s+IN\s*\(/i.test(s) && c.subs && c.subs.length) return `<strong>sous-requête</strong>${subTxt} : elle calcule d'abord une liste, puis je garde les lignes qui n'y figurent <em>pas</em> (NOT IN). C'est la traduction de « n'a jamais… », « aucun… ».`;
-    if (/\bIN\s*\(/i.test(s) && c.subs && c.subs.length) return `<strong>sous-requête</strong>${subTxt} : elle calcule d'abord une liste, puis je garde les lignes qui y figurent (IN).`;
-    if (c.subs && c.subs.length) return `la valeur de comparaison est calculée par une <strong>sous-requête</strong>${subTxt}, exécutée d'abord.`;
-    if (/\bIS\s+NOT\s+NULL\b/i.test(s)) return "valeur <em>renseignée</em> : IS NOT NULL.";
-    if (/\bIS\s+NULL\b/i.test(s)) return "valeur <em>vide</em> (non renseignée) : IS NULL — jamais <code>= NULL</code>.";
-    if (/\bNOT\s+IN\s*\(/i.test(s)) return "la valeur ne doit être aucune de celles de la liste (NOT IN).";
-    if (/\bIN\s*\(/i.test(s)) return "la valeur doit être l'une de celles de la liste (IN).";
-    if (/\bBETWEEN\b/i.test(s)) return "BETWEEN … AND … : bornes comprises.";
-    if (/\bLIKE\b/i.test(s)) return "LIKE : <code>%</code> remplace n'importe quelle suite de caractères.";
-    if (/\b(YEAR|ANNEE)\s*\(/i.test(k) && /\b(MONTH|MOIS)\s*\(/i.test(k)) return "on extrait le mois et l'année de la date.";
-    if (/\b(YEAR|ANNEE)\s*\(/i.test(k)) return "YEAR() extrait l'année de la date.";
-    if (/\b(MONTH|MOIS)\s*\(/i.test(k)) return "MONTH() extrait le mois de la date.";
-    if (/\bOR\b/i.test(s)) return "l'une <em>ou</em> l'autre condition suffit : les parenthèses évitent de mélanger OR et AND.";
-    if (/'/.test(s) || /"/.test(s)) return "le texte entre apostrophes doit être écrit exactement comme dans la base.";
-    if (/[#]\d|\d{2}\/\d{2}\/\d{4}/.test(c.p.t)) return "comparaison de dates.";
+    const subTxt = subT.length ? tr(" sur {t}", { t: listFr([...new Set(subT)].map(tb)) }) : "";
+    const sv = { sub: subTxt };
+    if (/\bNOT\s+EXISTS\s*\(/i.test(s)) return tr("<strong>sous-requête</strong>{sub} : je garde les lignes pour lesquelles elle ne renvoie <em>rien</em> (NOT EXISTS).", sv);
+    if (/\bEXISTS\s*\(/i.test(s)) return tr("<strong>sous-requête</strong>{sub} : je garde les lignes pour lesquelles elle renvoie au moins une ligne (EXISTS).", sv);
+    if (/\bNOT\s+IN\s*\(/i.test(s) && c.subs && c.subs.length) return tr("<strong>sous-requête</strong>{sub} : elle calcule d'abord une liste, puis je garde les lignes qui n'y figurent <em>pas</em> (NOT IN). C'est la traduction de « n'a jamais… », « aucun… ».", sv);
+    if (/\bIN\s*\(/i.test(s) && c.subs && c.subs.length) return tr("<strong>sous-requête</strong>{sub} : elle calcule d'abord une liste, puis je garde les lignes qui y figurent (IN).", sv);
+    if (c.subs && c.subs.length) return tr("la valeur de comparaison est calculée par une <strong>sous-requête</strong>{sub}, exécutée d'abord.", sv);
+    if (/\bIS\s+NOT\s+NULL\b/i.test(s)) return tr("valeur <em>renseignée</em> : IS NOT NULL.");
+    if (/\bIS\s+NULL\b/i.test(s)) return tr("valeur <em>vide</em> (non renseignée) : IS NULL — jamais <code>= NULL</code>.");
+    if (/\bNOT\s+IN\s*\(/i.test(s)) return tr("la valeur ne doit être aucune de celles de la liste (NOT IN).");
+    if (/\bIN\s*\(/i.test(s)) return tr("la valeur doit être l'une de celles de la liste (IN).");
+    if (/\bBETWEEN\b/i.test(s)) return tr("BETWEEN … AND … : bornes comprises.");
+    if (/\bLIKE\b/i.test(s)) return tr("LIKE : <code>%</code> remplace n'importe quelle suite de caractères.");
+    if (/\b(YEAR|ANNEE)\s*\(/i.test(k) && /\b(MONTH|MOIS)\s*\(/i.test(k)) return tr("on extrait le mois et l'année de la date.");
+    if (/\b(YEAR|ANNEE)\s*\(/i.test(k)) return tr("YEAR() extrait l'année de la date.");
+    if (/\b(MONTH|MOIS)\s*\(/i.test(k)) return tr("MONTH() extrait le mois de la date.");
+    if (/\bOR\b/i.test(s)) return tr("l'une <em>ou</em> l'autre condition suffit : les parenthèses évitent de mélanger OR et AND.");
+    if (/'/.test(s) || /"/.test(s)) return tr("le texte entre apostrophes doit être écrit exactement comme dans la base.");
+    if (/[#]\d|\d{2}\/\d{2}\/\d{4}/.test(c.p.t)) return tr("comparaison de dates.");
     return "";
   }
 
@@ -402,7 +609,7 @@
     };
 
     // 1. tables évidentes
-    const colsTxt = (e) => counted.has(e) ? " (ce sont ses lignes que l'on compte)" : usedBy.get(e).length ? ` (${usedBy.get(e).map(esc).join(", ")})` : "";
+    const colsTxt = (e) => counted.has(e) ? tr(" (ce sont ses lignes que l'on compte)") : usedBy.get(e).length ? ` (${usedBy.get(e).map(esc).join(", ")})` : "";
     addCols(focus.cols, Q.items.flatMap((it) => it.cols), "sel");
     addCols(focus.cols, filters.flatMap((f) => f.cols), "filt");
     addCols(focus.cols, Q.having.flatMap((h) => h.cols), "filt");
@@ -410,40 +617,44 @@
     addCols(focus.cols, Q.order.flatMap((o) => o.cols), "ord");
     let t1;
     if (Q.from.length === 1) {
-      t1 = `Je lis l'énoncé et je cherche où se trouvent les informations demandées : tout est dans la table ${tb(Q.from[0].table)}${colsTxt(Q.from[0])}. Une seule table, donc <strong>pas de jointure</strong>.`;
+      t1 = tr("Je lis l'énoncé et je cherche où se trouvent les informations demandées : tout est dans la table {t}{cols}. Une seule table, donc <strong>pas de jointure</strong>.", { t: tb(Q.from[0].table), cols: colsTxt(Q.from[0]) });
     } else {
-      t1 = `Je lis l'énoncé et je repère les tables qui contiennent les informations demandées (à afficher ou à filtrer) : ` +
-        listFr(main.map((e) => tb(e.table) + colsTxt(e))) + ".";
-      if (!inter.length) t1 += ` Sur le schéma, elles sont reliées directement par ${plural(main.length - 1, "une flèche", "des flèches")} : pas besoin de table intermédiaire.`;
+      t1 = tr("Je lis l'énoncé et je repère les tables qui contiennent les informations demandées (à afficher ou à filtrer) : {list}.",
+        { list: listFr(main.map((e) => tb(e.table) + colsTxt(e))) });
+      if (!inter.length) t1 += trn(main.length - 1, " Sur le schéma, elles sont reliées directement par une flèche : pas besoin de table intermédiaire.", " Sur le schéma, elles sont reliées directement par des flèches : pas besoin de table intermédiaire.");
     }
     shown.from = Q.explicit ? null : (inter.length ? plainFrom(main) : plainFrom(Q.from));
-    snap("tables", "Les tables évidentes", t1, ["from"], { hot: main.flatMap((e) => usedBy.get(e).map((col) => [e.table, col])) });
+    snap("tables", tr("Les tables évidentes"), t1, ["from"], { hot: main.flatMap((e) => usedBy.get(e).map((col) => [e.table, col])) });
 
     // 2. tables de passage
     if (inter.length) {
       const why = inter.map((e) => {
         const nb = joins.filter((j) => j.a.e === e || j.b.e === e).map((j) => (j.a.e === e ? j.b.e : j.a.e).table);
         const u = [...new Set(nb)];
-        return u.length >= 2 ? `${tb(e.table)} fait le lien entre ${listFr(u.map(tb))}` : `${tb(e.table)} est nécessaire pour atteindre ${listFr(u.map(tb)) || "les autres tables"}`;
+        return u.length >= 2 ? tr("{t} fait le lien entre {list}", { t: tb(e.table), list: listFr(u.map(tb)) }) : tr("{t} est nécessaire pour atteindre {list}", { t: tb(e.table), list: listFr(u.map(tb)) || tr("les autres tables") });
       });
-      const text = `Ces tables ne sont pas reliées directement : je suis les flèches du schéma. ${why.join(" ; ")}. ` +
-        `${plural(inter.length, "Elle n'apporte", "Elles n'apportent")} aucune colonne au résultat, mais ${plural(inter.length, "elle doit", "elles doivent")} figurer dans le FROM pour faire le chemin.`;
+      const text = tr("Ces tables ne sont pas reliées directement : je suis les flèches du schéma. {why}. ", { why: why.join(tr(" ; ")) }) +
+        trn(inter.length, "Elle n'apporte aucune colonne au résultat, mais elle doit figurer dans le FROM pour faire le chemin.", "Elles n'apportent aucune colonne au résultat, mais elles doivent figurer dans le FROM pour faire le chemin.");
       focus.inter = tableNames(inter);
       addCols(focus.cols, joins.flatMap((j) => [j.a, j.b]).filter((r) => inter.includes(r.e)), "join");
       shown.from = Q.explicit ? null : plainFrom(Q.from);
-      snap("passages", "Les tables de passage", text, ["from"], { hot: hot(joins.flatMap((j) => [j.a, j.b]).filter((r) => inter.includes(r.e))) });
+      snap("passages", tr("Les tables de passage"), text, ["from"], { hot: hot(joins.flatMap((j) => [j.a, j.b]).filter((r) => inter.includes(r.e))) });
     }
 
     // 3. alias
     const aliased = Q.from.filter((e) => e.alias);
     if (aliased.length) {
       const twice = Q.from.filter((e, i) => Q.from.findIndex((x) => low(x.table) === low(e.table)) !== i).map((e) => e.table);
-      let text = `Pour éviter de répéter les noms complets, je donne un surnom (alias) à ${plural(aliased.length, "la table", "chaque table")} dans le FROM : ` +
-        listFr(aliased.map((e) => `${code(e.alias)} pour ${tb(e.table)}`)) + `. Ensuite j'écris ${code(aliased[0].alias + "." + (aliased[0].t && aliased[0].t.cols[0] ? aliased[0].t.cols[0].name : "colonne"))} au lieu du nom complet.`;
-      if (twice.length) text += ` Ici la table ${tb(twice[0])} est utilisée deux fois : les alias sont <strong>obligatoires</strong> pour distinguer ses deux rôles.`;
+      let text = trn(aliased.length,
+        "Pour éviter de répéter les noms complets, je donne un surnom (alias) à la table dans le FROM : {list}. Ensuite j'écris {ex} au lieu du nom complet.",
+        "Pour éviter de répéter les noms complets, je donne un surnom (alias) à chaque table dans le FROM : {list}. Ensuite j'écris {ex} au lieu du nom complet.", {
+          list: listFr(aliased.map((e) => tr("{a} pour {t}", { a: code(e.alias), t: tb(e.table) }))),
+          ex: code(aliased[0].alias + "." + (aliased[0].t && aliased[0].t.cols[0] ? aliased[0].t.cols[0].name : tr("colonne"))),
+        });
+      if (twice.length) text += tr(" Ici la table {t} est utilisée deux fois : les alias sont <strong>obligatoires</strong> pour distinguer ses deux rôles.", { t: tb(twice[0]) });
       for (const e of aliased) focus.aliases[e.table] = focus.aliases[e.table] ? focus.aliases[e.table] + " / " + e.alias : e.alias;
       shown.from = Q.explicit ? null : Q.fromClause.t.replace(/\s+/g, " ");
-      snap("alias", "Les alias", text, ["from"]);
+      snap("alias", tr("Les alias"), text, ["from"]);
     }
 
     // 4. SELECT
@@ -455,20 +666,20 @@
           const others = Q.from.filter((e) => e !== c0.e && colOf(e.t, c0.col));
           const same = others.filter((e) => e.table === c0.e.table);
           d = same.length
-            ? `${tb(c0.e.table)} figure deux fois : l'alias ${code(c0.e.alias || c0.e.table)} dit de quelle copie il s'agit`
-            : `${esc(c0.col)} existe aussi dans ${listFr([...new Set(others.map((e) => e.table))].map(tb))} : je précise la table`;
+            ? tr("{t} figure deux fois : l'alias {a} dit de quelle copie il s'agit", { t: tb(c0.e.table), a: code(c0.e.alias || c0.e.table) })
+            : tr("{c} existe aussi dans {list} : je précise la table", { c: esc(c0.col), list: listFr([...new Set(others.map((e) => e.table))].map(tb)) });
         }
-        if (it.alias) d = (d ? d + ", " : "") + `colonne renommée « ${esc(it.alias)} »`;
+        if (it.alias) d = (d ? d + ", " : "") + tr("colonne renommée « {a} »", { a: esc(it.alias) });
         return `<li>${code(it.p.t)}${d ? " — " + d : ""}</li>`;
       });
-      let text = `Je liste ce que je veux voir apparaître, dans l'ordre de l'énoncé :<ul>${lis.join("")}</ul>`;
-      if (Q.distinct) text += `<p>« Sans doublon » : ${code("DISTINCT")} supprime les lignes identiques du résultat.</p>`;
-      if (Q.items.some((it) => it.agg) && !Q.group.length) text += `<p>Pas de GROUP BY : le calcul porte sur toutes les lignes retenues, le résultat tient en <strong>une ligne</strong>.</p>`;
-      text += `<p class="muted small">Le SELECT s'écrit en premier, mais on le remplit une fois qu'on sait d'où viennent les données.</p>`;
+      let text = tr("Je liste ce que je veux voir apparaître, dans l'ordre de l'énoncé :<ul>{lis}</ul>", { lis: lis.join("") });
+      if (Q.distinct) text += tr("<p>« Sans doublon » : {d} supprime les lignes identiques du résultat.</p>", { d: code("DISTINCT") });
+      if (Q.items.some((it) => it.agg) && !Q.group.length) text += tr("<p>Pas de GROUP BY : le calcul porte sur toutes les lignes retenues, le résultat tient en <strong>une ligne</strong>.</p>");
+      text += tr('<p class="muted small">Le SELECT s\'écrit en premier, mais on le remplit une fois qu\'on sait d\'où viennent les données.</p>');
       addCols(focus.cols, Q.items.flatMap((it) => it.cols), "sel");
       shown.select = true;
       if (Q.explicit) shown.from = null;
-      snap("select", "Ce que je veux voir", text, ["select"], { hot: hot(Q.items.flatMap((it) => it.cols)) });
+      snap("select", tr("Ce que je veux voir"), text, ["select"], { hot: hot(Q.items.flatMap((it) => it.cols)) });
     }
 
     // 5. jointures
@@ -477,7 +688,7 @@
       for (const j of joins) { focus.links.push([j.a.e.table, j.b.e.table]); focus.now.push([j.a.e.table, j.b.e.table]); }
       addCols(focus.cols, joins.flatMap((j) => [j.a, j.b]), "join");
       const n = Q.from.length;
-      snap("jointures", "Les jointures", `${n} tables, donc ${n - 1} ${plural(n - 1, "jointure", "jointures")}, écrites ici avec ${code("INNER JOIN … ON")} : chaque ON égalise une clé étrangère et la clé primaire qu'elle référence.`, ["from"]);
+      snap("jointures", tr("Les jointures"), trn(n - 1, "{t} tables, donc {n} jointure, écrites ici avec {c} : chaque ON égalise une clé étrangère et la clé primaire qu'elle référence.", "{t} tables, donc {n} jointures, écrites ici avec {c} : chaque ON égalise une clé étrangère et la clé primaire qu'elle référence.", { t: n, c: code("INNER JOIN … ON") }), ["from"]);
     } else {
       // une jointure = une paire de tables ; plusieurs égalités si la clé est composée
       const groups = [];
@@ -489,64 +700,68 @@
         const j = g.list[0];
         const [fk, pk] = fkBetween(j.a, j.b) ? [j.a, j.b] : fkBetween(j.b, j.a) ? [j.b, j.a] : [j.a, j.b];
         const linked = fkBetween(fk, pk);
-        let text = i === 0 ? `Avec ${Q.from.length} tables dans le FROM, il faut ${Q.from.length - 1} ${plural(Q.from.length - 1, "jointure", "jointures")} (une de moins que de tables), sinon chaque ligne serait combinée avec toutes les autres (produit cartésien). ` : "";
+        let text = i === 0 ? trn(Q.from.length - 1, "Avec {t} tables dans le FROM, il faut {n} jointure (une de moins que de tables), sinon chaque ligne serait combinée avec toutes les autres (produit cartésien). ", "Avec {t} tables dans le FROM, il faut {n} jointures (une de moins que de tables), sinon chaque ligne serait combinée avec toutes les autres (produit cartésien). ", { t: Q.from.length }) : "";
         if (g.list.length > 1) {
-          text += `Je relie ${tb(fk.e.table)} et ${tb(pk.e.table)}. La clé est <strong>composée</strong> de ${g.list.length} colonnes (${listFr(g.list.map((x) => code(x.a.col)))}) : il faut égaliser <em>chacune</em> d'elles, sinon la jointure associe des lignes qui ne vont pas ensemble.`;
+          text += tr("Je relie {a} et {b}. La clé est <strong>composée</strong> de {n} colonnes ({list}) : il faut égaliser <em>chacune</em> d'elles, sinon la jointure associe des lignes qui ne vont pas ensemble.", { a: tb(fk.e.table), b: tb(pk.e.table), n: g.list.length, list: listFr(g.list.map((x) => code(x.a.col))) });
         } else {
           text += linked
-            ? `Je relie ${tb(fk.e.table)} et ${tb(pk.e.table)} : la clé étrangère <i>#${esc(fk.col)}</i> de ${tb(fk.e.table)} pointe vers la clé primaire <u>${esc(pk.col)}</u> de ${tb(pk.e.table)}.`
-            : `Je relie ${tb(j.a.e.table)} et ${tb(j.b.e.table)} par leur colonne commune.`;
-          if (low(fk.col) === low(pk.col)) text += ` La colonne porte le même nom dans les deux tables : je la préfixe (${code(name(fk.e) + "." + fk.col)}).`;
+            ? tr("Je relie {a} et {b} : la clé étrangère <i>#{fk}</i> de {a} pointe vers la clé primaire <u>{pk}</u> de {b}.", { a: tb(fk.e.table), b: tb(pk.e.table), fk: esc(fk.col), pk: esc(pk.col) })
+            : tr("Je relie {a} et {b} par leur colonne commune.", { a: tb(j.a.e.table), b: tb(j.b.e.table) });
+          if (low(fk.col) === low(pk.col)) text += tr(" La colonne porte le même nom dans les deux tables : je la préfixe ({c}).", { c: code(name(fk.e) + "." + fk.col) });
         }
-        if (g.a.table === g.b.table) text += ` C'est la même table utilisée deux fois (relation réflexive) : les alias distinguent les deux rôles.`;
+        if (g.a.table === g.b.table) text += tr(" C'est la même table utilisée deux fois (relation réflexive) : les alias distinguent les deux rôles.");
         focus.links.push([g.a.table, g.b.table]);
         focus.now.push([g.a.table, g.b.table]);
         addCols(focus.cols, g.list.flatMap((x) => [x.a, x.b]), "join");
         for (const x of g.list) shown.where.push(Q.conds.indexOf(x));
-        snap("jointures", groups.length > 1 ? `Jointure ${i + 1} / ${groups.length}` : "La jointure", text, g.list.map((x) => "w" + Q.conds.indexOf(x)), { hot: hot(g.list.flatMap((x) => [x.a, x.b])) });
+        snap("jointures", groups.length > 1 ? tr("Jointure {i} / {n}", { i: i + 1, n: groups.length }) : tr("La jointure"), text, g.list.map((x) => "w" + Q.conds.indexOf(x)), { hot: hot(g.list.flatMap((x) => [x.a, x.b])) });
       });
     }
 
     // 6. filtres
     filters.forEach((f, i) => {
       const d = describeCond(f);
-      let text = (i === 0 ? "Je ne garde que les lignes qui répondent à l'énoncé. " : "") + `${code(f.p.t.replace(/\s+/g, " "))}` + (d ? " : " + d : ".");
-      if (i > 0) text = `J'ajoute une condition avec AND : ${text}`;
+      const c = code(f.p.t.replace(/\s+/g, " "));
+      const b = d ? tr("{c} : {d}", { c, d }) : c + ".";
+      const text = i === 0 ? tr("Je ne garde que les lignes qui répondent à l'énoncé. {b}", { b }) : tr("J'ajoute une condition avec AND : {b}", { b });
       addCols(focus.cols, f.cols, "filt");
       const st = subTables([f]);
       if (st.length) focus.sub = [...new Set([...focus.sub, ...st])];
       shown.where.push(Q.conds.indexOf(f));
-      snap("filtres", filters.length > 1 ? `Filtre ${i + 1} / ${filters.length}` : "Le filtre", text, ["w" + Q.conds.indexOf(f)], { hot: hot(f.cols) });
+      snap("filtres", filters.length > 1 ? tr("Filtre {i} / {n}", { i: i + 1, n: filters.length }) : tr("Le filtre"), text, ["w" + Q.conds.indexOf(f)], { hot: hot(f.cols) });
     });
 
     // 7. regroupement
     if (Q.group.length) {
       const plain = Q.items.filter((it) => !it.agg && it.expr.t.trim() !== "*").map((it) => code(it.expr.t));
-      let text = `Le calcul est demandé « par » ${listFr(Q.group.map((g) => code(g.p.t)))} : je regroupe les lignes avec ${code("GROUP BY")}. Le calcul (${listFr(Q.items.filter((it) => it.agg).map((it) => code(it.expr.t))) || "fonction"}) est alors fait pour chaque groupe.`;
-      if (plain.length) text += ` Règle : chaque colonne affichée <em>sans</em> fonction de calcul (${listFr(plain)}) doit figurer dans le GROUP BY.`;
+      let text = tr("Le calcul est demandé « par » {g} : je regroupe les lignes avec <code>GROUP BY</code>. Le calcul ({c}) est alors fait pour chaque groupe.",
+        { g: listFr(Q.group.map((g) => code(g.p.t))), c: listFr(Q.items.filter((it) => it.agg).map((it) => code(it.expr.t))) || tr("fonction") });
+      if (plain.length) text += tr(" Règle : chaque colonne affichée <em>sans</em> fonction de calcul ({list}) doit figurer dans le GROUP BY.", { list: listFr(plain) });
       addCols(focus.cols, Q.group.flatMap((g) => g.cols), "grp");
       shown.group = true;
-      snap("groupe", "Le regroupement", text, ["group"], { hot: hot(Q.group.flatMap((g) => g.cols)) });
+      snap("groupe", tr("Le regroupement"), text, ["group"], { hot: hot(Q.group.flatMap((g) => g.cols)) });
     }
     if (Q.having.length) {
       const st = [...new Set(Q.having.flatMap((h) => (h.subs || []).flatMap((q) => (q.from || []).map((e) => e.table))))];
       if (st.length) focus.sub = [...new Set([...focus.sub, ...st])];
-      const text = `La condition ${listFr(Q.having.map((h) => code(h.p.t)))} porte sur le <em>résultat d'un calcul</em> : elle ne peut pas aller dans le WHERE (qui filtre les lignes avant le regroupement) ; elle se place dans ${code("HAVING")}, après le GROUP BY.` +
-        (st.length ? ` La valeur de comparaison vient d'une sous-requête sur ${listFr(st.map(tb))}.` : "");
+      const text = tr("La condition {h} porte sur le <em>résultat d'un calcul</em> : elle ne peut pas aller dans le WHERE (qui filtre les lignes avant le regroupement) ; elle se place dans <code>HAVING</code>, après le GROUP BY.", { h: listFr(Q.having.map((h) => code(h.p.t))) }) +
+        (st.length ? tr(" La valeur de comparaison vient d'une sous-requête sur {list}.", { list: listFr(st.map(tb)) }) : "");
       shown.having = true;
-      snap("groupe", "La condition sur les groupes", text, ["having"], { hot: hot(Q.having.flatMap((h) => h.cols)) });
+      snap("groupe", tr("La condition sur les groupes"), text, ["having"], { hot: hot(Q.having.flatMap((h) => h.cols)) });
     }
 
     // 8. tri
     if (Q.order.length) {
-      const text = `L'énoncé demande un tri : ` + listFr(Q.order.map((o) => `${code(o.expr.t)} ${o.desc ? "par ordre <strong>décroissant</strong> (DESC)" : "par ordre croissant (par défaut)"}`)) +
-        (Q.order.length > 1 ? ". Le second critère départage les égalités du premier." : ".") + ` ${code("ORDER BY")} se place toujours à la fin.`;
+      const list = listFr(Q.order.map((o) => tr(o.desc ? "{c} par ordre <strong>décroissant</strong> (DESC)" : "{c} par ordre croissant (par défaut)", { c: code(o.expr.t) })));
+      const text = Q.order.length > 1
+        ? tr("L'énoncé demande un tri : {list}. Le second critère départage les égalités du premier. <code>ORDER BY</code> se place toujours à la fin.", { list })
+        : tr("L'énoncé demande un tri : {list}. <code>ORDER BY</code> se place toujours à la fin.", { list });
       addCols(focus.cols, Q.order.flatMap((o) => o.cols), "ord");
       shown.order = true;
-      snap("tri", "Le tri", text, ["order"], { hot: hot(Q.order.flatMap((o) => o.cols)) });
+      snap("tri", tr("Le tri"), text, ["order"], { hot: hot(Q.order.flatMap((o) => o.cols)) });
     }
 
-    snap("resultat", "Le résultat", "J'exécute la requête et je vérifie que le résultat répond bien à l'énoncé (nombre de lignes, colonnes, valeurs).", [], { run: true });
+    snap("resultat", tr("Le résultat"), tr("J'exécute la requête et je vérifie que le résultat répond bien à l'énoncé (nombre de lignes, colonnes, valeurs)."), [], { run: true });
     return { phases: PHASES_SELECT, steps };
   }
 
@@ -559,52 +774,58 @@
       shown.parts.push(...parts);
       steps.push({ phase, title, text, sql: clone(shown), fresh: parts, focus: clone({ ...focus, ...extra }) });
     };
-    const verb = { update: "modifier des lignes existantes : UPDATE", delete: "supprimer des lignes : DELETE", insert: "ajouter une ligne : INSERT INTO" }[W.kind];
-    snap("table", "La table concernée", `Il s'agit de ${verb}. Je repère la table touchée : ${tb(t)}. Une requête de mise à jour ne modifie qu'<strong>une seule table</strong>.`, ["head"]);
+    const intro = {
+      update: "Il s'agit de modifier des lignes existantes : UPDATE. Je repère la table touchée : {t}. Une requête de mise à jour ne modifie qu'<strong>une seule table</strong>.",
+      delete: "Il s'agit de supprimer des lignes : DELETE. Je repère la table touchée : {t}. Une requête de mise à jour ne modifie qu'<strong>une seule table</strong>.",
+      insert: "Il s'agit de ajouter une ligne : INSERT INTO. Je repère la table touchée : {t}. Une requête de mise à jour ne modifie qu'<strong>une seule table</strong>.",
+    }[W.kind];
+    snap("table", tr("La table concernée"), tr(intro, { t: tb(t) }), ["head"]);
     if (W.kind === "update") {
       const lis = W.sets.map((s) => {
         const self = new RegExp("\\b" + s.col + "\\b", "i").test(s.val.k);
-        return `<li>${code(s.p.t)}${self ? " — la nouvelle valeur est calculée à partir de l'ancienne" : ""}</li>`;
+        return `<li>${code(s.p.t)}${self ? tr(" — la nouvelle valeur est calculée à partir de l'ancienne") : ""}</li>`;
       });
       focus.cols[t] = Object.fromEntries(W.sets.map((s) => [s.col, "set"]));
-      snap("valeurs", "Les nouvelles valeurs", `Après ${code("SET")}, j'indique chaque colonne à changer et sa nouvelle valeur :<ul>${lis.join("")}</ul>`, ["set"]);
+      snap("valeurs", tr("Les nouvelles valeurs"), tr("Après <code>SET</code>, j'indique chaque colonne à changer et sa nouvelle valeur :<ul>{lis}</ul>", { lis: lis.join("") }), ["set"]);
     }
     if (W.kind === "insert") {
       const row = W.rows[0] || [];
       const fks = W.e.t ? W.cols.map((c) => colOf(W.e.t, c)).filter((c) => c && c.fk) : [];
       const lis = W.cols.map((c, i) => `<li>${code(c)} ← ${code(row[i] !== undefined ? row[i] : "?")}</li>`);
       let text = W.select
-        ? `Les valeurs proviennent d'une requête ${code("SELECT")} : chaque ligne qu'elle renvoie est ajoutée.`
-        : `Les valeurs sont données dans le même ordre que les colonnes :<ul>${lis.join("")}</ul>`;
+        ? tr("Les valeurs proviennent d'une requête <code>SELECT</code> : chaque ligne qu'elle renvoie est ajoutée.")
+        : tr("Les valeurs sont données dans le même ordre que les colonnes :<ul>{lis}</ul>", { lis: lis.join("") });
       if (fks.length) {
-        text += ` ${listFr(fks.map((c) => code(c.name)))} ${plural(fks.length, "est une clé étrangère", "sont des clés étrangères")} : la valeur doit déjà exister dans ${listFr([...new Set(fks.map((c) => tb(c.fk.split(".")[0])))])}.`;
+        text += trn(fks.length, " {c} est une clé étrangère : la valeur doit déjà exister dans {t}.", " {c} sont des clés étrangères : la valeur doit déjà exister dans {t}.", { c: listFr(fks.map((c) => code(c.name))), t: listFr([...new Set(fks.map((c) => tb(c.fk.split(".")[0])))]) });
         focus.links = fks.map((c) => [t, c.fk.split(".")[0]]);
         focus.now = focus.links.slice();
         focus.inter = [...new Set(fks.map((c) => c.fk.split(".")[0]))];
       }
-      text += " Les textes et les dates s'écrivent entre apostrophes, pas les nombres.";
+      text += tr(" Les textes et les dates s'écrivent entre apostrophes, pas les nombres.");
       focus.cols[t] = Object.fromEntries(W.cols.map((c) => [c, "set"]));
-      snap("valeurs", "Les valeurs à ajouter", text, ["values"]);
+      snap("valeurs", tr("Les valeurs à ajouter"), text, ["values"]);
     }
     if (W.kind !== "insert") {
       if (W.conds.length) {
         const lis = W.conds.map((c) => { const d = describeCond(c); return `<li>${code(c.p.t.replace(/\s+/g, " "))}${d ? " — " + d : ""}</li>`; });
         focus.sub = [...new Set(W.conds.flatMap((c) => (c.subs || []).flatMap((q) => (q.from || []).map((e) => e.table))))];
         focus.cols[t] = { ...(focus.cols[t] || {}), ...Object.fromEntries(W.conds.flatMap((c) => c.cols).map((r) => [r.col, (focus.cols[t] || {})[r.col] || "filt"])) };
-        let text = `Le ${code("WHERE")} cible les lignes concernées :<ul>${lis.join("")}</ul><strong>Sans WHERE, ${W.kind === "delete" ? "toutes les lignes seraient supprimées" : "toutes les lignes seraient modifiées"}.</strong>`;
+        let text = tr(W.kind === "delete"
+          ? "Le <code>WHERE</code> cible les lignes concernées :<ul>{lis}</ul><strong>Sans WHERE, toutes les lignes seraient supprimées.</strong>"
+          : "Le <code>WHERE</code> cible les lignes concernées :<ul>{lis}</ul><strong>Sans WHERE, toutes les lignes seraient modifiées.</strong>", { lis: lis.join("") });
         if (W.kind === "delete" && global.SQLCinemaSchema) {
           const refs = global.SQLCinemaSchema.filter((x) => x.cols.some((c) => c.fk && low(c.fk.split(".")[0]) === low(t))).map((x) => x.name);
           if (refs.length) {
-            text += ` Attention : si des lignes de ${listFr(refs.map(tb))} font référence aux lignes supprimées, l'intégrité référentielle bloque la suppression.`;
+            text += tr(" Attention : si des lignes de {t} font référence aux lignes supprimées, l'intégrité référentielle bloque la suppression.", { t: listFr(refs.map(tb)) });
             focus.links = refs.map((r) => [r, t]); focus.inter = refs;
           }
         }
-        snap("ciblage", "Les lignes visées", text, ["where"]);
+        snap("ciblage", tr("Les lignes visées"), text, ["where"]);
       } else {
-        snap("ciblage", "Les lignes visées", `Pas de ${code("WHERE")} : <strong>toutes les lignes</strong> de ${tb(t)} sont concernées. C'est voulu ici, mais à vérifier à chaque fois.`, []);
+        snap("ciblage", tr("Les lignes visées"), tr("Pas de <code>WHERE</code> : <strong>toutes les lignes</strong> de {t} sont concernées. C'est voulu ici, mais à vérifier à chaque fois.", { t: tb(t) }), []);
       }
     }
-    snap("resultat", "Le résultat", "J'exécute la requête (sur une copie de la base) et je contrôle les lignes touchées.", [], { run: true });
+    snap("resultat", tr("Le résultat"), tr("J'exécute la requête (sur une copie de la base) et je contrôle les lignes touchées."), [], { run: true });
     return { phases: PHASES_WRITE, steps };
   }
 
@@ -662,12 +883,12 @@
     // 1. lecture
     {
       const n = info.filter((x) => x.kind !== "modif").length;
-      snap("lecture", "Je lis les règles de gestion",
-        `Je repère, dans le schéma de départ, les tables concernées par les nouvelles règles. Pour chaque règle, je cherche le <strong>type de lien</strong> :` +
-        `<ul><li>« un … est lié à <em>un seul</em> … » : relation un à plusieurs, une <strong>clé étrangère</strong> suffit (du côté « plusieurs ») ;</li>` +
-        `<li>« un … peut être lié à <em>plusieurs</em> …, et inversement » : relation plusieurs à plusieurs, il faut une <strong>nouvelle table</strong> ;</li>` +
-        `<li>un nouvel objet à décrire, avec ses propres informations : une nouvelle table.</li></ul>` +
-        (n ? `<p>Ici, ${n} ${plural(n, "nouvelle table", "nouvelles tables")} à créer.</p>` : ""),
+      snap("lecture", tr("Je lis les règles de gestion"),
+        tr("Je repère, dans le schéma de départ, les tables concernées par les nouvelles règles. Pour chaque règle, je cherche le <strong>type de lien</strong> :" +
+        "<ul><li>« un … est lié à <em>un seul</em> … » : relation un à plusieurs, une <strong>clé étrangère</strong> suffit (du côté « plusieurs ») ;</li>" +
+        "<li>« un … peut être lié à <em>plusieurs</em> …, et inversement » : relation plusieurs à plusieurs, il faut une <strong>nouvelle table</strong> ;</li>" +
+        "<li>un nouvel objet à décrire, avec ses propres informations : une nouvelle table.</li></ul>") +
+        (n ? trn(n, "<p>Ici, {n} nouvelle table à créer.</p>", "<p>Ici, {n} nouvelles tables à créer.</p>") : ""),
         { main: depart.tables.map((t) => t.name) });
     }
 
@@ -678,15 +899,16 @@
       const gone = T.cols.filter((c) => x.interdits.some((spec) => same(spec, c.name))).map((c) => c.name);
       if (!gone.length) continue;
       const where = info.filter((o) => o !== x && gone.some((g) => o.pk.some((p) => norm(p) === norm(g)) || o.fk.some(([k]) => norm(k) === norm(g)) || o.attrs.some((a) => norm(a) === norm(g))));
-      let text = `${listFr(gone.map((g) => code(g)))} ne ${plural(gone.length, "peut", "peuvent")} plus rester dans ${tb(x.name)} : dans une ligne, une colonne ne contient qu'<em>une seule</em> valeur, or la nouvelle règle en demande plusieurs.`;
-      if (where.length) text += ` L'information sera reprise dans ${listFr(where.map((o) => tb(o.name)))}.`;
-      snap("retraits", "Ce qui ne tient plus", text, { main: [x.name], cols: colsMap(x.name, gone, "del") });
+      let text = trn(gone.length, "{c} ne peut plus rester dans {t} : dans une ligne, une colonne ne contient qu'<em>une seule</em> valeur, or la nouvelle règle en demande plusieurs.",
+        "{c} ne peuvent plus rester dans {t} : dans une ligne, une colonne ne contient qu'<em>une seule</em> valeur, or la nouvelle règle en demande plusieurs.", { c: listFr(gone.map((g) => code(g))), t: tb(x.name) });
+      if (where.length) text += tr(" L'information sera reprise dans {t}.", { t: listFr(where.map((o) => tb(o.name))) });
+      snap("retraits", tr("Ce qui ne tient plus"), text, { main: [x.name], cols: colsMap(x.name, gone, "del") });
       T.cols = T.cols.filter((c) => !gone.includes(c.name));
     }
     for (const name of sol.tablesSupprimees || []) {
       const T = cur.tables.find((t) => norm(t.name) === norm(name));
       if (!T) continue;
-      snap("retraits", "Une table disparaît", `La table ${tb(T.name)} n'a plus lieu d'être avec les nouvelles règles : je la supprime, avec les flèches qui y mènent.`,
+      snap("retraits", tr("Une table disparaît"), tr("La table {t} n'a plus lieu d'être avec les nouvelles règles : je la supprime, avec les flèches qui y mènent.", { t: tb(T.name) }),
         { sub: [T.name], cols: colsMap(T.name, T.cols.map((c) => c.name), "del") });
       cur.tables = cur.tables.filter((t) => t !== T);
       for (const t of cur.tables) for (const c of t.cols) if (c.fk && norm(c.fk) === norm(T.name)) c.fk = null;
@@ -698,12 +920,17 @@
       cur = SC.solutionSchema(cur, { tables: [x.t] });
       const own = x.fk.filter(([k]) => !x.pk.some((p) => norm(p) === norm(k)));
       const weak = x.fkInPk;
-      let text = `${x.role ? "Il faut " + esc(x.role) + " : " : ""}je crée la table ${tb(x.name)}. Sa clé primaire ${listFr(x.pk.map((p) => `<u>${esc(p)}</u>`))} identifie chaque ligne`;
-      text += x.attrs.length ? ` ; elle porte ${listFr(x.attrs.map(code))}.` : ".";
-      if (weak.length) text += ` Sa clé contient ${listFr(weak.map(([k, r]) => `<i>#${esc(k)}</i> (${tb(refName(r))})`))} : une ligne de ${tb(x.name)} n'existe qu'à l'intérieur de ${plural(weak.length, "cette table", "ces tables")}.`;
-      if (own.length) text += ` Chaque ligne est rattachée à un seul ${listFr(own.map(([, r]) => tb(refName(r))))} : relation un à plusieurs, d'où la clé étrangère ${listFr(own.map(([k]) => `<i>#${esc(k)}</i>`))} et la flèche.`;
+      let text = x.role ? tr("Il faut {r} : je crée la table {t}.", { r: esc(x.role), t: tb(x.name) }) : tr("je crée la table {t}.", { t: tb(x.name) });
+      const pkList = listFr(x.pk.map((p) => `<u>${esc(p)}</u>`));
+      text += x.attrs.length
+        ? tr(" Sa clé primaire {pk} identifie chaque ligne ; elle porte {a}.", { pk: pkList, a: listFr(x.attrs.map(code)) })
+        : tr(" Sa clé primaire {pk} identifie chaque ligne.", { pk: pkList });
+      if (weak.length) text += trn(weak.length, " Sa clé contient {k} : une ligne de {t} n'existe qu'à l'intérieur de cette table.", " Sa clé contient {k} : une ligne de {t} n'existe qu'à l'intérieur de ces tables.",
+        { k: listFr(weak.map(([k, r]) => `<i>#${esc(k)}</i> (${tb(refName(r))})`)), t: tb(x.name) });
+      if (own.length) text += tr(" Chaque ligne est rattachée à un seul {r} : relation un à plusieurs, d'où la clé étrangère {k} et la flèche.",
+        { r: listFr(own.map(([, r]) => tb(refName(r)))), k: listFr(own.map(([k]) => `<i>#${esc(k)}</i>`)) });
       const links = x.fk.map(([, r]) => [x.name, refName(r)]);
-      snap("entites", "Une nouvelle table", text, {
+      snap("entites", tr("Une nouvelle table"), text, {
         main: [x.name], inter: x.fk.map(([, r]) => refName(r)),
         cols: { [x.name]: { ...Object.fromEntries(x.pk.map((p) => [p, "add"])), ...Object.fromEntries(x.attrs.map((a) => [a, "sel"])), ...Object.fromEntries(x.fk.map(([k]) => [k, "join"])) } },
         links, now: links,
@@ -721,12 +948,12 @@
       if (!newFk.length && !newAttrs.length) continue;
       let text = "";
       for (const [k, r] of newFk) {
-        text += `<p>Chaque ligne de ${tb(x.name)} est liée à <em>un seul</em> ${tb(refName(r))}, qui peut l'être à plusieurs : relation <strong>un à plusieurs</strong>. ` +
-          `J'ajoute la clé étrangère <i>#${esc(k)}</i> dans ${tb(x.name)}, du côté « plusieurs » : la flèche part de ${tb(x.name)} vers ${tb(refName(r))}.</p>`;
+        text += tr("<p>Chaque ligne de {t} est liée à <em>un seul</em> {r}, qui peut l'être à plusieurs : relation <strong>un à plusieurs</strong>. " +
+          "J'ajoute la clé étrangère <i>#{k}</i> dans {t}, du côté « plusieurs » : la flèche part de {t} vers {r}.</p>", { t: tb(x.name), r: tb(refName(r)), k: esc(k) });
       }
-      if (newAttrs.length) text += `<p>J'ajoute ${listFr(newAttrs.map(code))} dans ${tb(x.name)} : ${plural(newAttrs.length, "c'est une information", "ce sont des informations")} sur chaque ligne de cette table.</p>`;
+      if (newAttrs.length) text += trn(newAttrs.length, "<p>J'ajoute {a} dans {t} : c'est une information sur chaque ligne de cette table.</p>", "<p>J'ajoute {a} dans {t} : ce sont des informations sur chaque ligne de cette table.</p>", { a: listFr(newAttrs.map(code)), t: tb(x.name) });
       const links = newFk.map(([, r]) => [x.name, refName(r)]);
-      snap("liens", newFk.length ? "Une clé étrangère" : "Un nouvel attribut", text, {
+      snap("liens", newFk.length ? tr("Une clé étrangère") : tr("Un nouvel attribut"), text, {
         main: [x.name], inter: newFk.map(([, r]) => refName(r)),
         cols: { [x.name]: { ...Object.fromEntries(newFk.map(([k]) => [k, "join"])), ...Object.fromEntries(newAttrs.map((a) => [a, "add"])) } },
         links, now: links,
@@ -738,19 +965,21 @@
       const refs = [...new Set(x.fkInPk.map(([, r]) => refName(r)))];
       cur = SC.solutionSchema(cur, { tables: [{ ...x.t, fk: {}, attributs: [] }] });
       const pkTxt = x.pk.map((p) => `<u>${esc(p)}</u>`).join(" + ");
-      let text = x.role ? `Règle : il faut ${esc(x.role)}. ` : "";
+      let text = x.role ? tr("Règle : il faut {r}. ", { r: esc(x.role) }) : "";
       text += refs.length >= 3
-        ? `Le lien concerne ${refs.length} tables à la fois (${listFr(refs.map(tb))}). `
-        : `Un ${tb(refs[0] || "?")} peut être lié à plusieurs ${tb(refs[1] || refs[0] || "?")}, et inversement : relation <strong>plusieurs à plusieurs</strong>. `;
-      text += `Une clé étrangère ne suffit pas (il faudrait plusieurs valeurs dans une case) : je crée la table ${tb(x.name)}. Sa clé primaire <strong>associe</strong> les clés des tables reliées : ${pkTxt}.`;
-      snap("associations", "Une table de liaison", text, {
+        ? tr("Le lien concerne {n} tables à la fois ({list}). ", { n: refs.length, list: listFr(refs.map(tb)) })
+        : tr("Un {a} peut être lié à plusieurs {b}, et inversement : relation <strong>plusieurs à plusieurs</strong>. ", { a: tb(refs[0] || "?"), b: tb(refs[1] || refs[0] || "?") });
+      text += tr("Une clé étrangère ne suffit pas (il faudrait plusieurs valeurs dans une case) : je crée la table {t}. Sa clé primaire <strong>associe</strong> les clés des tables reliées : {pk}.", { t: tb(x.name), pk: pkTxt });
+      snap("associations", tr("Une table de liaison"), text, {
         main: [x.name], inter: refs, cols: { [x.name]: Object.fromEntries(x.pk.map((p) => [p, "add"])) },
       }, [x.name]);
       cur = SC.solutionSchema(cur, { tables: [x.t] });
       const links = x.fk.map(([, r]) => [x.name, refName(r)]);
-      let t2 = `Chaque partie de la clé est aussi une <strong>clé étrangère</strong> : ${listFr(x.fk.map(([k, r]) => `<i>#${esc(k)}</i> renvoie à ${tb(refName(r))}`))}. D'où ${plural(links.length, "la flèche", "les flèches")}.`;
-      if (x.attrs.length) t2 += ` ${listFr(x.attrs.map(code))} dépend${x.attrs.length > 1 ? "ent" : ""} à la fois de ${listFr(refs.map(tb))} : ${plural(x.attrs.length, "l'attribut se place", "les attributs se placent")} dans ${tb(x.name)}, la table du lien.`;
-      snap("associations", "Les clés étrangères de la table de liaison", t2, {
+      let t2 = trn(links.length, "Chaque partie de la clé est aussi une <strong>clé étrangère</strong> : {list}. D'où la flèche.", "Chaque partie de la clé est aussi une <strong>clé étrangère</strong> : {list}. D'où les flèches.",
+        { list: listFr(x.fk.map(([k, r]) => tr("<i>#{k}</i> renvoie à {t}", { k: esc(k), t: tb(refName(r)) }))) });
+      if (x.attrs.length) t2 += trn(x.attrs.length, " {a} dépend à la fois de {r} : l'attribut se place dans {t}, la table du lien.", " {a} dépendent à la fois de {r} : les attributs se placent dans {t}, la table du lien.",
+        { a: listFr(x.attrs.map(code)), r: listFr(refs.map(tb)), t: tb(x.name) });
+      snap("associations", tr("Les clés étrangères de la table de liaison"), t2, {
         main: [x.name], inter: refs,
         cols: { [x.name]: { ...Object.fromEntries(x.fk.map(([k]) => [k, "join"])), ...Object.fromEntries(x.attrs.map((a) => [a, "sel"])) } },
         links, now: links,
@@ -761,11 +990,11 @@
     cur = SC.solutionSchema(depart, sol);
     const changed = info.map((x) => x.name);
     const allLinks = info.flatMap((x) => x.fk.map(([, r]) => [x.name, refName(r)]));
-    let text = `Le schéma final : ${listFr(changed.map(tb))} ${plural(changed.length, "a été créée ou modifiée", "ont été créées ou modifiées")}.` +
-      `<p>Pour vérifier : chaque nouvelle règle est-elle traduite ? chaque table a-t-elle une clé primaire ? chaque flèche part-elle d'une clé étrangère vers une clé primaire ?</p>` +
-      `<p class="muted small">Les noms peuvent varier : la vérification accepte les noms équivalents et reconnaît une table à sa clé primaire.</p>`;
-    if ((q.variantes || []).length) text += `<p class="muted small">Une autre solution est aussi acceptée : voir la correction.</p>`;
-    snap("bilan", "Le schéma final", text, { main: changed, links: allLinks });
+    let text = trn(changed.length, "Le schéma final : {t} a été créée ou modifiée.", "Le schéma final : {t} ont été créées ou modifiées.", { t: listFr(changed.map(tb)) }) +
+      tr("<p>Pour vérifier : chaque nouvelle règle est-elle traduite ? chaque table a-t-elle une clé primaire ? chaque flèche part-elle d'une clé étrangère vers une clé primaire ?</p>") +
+      tr('<p class="muted small">Les noms peuvent varier : la vérification accepte les noms équivalents et reconnaît une table à sa clé primaire.</p>');
+    if ((q.variantes || []).length) text += tr('<p class="muted small">Une autre solution est aussi acceptée : voir la correction.</p>');
+    snap("bilan", tr("Le schéma final"), text, { main: changed, links: allLinks });
 
     const out = { kind: "schema", phases: PHASES_SCHEMA, steps };
     override(out, q);
@@ -915,17 +1144,17 @@
       this.plan = P;
       this.q = q;
       const els = this.els;
-      els.title.textContent = (P.kind === "schema" ? "Construction du schéma pas à pas" : "Correction pas à pas") + (q.id ? ` – ${q.id}` : "");
+      els.title.textContent = (P.kind === "schema" ? tr("Construction du schéma pas à pas") : tr("Correction pas à pas")) + (q.id ? ` – ${q.id}` : "");
       els.enonce.textContent = q.enonce || "";
       els.strip.innerHTML = P.phases.map(([k, label], n) => {
         const used = P.steps.some((s) => s.phase === k);
-        return `<li data-phase="${k}" class="${used ? "" : "skip"}" ${used ? "" : 'title="Pas nécessaire ici"'}><span class="n">${n + 1}</span>${esc(label)}</li>`;
+        return `<li data-phase="${k}" class="${used ? "" : "skip"}" ${used ? "" : `title="${esc(tr("Pas nécessaire ici"))}"`}><span class="n">${n + 1}</span>${esc(tr(label))}</li>`;
       }).join("");
       els.dialog.classList.toggle("cn-schema", P.kind === "schema");
       const legend = els.dialog.querySelector("#cnLegend");
       if (legend) legend.innerHTML = P.kind === "schema"
-        ? '<i class="lg add"></i>nouveau <i class="lg join"></i>clé étrangère <i class="lg del"></i>retiré <i class="lg inter"></i>table reliée'
-        : '<i class="lg sel"></i>affiché <i class="lg filt"></i>filtre <i class="lg join"></i>jointure <i class="lg inter"></i>table de passage';
+        ? tr('<i class="lg add"></i>nouveau <i class="lg join"></i>clé étrangère <i class="lg del"></i>retiré <i class="lg inter"></i>table reliée')
+        : tr('<i class="lg sel"></i>affiché <i class="lg filt"></i>filtre <i class="lg join"></i>jointure <i class="lg inter"></i>table de passage');
       if (!els.dialog.open) els.dialog.showModal();
       els.next.focus();
     }
@@ -981,23 +1210,23 @@
         if (P.kind === "select" && r.result) {
           const { columns, values } = r.result;
           const max = 8;
-          html = `<p class="small"><strong>${values.length}</strong> ${plural(values.length, "ligne", "lignes")}${values.length > max ? ` (les ${max} premières)` : ""}</p>` +
+          html = `<p class="small">${trn(values.length, "<strong>{n}</strong> ligne", "<strong>{n}</strong> lignes")}${values.length > max ? tr(" (les {m} premières)", { m: max }) : ""}</p>` +
             `<div class="table-wrap"><table class="grid"><thead><tr>${columns.map((c) => `<th>${esc(c)}</th>`).join("")}</tr></thead><tbody>` +
             values.slice(0, max).map((row) => `<tr>${row.map((v) => `<td>${v === null ? '<span class="null">NULL</span>' : esc(v)}</td>`).join("")}</tr>`).join("") +
             "</tbody></table></div>";
         } else {
-          html = `<p class="small"><strong>${r.changes}</strong> ${plural(r.changes, "ligne touchée", "lignes touchées")} (sur une copie : la base n'est pas modifiée).</p>`;
+          html = `<p class="small">${trn(r.changes, "<strong>{n}</strong> ligne touchée (sur une copie : la base n'est pas modifiée).", "<strong>{n}</strong> lignes touchées (sur une copie : la base n'est pas modifiée).")}</p>`;
         }
-        if (P.more) html += `<p class="muted small">La correction contient ${P.more + 1} requêtes : seule la première est détaillée ici.</p>`;
+        if (P.more) html += tr('<p class="muted small">La correction contient {n} requêtes : seule la première est détaillée ici.</p>', { n: P.more + 1 });
       } catch (e) {
-        html = `<p class="small">Exécution impossible : ${esc(e.message)}</p>`;
+        html = `<p class="small">${tr("Exécution impossible : {e}", { e: esc(e.message) })}</p>`;
       }
       return html;
     }
 
     toggle() { if (this.timer) this.stop(); else { if (this.i === this.plan.steps.length - 1) this.go(0); this.start(); } }
     start() {
-      this.els.play.textContent = "⏸ Pause";
+      this.els.play.textContent = tr("⏸ Pause");
       this.els.play.setAttribute("aria-pressed", "true");
       const tick = () => {
         const st = this.plan.steps[this.i];
@@ -1009,7 +1238,7 @@
     stop() {
       clearTimeout(this.timer);
       this.timer = null;
-      this.els.play.textContent = "⏵ Lecture auto";
+      this.els.play.textContent = tr("⏵ Lecture auto");
       this.els.play.setAttribute("aria-pressed", "false");
     }
   }

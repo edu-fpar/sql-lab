@@ -1,5 +1,11 @@
 [
   {
+    "id": "demo-en",
+    "titre": "Demo – PedalPoint Bike Rentals",
+    "description": "Bike rentals: stores, bikes and categories, customers and referrals, rentals and rental lines.",
+    "langue": "en"
+  },
+  {
     "id": "dcg2026",
     "titre": "DCG 2026 – Elassure",
     "description": "Assurance automobile : clients, contrats, formules et garanties, règlements d'échéances, sinistres."

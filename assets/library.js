@@ -6,6 +6,28 @@
  */
 (function (global) {
   "use strict";
+  const I18N = global.I18N || { lang: "fr", add() {}, t: (s, v) => (v ? s.replace(/\{(\w+)\}/g, (m, k) => (v[k] !== undefined ? v[k] : m)) : s), n: (c, a, b, v) => (c > 1 ? b : a).replace(/\{(\w+)\}/g, (m, k) => (k === "n" ? c : v && v[k] !== undefined ? v[k] : m)) };
+  const tr = I18N.t, trn = I18N.n;
+  I18N.add({
+    "stockage du navigateur indisponible": "browser storage unavailable",
+    "Ma base": "My database",
+    "Base trop volumineuse ({n} Mo, maximum 100 Mo).": "Database too large ({n} MB, maximum 100 MB).",
+    "Base volumineuse ({n} Mo) : l'exécution des requêtes sera plus lente.": "Large database ({n} MB): queries will run more slowly.",
+    "La base ne contient aucune table.": "The database contains no tables.",
+    "{col} : {n} date(s) au format jj/mm/aaaa. Stockez les dates en AAAA-MM-JJ pour que YEAR(), BETWEEN et les tris fonctionnent.": "{col}: {n} date(s) in dd/mm/yyyy format. Store dates as YYYY-MM-DD so that YEAR(), BETWEEN and sorting work.",
+    "Aucune clé étrangère déclarée (REFERENCES) : le diagramme n'affichera pas de flèches entre les tables.": "No foreign keys declared (REFERENCES): the diagram will not show arrows between tables.",
+    "Base illisible : ": "Unreadable database: ",
+    "Pas de fichier exercice.json dans le zip : exercice créé sans questions.": "No exercice.json file in the zip: exercise created without questions.",
+    "Le zip ne contient ni base .sqlite ni script .sql.": "The zip contains neither a .sqlite database nor a .sql script.",
+    "Fichier illisible : ": "Unreadable file: ",
+    "Le fichier de base n'est pas une base SQLite valide.": "The database file is not a valid SQLite database.",
+    "Exercice SQL Lab : {titre}": "SQL Lab exercise: {titre}",
+    "Contenu :": "Contents:",
+    "- exercice.json : contexte, date du jour simulée et questions (format sql-lab-exercice/1)": "- exercice.json: context, simulated current date and questions (format sql-lab-exercice/1)",
+    "- db.sqlite : la base de données": "- db.sqlite: the database",
+    "Pour l'utiliser : dans SQL Lab, menu « Importer un fichier », choisir ce zip.": "To use it: in SQL Lab, click “Import a file” and choose this zip.",
+    "exercice introuvable dans ce navigateur": "exercise not found in this browser",
+  });
 
   const FORMAT = "sql-lab-exercice/1";
   const MAX_DB = 100 * 1024 * 1024;  // refus au-delà
@@ -17,7 +39,7 @@
   function idb() {
     if (!dbPromise) {
       dbPromise = new Promise((resolve, reject) => {
-        if (!global.indexedDB) { reject(new Error("stockage du navigateur indisponible")); return; }
+        if (!global.indexedDB) { reject(new Error(tr("stockage du navigateur indisponible"))); return; }
         const req = indexedDB.open("sqllab", 1);
         req.onupgradeneeded = () => req.result.createObjectStore("exercices", { keyPath: "id" });
         req.onsuccess = () => resolve(req.result);
@@ -55,7 +77,7 @@
   /** Métadonnées d'exercice propres (les questions passent par SQLPacks) */
   function normalizeExercise(raw, fallbackTitle) {
     raw = raw && typeof raw === "object" && !Array.isArray(raw) ? raw : {};
-    const titre = String(raw.titre || fallbackTitle || "Ma base").slice(0, 120).trim();
+    const titre = String(raw.titre || fallbackTitle || tr("Ma base")).slice(0, 120).trim();
     let id = String(raw.id || "").replace(/[^\w-]/g, "").slice(0, 50);
     if (!id.startsWith("perso-")) id = "perso-" + (id ? slug(id) : slug(titre));
     const ex = {
@@ -82,14 +104,14 @@
   /** Contrôles de la base : renvoie { errors, warnings } */
   function analyzeDb(SQL, bytes) {
     const errors = [], warnings = [];
-    if (bytes.length > MAX_DB) { errors.push(`Base trop volumineuse (${Math.round(bytes.length / 1048576)} Mo, maximum 100 Mo).`); return { errors, warnings }; }
-    if (bytes.length > WARN_DB) warnings.push(`Base volumineuse (${Math.round(bytes.length / 1048576)} Mo) : l'exécution des requêtes sera plus lente.`);
+    if (bytes.length > MAX_DB) { errors.push(tr("Base trop volumineuse ({n} Mo, maximum 100 Mo).", { n: Math.round(bytes.length / 1048576) })); return { errors, warnings }; }
+    if (bytes.length > WARN_DB) warnings.push(tr("Base volumineuse ({n} Mo) : l'exécution des requêtes sera plus lente.", { n: Math.round(bytes.length / 1048576) }));
     let db;
     try {
       db = new SQL.Database(bytes);
       const tables = db.exec("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'");
       const names = tables[0] ? tables[0].values.map((r) => r[0]) : [];
-      if (!names.length) { errors.push("La base ne contient aucune table."); return { errors, warnings }; }
+      if (!names.length) { errors.push(tr("La base ne contient aucune table.")); return { errors, warnings }; }
       let fk = 0;
       for (const t of names) {
         fk += (db.exec(`PRAGMA foreign_key_list("${t}")`)[0] || { values: [] }).values.length;
@@ -97,12 +119,12 @@
         for (const c of cols) {
           if (!/date/i.test(c[1]) && !/DATE/i.test(c[2] || "")) continue;
           const bad = db.exec(`SELECT COUNT(*) FROM "${t}" WHERE "${c[1]}" GLOB '[0-9]*/[0-9]*/[0-9][0-9][0-9][0-9]*'`)[0].values[0][0];
-          if (bad) warnings.push(`${t}.${c[1]} : ${bad} date(s) au format jj/mm/aaaa. Stockez les dates en AAAA-MM-JJ pour que YEAR(), BETWEEN et les tris fonctionnent.`);
+          if (bad) warnings.push(tr("{col} : {n} date(s) au format jj/mm/aaaa. Stockez les dates en AAAA-MM-JJ pour que YEAR(), BETWEEN et les tris fonctionnent.", { col: `${t}.${c[1]}`, n: bad }));
         }
       }
-      if (!fk && names.length > 1) warnings.push("Aucune clé étrangère déclarée (REFERENCES) : le diagramme n'affichera pas de flèches entre les tables.");
+      if (!fk && names.length > 1) warnings.push(tr("Aucune clé étrangère déclarée (REFERENCES) : le diagramme n'affichera pas de flèches entre les tables."));
     } catch (e) {
-      errors.push("Base illisible : " + e.message);
+      errors.push(tr("Base illisible : ") + e.message);
     } finally {
       if (db) db.close();
     }
@@ -135,21 +157,21 @@
         const find = (re) => entries.find(([n]) => re.test(n.split("/").pop()));
         const j = find(/^(exercice|questions)\.json$/i) || find(/\.json$/i);
         if (j) meta = JSON.parse(text(j[1]));
-        else warnings.push("Pas de fichier exercice.json dans le zip : exercice créé sans questions.");
+        else warnings.push(tr("Pas de fichier exercice.json dans le zip : exercice créé sans questions."));
         const dbf = find(/\.(sqlite3?|db)$/i);
         const sqlf = find(/\.sql$/i);
         if (dbf) bytes = dbf[1];
         else if (sqlf) bytes = sqlToDb(SQL, text(sqlf[1]));
-        else errors.push("Le zip ne contient ni base .sqlite ni script .sql.");
+        else errors.push(tr("Le zip ne contient ni base .sqlite ni script .sql."));
       } else if (isSqlite(u8)) {
         bytes = u8;
       } else {
         bytes = sqlToDb(SQL, text(u8)); // script SQL
       }
     } catch (e) {
-      errors.push("Fichier illisible : " + e.message);
+      errors.push(tr("Fichier illisible : ") + e.message);
     }
-    if (bytes && !isSqlite(bytes)) errors.push("Le fichier de base n'est pas une base SQLite valide.");
+    if (bytes && !isSqlite(bytes)) errors.push(tr("Le fichier de base n'est pas une base SQLite valide."));
     if (errors.length) return { exercise: null, bytes: null, errors, warnings };
     const a = analyzeDb(SQL, bytes);
     errors.push(...a.errors);
@@ -163,13 +185,13 @@
     const ff = global.fflate;
     const ex = { ...exercise, format: FORMAT };
     const lisezmoi = [
-      `Exercice SQL Lab : ${ex.titre}`,
+      tr("Exercice SQL Lab : {titre}", { titre: ex.titre }),
       "",
-      "Contenu :",
-      "- exercice.json : contexte, date du jour simulée et questions (format sql-lab-exercice/1)",
-      "- db.sqlite : la base de données",
+      tr("Contenu :"),
+      tr("- exercice.json : contexte, date du jour simulée et questions (format sql-lab-exercice/1)"),
+      tr("- db.sqlite : la base de données"),
       "",
-      "Pour l'utiliser : dans SQL Lab, menu « Importer un fichier », choisir ce zip.",
+      tr("Pour l'utiliser : dans SQL Lab, menu « Importer un fichier », choisir ce zip."),
     ].join("\n");
     return ff.zipSync({
       "exercice.json": ff.strToU8(JSON.stringify(ex, null, 2)),
@@ -183,7 +205,7 @@
   async function list(catalogue) {
     const perso = await store.all();
     return [
-      ...catalogue.map((e) => ({ id: e.id, titre: e.titre, kind: "integre" })),
+      ...catalogue.map((e) => ({ id: e.id, titre: e.titre, kind: "integre", langue: e.langue || "fr" })),
       ...perso.map((p) => ({ id: p.id, titre: p.exercise.titre, kind: "perso" })),
     ];
   }
@@ -199,7 +221,7 @@
       return { ex, bytes: new Uint8Array(buf), kind: "integre" };
     }
     const rec = await store.get(id);
-    if (!rec) throw new Error("exercice introuvable dans ce navigateur");
+    if (!rec) throw new Error(tr("exercice introuvable dans ce navigateur"));
     return { ex: JSON.parse(JSON.stringify(rec.exercise)), bytes: rec.db, kind: "perso" };
   }
 

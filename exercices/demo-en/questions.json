@@ -1,0 +1,307 @@
+{
+  "id": "demo-en",
+  "titre": "Demo – PedalPoint Bike Rentals",
+  "aujourdhui": "2025-06-15",
+  "contexte": "PedalPoint rents bikes from five STORE locations in the United Kingdom (Bristol, Edinburgh, Brighton, Manchester and Keswick). Each BIKE belongs to one store and to one CATEGORY (city bike, electric bike, mountain bike, road bike, kids bike, cargo bike), which sets its standard daily rate. When a CUSTOMER picks up bikes in a store, a RENTAL is recorded (start date, store, customer); its return date stays empty until the bikes are brought back. A rental can include several bikes: each one is a RENTAL_LINE with the daily price actually charged (10 % off for rentals of 5 days or more). A customer may have been referred by another customer (ReferredBy). Dates are stored as 'yyyy-mm-dd'.",
+  "source": "Demonstration exercise for SQL Lab. Entirely fictitious company and data.",
+  "schemaGrid": {
+    "CATEGORY": [0, 0],
+    "BIKE": [1, 0],
+    "RENTAL_LINE": [2, 0],
+    "STORE": [1, 1],
+    "RENTAL": [2, 1],
+    "CUSTOMER": [3, 1]
+  },
+  "questions": [
+    {
+      "id": "q01",
+      "theme": "Single table",
+      "enonce": "Display the list of bike categories offered by PedalPoint (all columns).",
+      "correction": ["SELECT *", "FROM CATEGORY;"],
+      "indice": "The star * displays every column of a table."
+    },
+    {
+      "id": "q02",
+      "theme": "Single table",
+      "enonce": "Display the last name, first name and phone number of the customers who live in Bristol, sorted alphabetically by last name.",
+      "ordered": [0],
+      "correction": ["SELECT LastName, FirstName, Phone", "FROM CUSTOMER", "WHERE City = 'Bristol'", "ORDER BY LastName;"],
+      "indice": "A condition on a text value is written between single quotes: City = 'Bristol'. Sorting is done with ORDER BY."
+    },
+    {
+      "id": "q03",
+      "theme": "Single table",
+      "enonce": "Display the customers (number, last name, first name, phone) who have not given an email address.",
+      "correction": ["SELECT CustomerId, LastName, FirstName, Phone", "FROM CUSTOMER", "WHERE Email IS NULL;"],
+      "indice": "A missing value is tested with IS NULL (not with = NULL)."
+    },
+    {
+      "id": "q04",
+      "theme": "Single table",
+      "enonce": "Display the bikes (number, model, brand) with a large frame (frame size 'L'), sorted by brand.",
+      "ordered": [2],
+      "correction": ["SELECT BikeId, Model, Brand", "FROM BIKE", "WHERE FrameSize = 'L'", "ORDER BY Brand;"],
+      "indice": "Two clauses: WHERE to keep the large frames, ORDER BY to sort the result."
+    },
+    {
+      "id": "q05",
+      "theme": "Aggregates",
+      "enonce": "Display the average, the lowest and the highest standard daily rate of the bike categories.",
+      "correction": ["SELECT AVG(DailyRate), MIN(DailyRate), MAX(DailyRate)", "FROM CATEGORY;"],
+      "indice": "The functions AVG (average), MIN and MAX each return a single value for the whole table."
+    },
+    {
+      "id": "q06",
+      "theme": "Dates",
+      "enonce": "Display the rentals (number, start date, return date) that started in April 2025.",
+      "correction": ["SELECT RentalId, StartDate, ReturnDate", "FROM RENTAL", "WHERE MONTH(StartDate) = 4", "AND YEAR(StartDate) = 2025;"],
+      "variantes": [["SELECT RentalId, StartDate, ReturnDate", "FROM RENTAL", "WHERE StartDate BETWEEN '2025-04-01' AND '2025-04-30';"]],
+      "indice": "Combine MONTH() and YEAR(), or use BETWEEN with two dates."
+    },
+    {
+      "id": "q07",
+      "theme": "Dates",
+      "enonce": "Display the number of rentals per year (year, number of rentals), based on the start date.",
+      "correction": ["SELECT YEAR(StartDate), COUNT(*)", "FROM RENTAL", "GROUP BY YEAR(StartDate);"],
+      "indice": "You can group on the result of a function: GROUP BY YEAR(StartDate)."
+    },
+    {
+      "id": "q08",
+      "theme": "Dates",
+      "enonce": "Display the returned rentals that lasted 7 days or more: rental number, start date, return date and duration in days, from the longest to the shortest.",
+      "ordered": [3],
+      "correction": ["SELECT RentalId, StartDate, ReturnDate, DATEDIFF(ReturnDate, StartDate)", "FROM RENTAL", "WHERE DATEDIFF(ReturnDate, StartDate) >= 7", "ORDER BY DATEDIFF(ReturnDate, StartDate) DESC;"],
+      "variantes": [["SELECT RentalId, StartDate, ReturnDate, DATEDIFF(ReturnDate, StartDate) AS Duration", "FROM RENTAL", "WHERE DATEDIFF(ReturnDate, StartDate) >= 7", "ORDER BY Duration DESC;"]],
+      "indice": "DATEDIFF(end, start) returns the number of days between two dates. A rental that is not returned yet has no return date, so DATEDIFF gives no value for it."
+    },
+    {
+      "id": "q09",
+      "theme": "Joins",
+      "enonce": "Display the bikes of the Lakeside store (store number 5): bike number, model and category name.",
+      "correction": ["SELECT BikeId, Model, CategoryName", "FROM BIKE, CATEGORY", "WHERE BIKE.CategoryId = CATEGORY.CategoryId", "AND StoreId = 5;"],
+      "variantes": [["SELECT BikeId, Model, CategoryName", "FROM BIKE", "INNER JOIN CATEGORY ON BIKE.CategoryId = CATEGORY.CategoryId", "WHERE StoreId = 5;"]],
+      "indice": "The category name is in CATEGORY: link BIKE and CATEGORY with CategoryId (foreign key of BIKE)."
+    },
+    {
+      "id": "q10",
+      "theme": "Joins",
+      "enonce": "Display, without duplicates, the model and brand of the bikes rented in rentals that started in May 2025.",
+      "correction": ["SELECT DISTINCT Model, Brand", "FROM BIKE, RENTAL_LINE, RENTAL", "WHERE BIKE.BikeId = RENTAL_LINE.BikeId", "AND RENTAL_LINE.RentalId = RENTAL.RentalId", "AND MONTH(StartDate) = 5", "AND YEAR(StartDate) = 2025;"],
+      "variantes": [
+        ["SELECT DISTINCT Model, Brand", "FROM BIKE", "INNER JOIN RENTAL_LINE ON BIKE.BikeId = RENTAL_LINE.BikeId", "INNER JOIN RENTAL ON RENTAL_LINE.RentalId = RENTAL.RentalId", "WHERE MONTH(StartDate) = 5", "AND YEAR(StartDate) = 2025;"],
+        ["SELECT DISTINCT Model, Brand", "FROM BIKE, RENTAL_LINE, RENTAL", "WHERE BIKE.BikeId = RENTAL_LINE.BikeId", "AND RENTAL_LINE.RentalId = RENTAL.RentalId", "AND StartDate BETWEEN '2025-05-01' AND '2025-05-31';"]
+      ],
+      "indice": "The model is in BIKE and the start date in RENTAL, but these two tables are not linked directly: RENTAL_LINE (one line per bike rented) connects them. It must appear in the FROM even though none of its columns is displayed."
+    },
+    {
+      "id": "q11",
+      "theme": "Joins",
+      "enonce": "Display, without duplicates, the last name and first name of the customers who have rented at least one electric bike (category number 2).",
+      "correction": ["SELECT DISTINCT LastName, FirstName", "FROM CUSTOMER, RENTAL, RENTAL_LINE, BIKE", "WHERE CUSTOMER.CustomerId = RENTAL.CustomerId", "AND RENTAL.RentalId = RENTAL_LINE.RentalId", "AND RENTAL_LINE.BikeId = BIKE.BikeId", "AND CategoryId = 2;"],
+      "variantes": [["SELECT DISTINCT LastName, FirstName", "FROM CUSTOMER", "INNER JOIN RENTAL ON CUSTOMER.CustomerId = RENTAL.CustomerId", "INNER JOIN RENTAL_LINE ON RENTAL.RentalId = RENTAL_LINE.RentalId", "INNER JOIN BIKE ON RENTAL_LINE.BikeId = BIKE.BikeId", "WHERE CategoryId = 2;"]],
+      "indice": "Follow the arrows of the diagram: CUSTOMER → RENTAL → RENTAL_LINE → BIKE (three join conditions). A customer who rented several electric bikes must appear only once: DISTINCT."
+    },
+    {
+      "id": "q12",
+      "theme": "Grouping",
+      "enonce": "Display, for each store (store name), the number of rentals recorded, from the busiest store to the quietest.",
+      "ordered": [1],
+      "correction": ["SELECT StoreName, COUNT(*)", "FROM STORE, RENTAL", "WHERE STORE.StoreId = RENTAL.StoreId", "GROUP BY StoreName", "ORDER BY COUNT(*) DESC;"],
+      "variantes": [["SELECT StoreName, COUNT(*) AS NbRentals", "FROM STORE", "INNER JOIN RENTAL ON STORE.StoreId = RENTAL.StoreId", "GROUP BY StoreName", "ORDER BY NbRentals DESC;"]],
+      "indice": "« For each store » means GROUP BY. The store name is in STORE, the rentals are in RENTAL."
+    },
+    {
+      "id": "q13",
+      "theme": "Grouping",
+      "enonce": "Display the customers (number, last name) who have made at least 3 rentals, with their number of rentals.",
+      "correction": ["SELECT CUSTOMER.CustomerId, LastName, COUNT(*)", "FROM CUSTOMER, RENTAL", "WHERE CUSTOMER.CustomerId = RENTAL.CustomerId", "GROUP BY CUSTOMER.CustomerId, LastName", "HAVING COUNT(*) >= 3;"],
+      "variantes": [["SELECT CUSTOMER.CustomerId, LastName, COUNT(*)", "FROM CUSTOMER", "INNER JOIN RENTAL ON CUSTOMER.CustomerId = RENTAL.CustomerId", "GROUP BY CUSTOMER.CustomerId, LastName", "HAVING COUNT(*) >= 3;"]],
+      "indice": "A condition on a computed number (COUNT) goes in HAVING, after GROUP BY. CustomerId exists in two tables: say which one (CUSTOMER.CustomerId)."
+    },
+    {
+      "id": "q14",
+      "theme": "Subqueries",
+      "enonce": "Display the customers (number, last name, first name) who have never rented a bike.",
+      "correction": ["SELECT CustomerId, LastName, FirstName", "FROM CUSTOMER", "WHERE CustomerId NOT IN (SELECT CustomerId", "                         FROM RENTAL);"],
+      "variantes": [["SELECT CustomerId, LastName, FirstName", "FROM CUSTOMER C", "WHERE NOT EXISTS (SELECT *", "                  FROM RENTAL R", "                  WHERE R.CustomerId = C.CustomerId);"]],
+      "indice": "« Never »: NOT IN (a subquery that lists the customers who have at least one rental)."
+    },
+    {
+      "id": "q15",
+      "theme": "Self-join",
+      "enonce": "Display each customer who was referred by another customer: last name and first name of the customer, and last name of the customer who referred them.",
+      "correction": ["SELECT C.LastName, C.FirstName, R.LastName", "FROM CUSTOMER C, CUSTOMER R", "WHERE C.ReferredBy = R.CustomerId;"],
+      "variantes": [["SELECT C.LastName, C.FirstName, R.LastName AS Referrer", "FROM CUSTOMER C", "INNER JOIN CUSTOMER R ON C.ReferredBy = R.CustomerId;"]],
+      "indice": "The CUSTOMER table is linked to itself (ReferredBy points to another customer). Use it twice in the FROM with two aliases: C (the customer) and R (the referrer)."
+    },
+    {
+      "id": "q16",
+      "theme": "Updates",
+      "type": "write",
+      "enonce": "The bikes of rental no. 1036 have just been brought back today (15 June 2025): record the return date.",
+      "correction": ["UPDATE RENTAL", "SET ReturnDate = '2025-06-15'", "WHERE RentalId = 1036;"],
+      "variantes": [["UPDATE RENTAL", "SET ReturnDate = NOW()", "WHERE RentalId = 1036;"]],
+      "verif": "SELECT * FROM RENTAL ORDER BY RentalId",
+      "indice": "UPDATE table SET column = value WHERE condition. Without WHERE, every rental would be modified. NOW() returns the date of the day."
+    },
+    {
+      "id": "q17",
+      "theme": "Updates",
+      "type": "write",
+      "enonce": "PedalPoint adds a new category: « Tandem », number 7, with a standard daily rate of 45. Add it.",
+      "correction": ["INSERT INTO CATEGORY", "VALUES (7, 'Tandem', 45);"],
+      "variantes": [["INSERT INTO CATEGORY (CategoryId, CategoryName, DailyRate)", "VALUES (7, 'Tandem', 45);"]],
+      "verif": "SELECT * FROM CATEGORY ORDER BY CategoryId",
+      "indice": "INSERT INTO table VALUES (value1, value2, …) in the order of the columns of the table."
+    },
+    {
+      "id": "q18",
+      "theme": "Updates",
+      "type": "write",
+      "enonce": "Customer no. 25 (Rhys Morgan), who has never rented a bike, asks for his account to be deleted. Delete him. Then try to delete customer no. 4: what happens, and why?",
+      "correction": ["DELETE FROM CUSTOMER", "WHERE CustomerId = 25;"],
+      "verif": "SELECT * FROM CUSTOMER ORDER BY CustomerId",
+      "indice": "DELETE FROM table WHERE condition. Customer no. 4 has rentals (and referred other customers): referential integrity refuses the deletion, because RENTAL.CustomerId and CUSTOMER.ReferredBy refer to him."
+    },
+    {
+      "id": "s01",
+      "type": "schema",
+      "theme": "Schema design",
+      "enonce": "PedalPoint wants to improve its database. 1) All the bikes of a given model have the same brand and the same category: the company wants to record the list of models once (model code, model name, brand, category), each bike being of one model. 2) Customers can now add accessories to a rental (helmet, lock, child seat, panniers…). Each accessory has a code, a name and a daily price. For each rental, the company records which accessories were taken and in what quantity; the same accessory can of course be part of many rentals. Update the schema below.",
+      "depart": "base",
+      "solution": {
+        "tables": [
+          { "nom": "BIKE", "interdits": ["Model|ModelName", "Brand|BrandName", "CategoryId"],
+            "fk": { "ModelId|ModelCode|CodeModel|IdModel|ModelNo|ModelNumber": "MODEL" } },
+          { "nom": "MODEL", "alias": ["BIKE_MODEL", "BIKEMODEL", "MODELS"],
+            "role": "describe each bike model once (name, brand, category)",
+            "pk": ["ModelId|ModelCode|CodeModel|IdModel|ModelNo|ModelNumber"],
+            "fk": { "CategoryId": "CATEGORY" },
+            "attributs": ["ModelName|Model|Name|ModelLabel", "Brand|BrandName"] },
+          { "nom": "ACCESSORY", "alias": ["ACCESSORIES", "ACCESSORY_TYPE", "EQUIPMENT"],
+            "role": "describe the accessories that can be rented",
+            "pk": ["AccessoryId|AccessoryCode|CodeAccessory|IdAccessory|AccessoryNo"],
+            "attributs": ["AccessoryName|Name|AccessoryLabel|Label", "DailyPrice|AccessoryDailyPrice|DailyRate|PricePerDay|Price"] },
+          { "nom": "RENTAL_ACCESSORY", "alias": ["RENTALACCESSORY", "INCLUDE", "ADD_ACCESSORY", "TAKE", "ACCESSORY_LINE", "EQUIP"],
+            "role": "record the quantity of each accessory taken in a rental",
+            "pk": ["RentalId", "AccessoryId|AccessoryCode|CodeAccessory|IdAccessory|AccessoryNo"],
+            "fk": { "RentalId": "RENTAL", "AccessoryId|AccessoryCode|CodeAccessory|IdAccessory|AccessoryNo": "ACCESSORY" },
+            "attributs": ["Quantity|Qty|NbAccessories|Number"] }
+        ]
+      },
+      "variantes": [
+        {
+          "tables": [
+            { "nom": "BIKE", "interdits": ["Model|ModelName", "Brand|BrandName"],
+              "fk": { "ModelId|ModelCode|CodeModel|IdModel|ModelNo|ModelNumber": "MODEL" } },
+            { "nom": "MODEL", "alias": ["BIKE_MODEL", "BIKEMODEL", "MODELS"],
+              "role": "describe each bike model once (name, brand, category)",
+              "pk": ["ModelId|ModelCode|CodeModel|IdModel|ModelNo|ModelNumber"],
+              "attributs": ["ModelName|Model|Name|ModelLabel", "Brand|BrandName"] },
+            { "nom": "ACCESSORY", "alias": ["ACCESSORIES", "ACCESSORY_TYPE", "EQUIPMENT"],
+              "role": "describe the accessories that can be rented",
+              "pk": ["AccessoryId|AccessoryCode|CodeAccessory|IdAccessory|AccessoryNo"],
+              "attributs": ["AccessoryName|Name|AccessoryLabel|Label", "DailyPrice|AccessoryDailyPrice|DailyRate|PricePerDay|Price"] },
+            { "nom": "RENTAL_ACCESSORY", "alias": ["RENTALACCESSORY", "INCLUDE", "ADD_ACCESSORY", "TAKE", "ACCESSORY_LINE", "EQUIP"],
+              "role": "record the quantity of each accessory taken in a rental",
+              "pk": ["RentalId", "AccessoryId|AccessoryCode|CodeAccessory|IdAccessory|AccessoryNo"],
+              "fk": { "RentalId": "RENTAL", "AccessoryId|AccessoryCode|CodeAccessory|IdAccessory|AccessoryNo": "ACCESSORY" },
+              "attributs": ["Quantity|Qty|NbAccessories|Number"] }
+          ],
+          "partiel": "Almost: MODEL is created, but the category stayed in BIKE. Since every bike of a model has the same category, the category belongs to the model: CategoryId must move from BIKE to MODEL."
+        }
+      ],
+      "indice": "Information that depends on the model and not on the individual bike (brand, category) moves to a new table, and BIKE keeps only a foreign key to it. A « many-to-many » relationship (rentals ↔ accessories) becomes a table whose primary key combines the keys of the two linked tables, and which carries the quantity."
+    },
+    {
+      "id": "p01",
+      "type": "processus",
+      "theme": "Process",
+      "enonce": "Interview with Sarah Jenkins, store manager at PedalPoint: « Customers book their bikes on our website. When a booking request comes in, the website checks whether a bike of the requested category is available on those dates. If one is available, the booking is confirmed; if not, the booking is refused and the customer is told so straight away. On the day, the customer comes to the store counter. We hand over the bike only when the booking is confirmed and the customer has either paid a deposit or shown a PedalPoint member card — members don't pay a deposit. When the bike is brought back, the counter staff inspect it. If it is in good condition, the deposit is refunded. If it is damaged, the deposit is kept and a repair request is sent to the workshop, which repairs the bike and puts it back in service. » Draw the event-driven process chart (events, operations, synchronisations) of this process.",
+      "couloirs": ["Customer", "Website", "Store counter", "Workshop"],
+      "elements": [
+        { "kind": "event", "label": "Booking request" },
+        { "kind": "event", "label": "Booking confirmed" },
+        { "kind": "event", "label": "Booking refused" },
+        { "kind": "event", "label": "Deposit paid" },
+        { "kind": "event", "label": "Member card shown" },
+        { "kind": "event", "label": "Bike handed over" },
+        { "kind": "event", "label": "Bike returned" },
+        { "kind": "event", "label": "Deposit refunded" },
+        { "kind": "event", "label": "Deposit kept" },
+        { "kind": "event", "label": "Repair request" },
+        { "kind": "event", "label": "Bike back in service" },
+        { "kind": "operation", "label": "Availability check" },
+        { "kind": "operation", "label": "Bike handover" },
+        { "kind": "operation", "label": "Return inspection" },
+        { "kind": "operation", "label": "Repair" }
+      ],
+      "attendus": [
+        { "operation": "Bike handover", "alias": ["Hand over bike", "Handover", "Bike pick-up", "Bike pickup", "Hand over the bike"],
+          "synchronisation": "Booking confirmed AND (Deposit paid OR Member card shown)" },
+        { "operation": "Availability check", "alias": ["Check availability", "Booking check", "Availability checking", "Check bike availability"],
+          "regles": ["Bike available", "No bike available"] },
+        { "operation": "Return inspection", "alias": ["Inspect bike", "Bike inspection", "Return check", "Inspection", "Check returned bike"],
+          "regles": ["Good condition", "Damaged"] }
+      ],
+      "equivalents": {
+        "Booking confirmed": ["Booking accepted", "Confirmed booking", "Reservation confirmed"],
+        "Deposit paid": ["Deposit", "Payment of deposit", "Deposit received"],
+        "Member card shown": ["Member card", "Membership card", "Member card presented", "Membership card shown"],
+        "Bike available": ["Available", "Bike free"],
+        "No bike available": ["Not available", "Unavailable", "No bike"],
+        "Good condition": ["Bike in good condition", "Not damaged", "OK"],
+        "Damaged": ["Bike damaged", "Damage", "Bad condition"]
+      },
+      "solution": {
+        "lanes": ["Customer", "Website", "Store counter", "Workshop"],
+        "nodes": [
+          { "id": "n1", "kind": "event", "label": "Booking request", "x": 120, "y": 95 },
+          { "id": "n2", "kind": "operation", "label": "Availability check", "x": 360, "y": 205,
+            "actions": ["Check bikes of the category on the dates"], "rules": ["Bike available", "No bike available"] },
+          { "id": "n3", "kind": "event", "label": "Booking confirmed", "x": 360, "y": 345 },
+          { "id": "n4", "kind": "event", "label": "Booking refused", "x": 120, "y": 345 },
+          { "id": "n5", "kind": "event", "label": "Deposit paid", "x": 120, "y": 470 },
+          { "id": "n6", "kind": "event", "label": "Member card shown", "x": 120, "y": 580 },
+          { "id": "n7", "kind": "sync", "label": "", "x": 600, "y": 680, "cond": "A and (B or C)" },
+          { "id": "n8", "kind": "operation", "label": "Bike handover", "x": 600, "y": 800,
+            "actions": ["Check the booking", "Record deposit or member card", "Hand over the bike"], "rules": ["Always"] },
+          { "id": "n9", "kind": "event", "label": "Bike handed over", "x": 120, "y": 940 },
+          { "id": "n10", "kind": "event", "label": "Bike returned", "x": 120, "y": 1060 },
+          { "id": "n11", "kind": "operation", "label": "Return inspection", "x": 600, "y": 1170,
+            "actions": ["Inspect the bike"], "rules": ["Good condition", "Damaged"] },
+          { "id": "n12", "kind": "event", "label": "Deposit refunded", "x": 120, "y": 1310 },
+          { "id": "n13", "kind": "event", "label": "Deposit kept", "x": 600, "y": 1310 },
+          { "id": "n14", "kind": "event", "label": "Repair request", "x": 840, "y": 1310 },
+          { "id": "n15", "kind": "operation", "label": "Repair", "x": 840, "y": 1430,
+            "actions": ["Repair the bike"], "rules": ["Always"] },
+          { "id": "n16", "kind": "event", "label": "Bike back in service", "x": 840, "y": 1570 }
+        ],
+        "arrows": [
+          { "id": "a1", "from": "n1", "rule": null, "to": "n2" },
+          { "id": "a2", "from": "n2", "rule": 0, "to": "n3" },
+          { "id": "a3", "from": "n2", "rule": 1, "to": "n4" },
+          { "id": "a4", "from": "n3", "rule": null, "to": "n7", "letter": "A" },
+          { "id": "a5", "from": "n5", "rule": null, "to": "n7", "letter": "B" },
+          { "id": "a6", "from": "n6", "rule": null, "to": "n7", "letter": "C" },
+          { "id": "a7", "from": "n7", "rule": null, "to": "n8" },
+          { "id": "a8", "from": "n8", "rule": 0, "to": "n9" },
+          { "id": "a9", "from": "n10", "rule": null, "to": "n11" },
+          { "id": "a10", "from": "n11", "rule": 0, "to": "n12" },
+          { "id": "a11", "from": "n11", "rule": 1, "to": "n13" },
+          { "id": "a12", "from": "n11", "rule": 1, "to": "n14" },
+          { "id": "a13", "from": "n14", "rule": null, "to": "n15" },
+          { "id": "a14", "from": "n15", "rule": 0, "to": "n16" }
+        ]
+      },
+      "autoevaluation": [
+        "The four actors are present: the customer, the website, the store counter and the workshop.",
+        "The availability check, on the website, has two emission rules: bike available (booking confirmed) / no bike available (booking refused).",
+        "The bike handover waits for the booking confirmed AND (the deposit paid OR the member card shown): this is the synchronisation.",
+        "The return inspection, triggered by the bike returned, has two cases: good condition (deposit refunded) / damaged (deposit kept and repair request).",
+        "The workshop repair is triggered by the repair request and puts the bike back in service."
+      ],
+      "indice": "First identify the actors (lanes), then what triggers each operation. An operation that leads to two different situations has two emission rules. The handover needs several things at the same time, one of them in two possible forms: that is where a synchronisation with a condition combining « and » and « or » is needed."
+    }
+  ]
+}

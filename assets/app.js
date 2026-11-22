@@ -1,6 +1,177 @@
 /* SQL Lab – interface. */
 (function () {
   "use strict";
+  const I18N = window.I18N || { lang: "fr", add() {}, t: (s, v) => (v ? s.replace(/\{(\w+)\}/g, (m, k) => (v[k] !== undefined ? v[k] : m)) : s), n: (c, a, b, v) => (c > 1 ? b : a).replace(/\{(\w+)\}/g, (m, k) => (k === "n" ? c : v && v[k] !== undefined ? v[k] : m)) };
+  const tr = I18N.t, trn = I18N.n;
+  I18N.add({
+    // ---- index.html (texte statique, traduit par I18N.dom)
+    "Afficher / masquer la liste des questions": "Show / hide the question list",
+    "Afficher ou masquer la liste des questions": "Show or hide the question list",
+    "Entraînement aux requêtes – DCG UE8": "SQL query practice – DCG UE8",
+    "Exercice": "Exercise",
+    "réussies": "solved",
+    "Questions complémentaires": "Additional questions",
+    "Questions (.json) ou exercice complet avec sa base (.zip, .sqlite, .sql)": "Questions (.json) or a full exercise with its database (.zip, .sqlite, .sql)",
+    "Importer un fichier…": "Import a file…",
+    "Créer des questions": "Create questions",
+    "Contexte de l'exercice": "Exercise context",
+    "Schéma de la base": "Database schema",
+    "Diagramme": "Diagram",
+    "Schéma relationnel": "Relational schema",
+    "Réduire": "Zoom out",
+    "Agrandir": "Zoom in",
+    "Agrandir le texte": "Enlarge text",
+    "Réinitialiser la disposition et le zoom": "Reset layout and zoom",
+    "Réinitialiser la disposition": "Reset layout",
+    "Ouvrir en grand": "Open full size",
+    "Ouvrir le diagramme en grand": "Open the diagram full size",
+    "Replier / déplier": "Collapse / expand",
+    "Glissez les tables pour les déplacer · double-clic : contenu de la table · clé primaire": "Drag tables to move them · double-click: table contents · primary key",
+    "soulignée": "underlined",
+    ", clé étrangère": ", foreign key",
+    "#en italique": "#in italics",
+    "clé primaire": "primary key",
+    "· clé étrangère": "· foreign key",
+    "· cliquez sur une table pour voir son contenu": "· click a table to see its contents",
+    "Largeur du schéma": "Schema width",
+    "Glisser pour élargir le schéma": "Drag to widen the schema",
+    "Fermer le message": "Close message",
+    "✎ Requête de modification : elle est exécutée sur une copie de la base, vos changements ne sont jamais conservés.": "✎ Data modification query: it runs on a copy of the database, your changes are never kept.",
+    "Votre requête SQL": "Your SQL query",
+    "Écrivez votre requête ici, puis Ctrl + Entrée pour l'exécuter": "Write your query here, then press Ctrl + Enter to run it",
+    "Complétion : tapez le début d'un nom de table ou de colonne, ou": "Autocomplete: type the start of a table or column name, or",
+    "Espace": "Space",
+    "; après": "; after",
+    "(ou un alias": "(or an alias",
+    ") les colonnes de la table sont proposées.": ") the table's columns are suggested.",
+    "▶ Exécuter": "▶ Run",
+    "Résultat attendu": "Expected result",
+    "Indice": "Hint",
+    "Correction": "Solution",
+    "← Précédente": "← Previous",
+    "Suivante →": "Next →",
+    "Aide-mémoire SQL": "SQL cheat sheet",
+    "Consultation": "Querying data",
+    "Jointure avec JOIN": "Join with JOIN",
+    "Sous-requête": "Subquery",
+    "Mises à jour": "Changing data",
+    "Dates": "Dates",
+    "ou": "or",
+    "sont acceptés": "are accepted",
+    ": date du jour simulée": ": simulated current date",
+    ": écart en jours": ": difference in days",
+    "Pièges fréquents": "Common pitfalls",
+    "et non": "not",
+    "décimales avec un point :": "decimals use a point:",
+    "condition sur COUNT/SUM →": "condition on COUNT/SUM →",
+    "· Les modifications sont fictives : la base repart de zéro à chaque exécution. · Moteur SQLite (sql.js) dans votre navigateur, aucune réponse n'est envoyée.": "· Changes are simulated: the database starts afresh at each run. · SQLite engine (sql.js) running in your browser, no answers are sent anywhere.",
+    "Glissez les tables pour les déplacer · double-clic sur une table : voir son contenu": "Drag tables to move them · double-click a table: see its contents",
+    "Fermer": "Close",
+    "Correction pas à pas": "Step-by-step solution",
+    "Étapes de construction de la requête": "Steps in building the query",
+    "Revenir au début": "Back to the start",
+    "◀ Précédent": "◀ Previous",
+    "Suivant ▶": "Next ▶",
+    "⏵ Lecture auto": "⏵ Autoplay",
+    "affiché": "shown",
+    "filtre": "filter",
+    "jointure": "join",
+    "table de passage": "linking table",
+    "Chargement de la base…": "Loading the database…",
+    // ---- textes dynamiques
+    "Aucune ligne": "No rows",
+    "… {n} ligne(s) supplémentaire(s) non affichée(s).": "… {n} more row(s) not shown.",
+    "{n} ligne": "{n} row",
+    "{n} lignes": "{n} rows",
+    "Impossible de charger le moteur SQL ou la liste des exercices. Ouvrez la page via un serveur web (GitHub Pages ou http://localhost), pas en double-cliquant sur le fichier.": "Could not load the SQL engine or the list of exercises. Open the page through a web server (GitHub Pages or http://localhost), not by double-clicking the file.",
+    "Plateforme non détectée : la progression reste dans ce navigateur.": "Learning platform not detected: your progress stays in this browser.",
+    "Connecté à la plateforme": "Connected to the learning platform",
+    " · score : {s} %": " · score: {s}%",
+    " · score transmis : {s} %": " · score sent: {s}%",
+    "Exercices importés": "Imported exercises",
+    "(FR) ": "(FR) ",
+    "fichier inaccessible ({s})": "file not reachable ({s})",
+    "Impossible de lire l'exercice du lien : {m}": "Could not read the exercise from the link: {m}",
+    "Exercice importé : « {titre} », {n} question.": "Exercise imported: “{titre}”, {n} question.",
+    "Exercice importé : « {titre} », {n} questions.": "Exercise imported: “{titre}”, {n} questions.",
+    "{n} correction(s) ne fonctionnent pas.": "{n} solution(s) do not work.",
+    "Exercice retiré de ce navigateur.": "Exercise removed from this browser.",
+    "Impossible de lire les questions du lien : {m}": "Could not read the questions from the link: {m}",
+    "Le lien ne contient aucune question exploitable. ": "The link does not contain any usable question. ",
+    "Questions ajoutées : « {titre} »{auteur}, {n} question, en fin de liste.": "Questions added: “{titre}”{auteur}, {n} question, at the end of the list.",
+    "Questions ajoutées : « {titre} »{auteur}, {n} questions, en fin de liste.": "Questions added: “{titre}”{auteur}, {n} questions, at the end of the list.",
+    "Attention : {n} correction(s) ne fonctionnent pas, signalez-le à l'enseignant.": "Careful: {n} solution(s) do not work, please tell your teacher.",
+    "Import de l'exercice…": "Importing the exercise…",
+    "Fichier illisible : {m}": "Unreadable file: {m}",
+    "Aucune question exploitable dans ce fichier. ": "No usable question in this file. ",
+    "Retirer ces questions": "Remove these questions",
+    "Retirer le pack {titre}": "Remove the question pack {titre}",
+    "Aucune. Un enseignant peut vous donner un fichier ou un lien.": "None. A teacher can give you a file or a link.",
+    "Impossible de charger l'exercice « {id} » ({m}).": "Could not load the exercise “{id}” ({m}).",
+    "Date du jour simulée : {d}": "Simulated current date: {d}",
+    "clé étrangère → {fk}": "foreign key → {fk}",
+    "Afficher le contenu ({n} lignes)": "Show the contents ({n} rows)",
+    "Schéma relationnel – {titre}": "Relational schema – {titre}",
+    "Contenu de la table {name}": "Contents of table {name}",
+    "Aperçu : équivaut à <code>SELECT * FROM {name};</code>": "Preview: same as <code>SELECT * FROM {name};</code>",
+    "Construction de schéma": "Schema building",
+    "Processus": "Process",
+    "Présentation": "Introduction",
+    "Présentation : le contexte et la base de données": "Introduction: the context and the database",
+    "La base de données": "The database",
+    "Elle contient {n} tables. Observez le diagramme : chaque flèche part d'une <i>#clé étrangère</i> et pointe vers la <u>clé primaire</u> de la table liée. C'est ce lien qui permet les jointures. Cliquez sur une table pour voir son contenu :": "It contains {n} tables. Look at the diagram: each arrow starts from a <i>#foreign key</i> and points to the <u>primary key</u> of the linked table. This link is what makes joins possible. Click a table to see its contents:",
+    "Date du jour simulée : <strong>{d}</strong> (c'est la date renvoyée par <code>NOW()</code> ou <code>CURDATE()</code>).": "Simulated current date: <strong>{d}</strong> (this is the date returned by <code>NOW()</code> or <code>CURDATE()</code>).",
+    "Comment travailler": "How to work",
+    "Lisez l'énoncé et repérez les tables utiles dans le diagramme.": "Read the question and find the tables you need in the diagram.",
+    "Écrivez la requête puis exécutez-la (<kbd>Ctrl</kbd>+<kbd>Entrée</kbd>) : elle est comparée au résultat attendu et un message vous guide si elle n'est pas encore juste.": "Write the query, then run it (<kbd>Ctrl</kbd>+<kbd>Enter</kbd>): it is compared with the expected result, and a message guides you if it is not right yet.",
+    "Si besoin : <em>Résultat attendu</em>, puis <em>Indice</em>, et seulement en dernier recours <em>Correction</em>.": "If needed: <em>Expected result</em>, then <em>Hint</em>, and only as a last resort <em>Solution</em>.",
+    "Les INSERT, UPDATE et DELETE sont fictifs : la base repart de zéro à chaque exécution.": "INSERT, UPDATE and DELETE are simulated: the database starts afresh at each run.",
+    "Ici, l'éditeur sert à <strong>explorer librement</strong> la base, par exemple <code>SELECT * FROM {t};</code>": "Here, the editor lets you <strong>explore the database freely</strong>, for example <code>SELECT * FROM {t};</code>",
+    "Commencer la question 1 →": "Start question 1 →",
+    "Exercice importé, conservé dans ce navigateur uniquement.": "Imported exercise, kept in this browser only.",
+    "Retirer cet exercice": "Remove this exercise",
+    "Annale {a}": "Exam {a}",
+    "Présentation de l'exercice": "About this exercise",
+    "✓ Vérifier le schéma": "✓ Check the schema",
+    "✓ Vérifier le processus": "✓ Check the process",
+    "▶ Exécuter <kbd>Ctrl</kbd><kbd>⏎</kbd>": "▶ Run <kbd>Ctrl</kbd><kbd>⏎</kbd>",
+    "Erreur dans la requête": "Error in the query",
+    "Résultat": "Result",
+    "{rows} modifiée(s) – modification fictive, non conservée.": "{rows} changed – simulated change, not kept.",
+    "Points de contrôle respectés : {a} / {b}": "Checkpoints passed: {a} / {b}",
+    "✓ Bravo, le schéma est correct !": "✓ Well done, the schema is correct!",
+    "Question suivante →": "Next question →",
+    "Presque…": "Almost…",
+    "Pas encore": "Not yet",
+    "Contrôles : grammaire du schéma à revoir · {a} / {b} points vérifiés. Le reste (découpage, noms, acteurs) se compare au corrigé.": "Checks: diagram grammar needs work · {a} / {b} points checked. The rest (breakdown, names, actors) is compared with the model answer.",
+    "Contrôles : grammaire du schéma respectée · {a} / {b} points vérifiés. Le reste (découpage, noms, acteurs) se compare au corrigé.": "Checks: diagram grammar respected · {a} / {b} points checked. The rest (breakdown, names, actors) is compared with the model answer.",
+    "✓ Bravo : le schéma respecte les règles et les synchronisations sont justes !": "✓ Well done: the diagram follows the rules and the synchronisations are right!",
+    "Comparez maintenant avec le <button type=\"button\" class=\"link\" data-show-correction>corrigé</button> et cochez la liste d'auto-évaluation.": "Now compare with the <button type=\"button\" class=\"link\" data-show-correction>model answer</button> and tick the self-assessment checklist.",
+    "Une solution possible (corrigé) — d'autres découpages peuvent être justes :": "One possible solution (model answer) — other breakdowns can be right too:",
+    "<strong>Auto-évaluation</strong> : cochez ce qui est vrai pour votre schéma.": "<strong>Self-assessment</strong>: tick what is true for your diagram.",
+    "Message du moteur : {m}": "Engine message: {m}",
+    "✓ Bravo, c'est le résultat attendu !": "✓ Well done, that's the expected result!",
+    "Vous avez terminé la dernière question de cet exercice.": "You have finished the last question of this exercise.",
+    "Comparez avec le <button type=\"button\" class=\"link\" data-show-expected>résultat attendu</button>.": "Compare with the <button type=\"button\" class=\"link\" data-show-expected>expected result</button>.",
+    "Effet de votre requête": "Effect of your query",
+    "{rows} modifiée(s), insérée(s) ou supprimée(s)": "{rows} changed, inserted or deleted",
+    "Lignes après modification ou ajout": "Rows after the change or insertion",
+    "Lignes avant modification ou supprimées": "Rows before the change, or deleted",
+    "Résultat de la dernière instruction": "Result of the last statement",
+    "Votre résultat": "Your result",
+    "Effet attendu": "Expected effect",
+    " · ordre imposé": " · order required",
+    "Les noms de colonnes peuvent différer (alias) : seules les valeurs comptent.": "Column names may differ (aliases): only the values count.",
+    "🎬 Construction pas à pas": "🎬 Step-by-step build",
+    "🎬 Correction pas à pas": "🎬 Step-by-step solution",
+    "Réponse acceptée seulement en partie": "Answer only partly accepted",
+    "Autre solution acceptée": "Other accepted solution",
+    "Les noms peuvent varier : la vérification accepte les noms équivalents et reconnaît une table à sa clé primaire.": "Names may vary: the check accepts equivalent names and recognises a table by its primary key.",
+    "Autre écriture possible": "Another possible way to write it",
+    "Pas d'indice pour cette question.": "No hint for this question.",
+    "Retirer l'exercice « {titre} » de ce navigateur ? (ses questions et sa base seront effacées de ce navigateur)": "Remove the exercise “{titre}” from this browser? (its questions and database will be deleted from this browser)",
+    "Retirer ces questions complémentaires de votre liste ?": "Remove these additional questions from your list?",
+  });
 
   const SQLJS_DIR = "lib/sql.js/";
   const MAX_ROWS = 200;
@@ -160,23 +331,28 @@
     let h = `<div class="table-wrap${cls}"><table><thead><tr>`;
     h += res.columns.map((c) => `<th>${esc(c)}</th>`).join("");
     h += "</tr></thead><tbody>";
-    if (!rows.length) h += `<tr><td colspan="${res.columns.length || 1}" class="empty">Aucune ligne</td></tr>`;
+    if (!rows.length) h += `<tr><td colspan="${res.columns.length || 1}" class="empty">${tr("Aucune ligne")}</td></tr>`;
     for (const r of rows) h += "<tr>" + r.map((v) => `<td>${fmtValue(v)}</td>`).join("") + "</tr>";
     h += "</tbody></table></div>";
-    if (res.values.length > MAX_ROWS) h += `<p class="muted small">… ${res.values.length - MAX_ROWS} ligne(s) supplémentaire(s) non affichée(s).</p>`;
+    if (res.values.length > MAX_ROWS) h += `<p class="muted small">${tr("… {n} ligne(s) supplémentaire(s) non affichée(s).", { n: res.values.length - MAX_ROWS })}</p>`;
     return h;
   }
 
-  function countLabel(n) { return `${n} ligne${n > 1 ? "s" : ""}`; }
+  // en anglais, 0 prend le pluriel (« 0 rows »)
+  function countLabel(n) { return trn(n === 0 && I18N.lang !== "fr" ? 2 : n, "{n} ligne", "{n} lignes", { n }); }
 
   // ---------------------------------------------------------------- chargement
   async function init() {
+    I18N.dom && I18N.dom(); // texte statique de la page, avant tout rendu dynamique
+    $("editor").placeholder = tr("Écrivez votre requête ici, puis Ctrl + Entrée pour l'exécuter"); // textarea ignorée par I18N.dom
+    if (I18N.toggle) I18N.toggle($("btnLang"));
+    else $("btnLang").hidden = true;
     try {
       state.SQL = await initSqlJs({ locateFile: (f) => SQLJS_DIR + f });
       state.catalogue = await (await fetch("exercices/catalogue.json")).json();
       state.exercises = await SQLLibrary.list(state.catalogue);
     } catch (e) {
-      $("loading").textContent = "Impossible de charger le moteur SQL ou la liste des exercices. Ouvrez la page via un serveur web (GitHub Pages ou http://localhost), pas en double-cliquant sur le fichier.";
+      $("loading").textContent = tr("Impossible de charger le moteur SQL ou la liste des exercices. Ouvrez la page via un serveur web (GitHub Pages ou http://localhost), pas en double-cliquant sur le fichier.");
       $("loading").classList.add("error");
       return;
     }
@@ -190,7 +366,10 @@
     const incoming = CONFIG.locked || incomingEx ? null : await readIncomingPack(); // ?pack=URL ou #pack=…
     const [exId, qId] = incomingEx && incomingEx.exercise ? [incomingEx.exercise.id, "intro"]
       : incoming && !incoming.error ? [incoming.exId, incoming.qId] : parseHash();
-    await loadExercise(CONFIG.locked ? CONFIG.exercice : exId || store.get("lastEx", state.catalogue[0].id), qId);
+    // interface en anglais sans exercice imposé : premier exercice en anglais du catalogue
+    const enEx = I18N.lang === "en" && state.catalogue.find((e) => e.langue === "en");
+    const defaultEx = enEx ? enEx.id : store.get("lastEx", state.catalogue[0].id);
+    await loadExercise(CONFIG.locked ? CONFIG.exercice : exId || defaultEx, qId);
     if (incomingEx) notifyExercise(incomingEx);
     if (incoming) notifyImport(incoming);
     if ((incoming || incomingEx) && state.ex) history.replaceState(null, "", `${location.pathname}#${state.ex.id}/${current().id}`);
@@ -214,7 +393,7 @@
     const el = $("lmsStatus");
     el.hidden = false;
     if (!state.lms) {
-      el.textContent = "Plateforme non détectée : la progression reste dans ce navigateur.";
+      el.textContent = tr("Plateforme non détectée : la progression reste dans ce navigateur.");
       return;
     }
     const st = SQLScorm.loadState();
@@ -222,7 +401,7 @@
     if (st.current) store.set("lastQ:" + CONFIG.exercice, st.current);
     const name = SQLScorm.learnerName();
     const score = SQLScorm.get("cmi.core.score.raw");
-    el.textContent = `Connecté à la plateforme${name ? " · " + name : ""}${score ? " · score : " + score + " %" : ""}`;
+    el.textContent = tr("Connecté à la plateforme") + (name ? " · " + name : "") + (score ? tr(" · score : {s} %", { s: score }) : "");
   }
 
   /** Transmet score, statut et progression à la plateforme */
@@ -238,15 +417,17 @@
     });
     if (firstSuccess) SQLScorm.recordInteraction(q.id, sql);
     const name = SQLScorm.learnerName();
-    $("lmsStatus").textContent = `Connecté à la plateforme${name ? " · " + name : ""} · score transmis : ${score} %`;
+    $("lmsStatus").textContent = tr("Connecté à la plateforme") + (name ? " · " + name : "") + tr(" · score transmis : {s} %", { s: score });
   }
 
   function renderExerciseSelect() {
-    const opt = (e) => `<option value="${esc(e.id)}">${esc(e.titre)}</option>`;
+    // exercices intégrés dans l'autre langue que l'interface : (FR) ou (EN) devant le titre
+    const tag = (e) => (e.kind === "perso" ? "" : I18N.lang === "fr" ? (e.langue === "en" ? "(EN) " : "") : e.langue !== "en" ? tr("(FR) ") : "");
+    const opt = (e) => `<option value="${esc(e.id)}">${tag(e)}${esc(e.titre)}</option>`;
     const builtin = state.exercises.filter((e) => e.kind !== "perso");
     const perso = state.exercises.filter((e) => e.kind === "perso");
     $("exercice").innerHTML = builtin.map(opt).join("") +
-      (perso.length ? `<optgroup label="Exercices importés">${perso.map(opt).join("")}</optgroup>` : "");
+      (perso.length ? `<optgroup label="${tr("Exercices importés")}">${perso.map(opt).join("")}</optgroup>` : "");
     if (state.ex) $("exercice").value = state.ex.id;
   }
 
@@ -258,10 +439,10 @@
     history.replaceState(null, "", location.pathname);
     try {
       const r = await fetch(url, { cache: "no-cache" });
-      if (!r.ok) throw new Error(`fichier inaccessible (${r.status})`);
+      if (!r.ok) throw new Error(tr("fichier inaccessible ({s})", { s: r.status }));
       return await saveExercise(new Uint8Array(await r.arrayBuffer()), url.split("/").pop());
     } catch (e) {
-      return { errors: [`Impossible de lire l'exercice du lien : ${e.message}`], warnings: [] };
+      return { errors: [tr("Impossible de lire l'exercice du lien : {m}", { m: e.message })], warnings: [] };
     }
   }
 
@@ -283,8 +464,8 @@
       for (const q of state.baseQuestions) if (!SQLPacks.checkQuestion(state.engine, q).ok) broken++;
       state.engine.cache.clear();
     }
-    notice(`Exercice importé : « ${res.exercise.titre} », ${n} question${n > 1 ? "s" : ""}.` +
-      (broken ? ` ${broken} correction(s) ne fonctionnent pas.` : "") +
+    notice(trn(n, "Exercice importé : « {titre} », {n} question.", "Exercice importé : « {titre} », {n} questions.", { titre: res.exercise.titre }) +
+      (broken ? " " + tr("{n} correction(s) ne fonctionnent pas.", { n: broken }) : "") +
       (res.warnings.length ? " " + res.warnings.join(" ") : ""), broken || res.warnings.length ? "partial" : "ok");
   }
 
@@ -293,7 +474,7 @@
     state.exercises = await SQLLibrary.list(state.catalogue);
     renderExerciseSelect();
     await loadExercise(state.catalogue[0].id);
-    notice("Exercice retiré de ce navigateur.", "ok");
+    notice(tr("Exercice retiré de ce navigateur."), "ok");
   }
 
   // ---------------------------------------------------------------- questions complémentaires
@@ -331,17 +512,17 @@
       if (inHash) { raw = await SQLPacks.decodePack(inHash); source = "lien"; }
       else {
         const r = await fetch(url, { cache: "no-cache" });
-        if (!r.ok) throw new Error(`fichier inaccessible (${r.status})`);
+        if (!r.ok) throw new Error(tr("fichier inaccessible ({s})", { s: r.status }));
         raw = await r.json();
         source = url;
       }
     } catch (e) {
       history.replaceState(null, "", location.pathname);
-      return { error: `Impossible de lire les questions du lien : ${e.message}` };
+      return { error: tr("Impossible de lire les questions du lien : {m}", { m: e.message }) };
     }
     const n = SQLPacks.normalizePack(raw);
     history.replaceState(null, "", location.pathname);
-    if (!n.pack || !n.pack.questions.length) return { error: "Le lien ne contient aucune question exploitable. " + n.errors.join(" ") };
+    if (!n.pack || !n.pack.questions.length) return { error: tr("Le lien ne contient aucune question exploitable. ") + n.errors.join(" ") };
     let exId = n.pack.exercice;
     if (!knownEx(exId)) exId = store.get("lastEx", state.catalogue[0].id);
     const key = savePack(exId, n.pack, source);
@@ -377,8 +558,9 @@
     if (res.error) { notice(res.error, "ko"); return; }
     const broken = checkPackQuestions(res.key);
     const n = res.pack.questions.length;
-    notice(`Questions ajoutées : « ${res.pack.titre} »${res.pack.auteur ? " (" + res.pack.auteur + ")" : ""}, ${n} question${n > 1 ? "s" : ""}, en fin de liste.` +
-      (broken ? ` Attention : ${broken} correction(s) ne fonctionnent pas, signalez-le à l'enseignant.` : ""), broken ? "partial" : "ok");
+    notice(trn(n, "Questions ajoutées : « {titre} »{auteur}, {n} question, en fin de liste.", "Questions ajoutées : « {titre} »{auteur}, {n} questions, en fin de liste.",
+      { titre: res.pack.titre, auteur: res.pack.auteur ? " (" + res.pack.auteur + ")" : "" }) +
+      (broken ? " " + tr("Attention : {n} correction(s) ne fonctionnent pas, signalez-le à l'enseignant.", { n: broken }) : ""), broken ? "partial" : "ok");
   }
 
   function notice(text, level = "ok") {
@@ -392,7 +574,7 @@
     const u8 = new Uint8Array(await file.arrayBuffer());
     if (SQLLibrary.isZip(u8) || /\.(sqlite3?|db|sql)$/i.test(file.name)) { // exercice complet ou base seule
       $("loading").hidden = false;
-      $("loading").textContent = "Import de l'exercice…";
+      $("loading").textContent = tr("Import de l'exercice…");
       const res = await saveExercise(u8, file.name);
       $("loading").hidden = true;
       if (!res.errors.length) await loadExercise(res.exercise.id, "intro");
@@ -403,11 +585,11 @@
     try {
       raw = SQLPacks.extractJson(new TextDecoder().decode(u8));
     } catch (e) {
-      notice(`Fichier illisible : ${e.message}`, "ko");
+      notice(tr("Fichier illisible : {m}", { m: e.message }), "ko");
       return;
     }
     const n = SQLPacks.normalizePack(raw);
-    if (!n.pack || !n.pack.questions.length) { notice("Aucune question exploitable dans ce fichier. " + n.errors.join(" "), "ko"); return; }
+    if (!n.pack || !n.pack.questions.length) { notice(tr("Aucune question exploitable dans ce fichier. ") + n.errors.join(" "), "ko"); return; }
     let exId = n.pack.exercice;
     if (!knownEx(exId)) exId = state.ex.id;
     const key = savePack(exId, n.pack, file.name);
@@ -425,8 +607,8 @@
     $("packList").innerHTML = packs.length
       ? packs.map((p) => `<li><span class="pack-title" title="${esc(p.description || "")}">${esc(p.titre)}</span>` +
           `<span class="muted small">${p.questions.length} q.${p.auteur ? " · " + esc(p.auteur) : ""}</span>` +
-          `<button type="button" class="icon-btn small" data-remove-pack="${esc(p.key)}" title="Retirer ces questions" aria-label="Retirer le pack ${esc(p.titre)}">✕</button></li>`).join("")
-      : `<li class="muted small">Aucune. Un enseignant peut vous donner un fichier ou un lien.</li>`;
+          `<button type="button" class="icon-btn small" data-remove-pack="${esc(p.key)}" title="${tr("Retirer ces questions")}" aria-label="${tr("Retirer le pack {titre}", { titre: esc(p.titre) })}">✕</button></li>`).join("")
+      : `<li class="muted small">${tr("Aucune. Un enseignant peut vous donner un fichier ou un lien.")}</li>`;
     $("linkCreate").href = `create.html#${encodeURIComponent(state.ex.id)}`;
   }
 
@@ -449,7 +631,7 @@
     if (!knownEx(exId)) exId = state.catalogue[0].id;
     $("loading").hidden = false;
     $("loading").classList.remove("error");
-    $("loading").textContent = "Chargement de la base…";
+    $("loading").textContent = tr("Chargement de la base…");
     try {
       const { ex, bytes, kind } = await SQLLibrary.load(exId, state.catalogue);
       state.ex = ex;
@@ -457,7 +639,7 @@
       state.baseQuestions = ex.questions || [];
       state.engine = new SQLEngine(state.SQL, bytes, ex.aujourdhui);
     } catch (e) {
-      $("loading").textContent = `Impossible de charger l'exercice « ${exId} » (${e.message}).`;
+      $("loading").textContent = tr("Impossible de charger l'exercice « {id} » ({m}).", { id: exId, m: e.message });
       $("loading").classList.add("error");
       return;
     }
@@ -465,7 +647,7 @@
     $("exercice").value = exId;
     $("contexte").textContent = state.ex.contexte || "";
     $("source").textContent = state.ex.source || "";
-    $("todayNote").textContent = `Date du jour simulée : ${frDate(state.ex.aujourdhui)}`;
+    $("todayNote").textContent = tr("Date du jour simulée : {d}", { d: frDate(state.ex.aujourdhui) });
     renderSchema();
     loadInlineDiagram();
     rebuildQuestions();
@@ -491,11 +673,11 @@
     $("schema").innerHTML = state.schema.map((t) => {
       const cols = t.cols.map((c) => {
         let n = esc(c.name);
-        if (c.fk) n = `<i title="clé étrangère → ${esc(c.fk)}">#${n}</i>`;
-        if (c.pk) n = `<u title="clé primaire">${n}</u>`;
+        if (c.fk) n = `<i title="${tr("clé étrangère → {fk}", { fk: esc(c.fk) })}">#${n}</i>`;
+        if (c.pk) n = `<u title="${tr("clé primaire")}">${n}</u>`;
         return n;
       }).join(", ");
-      return `<li><button type="button" class="tname" data-table="${esc(t.name)}" title="Afficher le contenu (${t.count} lignes)">${esc(t.name)}</button> (${cols})</li>`;
+      return `<li><button type="button" class="tname" data-table="${esc(t.name)}" title="${tr("Afficher le contenu ({n} lignes)", { n: t.count })}">${esc(t.name)}</button> (${cols})</li>`;
     }).join("");
   }
 
@@ -583,7 +765,7 @@
         onOpenTable: (name) => { $("diagramDialog").close(); previewTable(name); },
       });
     }
-    $("dgTitle").textContent = `Schéma relationnel – ${state.ex.titre}`;
+    $("dgTitle").textContent = tr("Schéma relationnel – {titre}", { titre: state.ex.titre });
     $("diagramDialog").showModal();
     state.diagram.load(state.schema, state.ex.schemaGrid, "layout:" + state.ex.id);
   }
@@ -592,8 +774,8 @@
     const r = state.engine.run(`SELECT * FROM "${name}"`);
     const total = r.result ? r.result.values.length : 0;
     $("resultsCard").hidden = false;
-    $("results").innerHTML = `<div class="card-head"><h2>Contenu de la table ${esc(name)}</h2><span class="muted small">${countLabel(total)}</span></div>` +
-      `<p class="muted small">Aperçu : équivaut à <code>SELECT * FROM ${esc(name)};</code></p>` + tableHtml(r.result);
+    $("results").innerHTML = `<div class="card-head"><h2>${tr("Contenu de la table {name}", { name: esc(name) })}</h2><span class="muted small">${countLabel(total)}</span></div>` +
+      `<p class="muted small">${tr("Aperçu : équivaut à <code>SELECT * FROM {name};</code>", { name: esc(name) })}</p>` + tableHtml(r.result);
     $("resultsCard").scrollIntoView({ behavior: "smooth", block: "nearest" });
   }
 
@@ -617,7 +799,7 @@
       const short = q.enonce.length > 70 ? q.enonce.slice(0, 68) + "…" : q.enonce;
       const cls = [done.has(q.id) ? "done" : "", i === state.index ? "current" : "", isIntro(q) ? "intro-item" : ""].filter(Boolean).join(" ");
       h += `<li><a href="#${esc(state.ex.id)}/${esc(q.id)}" data-i="${i}" class="${cls}">` +
-        `<span class="num">${qNumber(i)}</span><span class="txt">${esc(short)}</span>${q.type === "write" ? '<span class="tag">✎</span>' : q.type === "schema" ? '<span class="tag" title="Construction de schéma">◫</span>' : q.type === "processus" ? '<span class="tag" title="Processus">⇄</span>' : ""}</a></li>`;
+        `<span class="num">${qNumber(i)}</span><span class="txt">${esc(short)}</span>${q.type === "write" ? '<span class="tag">✎</span>' : q.type === "schema" ? '<span class="tag" title="${tr("Construction de schéma")}">◫</span>' : q.type === "processus" ? '<span class="tag" title="${tr("Processus")}">⇄</span>' : ""}</a></li>`;
     });
     h += "</ol>";
     $("questionList").innerHTML = h;
@@ -638,8 +820,8 @@
     return {
       id: "intro",
       type: "intro",
-      theme: "Présentation",
-      enonce: "Présentation : le contexte et la base de données",
+      theme: tr("Présentation"),
+      enonce: tr("Présentation : le contexte et la base de données"),
     };
   }
 
@@ -651,21 +833,21 @@
     $("qIntro").innerHTML =
       `<p>${esc(ex.contexte || "")}</p>` +
       (ex.source ? `<p class="muted small">${esc(ex.source)}</p>` : "") +
-      `<h3>La base de données</h3>` +
-      `<p>Elle contient ${state.schema.length} tables. Observez le diagramme : chaque flèche part d'une <i>#clé étrangère</i> et pointe vers la <u>clé primaire</u> de la table liée. C'est ce lien qui permet les jointures. Cliquez sur une table pour voir son contenu :</p>` +
+      `<h3>${tr("La base de données")}</h3>` +
+      `<p>${tr("Elle contient {n} tables. Observez le diagramme : chaque flèche part d'une <i>#clé étrangère</i> et pointe vers la <u>clé primaire</u> de la table liée. C'est ce lien qui permet les jointures. Cliquez sur une table pour voir son contenu :", { n: state.schema.length })}</p>` +
       `<ul class="tables">${tables}</ul>` +
-      `<p class="small">Date du jour simulée : <strong>${esc(frDate(ex.aujourdhui))}</strong> (c'est la date renvoyée par <code>NOW()</code> ou <code>CURDATE()</code>).</p>` +
-      `<h3>Comment travailler</h3>` +
+      `<p class="small">${tr("Date du jour simulée : <strong>{d}</strong> (c'est la date renvoyée par <code>NOW()</code> ou <code>CURDATE()</code>).", { d: esc(frDate(ex.aujourdhui)) })}</p>` +
+      `<h3>${tr("Comment travailler")}</h3>` +
       `<ol class="small">` +
-      `<li>Lisez l'énoncé et repérez les tables utiles dans le diagramme.</li>` +
-      `<li>Écrivez la requête puis exécutez-la (<kbd>Ctrl</kbd>+<kbd>Entrée</kbd>) : elle est comparée au résultat attendu et un message vous guide si elle n'est pas encore juste.</li>` +
-      `<li>Si besoin : <em>Résultat attendu</em>, puis <em>Indice</em>, et seulement en dernier recours <em>Correction</em>.</li>` +
-      `<li>Les INSERT, UPDATE et DELETE sont fictifs : la base repart de zéro à chaque exécution.</li>` +
+      `<li>${tr("Lisez l'énoncé et repérez les tables utiles dans le diagramme.")}</li>` +
+      `<li>${tr("Écrivez la requête puis exécutez-la (<kbd>Ctrl</kbd>+<kbd>Entrée</kbd>) : elle est comparée au résultat attendu et un message vous guide si elle n'est pas encore juste.")}</li>` +
+      `<li>${tr("Si besoin : <em>Résultat attendu</em>, puis <em>Indice</em>, et seulement en dernier recours <em>Correction</em>.")}</li>` +
+      `<li>${tr("Les INSERT, UPDATE et DELETE sont fictifs : la base repart de zéro à chaque exécution.")}</li>` +
       `</ol>` +
-      `<p class="small">Ici, l'éditeur sert à <strong>explorer librement</strong> la base, par exemple <code>SELECT * FROM ${esc(state.schema[0] ? state.schema[0].name : "")};</code></p>` +
-      `<p><button type="button" class="btn primary small" data-start>Commencer la question 1 →</button> <span class="muted small">${n} questions</span></p>` +
+      `<p class="small">${tr("Ici, l'éditeur sert à <strong>explorer librement</strong> la base, par exemple <code>SELECT * FROM {t};</code>", { t: esc(state.schema[0] ? state.schema[0].name : "") })}</p>` +
+      `<p><button type="button" class="btn primary small" data-start>${tr("Commencer la question 1 →")}</button> <span class="muted small">${n} questions</span></p>` +
       (state.kind === "perso" && !CONFIG.locked
-        ? `<p class="small muted">Exercice importé, conservé dans ce navigateur uniquement. <button type="button" class="link" data-remove-ex>Retirer cet exercice</button></p>`
+        ? `<p class="small muted">${tr("Exercice importé, conservé dans ce navigateur uniquement.")} <button type="button" class="link" data-remove-ex>${tr("Retirer cet exercice")}</button></p>`
         : "");
   }
 
@@ -678,13 +860,13 @@
     if (updateHash) history.replaceState(null, "", `#${state.ex.id}/${q.id}`);
 
     $("qTheme").textContent = q.theme;
-    const badge = q.annale ? `Annale ${q.annale}` : q.group ? `★ ${q.group}` : "";
+    const badge = q.annale ? tr("Annale {a}", { a: q.annale }) : q.group ? `★ ${q.group}` : "";
     $("qAnnale").hidden = !badge;
     $("qAnnale").textContent = badge;
     const intro = isIntro(q);
     const total = qs.filter((x) => !isIntro(x)).length;
     $("qNum").textContent = intro ? `${total} questions` : `Question ${qNumber(state.index)} / ${total}`;
-    $("qEnonce").textContent = intro ? "Présentation de l'exercice" : q.enonce;
+    $("qEnonce").textContent = intro ? tr("Présentation de l'exercice") : q.enonce;
     $("qIntro").hidden = !intro;
     if (intro) renderIntro();
     $("qTools").hidden = intro;
@@ -699,7 +881,7 @@
     $("processEditor").hidden = !processQ;
     document.body.classList.toggle("schema-mode", drawQ); // l'éditeur prend toute la largeur
     $("btnExpected").hidden = drawQ;
-    $("btnRun").innerHTML = schemaQ ? "✓ Vérifier le schéma" : processQ ? "✓ Vérifier le processus" : "▶ Exécuter <kbd>Ctrl</kbd><kbd>⏎</kbd>";
+    $("btnRun").innerHTML = schemaQ ? tr("✓ Vérifier le schéma") : processQ ? tr("✓ Vérifier le processus") : tr("▶ Exécuter <kbd>Ctrl</kbd><kbd>⏎</kbd>");
     if (schemaQ) openSchemaEditor(q);
     else if (processQ) openProcessEditor(q);
     else editor.set(store.get(draftKey(q), ""));
@@ -725,14 +907,14 @@
     } catch (e) {
       fb.hidden = false;
       fb.className = "feedback ko";
-      fb.innerHTML = `<strong>Erreur dans la requête</strong><p>${esc(SQLCompat.explainError(e.message, sql))}</p>`;
+      fb.innerHTML = `<strong>${tr("Erreur dans la requête")}</strong><p>${esc(SQLCompat.explainError(e.message, sql))}</p>`;
       $("resultsCard").hidden = true;
       return;
     }
     fb.hidden = true;
     let h = "";
-    if (r.result) h = `<div class="card-head"><h2>Résultat</h2><span class="muted small">${countLabel(r.result.values.length)}</span></div>` + tableHtml(r.result);
-    else h = `<p>${countLabel(r.changes)} modifiée(s) – modification fictive, non conservée.</p>`;
+    if (r.result) h = `<div class="card-head"><h2>${tr("Résultat")}</h2><span class="muted small">${countLabel(r.result.values.length)}</span></div>` + tableHtml(r.result);
+    else h = `<p>${tr("{rows} modifiée(s) – modification fictive, non conservée.", { rows: countLabel(r.changes) })}</p>`;
     $("results").innerHTML = h;
     $("resultsCard").hidden = false;
   }
@@ -767,7 +949,7 @@
     const fb = $("feedback");
     fb.hidden = false;
     $("resultsCard").hidden = true;
-    const score = `<p class="muted small">Points de contrôle respectés : ${c.score.passed} / ${c.score.total}</p>`;
+    const score = `<p class="muted small">${tr("Points de contrôle respectés : {a} / {b}", { a: c.score.passed, b: c.score.total })}</p>`;
     if (c.ok) {
       const s = solved();
       const first = !s.has(q.id);
@@ -776,12 +958,12 @@
       syncLms(q, SQLSchemaCheck.toText({ tables: st.tables }, false), first);
       renderList();
       fb.className = "feedback ok";
-      fb.innerHTML = `<strong>✓ Bravo, le schéma est correct !</strong>` +
+      fb.innerHTML = `<strong>${tr("✓ Bravo, le schéma est correct !")}</strong>` +
         (c.notes.length ? `<ul>${c.notes.map((n) => `<li>${esc(n)}</li>`).join("")}</ul>` : "") + score +
-        (state.index < state.ex.questions.length - 1 ? `<p><button type="button" class="btn small" data-next>Question suivante →</button></p>` : "");
+        (state.index < state.ex.questions.length - 1 ? `<p><button type="button" class="btn small" data-next>${tr("Question suivante →")}</button></p>` : "");
     } else {
       fb.className = `feedback ${c.level === "partial" ? "partial" : "ko"}`;
-      fb.innerHTML = `<strong>${c.level === "partial" ? "Presque…" : "Pas encore"}</strong><ul>${c.messages.map((m) => `<li>${esc(m)}</li>`).join("")}</ul>` +
+      fb.innerHTML = `<strong>${c.level === "partial" ? tr("Presque…") : tr("Pas encore")}</strong><ul>${c.messages.map((m) => `<li>${esc(m)}</li>`).join("")}</ul>` +
         (c.notes.length ? `<p class="muted small">${c.notes.map(esc).join(" ")}</p>` : "") + score;
     }
   }
@@ -822,7 +1004,9 @@
     const fb = $("feedback");
     fb.hidden = false;
     $("resultsCard").hidden = true;
-    const score = `<p class="muted small">Contrôles : grammaire du schéma ${c.score.grammar ? "à revoir" : "respectée"} · ${c.score.passed} / ${c.score.total} points vérifiés. Le reste (découpage, noms, acteurs) se compare au corrigé.</p>`;
+    const score = `<p class="muted small">${tr(c.score.grammar
+      ? "Contrôles : grammaire du schéma à revoir · {a} / {b} points vérifiés. Le reste (découpage, noms, acteurs) se compare au corrigé."
+      : "Contrôles : grammaire du schéma respectée · {a} / {b} points vérifiés. Le reste (découpage, noms, acteurs) se compare au corrigé.", { a: c.score.passed, b: c.score.total })}</p>`;
     if (c.ok) {
       const s = solved();
       const first = !s.has(q.id);
@@ -831,19 +1015,19 @@
       syncLms(q, "processus", first);
       renderList();
       fb.className = "feedback ok";
-      fb.innerHTML = `<strong>✓ Bravo : le schéma respecte les règles et les synchronisations sont justes !</strong>` + score +
-        `<p class="small">Comparez maintenant avec le <button type="button" class="link" data-show-correction>corrigé</button> et cochez la liste d'auto-évaluation.</p>`;
+      fb.innerHTML = `<strong>${tr("✓ Bravo : le schéma respecte les règles et les synchronisations sont justes !")}</strong>` + score +
+        `<p class="small">${tr("Comparez maintenant avec le <button type=\"button\" class=\"link\" data-show-correction>corrigé</button> et cochez la liste d'auto-évaluation.")}</p>`;
     } else {
       fb.className = `feedback ${c.level === "partial" ? "partial" : "ko"}`;
-      fb.innerHTML = `<strong>${c.level === "partial" ? "Presque…" : "Pas encore"}</strong><ul>${c.messages.map((x) => `<li>${esc(x)}</li>`).join("")}</ul>` + score;
+      fb.innerHTML = `<strong>${c.level === "partial" ? tr("Presque…") : tr("Pas encore")}</strong><ul>${c.messages.map((x) => `<li>${esc(x)}</li>`).join("")}</ul>` + score;
     }
   }
 
   function renderProcessCorrection(q) {
     const box = $("correction");
-    box.innerHTML = `<p class="muted small">Une solution possible (corrigé) — d'autres découpages peuvent être justes :</p>
+    box.innerHTML = `<p class="muted small">${tr("Une solution possible (corrigé) — d'autres découpages peuvent être justes :")}</p>
       <div class="process-solution"></div>
-      ${(q.autoevaluation || []).length ? `<p class="small"><strong>Auto-évaluation</strong> : cochez ce qui est vrai pour votre schéma.</p>
+      ${(q.autoevaluation || []).length ? `<p class="small">${tr("<strong>Auto-évaluation</strong> : cochez ce qui est vrai pour votre schéma.")}</p>
         <ul class="autoeval">${q.autoevaluation.map((t) => `<li><label><input type="checkbox"> ${esc(t)}</label></li>`).join("")}</ul>` : ""}`;
     const v = new ProcessEditor(box.querySelector(".process-solution"), { readonly: true });
     v.setModel(q.solution || processStart(q));
@@ -864,8 +1048,8 @@
 
     if (r.error) {
       fb.className = "feedback ko";
-      fb.innerHTML = `<strong>Erreur dans la requête</strong><p>${esc(r.error)}</p>` +
-        (r.raw && r.raw !== r.error ? `<p class="muted small">Message du moteur : ${esc(r.raw)}</p>` : "");
+      fb.innerHTML = `<strong>${tr("Erreur dans la requête")}</strong><p>${esc(r.error)}</p>` +
+        (r.raw && r.raw !== r.error ? `<p class="muted small">${tr("Message du moteur : {m}", { m: esc(r.raw) })}</p>` : "");
       $("resultsCard").hidden = true;
       return;
     }
@@ -879,25 +1063,25 @@
       syncLms(q, sql, first);
       renderList();
       fb.className = "feedback ok";
-      fb.innerHTML = `<strong>✓ Bravo, c'est le résultat attendu !</strong>` +
+      fb.innerHTML = `<strong>${tr("✓ Bravo, c'est le résultat attendu !")}</strong>` +
         (c.notes.length ? `<ul>${c.notes.map((n) => `<li>${esc(n)}</li>`).join("")}</ul>` : "") +
-        (state.index < state.ex.questions.length - 1 ? `<p><button type="button" class="btn small" data-next>Question suivante →</button></p>` : "<p>Vous avez terminé la dernière question de cet exercice.</p>");
+        (state.index < state.ex.questions.length - 1 ? `<p><button type="button" class="btn small" data-next>${tr("Question suivante →")}</button></p>` : `<p>${tr("Vous avez terminé la dernière question de cet exercice.")}</p>`);
     } else {
       fb.className = `feedback ${c.level === "partial" ? "partial" : "ko"}`;
-      fb.innerHTML = `<strong>${c.level === "partial" ? "Presque…" : "Pas encore"}</strong><ul>${c.messages.map((m) => `<li>${esc(m)}</li>`).join("")}</ul>` +
+      fb.innerHTML = `<strong>${c.level === "partial" ? tr("Presque…") : tr("Pas encore")}</strong><ul>${c.messages.map((m) => `<li>${esc(m)}</li>`).join("")}</ul>` +
         (c.notes.length ? `<p class="muted small">${c.notes.map(esc).join(" ")}</p>` : "") +
-        `<p class="muted small">Comparez avec le <button type="button" class="link" data-show-expected>résultat attendu</button>.</p>`;
+        `<p class="muted small">${tr("Comparez avec le <button type=\"button\" class=\"link\" data-show-expected>résultat attendu</button>.")}</p>`;
     }
 
     // résultat de l'étudiant
     let h = "";
     if (q.type === "write") {
-      h += `<div class="card-head"><h2>Effet de votre requête</h2><span class="muted small">${countLabel(r.changes)} modifiée(s), insérée(s) ou supprimée(s)</span></div>`;
-      if (c.changedByStudent && c.changedByStudent.length) h += `<h3>Lignes après modification ou ajout</h3>` + tableHtml({ columns: r.expected.after.columns, values: c.changedByStudent }, { cls: "added" });
-      if (c.removedByStudent && c.removedByStudent.length) h += `<h3>Lignes avant modification ou supprimées</h3>` + tableHtml({ columns: r.expected.before.columns, values: c.removedByStudent }, { cls: "removed" });
-      if (r.result) h += `<h3>Résultat de la dernière instruction</h3>` + tableHtml(r.result);
+      h += `<div class="card-head"><h2>${tr("Effet de votre requête")}</h2><span class="muted small">${tr("{rows} modifiée(s), insérée(s) ou supprimée(s)", { rows: countLabel(r.changes) })}</span></div>`;
+      if (c.changedByStudent && c.changedByStudent.length) h += `<h3>${tr("Lignes après modification ou ajout")}</h3>` + tableHtml({ columns: r.expected.after.columns, values: c.changedByStudent }, { cls: "added" });
+      if (c.removedByStudent && c.removedByStudent.length) h += `<h3>${tr("Lignes avant modification ou supprimées")}</h3>` + tableHtml({ columns: r.expected.before.columns, values: c.removedByStudent }, { cls: "removed" });
+      if (r.result) h += `<h3>${tr("Résultat de la dernière instruction")}</h3>` + tableHtml(r.result);
     } else if (r.result) {
-      h += `<div class="card-head"><h2>Votre résultat</h2><span class="muted small">${countLabel(r.result.values.length)}</span></div>` + tableHtml(r.result);
+      h += `<div class="card-head"><h2>${tr("Votre résultat")}</h2><span class="muted small">${countLabel(r.result.values.length)}</span></div>` + tableHtml(r.result);
     }
     $("results").innerHTML = h;
     $("resultsCard").hidden = !h;
@@ -915,12 +1099,12 @@
       const aft = new Set(e.after.values.map(key));
       const added = e.after.values.filter((r) => !bef.has(key(r)));
       const removed = e.before.values.filter((r) => !aft.has(key(r)));
-      h = `<div class="card-head"><h2>Effet attendu</h2></div>`;
-      if (added.length) h += `<h3>Lignes après modification ou ajout</h3>` + tableHtml({ columns: e.after.columns, values: added }, { cls: "added" });
-      if (removed.length) h += `<h3>Lignes avant modification ou supprimées</h3>` + tableHtml({ columns: e.before.columns, values: removed }, { cls: "removed" });
+      h = `<div class="card-head"><h2>${tr("Effet attendu")}</h2></div>`;
+      if (added.length) h += `<h3>${tr("Lignes après modification ou ajout")}</h3>` + tableHtml({ columns: e.after.columns, values: added }, { cls: "added" });
+      if (removed.length) h += `<h3>${tr("Lignes avant modification ou supprimées")}</h3>` + tableHtml({ columns: e.before.columns, values: removed }, { cls: "removed" });
     } else {
-      h = `<div class="card-head"><h2>Résultat attendu</h2><span class="muted small">${countLabel(e.result.values.length)}${q.ordered ? " · ordre imposé" : ""}</span></div>` +
-        `<p class="muted small">Les noms de colonnes peuvent différer (alias) : seules les valeurs comptent.</p>` + tableHtml(e.result, { cls: "expected" });
+      h = `<div class="card-head"><h2>${tr("Résultat attendu")}</h2><span class="muted small">${countLabel(e.result.values.length)}${q.ordered ? tr(" · ordre imposé") : ""}</span></div>` +
+        `<p class="muted small">${tr("Les noms de colonnes peuvent différer (alias) : seules les valeurs comptent.")}</p>` + tableHtml(e.result, { cls: "expected" });
     }
     $("expected").innerHTML = h;
   }
@@ -939,18 +1123,18 @@
     if (isSchema(q)) {
       const depart = schemaDepart(q);
       const sols = [q.solution, ...(q.variantes || [])];
-      const cineS = window.SQLCinema ? `<button class="btn small cn-launch" type="button" data-cinema>🎬 Construction pas à pas</button>` : "";
+      const cineS = window.SQLCinema ? `<button class="btn small cn-launch" type="button" data-cinema>${tr("🎬 Construction pas à pas")}</button>` : "";
       $("correction").innerHTML = cineS + sols.map((sol, i) =>
-        `<p class="muted small">${i === 0 ? "Correction" : sol.partiel ? "Réponse acceptée seulement en partie" : "Autre solution acceptée"}</p>` +
+        `<p class="muted small">${i === 0 ? tr("Correction") : sol.partiel ? tr("Réponse acceptée seulement en partie") : tr("Autre solution acceptée")}</p>` +
         `<div class="schema-text">${SQLSchemaCheck.toText(SQLSchemaCheck.solutionSchema(depart, sol), true).split("\n").map((l) => `<div>${l}</div>`).join("")}</div>`).join("") +
-        `<p class="muted small">Les noms peuvent varier : la vérification accepte les noms équivalents et reconnaît une table à sa clé primaire.</p>`;
+        `<p class="muted small">${tr("Les noms peuvent varier : la vérification accepte les noms équivalents et reconnaît une table à sa clé primaire.")}</p>`;
       return;
     }
     const blocks = [q.correction, ...(q.variantes || [])];
     const cine = window.SQLCinema && SQLCinema.plan(lines(q.correction), state.schema, q)
-      ? `<button class="btn small cn-launch" type="button" data-cinema>🎬 Correction pas à pas</button>` : "";
+      ? `<button class="btn small cn-launch" type="button" data-cinema>${tr("🎬 Correction pas à pas")}</button>` : "";
     $("correction").innerHTML = cine + blocks.map((b, i) =>
-      `<p class="muted small">${i === 0 ? "Correction" : "Autre écriture possible"}</p><pre><code>${esc(lines(b))}</code></pre>`).join("");
+      `<p class="muted small">${i === 0 ? tr("Correction") : tr("Autre écriture possible")}</p><pre><code>${esc(lines(b))}</code></pre>`).join("");
   }
 
   /** Mode cinéma : la correction expliquée étape par étape, avec le schéma animé */
@@ -984,7 +1168,7 @@
     $("btnRun").addEventListener("click", run);
     $("btnPrev").addEventListener("click", () => showQuestion(state.index - 1));
     $("btnNext").addEventListener("click", () => showQuestion(state.index + 1));
-    $("btnHint").addEventListener("click", () => toggle("btnHint", "hint", () => { $("hint").textContent = current().indice || "Pas d'indice pour cette question."; }));
+    $("btnHint").addEventListener("click", () => toggle("btnHint", "hint", () => { $("hint").textContent = current().indice || tr("Pas d'indice pour cette question."); }));
     $("btnCorrection").addEventListener("click", () => toggle("btnCorrection", "correction", renderCorrection));
     $("btnExpected").addEventListener("click", () => toggle("btnExpected", "expectedCard", renderExpected));
 
@@ -1037,7 +1221,7 @@
     });
     $("qIntro").addEventListener("click", (e) => {
       if (e.target.closest("[data-start]")) showQuestion(state.index + 1);
-      if (e.target.closest("[data-remove-ex]") && confirm(`Retirer l'exercice « ${state.ex.titre} » de ce navigateur ? (ses questions et sa base seront effacées de ce navigateur)`)) removeExercise(state.ex.id);
+      if (e.target.closest("[data-remove-ex]") && confirm(tr("Retirer l'exercice « {titre} » de ce navigateur ? (ses questions et sa base seront effacées de ce navigateur)", { titre: state.ex.titre }))) removeExercise(state.ex.id);
       const t = e.target.closest("[data-table]");
       if (t) previewTable(t.dataset.table);
     });
@@ -1050,7 +1234,7 @@
     });
     $("packList").addEventListener("click", (e) => {
       const b = e.target.closest("[data-remove-pack]");
-      if (b && confirm("Retirer ces questions complémentaires de votre liste ?")) removePack(b.dataset.removePack);
+      if (b && confirm(tr("Retirer ces questions complémentaires de votre liste ?"))) removePack(b.dataset.removePack);
     });
     $("notice").querySelector("button").addEventListener("click", () => { $("notice").hidden = true; });
 

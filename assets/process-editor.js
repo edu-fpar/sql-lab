@@ -6,6 +6,58 @@
 (function (global) {
   "use strict";
 
+  const I18N = global.I18N || { lang: "fr", add() {}, t: (s, v) => (v ? s.replace(/\{(\w+)\}/g, (m, k) => (v[k] !== undefined ? v[k] : m)) : s), n: (c, a, b, v) => (c > 1 ? b : a).replace(/\{(\w+)\}/g, (m, k) => (k === "n" ? c : v && v[k] !== undefined ? v[k] : m)) };
+  const tr = I18N.t;
+  I18N.add({
+    "◯ Événement": "◯ Event",
+    "▭ Opération": "▭ Operation",
+    "⏢ Synchronisation": "⏢ Synchronisation",
+    "+ Acteur": "+ Actor",
+    "Télécharger le schéma en image": "Download the diagram as an image",
+    "Télécharger le schéma en SVG": "Download the diagram as SVG",
+    "Repartir de zéro": "Start from scratch",
+    "Tirez le rond {dot} d'un événement, d'une synchronisation ou d'une règle d'émission vers l'élément suivant pour créer une flèche. Les flèches qui entrent dans une synchronisation reçoivent une lettre (A, B, C…) à utiliser dans sa condition.": "Drag the {dot} dot of an event, a synchronisation or an output rule to the next element to create an arrow. Arrows going into a synchronisation get a letter (A, B, C…) to use in its condition (with “and”, “or” and brackets).",
+    "Effacer votre schéma et repartir de zéro ?": "Clear your diagram and start from scratch?",
+    "Éléments proposés :": "Suggested elements:",
+    "Ajouter au schéma": "Add to the diagram",
+    "Acteur": "Actor",
+    "Acteur {k}": "Actor {k}",
+    "Nouvel événement": "New event",
+    "Nouvelle opération": "New operation",
+    "Toujours": "Always",
+    "Cas {k}": "Case {k}",
+    "Ce couloir contient encore des éléments : déplacez-les ou supprimez-les d'abord.": "This swimlane still contains elements: move or delete them first.",
+    "Cliquez sur un élément ou sur le nom d'un couloir pour le modifier.<br><br>\n          <strong>Opération</strong> : un nom, les actions réalisées, et une règle d'émission par cas (« Toujours », ou « Patient existant » / « Patient non existant »…).<br><br>\n          <strong>Synchronisation</strong> : quand une opération attend plusieurs événements ; sa condition combine les lettres des flèches avec « et », « ou » et des parenthèses.": "Click an element or a swimlane name to edit it.<br><br>\n          <strong>Operation</strong>: a name, the actions performed, and one output rule per case (“Always”, or “Existing patient” / “New patient”…).<br><br>\n          <strong>Synchronisation</strong>: when an operation waits for several events; its condition combines the arrow letters with “and”, “or” and brackets.",
+    "Acteur (couloir)": "Actor (swimlane)",
+    "Fermer": "Close",
+    "Nom": "Name",
+    "Supprimer ce couloir": "Delete this swimlane",
+    "synchronisation": "synchronisation",
+    "Supprimer la flèche": "Delete the arrow",
+    "Nom de l'événement": "Event name",
+    "Nom de l'opération": "Operation name",
+    "Actions (une par ligne)": "Actions (one per line)",
+    "Règles d'émission": "Output rules",
+    "Règle {k}": "Rule {k}",
+    "Supprimer la règle": "Delete the rule",
+    "+ Règle": "+ Rule",
+    "aucune flèche entrante": "no incoming arrow",
+    "Condition": "Condition",
+    "A et (B ou C)": "A and (B or C)",
+    "Événement": "Event",
+    "Opération": "Operation",
+    "Synchronisation": "Synchronisation",
+    "Flèches entrantes": "Incoming arrows",
+    "Flèches sortantes": "Outgoing arrows",
+    "Supprimer cet élément": "Delete this element",
+    "Schéma événements-résultats": "Event-driven process diagram",
+    "condition ?": "condition?",
+    "règle ?": "rule?",
+    "Flèche": "Arrow",
+    " (lettre {l})": " (letter {l})",
+    "processus": "process",
+  });
+
   const NS = "http://www.w3.org/2000/svg";
   const LANE_W = (global.SQLProcessCheck && SQLProcessCheck.LANE_W) || 240;
   const HEAD = 38;
@@ -89,21 +141,21 @@
       root.innerHTML = opts.readonly
         ? `<div class="pe-canvas"></div>`
         : `<div class="pe-toolbar">
-             <button type="button" class="btn small" data-add="event">◯ Événement</button>
-             <button type="button" class="btn small" data-add="operation">▭ Opération</button>
-             <button type="button" class="btn small" data-add="sync">⏢ Synchronisation</button>
-             <button type="button" class="btn small ghost" data-add="lane">+ Acteur</button>
+             <button type="button" class="btn small" data-add="event">${tr("◯ Événement")}</button>
+             <button type="button" class="btn small" data-add="operation">${tr("▭ Opération")}</button>
+             <button type="button" class="btn small" data-add="sync">${tr("⏢ Synchronisation")}</button>
+             <button type="button" class="btn small ghost" data-add="lane">${tr("+ Acteur")}</button>
              <span class="spacer"></span>
-             <button type="button" class="btn small ghost" data-act="png" title="Télécharger le schéma en image">⤓ PNG</button>
-             <button type="button" class="btn small ghost" data-act="svg" title="Télécharger le schéma en SVG">⤓ SVG</button>
-             <button type="button" class="btn small ghost" data-act="reset" title="Repartir de zéro">↺</button>
+             <button type="button" class="btn small ghost" data-act="png" title="${tr("Télécharger le schéma en image")}">⤓ PNG</button>
+             <button type="button" class="btn small ghost" data-act="svg" title="${tr("Télécharger le schéma en SVG")}">⤓ SVG</button>
+             <button type="button" class="btn small ghost" data-act="reset" title="${tr("Repartir de zéro")}" aria-label="${tr("Repartir de zéro")}">↺</button>
            </div>
            <div class="pe-palette" hidden></div>
            <div class="pe-main">
              <div class="pe-canvas diagram-wrap"></div>
              <aside class="pe-inspector"></aside>
            </div>
-           <p class="muted small pe-help">Tirez le rond <span class="pe-dot">●</span> d'un événement, d'une synchronisation ou d'une règle d'émission vers l'élément suivant pour créer une flèche. Les flèches qui entrent dans une synchronisation reçoivent une lettre (A, B, C…) à utiliser dans sa condition.</p>`;
+           <p class="muted small pe-help">${tr("Tirez le rond {dot} d'un événement, d'une synchronisation ou d'une règle d'émission vers l'élément suivant pour créer une flèche. Les flèches qui entrent dans une synchronisation reçoivent une lettre (A, B, C…) à utiliser dans sa condition.", { dot: '<span class="pe-dot">●</span>' })}</p>`;
       this.canvas = root.querySelector(".pe-canvas");
       this.inspector = root.querySelector(".pe-inspector");
       if (!opts.readonly) this.bindToolbar();
@@ -134,7 +186,7 @@
         if (b.dataset.add) return this.addNode(b.dataset.add);
         if (b.dataset.act === "png") return this.exportImage("png");
         if (b.dataset.act === "svg") return this.exportImage("svg");
-        if (b.dataset.act === "reset" && confirm("Effacer votre schéma et repartir de zéro ?")) this.opts.onReset && this.opts.onReset();
+        if (b.dataset.act === "reset" && confirm(tr("Effacer votre schéma et repartir de zéro ?"))) this.opts.onReset && this.opts.onReset();
       });
       this.root.querySelector(".pe-palette").addEventListener("click", (e) => {
         const b = e.target.closest("[data-pal]");
@@ -155,13 +207,13 @@
       const items = this.opts.palette || [];
       pal.hidden = !items.length;
       const used = new Set(this.model.nodes.map((n) => n.kind + "|" + n.label));
-      pal.innerHTML = `<span class="muted small">Éléments proposés :</span> ` + items.map((p, i) =>
-        `<button type="button" class="pe-chip ${p.kind}${used.has(p.kind + "|" + p.label) ? " used" : ""}" data-pal="${i}" title="Ajouter au schéma">${p.kind === "event" ? "◯" : p.kind === "operation" ? "▭" : "⏢"} ${esc(p.label)}</button>`).join("");
+      pal.innerHTML = `<span class="muted small">${tr("Éléments proposés :")}</span> ` + items.map((p, i) =>
+        `<button type="button" class="pe-chip ${p.kind}${used.has(p.kind + "|" + p.label) ? " used" : ""}" data-pal="${i}" title="${tr("Ajouter au schéma")}">${p.kind === "event" ? "◯" : p.kind === "operation" ? "▭" : "⏢"} ${esc(p.label)}</button>`).join("");
     }
 
     addLane() {
-      let name = "Acteur", k = 2;
-      while (this.model.lanes.includes(name)) name = "Acteur " + k++;
+      let name = tr("Acteur"), k = 2;
+      while (this.model.lanes.includes(name)) name = tr("Acteur {k}", { k: k++ });
       this.model.lanes.push(name);
       this.sel = { type: "lane", id: this.model.lanes.length - 1 };
       this.changed();
@@ -170,13 +222,13 @@
     }
 
     addNode(kind, label) {
-      if (!this.model.lanes.length) this.model.lanes.push("Acteur");
+      if (!this.model.lanes.length) this.model.lanes.push(tr("Acteur"));
       const lane = this.sel && this.sel.type === "lane" ? this.sel.id
         : this.sel && this.sel.type === "node" && this.node(this.sel.id) ? Math.floor(this.node(this.sel.id).x / LANE_W) : 0;
       const inLane = this.model.nodes.filter((n) => Math.floor(n.x / LANE_W) === lane);
       const y = inLane.length ? Math.max(...inLane.map((n) => n.y + geom(n).h / 2)) + 70 : HEAD + 60;
-      const n = { id: this.newId("n"), kind, label: label || (kind === "event" ? "Nouvel événement" : kind === "operation" ? "Nouvelle opération" : ""), x: lane * LANE_W + LANE_W / 2, y };
-      if (kind === "operation") { n.actions = []; n.rules = ["Toujours"]; }
+      const n = { id: this.newId("n"), kind, label: label || (kind === "event" ? tr("Nouvel événement") : kind === "operation" ? tr("Nouvelle opération") : ""), x: lane * LANE_W + LANE_W / 2, y };
+      if (kind === "operation") { n.actions = []; n.rules = [tr("Toujours")]; }
       if (kind === "sync") n.cond = "";
       this.model.nodes.push(n);
       this.sel = { type: "node", id: n.id };
@@ -232,7 +284,7 @@
       switch (b.dataset.act) {
         case "close": this.sel = null; break;
         case "del-node": this.deleteNode(n.id); this.renderPalette(); break;
-        case "add-rule": n.rules.push(n.rules.length ? "Cas " + (n.rules.length + 1) : "Toujours"); break;
+        case "add-rule": n.rules.push(n.rules.length ? tr("Cas {k}", { k: n.rules.length + 1 }) : tr("Toujours")); break;
         case "del-rule": {
           const i = +b.dataset.i;
           n.rules.splice(i, 1);
@@ -243,7 +295,7 @@
         case "del-arrow": this.model.arrows = this.model.arrows.filter((a) => a.id !== b.dataset.id); break;
         case "del-lane": {
           const i = this.sel.id;
-          if (this.model.nodes.some((x) => Math.floor(x.x / LANE_W) === i)) { alert("Ce couloir contient encore des éléments : déplacez-les ou supprimez-les d'abord."); return; }
+          if (this.model.nodes.some((x) => Math.floor(x.x / LANE_W) === i)) { alert(tr("Ce couloir contient encore des éléments : déplacez-les ou supprimez-les d'abord.")); return; }
           this.model.lanes.splice(i, 1);
           for (const x of this.model.nodes) if (Math.floor(x.x / LANE_W) > i) x.x -= LANE_W;
           this.sel = null;
@@ -258,47 +310,45 @@
       if (!this.inspector) return;
       const s = this.sel;
       if (!s) {
-        this.inspector.innerHTML = `<p class="muted small">Cliquez sur un élément ou sur le nom d'un couloir pour le modifier.<br><br>
-          <strong>Opération</strong> : un nom, les actions réalisées, et une règle d'émission par cas (« Toujours », ou « Patient existant » / « Patient non existant »…).<br><br>
-          <strong>Synchronisation</strong> : quand une opération attend plusieurs événements ; sa condition combine les lettres des flèches avec « et », « ou » et des parenthèses.</p>`;
+        this.inspector.innerHTML = `<p class="muted small">${tr("Cliquez sur un élément ou sur le nom d'un couloir pour le modifier.<br><br>\n          <strong>Opération</strong> : un nom, les actions réalisées, et une règle d'émission par cas (« Toujours », ou « Patient existant » / « Patient non existant »…).<br><br>\n          <strong>Synchronisation</strong> : quand une opération attend plusieurs événements ; sa condition combine les lettres des flèches avec « et », « ou » et des parenthèses.")}</p>`;
         return;
       }
       if (s.type === "lane") {
-        this.inspector.innerHTML = `<div class="pe-head"><strong>Acteur (couloir)</strong><button type="button" class="icon-btn small" data-act="close" aria-label="Fermer">✕</button></div>
-          <label class="pe-field">Nom <input type="text" data-f="lane-name" value="${esc(this.model.lanes[s.id])}"></label>
-          ${this.opts.fixedLanes ? "" : `<button type="button" class="btn small ghost" data-act="del-lane">Supprimer ce couloir</button>`}`;
+        this.inspector.innerHTML = `<div class="pe-head"><strong>${tr("Acteur (couloir)")}</strong><button type="button" class="icon-btn small" data-act="close" aria-label="${tr("Fermer")}">✕</button></div>
+          <label class="pe-field">${tr("Nom")} <input type="text" data-f="lane-name" value="${esc(this.model.lanes[s.id])}"></label>
+          ${this.opts.fixedLanes ? "" : `<button type="button" class="btn small ghost" data-act="del-lane">${tr("Supprimer ce couloir")}</button>`}`;
         return;
       }
       const n = this.node(s.id);
       if (!n) { this.inspector.innerHTML = ""; return; }
       const incoming = this.model.arrows.filter((a) => a.to === n.id);
       const outgoing = this.model.arrows.filter((a) => a.from === n.id);
-      const nm = (id) => { const x = this.node(id); return x ? (x.kind === "sync" ? "synchronisation" : x.label) : "?"; };
+      const nm = (id) => { const x = this.node(id); return x ? (x.kind === "sync" ? tr("synchronisation") : x.label) : "?"; };
       const arrowList = (list, dir) => list.map((a) =>
         `<li>${dir === "in" ? (a.letter ? `<b>${a.letter}</b> ← ` : "← ") + esc(nm(a.from)) : "→ " + esc(nm(a.to)) + (a.rule !== null && a.rule !== undefined && n.rules ? ` <span class="muted">(${esc(n.rules[a.rule] || "")})</span>` : "")}
-          <button type="button" class="icon-btn small" data-act="del-arrow" data-id="${a.id}" title="Supprimer la flèche" aria-label="Supprimer la flèche">✕</button></li>`).join("");
+          <button type="button" class="icon-btn small" data-act="del-arrow" data-id="${a.id}" title="${tr("Supprimer la flèche")}" aria-label="${tr("Supprimer la flèche")}">✕</button></li>`).join("");
       let body = "";
       if (n.kind === "event") {
-        body = `<label class="pe-field">Nom de l'événement <input type="text" data-f="label" value="${esc(n.label)}"></label>`;
+        body = `<label class="pe-field">${tr("Nom de l'événement")} <input type="text" data-f="label" value="${esc(n.label)}"></label>`;
       } else if (n.kind === "operation") {
-        body = `<label class="pe-field">Nom de l'opération <input type="text" data-f="label" value="${esc(n.label)}"></label>
-          <label class="pe-field">Actions (une par ligne) <textarea data-f="actions" rows="3">${esc((n.actions || []).join("\n"))}</textarea></label>
-          <div class="pe-field">Règles d'émission
-            <ul class="pe-rules">${(n.rules || []).map((r, i) => `<li><input type="text" data-f="rule" data-i="${i}" value="${esc(r)}" aria-label="Règle ${i + 1}">
-              <button type="button" class="icon-btn small" data-act="del-rule" data-i="${i}" title="Supprimer la règle" aria-label="Supprimer la règle">✕</button></li>`).join("")}</ul>
-            <button type="button" class="btn small" data-act="add-rule">+ Règle</button>
+        body = `<label class="pe-field">${tr("Nom de l'opération")} <input type="text" data-f="label" value="${esc(n.label)}"></label>
+          <label class="pe-field">${tr("Actions (une par ligne)")} <textarea data-f="actions" rows="3">${esc((n.actions || []).join("\n"))}</textarea></label>
+          <div class="pe-field">${tr("Règles d'émission")}
+            <ul class="pe-rules">${(n.rules || []).map((r, i) => `<li><input type="text" data-f="rule" data-i="${i}" value="${esc(r)}" aria-label="${tr("Règle {k}", { k: i + 1 })}">
+              <button type="button" class="icon-btn small" data-act="del-rule" data-i="${i}" title="${tr("Supprimer la règle")}" aria-label="${tr("Supprimer la règle")}">✕</button></li>`).join("")}</ul>
+            <button type="button" class="btn small" data-act="add-rule">${tr("+ Règle")}</button>
           </div>`;
       } else {
-        const letters = incoming.map((a) => `<b>${a.letter || "?"}</b> = ${esc(nm(a.from))}`).join("<br>") || "<span class='muted'>aucune flèche entrante</span>";
-        body = `<label class="pe-field">Condition <input type="text" data-f="cond" value="${esc(n.cond || "")}" placeholder="A et (B ou C)"></label>
+        const letters = incoming.map((a) => `<b>${a.letter || "?"}</b> = ${esc(nm(a.from))}`).join("<br>") || `<span class='muted'>${tr("aucune flèche entrante")}</span>`;
+        body = `<label class="pe-field">${tr("Condition")} <input type="text" data-f="cond" value="${esc(n.cond || "")}" placeholder="${tr("A et (B ou C)")}"></label>
           <p class="small">${letters}</p>`;
       }
-      this.inspector.innerHTML = `<div class="pe-head"><strong>${n.kind === "event" ? "Événement" : n.kind === "operation" ? "Opération" : "Synchronisation"}</strong>
-          <button type="button" class="icon-btn small" data-act="close" aria-label="Fermer">✕</button></div>
+      this.inspector.innerHTML = `<div class="pe-head"><strong>${n.kind === "event" ? tr("Événement") : n.kind === "operation" ? tr("Opération") : tr("Synchronisation")}</strong>
+          <button type="button" class="icon-btn small" data-act="close" aria-label="${tr("Fermer")}">✕</button></div>
         ${body}
-        ${incoming.length ? `<div class="pe-field">Flèches entrantes<ul class="pe-arrows">${arrowList(incoming, "in")}</ul></div>` : ""}
-        ${outgoing.length ? `<div class="pe-field">Flèches sortantes<ul class="pe-arrows">${arrowList(outgoing, "out")}</ul></div>` : ""}
-        <button type="button" class="btn small ghost" data-act="del-node">Supprimer cet élément</button>`;
+        ${incoming.length ? `<div class="pe-field">${tr("Flèches entrantes")}<ul class="pe-arrows">${arrowList(incoming, "in")}</ul></div>` : ""}
+        ${outgoing.length ? `<div class="pe-field">${tr("Flèches sortantes")}<ul class="pe-arrows">${arrowList(outgoing, "out")}</ul></div>` : ""}
+        <button type="button" class="btn small ghost" data-act="del-node">${tr("Supprimer cet élément")}</button>`;
     }
 
     // ------------------------------------------------------------ dessin
@@ -311,7 +361,7 @@
     render() {
       const { w, h } = this.size();
       this.canvas.textContent = "";
-      const svg = el("svg", { class: "pe-svg", width: w, height: h, viewBox: `0 0 ${w} ${h}`, role: "img", "aria-label": "Schéma événements-résultats" }, this.canvas);
+      const svg = el("svg", { class: "pe-svg", width: w, height: h, viewBox: `0 0 ${w} ${h}`, role: "img", "aria-label": tr("Schéma événements-résultats") }, this.canvas);
       this.svg = svg;
       const defs = el("defs", {}, svg);
       const m = el("marker", { id: "pe-arrow", viewBox: "0 0 10 10", refX: "9", refY: "5", markerWidth: "8", markerHeight: "8", orient: "auto-start-reverse" }, defs);
@@ -360,7 +410,7 @@
         const a = SY_TOP / 2, b = SY_BOT / 2, hh = SY_H / 2;
         el("path", { d: `M${-a} ${-hh} H${a} L${b} ${hh} H${-b} Z`, class: "pe-shape pe-trap" }, g);
         const t = el("text", { x: 0, y: 4.5, "text-anchor": "middle", class: "pe-text pe-cond" }, g);
-        t.textContent = n.cond || "condition ?";
+        t.textContent = n.cond || tr("condition ?");
         if (!this.opts.readonly) el("circle", { cx: 0, cy: hh, r: 5.5, class: "pe-handle", "data-handle": "out" }, g);
       } else {
         const w = g0.w, hh = g0.h / 2, top = -hh;
@@ -391,7 +441,7 @@
         });
         if (!g0.rules.length) {
           const t = el("text", { x: 0, y: ry + 17, "text-anchor": "middle", class: "pe-text pe-rule muted" }, g);
-          t.textContent = "règle ?";
+          t.textContent = tr("règle ?");
         }
       }
       this.nodeEls.set(n.id, g);
@@ -442,10 +492,10 @@
     showArrow(id) {
       const a = this.model.arrows.find((x) => x.id === id);
       if (!a) return;
-      const nm = (nid) => { const x = this.node(nid); return x ? (x.kind === "sync" ? "synchronisation" : x.label) : "?"; };
-      this.inspector.innerHTML = `<div class="pe-head"><strong>Flèche</strong><button type="button" class="icon-btn small" data-act="close" aria-label="Fermer">✕</button></div>
-        <p class="small">${esc(nm(a.from))} → ${esc(nm(a.to))}${a.letter ? ` (lettre <b>${a.letter}</b>)` : ""}</p>
-        <button type="button" class="btn small ghost" data-act="del-arrow" data-id="${a.id}">Supprimer la flèche</button>`;
+      const nm = (nid) => { const x = this.node(nid); return x ? (x.kind === "sync" ? tr("synchronisation") : x.label) : "?"; };
+      this.inspector.innerHTML = `<div class="pe-head"><strong>${tr("Flèche")}</strong><button type="button" class="icon-btn small" data-act="close" aria-label="${tr("Fermer")}">✕</button></div>
+        <p class="small">${esc(nm(a.from))} → ${esc(nm(a.to))}${a.letter ? tr(" (lettre {l})", { l: `<b>${a.letter}</b>` }) : ""}</p>
+        <button type="button" class="btn small ghost" data-act="del-arrow" data-id="${a.id}">${tr("Supprimer la flèche")}</button>`;
     }
 
     startDrag(e, id) {
@@ -518,7 +568,7 @@
 
     exportImage(kind) {
       const svgText = this.standaloneSvg();
-      const name = (this.opts.fileName || "processus") + "." + kind;
+      const name = (this.opts.fileName || tr("processus")) + "." + kind;
       const save = (blob) => {
         const a = document.createElement("a");
         a.href = URL.createObjectURL(blob);

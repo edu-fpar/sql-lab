@@ -53,7 +53,7 @@ async function main() {
     const go = async (url) => {
       // paramètre unique : rechargement complet, sans garder le défilement de la page précédente
       const [a, h] = url.split("#");
-      await cdp.send("Page.navigate", { url: `${a}${a.includes("?") ? "&" : "?"}cap=${++n}${h ? "#" + h : ""}` });
+      await cdp.send("Page.navigate", { url: `${a}${a.includes("?") ? "&" : "?"}lang=${LANG}&cap=${++n}${h ? "#" + h : ""}` });
       await sleep(2200);
       await ev("window.scrollTo(0, 0);");
     };
@@ -137,12 +137,14 @@ const SCENES = {
   },
   en: {
     ex: "demo-en",
-    join: "q08",
-    joinSql: "",
-    joinBad: "",
-    date: "q05",
-    dateSql: "",
-    schema: "s01", schemaStep: 4,
+    join: "q11",
+    joinSql: ["SELECT DISTINCT LastName, FirstName", "FROM CUSTOMER, RENTAL, RENTAL_LINE, BIKE", "WHERE CUSTOMER.CustomerId = RENTAL.CustomerId",
+      "AND RENTAL.RentalId = RENTAL_LINE.RentalId", "AND RENTAL_LINE.BikeId = BIKE.BikeId", "AND CategoryId = 2;"].join("\n"),
+    joinBad: ["SELECT DISTINCT LastName, FirstName", "FROM CUSTOMER, RENTAL, RENTAL_LINE, BIKE", "WHERE CUSTOMER.CustomerId = RENTAL.CustomerId",
+      "AND RENTAL.RentalId = RENTAL_LINE.RentalId", "AND CategoryId = 2;"].join("\n"),
+    date: "q06",
+    dateSql: ["SELECT RentalId, StartDate, ReturnDate", "FROM RENTAL", "WHERE MONTH(StartDate) = 4", "AND YEAR(StartDate) = 2025;"].join("\n"),
+    schema: "s01", schemaStep: 6,
     process: "p01",
   },
 };

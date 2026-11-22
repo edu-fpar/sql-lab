@@ -18,6 +18,27 @@
 (function (global) {
   "use strict";
 
+  const I18N = global.I18N || { lang: "fr", add() {}, t: (s, v) => (v ? s.replace(/\{(\w+)\}/g, (m, k) => (v[k] !== undefined ? v[k] : m)) : s), n: (c, a, b, v) => (c > 1 ? b : a).replace(/\{(\w+)\}/g, (m, k) => (k === "n" ? c : v && v[k] !== undefined ? v[k] : m)) };
+  const tr = I18N.t;
+  I18N.add({
+    "La table « {a} » a été reconnue comme « {b} ».": "The table “{a}” was recognised as “{b}”.",
+    "La table {t} a disparu : elle doit rester dans le schéma.": "The table {t} has disappeared: it must stay in the schema.",
+    "Il manque une table pour {r}.": "A table is missing to {r}.",
+    "Il manque une table ({t}).": "A table is missing ({t}).",
+    "Dans {t}, il manque l'attribut {a}.": "In {t}, the attribute {a} is missing.",
+    "{c} ne doit plus figurer dans {t}.": "{c} should no longer appear in {t}.",
+    "{t} n'a pas de clé primaire.": "{t} has no primary key.",
+    "La clé primaire de {t} n'est pas la bonne : pensez à une clé composée de {k} attributs.": "The primary key of {t} is not right: think of a key made up of {k} attributes.",
+    "La clé primaire de {t} n'est pas la bonne.": "The primary key of {t} is not right.",
+    "Dans {t}, {c} doit faire référence à une autre table (clé étrangère) : tirez une flèche vers la table concernée.": "In {t}, {c} must refer to another table (foreign key): drag an arrow to the table concerned.",
+    "Dans {t}, la clé étrangère {c} ne pointe pas vers la bonne table.": "In {t}, the foreign key {c} does not point to the right table.",
+    "Attribut(s) non demandé(s) dans {t} : {l}.": "Attribute(s) not asked for in {t}: {l}.",
+    "La table {t} devrait être supprimée.": "The table {t} should be deleted.",
+    "La table {t} ne correspond à aucune table attendue (nom, clé primaire ?).": "The table {t} does not match any expected table (name, primary key?).",
+    "Le schéma n'a pas encore été modifié : lisez les règles de gestion de l'énoncé, puis ajoutez ou modifiez les tables nécessaires.": "The schema has not been changed yet: read the business rules in the question, then add or change the tables you need.",
+    "référence {t}": "references {t}",
+  });
+
   const norm = (s) => String(s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z0-9]/g, "");
   const alts = (spec) => String(spec).split("|").map((x) => x.trim()).filter(Boolean);
   const first = (spec) => alts(spec)[0];
@@ -113,7 +134,7 @@
         const pks = x.cols.filter((c) => c.pk);
         return pks.length === t.pk.length && t.pk.every((spec) => pks.some((c) => matches(spec, c.name)));
       });
-      if (st) { map.set(t, st); used.add(st); notes.push(`La table « ${st.name} » a été reconnue comme « ${t.nom} ».`); }
+      if (st) { map.set(t, st); used.add(st); notes.push(tr("La table « {a} » a été reconnue comme « {b} ».", { a: st.name, b: t.nom })); }
     }
 
     // référence : la table visée par une clé étrangère de l'étudiant correspond-elle à celle attendue ?
@@ -127,53 +148,53 @@
     for (const t of sol.tables) {
       const st = map.get(t);
       const isDepart = depart.tables.some((d) => tableNames(t).some((n) => norm(n) === norm(d.name)));
-      if (!check(!!st, isDepart ? `La table ${t.nom} a disparu : elle doit rester dans le schéma.`
-        : t.role ? `Il manque une table pour ${t.role}.` : `Il manque une table (${t.nom}).`)) continue;
+      if (!check(!!st, isDepart ? tr("La table {t} a disparu : elle doit rester dans le schéma.", { t: t.nom })
+        : t.role ? tr("Il manque une table pour {r}.", { r: t.role }) : tr("Il manque une table ({t}).", { t: t.nom }))) continue;
       const label = st.name;
       const required = [...(t.pk || []), ...Object.keys(t.fk || {}), ...(t.attributs || [])]
         .filter((spec, i, arr) => arr.findIndex((s) => norm(first(s)) === norm(first(spec))) === i);
       for (const spec of required) {
-        check(st.cols.some((c) => matches(spec, c.name)), `Dans ${label}, il manque l'attribut ${first(spec)}.`);
+        check(st.cols.some((c) => matches(spec, c.name)), tr("Dans {t}, il manque l'attribut {a}.", { t: label, a: first(spec) }));
       }
       for (const spec of t.interdits || []) {
         const col = st.cols.find((c) => matches(spec, c.name));
-        check(!col, col ? `${col.name} ne doit plus figurer dans ${label}.` : "");
+        check(!col, col ? tr("{c} ne doit plus figurer dans {t}.", { c: col.name, t: label }) : "");
       }
       if ((t.pk || []).length) {
         const pks = st.cols.filter((c) => c.pk);
         const ok = pks.length === t.pk.length && t.pk.every((spec) => pks.some((c) => matches(spec, c.name)));
-        check(ok, ok ? "" : !pks.length ? `${label} n'a pas de clé primaire.`
-          : t.pk.length > 1 ? `La clé primaire de ${label} n'est pas la bonne : pensez à une clé composée de ${t.pk.length} attributs.`
-          : `La clé primaire de ${label} n'est pas la bonne.`);
+        check(ok, ok ? "" : !pks.length ? tr("{t} n'a pas de clé primaire.", { t: label })
+          : t.pk.length > 1 ? tr("La clé primaire de {t} n'est pas la bonne : pensez à une clé composée de {k} attributs.", { t: label, k: t.pk.length })
+          : tr("La clé primaire de {t} n'est pas la bonne.", { t: label }));
       }
       for (const [spec, ref] of Object.entries(t.fk || {})) {
         const col = st.cols.find((c) => matches(spec, c.name));
         if (!col) { total++; continue; } // déjà signalé comme manquant
         check(refOk(col.fk, ref), !col.fk
-          ? `Dans ${label}, ${col.name} doit faire référence à une autre table (clé étrangère) : tirez une flèche vers la table concernée.`
-          : `Dans ${label}, la clé étrangère ${col.name} ne pointe pas vers la bonne table.`);
+          ? tr("Dans {t}, {c} doit faire référence à une autre table (clé étrangère) : tirez une flèche vers la table concernée.", { t: label, c: col.name })
+          : tr("Dans {t}, la clé étrangère {c} ne pointe pas vers la bonne table.", { t: label, c: col.name }));
       }
       const known = [...required, ...(t.optionnels || [])];
       const extra = st.cols.filter((c) => !known.some((spec) => matches(spec, c.name)) && !isDepart);
-      if (extra.length) notes.push(`Attribut(s) non demandé(s) dans ${label} : ${extra.map((c) => c.name).join(", ")}.`);
+      if (extra.length) notes.push(tr("Attribut(s) non demandé(s) dans {t} : {l}.", { t: label, l: extra.map((c) => c.name).join(", ") }));
     }
 
     // tables de départ non concernées par la solution : elles doivent rester
     for (const d of depart.tables) {
       if (sol.tables.some((t) => tableNames(t).some((n) => norm(n) === norm(d.name)))) continue;
       if ((sol.tablesSupprimees || []).some((n) => norm(n) === norm(d.name))) {
-        check(!student.tables.some((x) => norm(x.name) === norm(d.name)), `La table ${d.name} devrait être supprimée.`);
+        check(!student.tables.some((x) => norm(x.name) === norm(d.name)), tr("La table {t} devrait être supprimée.", { t: d.name }));
         continue;
       }
       const st = student.tables.find((x) => norm(x.name) === norm(d.name));
-      check(!!st, `La table ${d.name} a disparu : elle doit rester dans le schéma.`);
+      check(!!st, tr("La table {t} a disparu : elle doit rester dans le schéma.", { t: d.name }));
       if (st) used.add(st);
     }
     // tables en trop
     for (const st of student.tables) {
       if (used.has(st)) continue;
       if ((sol.tablesOptionnelles || []).some((n) => norm(n) === norm(st.name))) continue;
-      check(false, `La table ${st.name} ne correspond à aucune table attendue (nom, clé primaire ?).`);
+      check(false, tr("La table {t} ne correspond à aucune table attendue (nom, clé primaire ?).", { t: st.name }));
     }
     return { errors, notes, partielMsg: sol.partiel || null, passed, total };
   }
@@ -192,7 +213,7 @@
       const main = compareOne(student, depart, q.solution);
       return {
         ok: false, level: "ko", notes: [], score: { passed: main.passed, total: main.total },
-        messages: ["Le schéma n'a pas encore été modifié : lisez les règles de gestion de l'énoncé, puis ajoutez ou modifiez les tables nécessaires."],
+        messages: [tr("Le schéma n'a pas encore été modifié : lisez les règles de gestion de l'énoncé, puis ajoutez ou modifiez les tables nécessaires.")],
       };
     }
     const sols = [q.solution, ...(q.variantes || []).filter((v) => v && typeof v === "object" && v.tables)];
@@ -220,7 +241,7 @@
         let n = (c.fk ? "#" : "") + c.name;
         if (!html) return c.pk ? `_${n}_` : n;
         n = esc(n);
-        if (c.fk) n = `<i title="référence ${esc(c.fk)}">${n}</i>`;
+        if (c.fk) n = `<i title="${tr("référence {t}", { t: esc(c.fk) })}">${n}</i>`;
         if (c.pk) n = `<u>${n}</u>`;
         return n;
       }).join(", ");

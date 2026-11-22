@@ -78,6 +78,7 @@ ${list}
    * @param o.readFile  async (chemin) => Uint8Array  (fichiers de l'application)
    * @param o.fflate    module fflate
    * @param o.seuil     % de réussite pour « passed » (facultatif, 1 à 100)
+   * @param o.lang      langue de l'interface du paquet ("fr" | "en"), par défaut celle de la page
    * @returns Uint8Array du zip
    */
   async function buildScorm(o) {
@@ -92,6 +93,8 @@ ${list}
     // page verrouillée sur l'exercice, avec les réglages SCORM
     const config = { locked: true, scorm: true, exercice: id };
     if (seuil) config.seuil = seuil;
+    const lang = o.lang || (global.I18N && global.I18N.lang);
+    if (lang) config.lang = lang;
     let html = new TextDecoder().decode(files["index.html"]);
     html = html.replace("<!--SQLLAB_CONFIG-->", `<script>window.SQLLAB_CONFIG = ${JSON.stringify(config)};</script>`);
     html = html.replace(/<title>[^<]*<\/title>/, `<title>${xml(exercise.titre)} – SQL Lab</title>`);

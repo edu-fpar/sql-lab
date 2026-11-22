@@ -19,6 +19,55 @@
 (function (global) {
   "use strict";
 
+  const I18N = global.I18N || { lang: "fr", add() {}, t: (s, v) => (v ? s.replace(/\{(\w+)\}/g, (m, k) => (v[k] !== undefined ? v[k] : m)) : s), n: (c, a, b, v) => (c > 1 ? b : a).replace(/\{(\w+)\}/g, (m, k) => (k === "n" ? c : v && v[k] !== undefined ? v[k] : m)) };
+  const t = I18N.t;
+  I18N.add({
+    "« {x} »": "“{x}”",
+    " et ": " and ",
+    "synchronisation": "synchronisation",
+    "sans nom": "unnamed",
+    "condition incomplète": "incomplete condition",
+    "parenthèse non fermée": "unclosed bracket",
+    "« {x} » inattendu": "unexpected “{x}”",
+    "condition vide": "empty condition",
+    "opérateur manquant (et / ou)": "missing operator (and / or)",
+    "Le schéma ne contient aucune opération.": "The diagram has no operation.",
+    "Un événement n'a pas de nom.": "An event has no name.",
+    "L'événement {n} ne peut être produit que par une opération (flèche partant d'une règle d'émission).": "The event {n} can only be produced by an operation (an arrow starting from an output rule).",
+    "L'événement {n} doit déclencher une opération ou entrer dans une synchronisation.": "The event {n} must trigger an operation or go into a synchronisation.",
+    "L'événement {n} n'est relié à rien.": "The event {n} is not connected to anything.",
+    "Une opération n'a pas de nom.": "An operation has no name.",
+    "L'opération {n} n'est déclenchée par aucun événement.": "The operation {n} is not triggered by any event.",
+    "L'opération {n} reçoit {k} flèches : quand une opération attend plusieurs événements, il faut une synchronisation.": "The operation {n} receives {k} arrows: when an operation waits for several events, you need a synchronisation.",
+    "Pas de flèche directe d'une opération vers une autre ({n}) : une opération produit un événement, qui déclenche la suivante.": "No direct arrow from one operation to another ({n}): an operation produces an event, which triggers the next one.",
+    "L'opération {n} n'a pas de règle d'émission (par exemple « Toujours »).": "The operation {n} has no output rule (for example “Always”).",
+    "La règle « {r} » de l'opération {n} ne produit aucun événement.": "The rule “{r}” of the operation {n} does not produce any event.",
+    "L'opération {n} doit produire des événements (bulles), pas déclencher directement une autre opération ou une synchronisation.": "The operation {n} must produce events (bubbles), not directly trigger another operation or a synchronisation.",
+    "Une flèche de l'opération {n} ne part d'aucune règle d'émission.": "An arrow from the operation {n} does not start from any output rule.",
+    "L'opération {n} doit être placée dans le couloir de l'acteur qui la réalise.": "The operation {n} must be placed in the swimlane of the actor who performs it.",
+    "Une synchronisation sert à attendre plusieurs événements : celle de {s} n'en reçoit qu'un.": "A synchronisation is used to wait for several events: the one for {s} receives only one.",
+    "Une synchronisation sert à attendre plusieurs événements : celle de {s} n'en reçoit aucun.": "A synchronisation is used to wait for several events: the one for {s} receives none.",
+    "Seuls des événements entrent dans une synchronisation ({s}).": "Only events can go into a synchronisation ({s}).",
+    "Une synchronisation déclenche une seule opération : une flèche sortante vers une opération ({s}).": "A synchronisation triggers a single operation: one outgoing arrow to an operation ({s}).",
+    "La synchronisation de {s} n'a pas de condition (par exemple « A et B »).": "The synchronisation for {s} has no condition (for example “A and B”).",
+    "La condition de {s} utilise {x}, qui ne correspond à aucune flèche entrante.": "The condition for {s} uses {x}, which does not match any incoming arrow.",
+    "La condition de {s} n'utilise pas {x} : chaque flèche entrante doit apparaître dans la condition.": "The condition for {s} does not use {x}: every incoming arrow must appear in the condition.",
+    "Condition illisible pour {s} ({e}) : utilisez les lettres des flèches, « et », « ou » et des parenthèses.": "Unreadable condition for {s} ({e}): use the arrow letters, “and”, “or” and brackets.",
+    "l'opération « {x} »": "the operation “{x}”",
+    "la synchronisation": "the synchronisation",
+    "Il manque l'opération « {x} ».": "The operation “{x}” is missing.",
+    "L'opération « {x} » : son déclenchement n'est pas lisible (vérifiez sa synchronisation).": "The operation “{x}”: what triggers it cannot be read (check its synchronisation).",
+    "L'opération « {x} » doit aussi attendre : {m}.": "The operation “{x}” must also wait for: {m}.",
+    "L'opération « {x} » attend {m}, qui ne fait pas partie de ce qui la déclenche.": "The operation “{x}” waits for {m}, which is not part of what triggers it.",
+    "aucun événement": "no event",
+    "Avec votre condition, « {x} » se déclencherait avec seulement {p} : ce n'est pas suffisant.": "With your condition, “{x}” would be triggered by {p} alone: that is not enough.",
+    "Avec votre condition, « {x} » ne se déclencherait pas quand {p} est arrivé, alors que cela devrait suffire.": "With your condition, “{x}” would not be triggered when {p} has occurred, although that should be enough.",
+    "Avec votre condition, « {x} » ne se déclencherait pas quand {p} sont arrivés, alors que cela devrait suffire.": "With your condition, “{x}” would not be triggered when {p} have occurred, although that should be enough.",
+    "L'opération « {x} » doit avoir {k} règles d'émission{w} : elle produit des résultats différents selon le cas.": "The operation “{x}” must have {k} output rules{w}: it produces different results depending on the case.",
+    "Règles d'émission de « {x} » : il manque le cas {m}.": "Output rules of “{x}”: the case {m} is missing.",
+  });
+  const quote = (x) => t("« {x} »", { x });
+
   const LANE_W = 240;
   const norm = (s) => String(s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z0-9]/g, "");
   const laneOf = (n, model) => Math.max(0, Math.min(model.lanes.length - 1, Math.floor(n.x / LANE_W)));
@@ -72,20 +121,20 @@
     }
     function factor() {
       const tk = toks[i++];
-      if (!tk) throw new Error("condition incomplète");
+      if (!tk) throw new Error(t("condition incomplète"));
       if (tk.t === "not") return { op: "not", a: factor() };
       if (tk.t === "(") {
         const e = expr();
-        if (!peek() || peek().t !== ")") throw new Error("parenthèse non fermée");
+        if (!peek() || peek().t !== ")") throw new Error(t("parenthèse non fermée"));
         i++;
         return e;
       }
       if (tk.t === "atom") return { atom: tk.v };
-      throw new Error(`« ${tk.t === ")" ? ")" : tk.t} » inattendu`);
+      throw new Error(t("« {x} » inattendu", { x: tk.t === ")" ? ")" : tk.t }));
     }
-    if (!toks.length) throw new Error("condition vide");
+    if (!toks.length) throw new Error(t("condition vide"));
     const tree = expr();
-    if (i < toks.length) throw new Error("opérateur manquant (et / ou)");
+    if (i < toks.length) throw new Error(t("opérateur manquant (et / ou)"));
     return tree;
   }
 
@@ -108,46 +157,48 @@
     const byId = new Map(model.nodes.map((n) => [n.id, n]));
     const inc = (n) => model.arrows.filter((a) => a.to === n.id);
     const out = (n) => model.arrows.filter((a) => a.from === n.id);
-    const name = (n) => `« ${n.label || (n.kind === "sync" ? "synchronisation" : "sans nom")} »`;
+    const name = (n) => quote(n.label || (n.kind === "sync" ? t("synchronisation") : t("sans nom")));
     const kindOf = (id) => (byId.get(id) || {}).kind;
 
-    if (!model.nodes.some((n) => n.kind === "operation")) errors.push("Le schéma ne contient aucune opération.");
+    if (!model.nodes.some((n) => n.kind === "operation")) errors.push(t("Le schéma ne contient aucune opération."));
     for (const n of model.nodes) {
       const i = inc(n), o = out(n);
       if (n.kind === "event") {
-        if (!n.label || !n.label.trim()) errors.push("Un événement n'a pas de nom.");
-        if (i.some((a) => kindOf(a.from) !== "operation")) errors.push(`L'événement ${name(n)} ne peut être produit que par une opération (flèche partant d'une règle d'émission).`);
-        if (o.some((a) => !["operation", "sync"].includes(kindOf(a.to)))) errors.push(`L'événement ${name(n)} doit déclencher une opération ou entrer dans une synchronisation.`);
-        if (!i.length && !o.length) errors.push(`L'événement ${name(n)} n'est relié à rien.`);
+        if (!n.label || !n.label.trim()) errors.push(t("Un événement n'a pas de nom."));
+        if (i.some((a) => kindOf(a.from) !== "operation")) errors.push(t("L'événement {n} ne peut être produit que par une opération (flèche partant d'une règle d'émission).", { n: name(n) }));
+        if (o.some((a) => !["operation", "sync"].includes(kindOf(a.to)))) errors.push(t("L'événement {n} doit déclencher une opération ou entrer dans une synchronisation.", { n: name(n) }));
+        if (!i.length && !o.length) errors.push(t("L'événement {n} n'est relié à rien.", { n: name(n) }));
       } else if (n.kind === "operation") {
-        if (!n.label || !n.label.trim()) errors.push("Une opération n'a pas de nom.");
-        if (!i.length) errors.push(`L'opération ${name(n)} n'est déclenchée par aucun événement.`);
-        if (i.length > 1) errors.push(`L'opération ${name(n)} reçoit ${i.length} flèches : quand une opération attend plusieurs événements, il faut une synchronisation.`);
-        if (i.some((a) => kindOf(a.from) === "operation")) errors.push(`Pas de flèche directe d'une opération vers une autre (${name(n)}) : une opération produit un événement, qui déclenche la suivante.`);
+        if (!n.label || !n.label.trim()) errors.push(t("Une opération n'a pas de nom."));
+        if (!i.length) errors.push(t("L'opération {n} n'est déclenchée par aucun événement.", { n: name(n) }));
+        if (i.length > 1) errors.push(t("L'opération {n} reçoit {k} flèches : quand une opération attend plusieurs événements, il faut une synchronisation.", { n: name(n), k: i.length }));
+        if (i.some((a) => kindOf(a.from) === "operation")) errors.push(t("Pas de flèche directe d'une opération vers une autre ({n}) : une opération produit un événement, qui déclenche la suivante.", { n: name(n) }));
         const rules = n.rules || [];
-        if (!rules.length) errors.push(`L'opération ${name(n)} n'a pas de règle d'émission (par exemple « Toujours »).`);
+        if (!rules.length) errors.push(t("L'opération {n} n'a pas de règle d'émission (par exemple « Toujours »).", { n: name(n) }));
         rules.forEach((r, k) => {
           const ro = o.filter((a) => a.rule === k);
-          if (!ro.length) errors.push(`La règle « ${r || "sans nom"} » de l'opération ${name(n)} ne produit aucun événement.`);
+          if (!ro.length) errors.push(t("La règle « {r} » de l'opération {n} ne produit aucun événement.", { r: r || t("sans nom"), n: name(n) }));
         });
-        if (o.some((a) => kindOf(a.to) !== "event")) errors.push(`L'opération ${name(n)} doit produire des événements (bulles), pas déclencher directement une autre opération ou une synchronisation.`);
-        if (o.some((a) => a.rule === null || a.rule === undefined || a.rule >= rules.length)) errors.push(`Une flèche de l'opération ${name(n)} ne part d'aucune règle d'émission.`);
-        if (model.lanes.length && (n.x < 0 || n.x > model.lanes.length * LANE_W)) errors.push(`L'opération ${name(n)} doit être placée dans le couloir de l'acteur qui la réalise.`);
+        if (o.some((a) => kindOf(a.to) !== "event")) errors.push(t("L'opération {n} doit produire des événements (bulles), pas déclencher directement une autre opération ou une synchronisation.", { n: name(n) }));
+        if (o.some((a) => a.rule === null || a.rule === undefined || a.rule >= rules.length)) errors.push(t("Une flèche de l'opération {n} ne part d'aucune règle d'émission.", { n: name(n) }));
+        if (model.lanes.length && (n.x < 0 || n.x > model.lanes.length * LANE_W)) errors.push(t("L'opération {n} doit être placée dans le couloir de l'acteur qui la réalise.", { n: name(n) }));
       } else if (n.kind === "sync") {
-        if (i.length < 2) errors.push(`Une synchronisation sert à attendre plusieurs événements : celle de ${syncTarget(n)} n'en reçoit ${i.length ? "qu'un" : "aucun"}.`);
-        if (i.some((a) => kindOf(a.from) !== "event")) errors.push(`Seuls des événements entrent dans une synchronisation (${syncTarget(n)}).`);
-        if (o.length !== 1 || kindOf(o[0].to) !== "operation") errors.push(`Une synchronisation déclenche une seule opération : une flèche sortante vers une opération (${syncTarget(n)}).`);
-        if (!n.cond || !n.cond.trim()) errors.push(`La synchronisation de ${syncTarget(n)} n'a pas de condition (par exemple « A et B »).`);
+        if (i.length < 2) errors.push(i.length
+          ? t("Une synchronisation sert à attendre plusieurs événements : celle de {s} n'en reçoit qu'un.", { s: syncTarget(n) })
+          : t("Une synchronisation sert à attendre plusieurs événements : celle de {s} n'en reçoit aucun.", { s: syncTarget(n) }));
+        if (i.some((a) => kindOf(a.from) !== "event")) errors.push(t("Seuls des événements entrent dans une synchronisation ({s}).", { s: syncTarget(n) }));
+        if (o.length !== 1 || kindOf(o[0].to) !== "operation") errors.push(t("Une synchronisation déclenche une seule opération : une flèche sortante vers une opération ({s}).", { s: syncTarget(n) }));
+        if (!n.cond || !n.cond.trim()) errors.push(t("La synchronisation de {s} n'a pas de condition (par exemple « A et B »).", { s: syncTarget(n) }));
         else {
           try {
             const used = [...atoms(parse(n.cond))].map((x) => x.toUpperCase());
             const letters = i.map((a) => (a.letter || "").toUpperCase()).filter(Boolean);
             const unknown = used.filter((x) => !letters.includes(x));
             const missing = letters.filter((x) => !used.includes(x));
-            if (unknown.length) errors.push(`La condition de ${syncTarget(n)} utilise ${unknown.join(", ")}, qui ne correspond à aucune flèche entrante.`);
-            if (missing.length) errors.push(`La condition de ${syncTarget(n)} n'utilise pas ${missing.join(", ")} : chaque flèche entrante doit apparaître dans la condition.`);
+            if (unknown.length) errors.push(t("La condition de {s} utilise {x}, qui ne correspond à aucune flèche entrante.", { s: syncTarget(n), x: unknown.join(", ") }));
+            if (missing.length) errors.push(t("La condition de {s} n'utilise pas {x} : chaque flèche entrante doit apparaître dans la condition.", { s: syncTarget(n), x: missing.join(", ") }));
           } catch (e) {
-            errors.push(`Condition illisible pour ${syncTarget(n)} (${e.message}) : utilisez les lettres des flèches, « et », « ou » et des parenthèses.`);
+            errors.push(t("Condition illisible pour {s} ({e}) : utilisez les lettres des flèches, « et », « ou » et des parenthèses.", { s: syncTarget(n), e: e.message }));
           }
         }
       }
@@ -156,8 +207,8 @@
 
     function syncTarget(s) {
       const o = model.arrows.find((a) => a.from === s.id);
-      const t = o && byId.get(o.to);
-      return t ? `l'opération « ${t.label} »` : "la synchronisation";
+      const tg = o && byId.get(o.to);
+      return tg ? t("l'opération « {x} »", { x: tg.label }) : t("la synchronisation");
     }
   }
 
@@ -224,13 +275,13 @@
     for (const spec of q.attendus || []) {
       total++;
       const op = opMap.get(spec);
-      if (!op) { errors.push(spec.manque || `Il manque l'opération « ${spec.operation} ».`); continue; }
+      if (!op) { errors.push(spec.manque || t("Il manque l'opération « {x} ».", { x: spec.operation })); continue; }
       let ok = true;
       if (spec.synchronisation) {
         const expTree = parse(spec.synchronisation);
         const expVars = [...atoms(expTree)];
         const trig = triggerOf(model, op);
-        if (!trig) { errors.push(`L'opération « ${op.label} » : son déclenchement n'est pas lisible (vérifiez sa synchronisation).`); continue; }
+        if (!trig) { errors.push(t("L'opération « {x} » : son déclenchement n'est pas lisible (vérifiez sa synchronisation).", { x: op.label })); continue; }
         // correspondance des événements de l'étudiant avec ceux attendus
         // d'abord les noms identiques ou déclarés équivalents, puis les noms qui se contiennent ;
         // chaque événement attendu n'est associé qu'une fois (« Fiche patient » ≠ « Fiche patient créée »)
@@ -254,11 +305,11 @@
         const missing = expVars.filter((x) => !Object.values(map).includes(x));
         if (missing.length) {
           ok = false;
-          errors.push(`L'opération « ${op.label} » doit aussi attendre : ${missing.map((m) => "« " + m + " »").join(", ")}.`);
+          errors.push(t("L'opération « {x} » doit aussi attendre : {m}.", { x: op.label, m: missing.map(quote).join(", ") }));
         }
         if (unknown.length) {
           ok = false;
-          errors.push(`L'opération « ${op.label} » attend ${unknown.map((m) => "« " + m + " »").join(", ")}, qui ne fait pas partie de ce qui la déclenche.`);
+          errors.push(t("L'opération « {x} » attend {m}, qui ne fait pas partie de ce qui la déclenche.", { x: op.label, m: unknown.map(quote).join(", ") }));
         }
         if (ok) {
           // table de vérité sur les événements attendus
@@ -269,10 +320,12 @@
             const got = trig.fn((lbl) => optional.has(lbl) || on.has(map[lbl]));
             if (want !== got) {
               ok = false;
-              const present = [...on].map((m) => "« " + m + " »").join(" et ") || "aucun événement";
+              const present = [...on].map(quote).join(t(" et ")) || t("aucun événement");
               errors.push(got
-                ? `Avec votre condition, « ${op.label} » se déclencherait avec seulement ${present} : ce n'est pas suffisant.`
-                : `Avec votre condition, « ${op.label} » ne se déclencherait pas quand ${present} ${on.size > 1 ? "sont arrivés" : "est arrivé"}, alors que cela devrait suffire.`);
+                ? t("Avec votre condition, « {x} » se déclencherait avec seulement {p} : ce n'est pas suffisant.", { x: op.label, p: present })
+                : on.size > 1
+                  ? t("Avec votre condition, « {x} » ne se déclencherait pas quand {p} sont arrivés, alors que cela devrait suffire.", { x: op.label, p: present })
+                  : t("Avec votre condition, « {x} » ne se déclencherait pas quand {p} est arrivé, alors que cela devrait suffire.", { x: op.label, p: present }));
             }
           }
         }
@@ -283,10 +336,10 @@
         const nWant = want ? want.length : +spec.regles;
         if (rules.length < nWant) {
           ok = false;
-          errors.push(`L'opération « ${op.label} » doit avoir ${nWant} règles d'émission${want ? " (" + want.join(" / ") + ")" : ""} : elle produit des résultats différents selon le cas.`);
+          errors.push(t("L'opération « {x} » doit avoir {k} règles d'émission{w} : elle produit des résultats différents selon le cas.", { x: op.label, k: nWant, w: want ? " (" + want.join(" / ") + ")" : "" }));
         } else if (want) {
           const miss = want.filter((w) => !rules.some((r) => matchName(r, w, eq)));
-          if (miss.length) { ok = false; errors.push(`Règles d'émission de « ${op.label} » : il manque le cas ${miss.map((m) => "« " + m + " »").join(", ")}.`); }
+          if (miss.length) { ok = false; errors.push(t("Règles d'émission de « {x} » : il manque le cas {m}.", { x: op.label, m: miss.map(quote).join(", ") })); }
         }
       }
       if (ok) passed++;
