@@ -6,6 +6,8 @@
   I18N.add({
     "📖 Aide": "📖 Help",
     "Copier le lien de cette question": "Copy the link to this question",
+    "{t} questions": "{t} questions",
+    "Question {n} / {t}": "Question {n} / {t}",
     "Lien copié : {url}": "Link copied: {url}",
     "Copiez ce lien :": "Copy this link:",
     "Documentation : guide par profil et par thème": "Documentation: guide by profile and by topic",
@@ -353,7 +355,7 @@
     if (I18N.toggle) I18N.toggle($("btnLang"));
     else $("btnLang").hidden = true;
     // documentation : absente des paquets SCORM, on pointe alors vers le site public
-    $("btnDocs").href = (CONFIG.scorm ? "https://edu-fpar.github.io/sql-lab/" : "") + (I18N.lang === "en" ? "docs/#/en/" : "docs/");
+    $("btnDocs").href = (CONFIG.scorm ? "https://edu-fpar.github.io/sql-lab/" : "") + (I18N.lang !== "fr" ? `docs/#/${I18N.lang}/` : "docs/");
     try {
       state.SQL = await initSqlJs({ locateFile: (f) => SQLJS_DIR + f });
       state.catalogue = await (await fetch("exercices/catalogue.json")).json();
@@ -374,7 +376,7 @@
     const [exId, qId] = incomingEx && incomingEx.exercise ? [incomingEx.exercise.id, "intro"]
       : incoming && !incoming.error ? [incoming.exId, incoming.qId] : parseHash();
     // interface en anglais sans exercice imposé : premier exercice en anglais du catalogue
-    const enEx = I18N.lang === "en" && state.catalogue.find((e) => e.langue === "en");
+    const enEx = I18N.lang !== "fr" && state.catalogue.find((e) => e.langue === I18N.lang); // exercice dans la langue de l'interface
     const defaultEx = enEx ? enEx.id : store.get("lastEx", state.catalogue[0].id);
     await loadExercise(CONFIG.locked ? CONFIG.exercice : exId || defaultEx, qId);
     if (incomingEx) notifyExercise(incomingEx);
@@ -429,7 +431,7 @@
 
   function renderExerciseSelect() {
     // exercices intégrés dans l'autre langue que l'interface : (FR) ou (EN) devant le titre
-    const tag = (e) => (e.kind === "perso" ? "" : I18N.lang === "fr" ? (e.langue === "en" ? "(EN) " : "") : e.langue !== "en" ? tr("(FR) ") : "");
+    const tag = (e) => (e.kind === "perso" || (e.langue || "fr") === I18N.lang ? "" : `(${(e.langue || "fr").toUpperCase()}) `);
     const opt = (e) => `<option value="${esc(e.id)}">${tag(e)}${esc(e.titre)}</option>`;
     const builtin = state.exercises.filter((e) => e.kind !== "perso");
     const perso = state.exercises.filter((e) => e.kind === "perso");
@@ -876,7 +878,7 @@
     $("qAnnale").textContent = badge;
     const intro = isIntro(q);
     const total = qs.filter((x) => !isIntro(x)).length;
-    $("qNum").textContent = intro ? `${total} questions` : `Question ${qNumber(state.index)} / ${total}`;
+    $("qNum").textContent = intro ? tr("{t} questions", { t: total }) : tr("Question {n} / {t}", { n: qNumber(state.index), t: total });
     $("qEnonce").textContent = intro ? tr("Présentation de l'exercice") : q.enonce;
     $("qIntro").hidden = !intro;
     if (intro) renderIntro();
@@ -1152,7 +1154,7 @@
   async function copyQuestionLink() {
     const q = current();
     const u = new URL(location.href);
-    u.search = I18N.lang === "en" ? "?lang=en" : "";
+    u.search = I18N.lang !== "fr" ? `?lang=${I18N.lang}` : "";
     u.hash = `${state.ex.id}/${q.id}`;
     const url = u.toString();
     const btn = $("btnCopyLink");

@@ -32,11 +32,11 @@
   </style>
 </head>
 <body>
-  <div id="app">Chargement… / Loading…</div>
+  <div id="app">Chargement… / Loading… / Cargando…</div>
   <script>
     window.$docsify = {
       name: "SQL Lab",
-      nameLink: { "/en/": "#/en/", "/": "#/" },
+      nameLink: { "/en/": "#/en/", "/es/": "#/es/", "/": "#/" },
       repo: "",
       loadSidebar: true,
       loadNavbar: true,
@@ -44,6 +44,8 @@
         // les alias s'appliquent en cascade : la règle française ne doit pas capturer /en/_sidebar.md
         "/en/.+/_sidebar.md": "/en/_sidebar.md",
         "/en/.+/_navbar.md": "/en/_navbar.md",
+        "/es/.+/_sidebar.md": "/es/_sidebar.md",
+        "/es/.+/_navbar.md": "/es/_navbar.md",
         "/(profils|themes|reference)/_sidebar.md": "/_sidebar.md",
         "/(profils|themes|reference)/_navbar.md": "/_navbar.md",
       },
@@ -56,14 +58,15 @@
       search: {
         paths: "auto",
         depth: 3,
-        placeholder: { "/en/": "Search", "/": "Rechercher" },
-        noData: { "/en/": "No results", "/": "Aucun résultat" },
+        placeholder: { "/en/": "Search", "/es/": "Buscar", "/": "Rechercher" },
+        noData: { "/en/": "No results", "/es/": "Sin resultados", "/": "Aucun résultat" },
       },
       plugins: [
         function (hook, vm) {
           // langue de la page (lecteurs d'écran, césure)
           hook.doneEach(function () {
-            document.documentElement.lang = vm.route.path.indexOf("/en/") === 0 ? "en" : "fr";
+            const p = vm.route.path;
+            document.documentElement.lang = p.indexOf("/en/") === 0 ? "en" : p.indexOf("/es/") === 0 ? "es" : "fr";
           });
         },
       ],

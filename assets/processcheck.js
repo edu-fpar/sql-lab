@@ -73,7 +73,7 @@
   const laneOf = (n, model) => Math.max(0, Math.min(model.lanes.length - 1, Math.floor(n.x / LANE_W)));
 
   // ------------------------------------------------------------ expressions logiques
-  const OPS = /(\(|\)|&&|\|\||&|\||(?<![\p{L}\d])(?:ET|OU|AND|OR|NON|NOT|SAUF)(?![\p{L}\d]))/giu;
+  const OPS = /(\(|\)|&&|\|\||&|\||(?<![\p{L}\d])(?:ET|OU|AND|OR|Y|O|NON|NOT|NO|SAUF)(?![\p{L}\d]))/giu;
 
   function tokenize(src) {
     const out = [];
@@ -96,9 +96,9 @@
       if (!p) continue;
       const u = p.toUpperCase();
       if (p === "(" || p === ")") out.push({ t: p });
-      else if (u === "ET" || u === "AND" || p === "&" || p === "&&") out.push({ t: "and" });
-      else if (u === "OU" || u === "OR" || p === "|" || p === "||") out.push({ t: "or" });
-      else if (u === "NON" || u === "NOT" || u === "SAUF") out.push({ t: "not" });
+      else if (u === "ET" || u === "AND" || u === "Y" || p === "&" || p === "&&") out.push({ t: "and" });
+      else if (u === "OU" || u === "OR" || u === "O" || p === "|" || p === "||") out.push({ t: "or" });
+      else if (u === "NON" || u === "NOT" || u === "NO" || u === "SAUF") out.push({ t: "not" });
       else out.push({ t: "atom", v: p });
     }
     return out;

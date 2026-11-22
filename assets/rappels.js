@@ -37,16 +37,16 @@
 
   // ----------------------------------------------------------- correspondance thème → rappel
   const MATCH = [
-    [/auto-?jointure|self-?join/i, "autojointure"],
-    [/regroupement|grouping/i, "groupes"],
-    [/jointure|join/i, "jointures"],
-    [/sous-requ|subquer/i, "sousrequetes"],
-    [/agr[ée]gat|calcul|aggregate/i, "agregats"],
-    [/mise.? à jour|\bupdates?\b/i, "majs"], // avant les dates : « Updates » contient « date »
-    [/\bdates?\b/i, "dates"],
-    [/sch[ée]ma/i, "schema"],
-    [/processus|process/i, "processus"],
-    [/une seule table|single table/i, "table"],
+    [/auto-?jointure|self-?join|autocombinaci/i, "autojointure"],
+    [/regroupement|grouping|agrupaci/i, "groupes"],
+    [/jointure|join|combinaci/i, "jointures"],
+    [/sous-requ|subquer|subconsult/i, "sousrequetes"],
+    [/agr[ée]gat|calcul|c[aá]lculo|aggregate|agregado/i, "agregats"],
+    [/mise.? à jour|\bupdates?\b|actualizaci/i, "majs"], // avant les dates : « Updates » contient « date »
+    [/\bdates?\b|fecha/i, "dates"],
+    [/sch[ée]ma|esquema/i, "schema"],
+    [/processus|process|proceso/i, "processus"],
+    [/une seule table|single table|una sola tabla/i, "table"],
   ];
   function idFor(theme) {
     for (const [re, id] of MATCH) if (re.test(theme || "")) return id;

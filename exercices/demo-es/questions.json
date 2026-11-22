@@ -1,0 +1,307 @@
+{
+  "id": "demo-es",
+  "titre": "Demo – PedalPoint Alquiler de Bicicletas",
+  "aujourdhui": "2025-06-15",
+  "contexte": "PedalPoint alquila bicicletas en cinco tiendas (TIENDA) en España (Sevilla, Bilbao, Valencia, Madrid y Banyoles). Cada bicicleta (BICICLETA) pertenece a una tienda y a una categoría (CATEGORIA: bicicleta urbana, eléctrica, de montaña, de carretera, infantil, de carga), que fija su tarifa diaria estándar. Cuando un cliente (CLIENTE) recoge bicicletas en una tienda, se registra un alquiler (ALQUILER: fecha de inicio, tienda, cliente); su fecha de devolución queda vacía hasta que se devuelven las bicicletas. Un alquiler puede incluir varias bicicletas: cada una es una línea (LINEA_ALQUILER) con el precio diario realmente cobrado (10 % de descuento en los alquileres de 5 días o más). Un cliente puede haber sido recomendado por otro cliente (RecomendadoPor). Las fechas se guardan con el formato 'aaaa-mm-dd'.",
+  "source": "Ejercicio de demostración de SQL Lab. Empresa y datos totalmente ficticios.",
+  "schemaGrid": {
+    "CATEGORIA": [0, 0],
+    "BICICLETA": [1, 0],
+    "LINEA_ALQUILER": [2, 0],
+    "TIENDA": [1, 1],
+    "ALQUILER": [2, 1],
+    "CLIENTE": [3, 1]
+  },
+  "questions": [
+    {
+      "id": "q01",
+      "theme": "Una sola tabla",
+      "enonce": "Muestra la lista de las categorías de bicicletas que ofrece PedalPoint (todas las columnas).",
+      "correction": ["SELECT *", "FROM CATEGORIA;"],
+      "indice": "El asterisco * muestra todas las columnas de una tabla."
+    },
+    {
+      "id": "q02",
+      "theme": "Una sola tabla",
+      "enonce": "Muestra el apellido, el nombre y el teléfono de los clientes que viven en Sevilla, ordenados alfabéticamente por apellido.",
+      "ordered": [0],
+      "correction": ["SELECT Apellido, Nombre, Telefono", "FROM CLIENTE", "WHERE Ciudad = 'Sevilla'", "ORDER BY Apellido;"],
+      "indice": "Una condición sobre un valor de texto se escribe entre comillas simples: Ciudad = 'Sevilla'. La ordenación se hace con ORDER BY."
+    },
+    {
+      "id": "q03",
+      "theme": "Una sola tabla",
+      "enonce": "Muestra los clientes (número, apellido, nombre, teléfono) que no han indicado ninguna dirección de correo electrónico.",
+      "correction": ["SELECT IdCliente, Apellido, Nombre, Telefono", "FROM CLIENTE", "WHERE Email IS NULL;"],
+      "indice": "Un valor ausente se comprueba con IS NULL (no con = NULL)."
+    },
+    {
+      "id": "q04",
+      "theme": "Una sola tabla",
+      "enonce": "Muestra las bicicletas (número, modelo, marca) con cuadro grande (talla de cuadro 'L'), ordenadas por marca.",
+      "ordered": [2],
+      "correction": ["SELECT IdBicicleta, Modelo, Marca", "FROM BICICLETA", "WHERE TallaCuadro = 'L'", "ORDER BY Marca;"],
+      "indice": "Dos cláusulas: WHERE para quedarte con los cuadros grandes, ORDER BY para ordenar el resultado."
+    },
+    {
+      "id": "q05",
+      "theme": "Cálculos y agregados",
+      "enonce": "Muestra la media, el mínimo y el máximo de la tarifa diaria estándar de las categorías de bicicletas.",
+      "correction": ["SELECT AVG(TarifaDiaria), MIN(TarifaDiaria), MAX(TarifaDiaria)", "FROM CATEGORIA;"],
+      "indice": "Las funciones AVG (media), MIN y MAX devuelven cada una un único valor para toda la tabla."
+    },
+    {
+      "id": "q06",
+      "theme": "Fechas",
+      "enonce": "Muestra los alquileres (número, fecha de inicio, fecha de devolución) que empezaron en abril de 2025.",
+      "correction": ["SELECT IdAlquiler, FechaInicio, FechaDevolucion", "FROM ALQUILER", "WHERE MONTH(FechaInicio) = 4", "AND YEAR(FechaInicio) = 2025;"],
+      "variantes": [["SELECT IdAlquiler, FechaInicio, FechaDevolucion", "FROM ALQUILER", "WHERE FechaInicio BETWEEN '2025-04-01' AND '2025-04-30';"]],
+      "indice": "Combina MONTH() y YEAR(), o utiliza BETWEEN con dos fechas."
+    },
+    {
+      "id": "q07",
+      "theme": "Fechas",
+      "enonce": "Muestra el número de alquileres por año (año, número de alquileres), según la fecha de inicio.",
+      "correction": ["SELECT YEAR(FechaInicio), COUNT(*)", "FROM ALQUILER", "GROUP BY YEAR(FechaInicio);"],
+      "indice": "Puedes agrupar sobre el resultado de una función: GROUP BY YEAR(FechaInicio)."
+    },
+    {
+      "id": "q08",
+      "theme": "Fechas",
+      "enonce": "Muestra los alquileres ya devueltos que duraron 7 días o más: número de alquiler, fecha de inicio, fecha de devolución y duración en días, del más largo al más corto.",
+      "ordered": [3],
+      "correction": ["SELECT IdAlquiler, FechaInicio, FechaDevolucion, DATEDIFF(FechaDevolucion, FechaInicio)", "FROM ALQUILER", "WHERE DATEDIFF(FechaDevolucion, FechaInicio) >= 7", "ORDER BY DATEDIFF(FechaDevolucion, FechaInicio) DESC;"],
+      "variantes": [["SELECT IdAlquiler, FechaInicio, FechaDevolucion, DATEDIFF(FechaDevolucion, FechaInicio) AS Duracion", "FROM ALQUILER", "WHERE DATEDIFF(FechaDevolucion, FechaInicio) >= 7", "ORDER BY Duracion DESC;"]],
+      "indice": "DATEDIFF(fin, inicio) devuelve el número de días entre dos fechas. Un alquiler que todavía no se ha devuelto no tiene fecha de devolución, así que DATEDIFF no da ningún valor para él."
+    },
+    {
+      "id": "q09",
+      "theme": "Combinaciones (JOIN)",
+      "enonce": "Muestra las bicicletas de la tienda Orilla del Lago (tienda número 5): número de bicicleta, modelo y nombre de la categoría.",
+      "correction": ["SELECT IdBicicleta, Modelo, NombreCategoria", "FROM BICICLETA, CATEGORIA", "WHERE BICICLETA.IdCategoria = CATEGORIA.IdCategoria", "AND IdTienda = 5;"],
+      "variantes": [["SELECT IdBicicleta, Modelo, NombreCategoria", "FROM BICICLETA", "INNER JOIN CATEGORIA ON BICICLETA.IdCategoria = CATEGORIA.IdCategoria", "WHERE IdTienda = 5;"]],
+      "indice": "El nombre de la categoría está en CATEGORIA: une BICICLETA y CATEGORIA mediante IdCategoria (clave foránea de BICICLETA). Es una combinación (join)."
+    },
+    {
+      "id": "q10",
+      "theme": "Combinaciones (JOIN)",
+      "enonce": "Muestra, sin duplicados, el modelo y la marca de las bicicletas alquiladas en los alquileres que empezaron en mayo de 2025.",
+      "correction": ["SELECT DISTINCT Modelo, Marca", "FROM BICICLETA, LINEA_ALQUILER, ALQUILER", "WHERE BICICLETA.IdBicicleta = LINEA_ALQUILER.IdBicicleta", "AND LINEA_ALQUILER.IdAlquiler = ALQUILER.IdAlquiler", "AND MONTH(FechaInicio) = 5", "AND YEAR(FechaInicio) = 2025;"],
+      "variantes": [
+        ["SELECT DISTINCT Modelo, Marca", "FROM BICICLETA", "INNER JOIN LINEA_ALQUILER ON BICICLETA.IdBicicleta = LINEA_ALQUILER.IdBicicleta", "INNER JOIN ALQUILER ON LINEA_ALQUILER.IdAlquiler = ALQUILER.IdAlquiler", "WHERE MONTH(FechaInicio) = 5", "AND YEAR(FechaInicio) = 2025;"],
+        ["SELECT DISTINCT Modelo, Marca", "FROM BICICLETA, LINEA_ALQUILER, ALQUILER", "WHERE BICICLETA.IdBicicleta = LINEA_ALQUILER.IdBicicleta", "AND LINEA_ALQUILER.IdAlquiler = ALQUILER.IdAlquiler", "AND FechaInicio BETWEEN '2025-05-01' AND '2025-05-31';"]
+      ],
+      "indice": "El modelo está en BICICLETA y la fecha de inicio en ALQUILER, pero estas dos tablas no están unidas directamente: LINEA_ALQUILER (una fila por bicicleta alquilada) las relaciona. Debe aparecer en el FROM aunque no se muestre ninguna de sus columnas."
+    },
+    {
+      "id": "q11",
+      "theme": "Combinaciones (JOIN)",
+      "enonce": "Muestra, sin duplicados, el apellido y el nombre de los clientes que han alquilado al menos una bicicleta eléctrica (categoría número 2).",
+      "correction": ["SELECT DISTINCT Apellido, Nombre", "FROM CLIENTE, ALQUILER, LINEA_ALQUILER, BICICLETA", "WHERE CLIENTE.IdCliente = ALQUILER.IdCliente", "AND ALQUILER.IdAlquiler = LINEA_ALQUILER.IdAlquiler", "AND LINEA_ALQUILER.IdBicicleta = BICICLETA.IdBicicleta", "AND IdCategoria = 2;"],
+      "variantes": [["SELECT DISTINCT Apellido, Nombre", "FROM CLIENTE", "INNER JOIN ALQUILER ON CLIENTE.IdCliente = ALQUILER.IdCliente", "INNER JOIN LINEA_ALQUILER ON ALQUILER.IdAlquiler = LINEA_ALQUILER.IdAlquiler", "INNER JOIN BICICLETA ON LINEA_ALQUILER.IdBicicleta = BICICLETA.IdBicicleta", "WHERE IdCategoria = 2;"]],
+      "indice": "Sigue las flechas del diagrama: CLIENTE → ALQUILER → LINEA_ALQUILER → BICICLETA (tres condiciones de combinación). Un cliente que alquiló varias bicicletas eléctricas debe aparecer una sola vez: DISTINCT."
+    },
+    {
+      "id": "q12",
+      "theme": "Agrupaciones",
+      "enonce": "Muestra, para cada tienda (nombre de la tienda), el número de alquileres registrados, de la tienda con más actividad a la de menos.",
+      "ordered": [1],
+      "correction": ["SELECT NombreTienda, COUNT(*)", "FROM TIENDA, ALQUILER", "WHERE TIENDA.IdTienda = ALQUILER.IdTienda", "GROUP BY NombreTienda", "ORDER BY COUNT(*) DESC;"],
+      "variantes": [["SELECT NombreTienda, COUNT(*) AS NumAlquileres", "FROM TIENDA", "INNER JOIN ALQUILER ON TIENDA.IdTienda = ALQUILER.IdTienda", "GROUP BY NombreTienda", "ORDER BY NumAlquileres DESC;"]],
+      "indice": "« Para cada tienda » significa GROUP BY. El nombre de la tienda está en TIENDA, los alquileres están en ALQUILER."
+    },
+    {
+      "id": "q13",
+      "theme": "Agrupaciones",
+      "enonce": "Muestra los clientes (número, apellido) que han hecho al menos 3 alquileres, con su número de alquileres.",
+      "correction": ["SELECT CLIENTE.IdCliente, Apellido, COUNT(*)", "FROM CLIENTE, ALQUILER", "WHERE CLIENTE.IdCliente = ALQUILER.IdCliente", "GROUP BY CLIENTE.IdCliente, Apellido", "HAVING COUNT(*) >= 3;"],
+      "variantes": [["SELECT CLIENTE.IdCliente, Apellido, COUNT(*)", "FROM CLIENTE", "INNER JOIN ALQUILER ON CLIENTE.IdCliente = ALQUILER.IdCliente", "GROUP BY CLIENTE.IdCliente, Apellido", "HAVING COUNT(*) >= 3;"]],
+      "indice": "Una condición sobre un número calculado (COUNT) va en HAVING, después de GROUP BY. IdCliente existe en dos tablas: indica cuál (CLIENTE.IdCliente)."
+    },
+    {
+      "id": "q14",
+      "theme": "Subconsultas",
+      "enonce": "Muestra los clientes (número, apellido, nombre) que nunca han alquilado una bicicleta.",
+      "correction": ["SELECT IdCliente, Apellido, Nombre", "FROM CLIENTE", "WHERE IdCliente NOT IN (SELECT IdCliente", "                        FROM ALQUILER);"],
+      "variantes": [["SELECT IdCliente, Apellido, Nombre", "FROM CLIENTE C", "WHERE NOT EXISTS (SELECT *", "                  FROM ALQUILER A", "                  WHERE A.IdCliente = C.IdCliente);"]],
+      "indice": "« Nunca »: NOT IN (una subconsulta que da la lista de los clientes que tienen al menos un alquiler)."
+    },
+    {
+      "id": "q15",
+      "theme": "Autocombinación",
+      "enonce": "Muestra cada cliente que fue recomendado por otro cliente: apellido y nombre del cliente, y apellido del cliente que lo recomendó.",
+      "correction": ["SELECT C.Apellido, C.Nombre, R.Apellido", "FROM CLIENTE C, CLIENTE R", "WHERE C.RecomendadoPor = R.IdCliente;"],
+      "variantes": [["SELECT C.Apellido, C.Nombre, R.Apellido AS Recomendador", "FROM CLIENTE C", "INNER JOIN CLIENTE R ON C.RecomendadoPor = R.IdCliente;"]],
+      "indice": "La tabla CLIENTE está unida consigo misma (RecomendadoPor apunta a otro cliente). Úsala dos veces en el FROM con dos alias: C (el cliente) y R (quien lo recomendó)."
+    },
+    {
+      "id": "q16",
+      "theme": "Actualizaciones",
+      "type": "write",
+      "enonce": "Las bicicletas del alquiler n.º 1036 se acaban de devolver hoy (15 de junio de 2025): registra la fecha de devolución.",
+      "correction": ["UPDATE ALQUILER", "SET FechaDevolucion = '2025-06-15'", "WHERE IdAlquiler = 1036;"],
+      "variantes": [["UPDATE ALQUILER", "SET FechaDevolucion = NOW()", "WHERE IdAlquiler = 1036;"]],
+      "verif": "SELECT * FROM ALQUILER ORDER BY IdAlquiler",
+      "indice": "UPDATE tabla SET columna = valor WHERE condición. Sin WHERE, se modificarían todos los alquileres. NOW() devuelve la fecha del día."
+    },
+    {
+      "id": "q17",
+      "theme": "Actualizaciones",
+      "type": "write",
+      "enonce": "PedalPoint añade una nueva categoría: « Tándem », número 7, con una tarifa diaria estándar de 45. Añádela.",
+      "correction": ["INSERT INTO CATEGORIA", "VALUES (7, 'Tándem', 45);"],
+      "variantes": [["INSERT INTO CATEGORIA (IdCategoria, NombreCategoria, TarifaDiaria)", "VALUES (7, 'Tándem', 45);"]],
+      "verif": "SELECT * FROM CATEGORIA ORDER BY IdCategoria",
+      "indice": "INSERT INTO tabla VALUES (valor1, valor2, …) en el orden de las columnas de la tabla."
+    },
+    {
+      "id": "q18",
+      "theme": "Actualizaciones",
+      "type": "write",
+      "enonce": "El cliente n.º 25 (Diego Moreno), que nunca ha alquilado una bicicleta, pide que se borre su cuenta. Elimínalo. Después intenta eliminar al cliente n.º 4: ¿qué ocurre y por qué?",
+      "correction": ["DELETE FROM CLIENTE", "WHERE IdCliente = 25;"],
+      "verif": "SELECT * FROM CLIENTE ORDER BY IdCliente",
+      "indice": "DELETE FROM tabla WHERE condición. El cliente n.º 4 tiene alquileres (y ha recomendado a otros clientes): la integridad referencial impide borrarlo, porque ALQUILER.IdCliente y CLIENTE.RecomendadoPor hacen referencia a él."
+    },
+    {
+      "id": "s01",
+      "type": "schema",
+      "theme": "Evolución del esquema",
+      "enonce": "PedalPoint quiere mejorar su base de datos. 1) Todas las bicicletas de un mismo modelo tienen la misma marca y la misma categoría: la empresa quiere registrar una sola vez la lista de modelos (código del modelo, nombre del modelo, marca, categoría), siendo cada bicicleta de un modelo. 2) Los clientes pueden ahora añadir accesorios a un alquiler (casco, candado, sillita infantil, alforjas…). Cada accesorio tiene un código, un nombre y un precio diario. Para cada alquiler, la empresa registra qué accesorios se llevaron y en qué cantidad; un mismo accesorio puede, por supuesto, formar parte de muchos alquileres. Actualiza el esquema relacional siguiente.",
+      "depart": "base",
+      "solution": {
+        "tables": [
+          { "nom": "BICICLETA", "interdits": ["Modelo|NombreModelo", "Marca|NombreMarca", "IdCategoria"],
+            "fk": { "IdModelo|CodModelo|CodigoModelo|NumModelo|NoModelo": "MODELO" } },
+          { "nom": "MODELO", "alias": ["MODELO_BICICLETA", "MODELOBICICLETA", "MODELOS"],
+            "role": "describir una sola vez cada modelo de bicicleta (nombre, marca, categoría)",
+            "pk": ["IdModelo|CodModelo|CodigoModelo|NumModelo|NoModelo"],
+            "fk": { "IdCategoria": "CATEGORIA" },
+            "attributs": ["NombreModelo|Modelo|Nombre|DescripcionModelo", "Marca|NombreMarca"] },
+          { "nom": "ACCESORIO", "alias": ["ACCESORIOS", "TIPO_ACCESORIO", "EQUIPAMIENTO"],
+            "role": "describir los accesorios que se pueden alquilar",
+            "pk": ["IdAccesorio|CodAccesorio|CodigoAccesorio|NumAccesorio|NoAccesorio"],
+            "attributs": ["NombreAccesorio|Nombre|DescripcionAccesorio|Descripcion", "PrecioDiario|PrecioDiarioAccesorio|TarifaDiaria|PrecioPorDia|Precio"] },
+          { "nom": "ALQUILER_ACCESORIO", "alias": ["ALQUILERACCESORIO", "INCLUIR", "ANADIR_ACCESORIO", "LLEVAR", "LINEA_ACCESORIO", "EQUIPAR"],
+            "role": "registrar la cantidad de cada accesorio que se lleva en un alquiler",
+            "pk": ["IdAlquiler", "IdAccesorio|CodAccesorio|CodigoAccesorio|NumAccesorio|NoAccesorio"],
+            "fk": { "IdAlquiler": "ALQUILER", "IdAccesorio|CodAccesorio|CodigoAccesorio|NumAccesorio|NoAccesorio": "ACCESORIO" },
+            "attributs": ["Cantidad|Cant|NumAccesorios|Numero"] }
+        ]
+      },
+      "variantes": [
+        {
+          "tables": [
+            { "nom": "BICICLETA", "interdits": ["Modelo|NombreModelo", "Marca|NombreMarca"],
+              "fk": { "IdModelo|CodModelo|CodigoModelo|NumModelo|NoModelo": "MODELO" } },
+            { "nom": "MODELO", "alias": ["MODELO_BICICLETA", "MODELOBICICLETA", "MODELOS"],
+              "role": "describir una sola vez cada modelo de bicicleta (nombre, marca, categoría)",
+              "pk": ["IdModelo|CodModelo|CodigoModelo|NumModelo|NoModelo"],
+              "attributs": ["NombreModelo|Modelo|Nombre|DescripcionModelo", "Marca|NombreMarca"] },
+            { "nom": "ACCESORIO", "alias": ["ACCESORIOS", "TIPO_ACCESORIO", "EQUIPAMIENTO"],
+              "role": "describir los accesorios que se pueden alquilar",
+              "pk": ["IdAccesorio|CodAccesorio|CodigoAccesorio|NumAccesorio|NoAccesorio"],
+              "attributs": ["NombreAccesorio|Nombre|DescripcionAccesorio|Descripcion", "PrecioDiario|PrecioDiarioAccesorio|TarifaDiaria|PrecioPorDia|Precio"] },
+            { "nom": "ALQUILER_ACCESORIO", "alias": ["ALQUILERACCESORIO", "INCLUIR", "ANADIR_ACCESORIO", "LLEVAR", "LINEA_ACCESORIO", "EQUIPAR"],
+              "role": "registrar la cantidad de cada accesorio que se lleva en un alquiler",
+              "pk": ["IdAlquiler", "IdAccesorio|CodAccesorio|CodigoAccesorio|NumAccesorio|NoAccesorio"],
+              "fk": { "IdAlquiler": "ALQUILER", "IdAccesorio|CodAccesorio|CodigoAccesorio|NumAccesorio|NoAccesorio": "ACCESORIO" },
+              "attributs": ["Cantidad|Cant|NumAccesorios|Numero"] }
+          ],
+          "partiel": "Casi: MODELO está creada, pero la categoría se ha quedado en BICICLETA. Como todas las bicicletas de un modelo tienen la misma categoría, la categoría corresponde al modelo: IdCategoria debe pasar de BICICLETA a MODELO."
+        }
+      ],
+      "indice": "La información que depende del modelo y no de cada bicicleta (marca, categoría) pasa a una nueva tabla, y BICICLETA solo conserva una clave foránea hacia ella. Una relación « muchos a muchos » (alquileres ↔ accesorios) se convierte en una tabla de relación cuya clave primaria combina las claves de las dos tablas relacionadas, y que lleva la cantidad."
+    },
+    {
+      "id": "p01",
+      "type": "processus",
+      "theme": "Proceso",
+      "enonce": "Entrevista con Lucía Herrera, encargada de tienda en PedalPoint: « Los clientes reservan sus bicicletas en nuestro sitio web. Cuando llega una solicitud de reserva, el sitio web comprueba si hay una bicicleta de la categoría pedida disponible en esas fechas. Si hay una disponible, la reserva se confirma; si no, la reserva se rechaza y se avisa al cliente inmediatamente. El día acordado, el cliente viene al mostrador de la tienda. Entregamos la bicicleta solo cuando la reserva está confirmada y el cliente ha pagado una fianza o ha presentado una tarjeta de socio de PedalPoint: los socios no pagan fianza. Cuando se devuelve la bicicleta, el personal del mostrador la revisa. Si está en buen estado, se devuelve la fianza. Si está dañada, se retiene la fianza y se envía una solicitud de reparación al taller, que repara la bicicleta y la vuelve a poner en servicio. » Dibuja el diagrama de eventos y resultados (eventos, operaciones, sincronizaciones) de este proceso.",
+      "couloirs": ["Cliente", "Sitio web", "Mostrador de la tienda", "Taller"],
+      "elements": [
+        { "kind": "event", "label": "Solicitud de reserva" },
+        { "kind": "event", "label": "Reserva confirmada" },
+        { "kind": "event", "label": "Reserva rechazada" },
+        { "kind": "event", "label": "Fianza pagada" },
+        { "kind": "event", "label": "Tarjeta de socio presentada" },
+        { "kind": "event", "label": "Bicicleta entregada" },
+        { "kind": "event", "label": "Bicicleta devuelta" },
+        { "kind": "event", "label": "Fianza devuelta" },
+        { "kind": "event", "label": "Fianza retenida" },
+        { "kind": "event", "label": "Solicitud de reparación" },
+        { "kind": "event", "label": "Bicicleta de nuevo en servicio" },
+        { "kind": "operation", "label": "Comprobación de disponibilidad" },
+        { "kind": "operation", "label": "Entrega de la bicicleta" },
+        { "kind": "operation", "label": "Revisión de la devolución" },
+        { "kind": "operation", "label": "Reparación" }
+      ],
+      "attendus": [
+        { "operation": "Entrega de la bicicleta", "alias": ["Entregar la bicicleta", "Entrega", "Entrega de bicicleta", "Recogida de la bicicleta", "Entregar bicicleta"],
+          "synchronisation": "Reserva confirmada Y (Fianza pagada O Tarjeta de socio presentada)" },
+        { "operation": "Comprobación de disponibilidad", "alias": ["Comprobar disponibilidad", "Comprobar la disponibilidad", "Verificación de disponibilidad", "Comprobación de la reserva", "Verificar disponibilidad"],
+          "regles": ["Bicicleta disponible", "Ninguna bicicleta disponible"] },
+        { "operation": "Revisión de la devolución", "alias": ["Revisar la bicicleta", "Revisión de la bicicleta", "Inspección de la bicicleta", "Revisión", "Inspección", "Control de la devolución"],
+          "regles": ["Buen estado", "Dañada"] }
+      ],
+      "equivalents": {
+        "Reserva confirmada": ["Reserva aceptada", "Confirmación de la reserva", "Reserva validada"],
+        "Fianza pagada": ["Fianza", "Pago de la fianza", "Fianza recibida", "Depósito pagado"],
+        "Tarjeta de socio presentada": ["Tarjeta de socio", "Tarjeta de miembro", "Tarjeta de socio mostrada", "Presentación de la tarjeta de socio"],
+        "Bicicleta disponible": ["Disponible", "Bicicleta libre"],
+        "Ninguna bicicleta disponible": ["No disponible", "Sin bicicleta disponible", "Ninguna bicicleta"],
+        "Buen estado": ["Bicicleta en buen estado", "Sin daños", "OK"],
+        "Dañada": ["Bicicleta dañada", "Daños", "Mal estado"]
+      },
+      "solution": {
+        "lanes": ["Cliente", "Sitio web", "Mostrador de la tienda", "Taller"],
+        "nodes": [
+          { "id": "n1", "kind": "event", "label": "Solicitud de reserva", "x": 120, "y": 95 },
+          { "id": "n2", "kind": "operation", "label": "Comprobación de disponibilidad", "x": 360, "y": 205,
+            "actions": ["Comprobar las bicicletas de la categoría en esas fechas"], "rules": ["Bicicleta disponible", "Ninguna bicicleta disponible"] },
+          { "id": "n3", "kind": "event", "label": "Reserva confirmada", "x": 360, "y": 345 },
+          { "id": "n4", "kind": "event", "label": "Reserva rechazada", "x": 120, "y": 345 },
+          { "id": "n5", "kind": "event", "label": "Fianza pagada", "x": 120, "y": 470 },
+          { "id": "n6", "kind": "event", "label": "Tarjeta de socio presentada", "x": 120, "y": 580 },
+          { "id": "n7", "kind": "sync", "label": "", "x": 600, "y": 680, "cond": "A y (B o C)" },
+          { "id": "n8", "kind": "operation", "label": "Entrega de la bicicleta", "x": 600, "y": 800,
+            "actions": ["Comprobar la reserva", "Registrar la fianza o la tarjeta de socio", "Entregar la bicicleta"], "rules": ["Siempre"] },
+          { "id": "n9", "kind": "event", "label": "Bicicleta entregada", "x": 120, "y": 940 },
+          { "id": "n10", "kind": "event", "label": "Bicicleta devuelta", "x": 120, "y": 1060 },
+          { "id": "n11", "kind": "operation", "label": "Revisión de la devolución", "x": 600, "y": 1170,
+            "actions": ["Revisar la bicicleta"], "rules": ["Buen estado", "Dañada"] },
+          { "id": "n12", "kind": "event", "label": "Fianza devuelta", "x": 120, "y": 1310 },
+          { "id": "n13", "kind": "event", "label": "Fianza retenida", "x": 600, "y": 1310 },
+          { "id": "n14", "kind": "event", "label": "Solicitud de reparación", "x": 840, "y": 1310 },
+          { "id": "n15", "kind": "operation", "label": "Reparación", "x": 840, "y": 1430,
+            "actions": ["Reparar la bicicleta"], "rules": ["Siempre"] },
+          { "id": "n16", "kind": "event", "label": "Bicicleta de nuevo en servicio", "x": 840, "y": 1570 }
+        ],
+        "arrows": [
+          { "id": "a1", "from": "n1", "rule": null, "to": "n2" },
+          { "id": "a2", "from": "n2", "rule": 0, "to": "n3" },
+          { "id": "a3", "from": "n2", "rule": 1, "to": "n4" },
+          { "id": "a4", "from": "n3", "rule": null, "to": "n7", "letter": "A" },
+          { "id": "a5", "from": "n5", "rule": null, "to": "n7", "letter": "B" },
+          { "id": "a6", "from": "n6", "rule": null, "to": "n7", "letter": "C" },
+          { "id": "a7", "from": "n7", "rule": null, "to": "n8" },
+          { "id": "a8", "from": "n8", "rule": 0, "to": "n9" },
+          { "id": "a9", "from": "n10", "rule": null, "to": "n11" },
+          { "id": "a10", "from": "n11", "rule": 0, "to": "n12" },
+          { "id": "a11", "from": "n11", "rule": 1, "to": "n13" },
+          { "id": "a12", "from": "n11", "rule": 1, "to": "n14" },
+          { "id": "a13", "from": "n14", "rule": null, "to": "n15" },
+          { "id": "a14", "from": "n15", "rule": 0, "to": "n16" }
+        ]
+      },
+      "autoevaluation": [
+        "Están los cuatro actores: el cliente, el sitio web, el mostrador de la tienda y el taller.",
+        "La comprobación de disponibilidad, en el sitio web, tiene dos reglas de emisión: bicicleta disponible (reserva confirmada) / ninguna bicicleta disponible (reserva rechazada).",
+        "La entrega de la bicicleta espera la reserva confirmada Y (la fianza pagada O la tarjeta de socio presentada): es la sincronización.",
+        "La revisión de la devolución, desencadenada por la bicicleta devuelta, tiene dos casos: buen estado (fianza devuelta) / dañada (fianza retenida y solicitud de reparación).",
+        "La reparación en el taller se desencadena por la solicitud de reparación y vuelve a poner la bicicleta en servicio."
+      ],
+      "indice": "Identifica primero los actores (calles) y después lo que desencadena cada operación. Una operación que lleva a dos situaciones distintas tiene dos reglas de emisión. La entrega necesita varias cosas a la vez, una de ellas de dos formas posibles: ahí hace falta una sincronización con una condición que combine « y » y « o »."
+    }
+  ]
+}

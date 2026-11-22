@@ -54,9 +54,9 @@ function testProcess(q) {
   if (empty.ok) bad++;
   let traps = 0, trapsOk = 0;
   for (const spec of q.attendus || []) {
-    if (!spec.synchronisation || !/\b(OU|OR)\b/i.test(spec.synchronisation)) continue;
+    if (!spec.synchronisation || !/(^|[^\p{L}"«])(OU|OR|O)(?=$|[^\p{L}"»])/iu.test(spec.synchronisation)) continue;
     const m = JSON.parse(JSON.stringify(q.solution));
-    for (const n of m.nodes) if (n.kind === "sync") n.cond = n.cond.replace(/\bou\b/gi, "et").replace(/\bor\b/gi, "and");
+    for (const n of m.nodes) if (n.kind === "sync") n.cond = n.cond.replace(/\bou\b/gi, "et").replace(/\bor\b/gi, "and").replace(/\bo\b/gi, "y");
     traps++;
     if (!Process.check(m, q).ok) trapsOk++; else bad++;
   }

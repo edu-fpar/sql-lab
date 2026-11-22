@@ -1,6 +1,6 @@
 # SQL Lab – entraînement SQL pour l'UE8 du DCG
 
-*[English version](README.en.md)* · **[Ouvrir l'application](https://edu-fpar.github.io/sql-lab/)** ·
+*[English version](README.en.md)* · *[Documentación en español](https://edu-fpar.github.io/sql-lab/docs/#/es/)* · **[Ouvrir l'application](https://edu-fpar.github.io/sql-lab/)** ·
 [Espace enseignant](https://edu-fpar.github.io/sql-lab/create.html) · **[Documentation](https://edu-fpar.github.io/sql-lab/docs/)** (par profil et par thème, [sources](docs/))
 
 Application web statique (HTML + JavaScript) : les étudiants écrivent leurs requêtes,
@@ -345,7 +345,7 @@ puis ouvrir http://localhost:8765. UwAmp convient aussi.
 ## Documentation
 
 Le dossier `docs/` est un site [docsify](https://docsify.js.org) (embarqué dans `lib/docsify`, sans CDN) :
-guide par profil, par thème et référence, en français et en anglais (`docs/en/`). Il est servi
+guide par profil, par thème et référence, en français, en anglais (`docs/en/`) et en espagnol (`docs/es/`). Il est servi
 par GitHub Pages à `/sql-lab/docs/` et accessible depuis le bouton **Aide** de l'application.
 
 ## Captures d'écran

@@ -1,2 +1,3 @@
 - [<i class="i i-play"></i> Application](../index.html ':ignore')
 - [<i class="i i-languages"></i> English](en/)
+- [<i class="i i-languages"></i> Español](es/)

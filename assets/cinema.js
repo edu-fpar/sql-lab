@@ -132,7 +132,7 @@
     // requêtes de mise à jour
     "Il s'agit de modifier des lignes existantes : UPDATE. Je repère la table touchée : {t}. Une requête de mise à jour ne modifie qu'<strong>une seule table</strong>.": "The task is to change existing rows: UPDATE. I identify the table affected: {t}. A data-modification query only changes <strong>one table</strong>.",
     "Il s'agit de supprimer des lignes : DELETE. Je repère la table touchée : {t}. Une requête de mise à jour ne modifie qu'<strong>une seule table</strong>.": "The task is to delete rows: DELETE. I identify the table affected: {t}. A data-modification query only changes <strong>one table</strong>.",
-    "Il s'agit de ajouter une ligne : INSERT INTO. Je repère la table touchée : {t}. Une requête de mise à jour ne modifie qu'<strong>une seule table</strong>.": "The task is to add a row: INSERT INTO. I identify the table affected: {t}. A data-modification query only changes <strong>one table</strong>.",
+    "Il s'agit d'ajouter une ligne : INSERT INTO. Je repère la table touchée : {t}. Une requête de mise à jour ne modifie qu'<strong>une seule table</strong>.": "The task is to add a row: INSERT INTO. I identify the table affected: {t}. A data-modification query only changes <strong>one table</strong>.",
     "La table concernée": "The target table",
     " — la nouvelle valeur est calculée à partir de l'ancienne": " — the new value is calculated from the old one",
     "Après <code>SET</code>, j'indique chaque colonne à changer et sa nouvelle valeur :<ul>{lis}</ul>": "After <code>SET</code>, I give each column to change and its new value:<ul>{lis}</ul>",
@@ -777,7 +777,7 @@
     const intro = {
       update: "Il s'agit de modifier des lignes existantes : UPDATE. Je repère la table touchée : {t}. Une requête de mise à jour ne modifie qu'<strong>une seule table</strong>.",
       delete: "Il s'agit de supprimer des lignes : DELETE. Je repère la table touchée : {t}. Une requête de mise à jour ne modifie qu'<strong>une seule table</strong>.",
-      insert: "Il s'agit de ajouter une ligne : INSERT INTO. Je repère la table touchée : {t}. Une requête de mise à jour ne modifie qu'<strong>une seule table</strong>.",
+      insert: "Il s'agit d'ajouter une ligne : INSERT INTO. Je repère la table touchée : {t}. Une requête de mise à jour ne modifie qu'<strong>une seule table</strong>.",
     }[W.kind];
     snap("table", tr("La table concernée"), tr(intro, { t: tb(t) }), ["head"]);
     if (W.kind === "update") {

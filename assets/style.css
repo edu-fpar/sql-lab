@@ -544,3 +544,7 @@ a.btn, a.btn:hover { text-decoration: none; }
 /* lien direct vers la question */
 .copy-link { margin-left: .2rem; }
 .copy-link.copied { color: var(--ok); border-color: var(--ok); }
+
+/* sélecteur de langue */
+.lang-select { font: inherit; font-size: .82rem; font-weight: 600; padding: .3rem .45rem; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); color: var(--text); cursor: pointer; }
+.lang-select:hover, .lang-select:focus-visible { border-color: var(--accent); }

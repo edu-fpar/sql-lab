@@ -4,8 +4,9 @@
 
   const I18N = global.I18N || { lang: "fr", add() {}, has: () => false, t: (s, v) => (v ? s.replace(/\{(\w+)\}/g, (m, k) => (v[k] !== undefined ? v[k] : m)) : s), n: (c, a, b, v) => (c > 1 ? b : a).replace(/\{(\w+)\}/g, (m, k) => (k === "n" ? c : v && v[k] !== undefined ? v[k] : m)) };
   const t = I18N.t, tn = I18N.n;
-  const EN = () => I18N.lang === "en";
-  const numLocale = () => (EN() ? "en-GB" : "fr-FR");
+  const EN = () => I18N.lang !== "fr"; // prompt dans une autre langue que le français
+  const LANG_NAME = () => ({ en: "English", es: "Spanish (español)" }[I18N.lang] || "English");
+  const numLocale = () => ({ fr: "fr-FR", en: "en-GB", es: "es-ES" }[I18N.lang] || "fr-FR");
   I18N.add({
     "📖 Aide": "📖 Help",
     "Documentation : guide par profil et par thème": "Documentation: guide by profile and by topic",
@@ -348,7 +349,7 @@
   async function init() {
     translatePage();
     if (I18N.toggle) I18N.toggle($("btnLang"));
-    if (I18N.lang === "en") $("btnDocs").href = "docs/#/en/profiles/teacher";
+    if (I18N.lang !== "fr") $("btnDocs").href = `docs/#/${I18N.lang}/profiles/teacher`;
     try {
       state.SQL = await initSqlJs({ locateFile: (f) => SQLJS_DIR + f });
       state.catalogue = await (await fetch("exercices/catalogue.json")).json();
@@ -363,8 +364,10 @@
     bind();
     const wanted = decodeURIComponent(location.hash.slice(1));
     const known = (id) => state.exercises.some((e) => e.id === id);
-    const last = store.get("creator:lastEx", state.catalogue[0].id);
-    await loadExercise(known(wanted) ? wanted : known(last) ? last : state.catalogue[0].id);
+    // par défaut : le premier exercice dans la langue de l'interface (les annales en français)
+    const byLang = state.catalogue.find((e) => (e.langue || "fr") === I18N.lang) || state.catalogue[0];
+    const last = store.get("creator:lastEx", byLang.id);
+    await loadExercise(known(wanted) ? wanted : known(last) ? last : byLang.id);
   }
 
   function renderExerciseSelect() {
@@ -836,7 +839,7 @@
     out.push("");
     out.push(t("## Mode d'emploi (format JSON attendu et règles de rédaction)"));
     out.push(t("Lien : {url}", { url: skillUrl }));
-    if (EN()) out.push("Note: these instructions are written in French. Follow them, but write everything the students will read in English (pack title and description, theme, enonce, indice, roles, autoevaluation…). Keep the JSON keys and fixed values (such as \"type\": \"write\") exactly as specified.");
+    if (EN()) out.push(`Note: these instructions are written in French. Follow them, but write everything the students will read in ${LANG_NAME()} (pack title and description, theme, enonce, indice, roles, autoevaluation…). Keep the JSON keys and fixed values (such as \"type\": \"write\") exactly as specified.`);
     if ($("pInclureSkill").checked) {
       const s = await skillText();
       if (s) out.push("", t("<<<DÉBUT DU MODE D'EMPLOI"), s.trim(), t("FIN DU MODE D'EMPLOI>>>"));
@@ -850,7 +853,7 @@
     out.push(t("- Thèmes à faire travailler : {v}", { v: themes.length ? themes.join(EN() ? "; " : " ; ") : t("au choix, en progression du plus simple au plus difficile") }));
     out.push(t("- Niveau : {v}", { v: t(NIVEAUX[$("pNiveau").value]) }));
     out.push(t("- Consignes particulières : {v}", { v: $("pConsignes").value.trim() || t("aucune") }));
-    if (EN()) out.push("- Language: write the questions (enonce), themes, hints (indice) and every other text for students in English, even though the instructions are in French.");
+    if (EN()) out.push(`- Language: write the questions (enonce), themes, hints (indice) and every other text for students in ${LANG_NAME()}, even though the instructions are in French.`);
     if ($("pSchema").checked) out.push(t("- Ajouter aussi 1 ou 2 questions de construction / évolution du schéma relationnel (type \"schema\", voir le mode d'emploi), à partir de règles de gestion nouvelles et plausibles pour cette entreprise."));
     if ($("pEviter").checked && ex.questions.length) {
       out.push(t("- Questions déjà proposées aux étudiants sur cette base (ne pas les reproduire à l'identique) :"));

@@ -6,6 +6,12 @@
     "langue": "en"
   },
   {
+    "id": "demo-es",
+    "titre": "Demo – PedalPoint Alquiler de Bicicletas",
+    "description": "Alquiler de bicicletas: tiendas, bicicletas y categorías, clientes y recomendaciones, alquileres y líneas de alquiler.",
+    "langue": "es"
+  },
+  {
     "id": "dcg2026",
     "titre": "DCG 2026 – Elassure",
     "description": "Assurance automobile : clients, contrats, formules et garanties, règlements d'échéances, sinistres."

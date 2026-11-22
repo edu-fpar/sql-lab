@@ -8,7 +8,7 @@ with SQLite ([sql.js](https://sql.js.org)). No PHP/MySQL server is needed, so it
 GitHub Pages. It was built for the French accounting diploma DCG (unit UE8, management
 information systems): 18 exercises taken from the 2008–2026 exam papers (in French), about
 450 SQL questions, schema-design and process questions, and an animated step-by-step solution.
-The interface is available in English, with an **English demo exercise** (`demo-en`).
+The interface is available in English and Spanish, with **demo exercises** in English (`demo-en`) and Spanish (`demo-es`).
 
 ![A question: statement, editor with autocompletion, result compared with the expected one, and the schema diagram](docs/img/en/question.png)
 
@@ -50,7 +50,7 @@ The interface is available in English, with an **English demo exercise** (`demo-
   letters or with Ctrl+Space; after `TABLE.` or `alias.`, only that table's columns are offered).
 - Progress and drafts are kept in the student's browser (localStorage).
 - Direct link to a question: `index.html#demo-en/q08`.
-- Interface language: FR/EN button in the top bar, or `?lang=en` in the address. Only the
+- Interface language: FR / EN / ES selector in the top bar, or `?lang=en` / `?lang=es` in the address. Only the
   interface is translated: each exercise keeps its own language.
 
 ## Schema-design questions
@@ -168,7 +168,7 @@ skill/sql-lab-questions/    question format guide, for AIs (French)
 exemples/                   sample question pack and custom exercise
 lib/                        bundled libraries (sql.js, CodeMirror, fflate): no CDN
 assets/
-  i18n.js                   interface translation (French keys, English dictionaries per module)
+  i18n.js, lang-es.js       interface translation (French keys; English dictionaries per module, Spanish in lang-es.js)
   compat.js                 query rewriting (dates…) and functions added to SQLite
   compare.js                student result / expected result comparison
   engine.js                 execution (fresh copy of the database for each query)
@@ -182,7 +182,7 @@ assets/
   app.js, style.css         interface
 exercices/
   catalogue.json            exercises offered in the menu ("langue": "en" for English ones)
-  demo-en/                  English demo exercise
+  demo-en/, demo-es/        English and Spanish demo exercises
   dcg2008 … dcg2026/        French exam-based exercises (questions.json, db.sql, db.sqlite)
 tools/
   test_exercice.js          checks solutions, alternatives and diagnostics
