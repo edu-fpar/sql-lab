@@ -1,8 +1,15 @@
 # SQL Lab – entraînement SQL pour l'UE8 du DCG
 
+*[English version](README.en.md)* · **[Ouvrir l'application](https://edu-fpar.github.io/sql-lab/)** ·
+[Espace enseignant](https://edu-fpar.github.io/sql-lab/create.html)
+
 Application web statique (HTML + JavaScript) : les étudiants écrivent leurs requêtes,
 qui sont exécutées **dans le navigateur** par SQLite ([sql.js](https://sql.js.org)).
 Aucun serveur PHP/MySQL n'est nécessaire, ce qui permet un hébergement sur GitHub Pages.
+18 exercices tirés des annales 2008 à 2026, environ 450 questions SQL, des questions de
+construction de schéma et de processus, et une correction pas à pas animée.
+
+![Une question : énoncé, éditeur avec complétion, résultat comparé à l'attendu et diagramme du schéma](docs/img/fr/question.png)
 
 ## Ce que fait l'application
 
@@ -22,7 +29,11 @@ Aucun serveur PHP/MySQL n'est nécessaire, ce qui permet un hébergement sur Git
 - **Dates « à la DCG »** : `YEAR()`, `MONTH()`, `DAY()`, `DATEDIFF()`, `NOW()`/`CURDATE()`
   (date du jour simulée, fixée par exercice), littéraux `'15/06/2024'` et `#15/06/2024#`,
   `EXTRACT(YEAR FROM …)`.
+
+  ![Fonctions de date du DCG exécutées sur SQLite](docs/img/fr/dates.png)
 - Les messages d'erreur de SQLite sont traduits en conseils en français.
+
+  ![Diagnostic : trop de lignes, une condition ou une jointure manque](docs/img/fr/diagnostic.png)
 - Les deux écritures des jointures sont acceptées : dans le `WHERE` ou avec `INNER JOIN … ON`.
 - Indice, correction (et variantes d'écriture), résultat attendu, aperçu des tables.
 - Schéma toujours visible pendant l'écriture, en deux onglets : **Diagramme** (par défaut) et
@@ -36,6 +47,8 @@ Aucun serveur PHP/MySQL n'est nécessaire, ce qui permet un hébergement sur Git
   Dans une colonne étroite, les tables sont disposées en hauteur.
   La disposition initiale se règle par exercice avec `schemaGrid` dans `questions.json`
   (`{"TABLE": [colonne, ligne]}`) ; sans ce réglage, une grille automatique est utilisée.
+
+  ![Diagramme en grand, en notation française](docs/img/fr/diagramme.png)
 - Éditeur CodeMirror 5 : coloration syntaxique et complétion des noms de tables et de colonnes
   (dès 2 lettres ou avec Ctrl+Espace ; après `TABLE.` ou `alias.`, seules les colonnes de cette
   table sont proposées).
@@ -120,6 +133,8 @@ avec un score en points de contrôle.
 - Tests : `node tools/test_exercice.js` vérifie que chaque solution est reconnue, que le schéma de
   départ seul est refusé, et que des erreurs typiques donnent le bon diagnostic.
 
+![Question schéma : l'étudiant fait évoluer le schéma de départ](docs/img/fr/schema.png)
+
 ## Questions « processus » (schéma événements-résultats)
 
 Espace d'entraînement au formalisme des annales : couloirs (acteurs) en colonnes, **événements**
@@ -162,6 +177,8 @@ l'exiger se déclare dans `"facultatifs": ["Relevés météo"]` (au niveau de l'
 Exemple : `dcg2025` (question `p01`). Pas encore d'édition dans l'espace de création : la solution
 se dessine dans l'application puis se recopie depuis le brouillon (ou s'écrit dans le JSON).
 
+![Question processus : schéma événements-résultats vérifié](docs/img/fr/processus.png)
+
 ## Correction pas à pas (« mode cinéma »)
 
 Dans la correction d'une question SQL, le bouton **🎬 Correction pas à pas** rejoue le
@@ -172,7 +189,17 @@ diagramme s'anime (tables allumées, tables de passage en pointillés, colonnes 
 flèche de la jointure en cours) et la requête se construit morceau par morceau. Les requêtes de
 mise à jour ont leur propre déroulé : table, valeurs, lignes visées, résultat.
 
-Rien à écrire : les étapes sont **générées à partir de la correction** (`assets/cinema.js`).
+![Correction pas à pas : la jointure en cours est animée sur le schéma](docs/img/fr/cinema-sql.png)
+
+Les questions de **schéma** ont le même mode (**🎬 Construction pas à pas**) : règles de gestion →
+ce qui ne tient plus (colonne barrée) → nouvelles tables → clés étrangères (relation un à
+plusieurs) → tables de liaison (plusieurs à plusieurs, clé composée puis flèches) → schéma final.
+Le diagramme évolue à chaque étape.
+
+![Construction du schéma pas à pas : table de liaison ternaire et ses clés étrangères](docs/img/fr/cinema-schema.png)
+
+Rien à écrire : les étapes sont **générées à partir de la correction** (ou de la solution du
+schéma) par `assets/cinema.js`.
 Pour remplacer un commentaire automatique, ajouter à la question un champ facultatif :
 
 ```json
@@ -207,6 +234,8 @@ Pour remplacer un commentaire automatique, ajouter à la question un champ facul
 Un enseignant peut ajouter ses propres questions sur une base existante, sans toucher au dépôt.
 
 **Espace enseignant : `create.html`** (lien « Créer des questions » dans le menu)
+
+![Espace enseignant : préparer la demande à son IA](docs/img/fr/creation.png)
 
 1. *Préparer la demande à votre IA* : titre, nombre de questions, thèmes, niveau, consignes →
    bouton **Copier le prompt**. Le prompt contient le lien vers la skill
@@ -312,6 +341,11 @@ python -m http.server 8765
 ```
 
 puis ouvrir http://localhost:8765. UwAmp convient aussi.
+
+## Captures d'écran
+
+`node tools/captures.js fr` (ou `en`) régénère les captures de `docs/img/` avec Edge ou Chrome
+sans fenêtre, à partir du serveur local (profil temporaire, rien n'est écrit dans le navigateur).
 
 ## Publier sur GitHub Pages
 
