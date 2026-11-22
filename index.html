@@ -20,6 +20,7 @@
   <meta name="description" content="Entraînement aux requêtes SQL pour l'UE8 du DCG, directement dans le navigateur.">
   <meta name="author" content="François Parlant">
   <link rel="stylesheet" href="lib/lucide/icons.css">
+  <link rel="stylesheet" href="assets/rappels.css">
   <link rel="stylesheet" href="lib/codemirror/codemirror.css">
   <link rel="stylesheet" href="lib/codemirror/show-hint.css">
   <link rel="stylesheet" href="assets/style.css">
@@ -107,7 +108,7 @@
       </div>
       <section class="card question" aria-live="polite">
         <div class="question-head">
-          <span class="badge" id="qTheme"></span>
+          <span class="badge" id="qTheme"></span><span id="qRappel" class="q-rappel"></span>
           <span class="badge annale" id="qAnnale" hidden></span>
           <span class="qnum" id="qNum"></span>
         </div>
@@ -270,6 +271,8 @@ DELETE FROM TABLE WHERE condition;</pre>
   <script src="assets/processcheck.js"></script>
   <script src="assets/process-editor.js"></script>
   <script src="assets/cinema.js"></script>
+  <script src="assets/rappels-data.js"></script>
+  <script src="assets/rappels.js"></script>
   <script src="assets/app.js"></script>
   <script src="assets/icons.js"></script>
 </body>

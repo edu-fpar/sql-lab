@@ -16,7 +16,7 @@
     "✓": "check", "✗": "circle-x", "⚠": "triangle-alert", "✎": "pencil-line", "✕": "x",
     "◫": "table-2",
     "⇄": (pos, el) => (el.closest(".se-main, .se-toolbar, .se-inspector, .se-cols") ? "arrow-left-right" : "workflow"),
-    "↑": "arrow-up", "↓": (pos, el, rest) => (/^(PNG|SVG)/.test(rest) ? "download" : "arrow-down"), "↺": "rotate-ccw", "⟲": "rotate-ccw", "⤢": "maximize-2",
+    "↑": "arrow-up", "↓": (pos, el, rest) => (/^(PNG|SVG)\b/.test(rest) ? "download" : "arrow-down"), "↺": "rotate-ccw", "⟲": "rotate-ccw", "⤢": "maximize-2",
     "◯": "circle", "▭": "rectangle-horizontal", "⏢": "trapezoid",
     "☰": "menu", "▾": "chevron-down", "★": "star", "＋": "plus", "−": "minus", "⏎": "corner-down-left",
     "🎬": "clapperboard", "📖": "book-open",

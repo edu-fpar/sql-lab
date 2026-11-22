@@ -10,6 +10,16 @@
 Questions go from easy to hard: one table, calculations, dates, joins, grouping, subqueries,
 updates, then schema and process design. See [Queries and automatic checking](en/topics/queries).
 
+## Review the course
+Next to each topic in the question list (and next to the question's badge), the
+<i class="i i-lightbulb"></i> icon opens a visual **course reminder**:
+
+- the method as steps you expand one by one;
+- concepts and finer points as "petals";
+- classic pitfalls, with the wrong and the right way to write them.
+
+The **Expand all** button shows everything at once, for revision or printing.
+
 ## Understand my mistakes
 - The message does not just say "wrong": it explains what is off. For example: too many rows
   (missing join or condition), duplicates (DISTINCT), wrong order, `= NULL` instead of

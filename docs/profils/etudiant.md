@@ -11,6 +11,16 @@ Les questions vont du plus simple au plus difficile : une table, calculs, dates,
 regroupements, sous-requêtes, mises à jour, puis schéma et processus.
 Voir [Requêtes et correction automatique](themes/requetes).
 
+## Revoir le cours
+À côté de chaque thème de la liste des questions (et du badge de la question), l'icône
+<i class="i i-lightbulb"></i> ouvre un **rappel de cours** visuel :
+
+- la méthode en étapes que l'on déplie une à une ;
+- les notions et subtilités en « pétales » ;
+- les pièges classiques, avec l'écriture fausse et l'écriture juste.
+
+Le bouton **Tout déplier** affiche tout d'un coup, pour réviser ou imprimer.
+
 ## Comprendre mes erreurs
 - Le message ne dit pas seulement « faux » : il explique ce qui cloche. Par exemple : trop de
   lignes (jointure ou condition oubliée), des doublons (DISTINCT), un mauvais tri, `= NULL` au

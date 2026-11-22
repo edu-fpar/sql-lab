@@ -798,12 +798,12 @@
       if (q.theme !== theme) {
         if (theme !== null) h += "</ol>";
         theme = q.theme;
-        h += `<h3>${esc(theme)}</h3><ol>`;
+        h += `<h3><span>${esc(theme)}</span>${window.SQLRappels ? SQLRappels.button(theme) : ""}</h3><ol>`;
       }
       const short = q.enonce.length > 70 ? q.enonce.slice(0, 68) + "…" : q.enonce;
       const cls = [done.has(q.id) ? "done" : "", i === state.index ? "current" : "", isIntro(q) ? "intro-item" : ""].filter(Boolean).join(" ");
       h += `<li><a href="#${esc(state.ex.id)}/${esc(q.id)}" data-i="${i}" class="${cls}">` +
-        `<span class="num">${qNumber(i)}</span><span class="txt">${esc(short)}</span>${q.type === "write" ? '<span class="tag">✎</span>' : q.type === "schema" ? '<span class="tag" title="${tr("Construction de schéma")}">◫</span>' : q.type === "processus" ? '<span class="tag" title="${tr("Processus")}">⇄</span>' : ""}</a></li>`;
+        `<span class="num">${qNumber(i)}</span><span class="txt">${esc(short)}</span>${q.type === "write" ? '<span class="tag">✎</span>' : q.type === "schema" ? `<span class="tag" title="${esc(tr("Construction de schéma"))}">◫</span>` : q.type === "processus" ? `<span class="tag" title="${esc(tr("Processus"))}">⇄</span>` : ""}</a></li>`;
     });
     h += "</ol>";
     $("questionList").innerHTML = h;
@@ -864,6 +864,8 @@
     if (updateHash) history.replaceState(null, "", `#${state.ex.id}/${q.id}`);
 
     $("qTheme").textContent = q.theme;
+    const rp = $("qRappel");
+    if (rp) rp.innerHTML = window.SQLRappels && !isIntro(q) ? SQLRappels.button(q.theme) : "";
     const badge = q.annale ? tr("Annale {a}", { a: q.annale }) : q.group ? `★ ${q.group}` : "";
     $("qAnnale").hidden = !badge;
     $("qAnnale").textContent = badge;
