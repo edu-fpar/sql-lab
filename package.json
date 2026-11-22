@@ -2,6 +2,7 @@
   "name": "sql-lab",
   "private": true,
   "description": "Entraînement SQL pour l'UE8 du DCG (sql.js, GitHub Pages)",
+  "license": "CC-BY-NC-SA-4.0",
   "scripts": {
     "vendor": "node tools/vendor.js",
     "test": "node tools/test_exercice.js dcg2024 && node tools/test_pack.js exemples/pack-exemple-dcg2024.json",

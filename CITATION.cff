@@ -1,0 +1,18 @@
+cff-version: 1.2.0
+message: "If you use this tool in teaching or research, please cite it as below."
+type: software
+title: "SQL Lab"
+abstract: "Browser-based SQL practice for business students: queries checked against the expected result with targeted error diagnosis, relational schema and event-driven process design questions, animated step-by-step solutions, AI-assisted question authoring and SCORM export. Built for the French DCG accounting diploma (unit UE8), with an English interface and demo."
+authors:
+  - family-names: Parlant
+    given-names: François
+license: CC-BY-NC-SA-4.0
+repository-code: "https://github.com/edu-fpar/sql-lab"
+url: "https://edu-fpar.github.io/sql-lab/"
+keywords:
+  - SQL
+  - databases
+  - relational schema
+  - business information systems
+  - education
+  - SCORM

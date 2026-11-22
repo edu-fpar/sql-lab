@@ -1,7 +1,7 @@
 # SQL Lab – SQL practice for business students
 
 *[Version française](README.md)* · **[Open the app (English demo)](https://edu-fpar.github.io/sql-lab/?lang=en#demo-en/intro)** ·
-[Teacher space](https://edu-fpar.github.io/sql-lab/create.html?lang=en)
+[Teacher space](https://edu-fpar.github.io/sql-lab/create.html?lang=en) · **[Guide by profile and by topic](GUIDE.en.md)**
 
 A static web app (HTML + JavaScript): students write their queries, which run **in the browser**
 with SQLite ([sql.js](https://sql.js.org)). No PHP/MySQL server is needed, so it can be hosted on
@@ -208,6 +208,12 @@ then open http://localhost:8765/?lang=en.
 
 Screenshots: `node tools/captures.js en` regenerates `docs/img/en/` with headless Edge or Chrome.
 
-## Licence
+## License and citation
 
-CC BY-SA 4.0 – François Parlant
+© 2026 François Parlant — [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/). Using it in class or in training is free, with credit to the author; adaptations must be shared under the same license. See [LICENSE](LICENSE).
+
+**Commercial use** (publisher, training company, integration into a software product, white label, custom exercises): a commercial license is available by agreement. [Get in touch](https://edu-fpar.github.io/about.html?lang=en).
+
+**How to cite** (GitHub's *Cite this repository* button, from [CITATION.cff](CITATION.cff)):
+
+> Parlant, F. (2026). *SQL Lab* [Educational software]. https://github.com/edu-fpar/sql-lab

@@ -1,7 +1,7 @@
 # SQL Lab – entraînement SQL pour l'UE8 du DCG
 
 *[English version](README.en.md)* · **[Ouvrir l'application](https://edu-fpar.github.io/sql-lab/)** ·
-[Espace enseignant](https://edu-fpar.github.io/sql-lab/create.html)
+[Espace enseignant](https://edu-fpar.github.io/sql-lab/create.html) · **[Guide par profil et par thème](GUIDE.md)**
 
 Application web statique (HTML + JavaScript) : les étudiants écrivent leurs requêtes,
 qui sont exécutées **dans le navigateur** par SQLite ([sql.js](https://sql.js.org)).
@@ -352,6 +352,12 @@ sans fenêtre, à partir du serveur local (profil temporaire, rien n'est écrit 
 Pousser le dossier dans un dépôt, puis *Settings → Pages → Deploy from a branch* (racine).
 Le `.gitignore` exclut déjà `annales/` (sujets d'origine), `node_modules/` et `.claude/`.
 
-## Licence
+## Licence et citation
 
-CC BY-SA 4.0 – François Parlant
+© 2026 François Parlant — [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.fr). L'usage en classe et en formation est libre, en citant l'auteur ; vos adaptations se partagent sous la même licence. Voir [LICENSE](LICENSE).
+
+**Usage commercial** (éditeur, organisme de formation, intégration dans un logiciel, marque blanche, exercices sur mesure) : une licence commerciale est possible sur accord. [Me contacter](https://edu-fpar.github.io/about.html).
+
+**Citer cet outil** (bouton *Cite this repository* de GitHub, d'après [CITATION.cff](CITATION.cff)) :
+
+> Parlant, F. (2026). *SQL Lab* [Logiciel pédagogique]. https://github.com/edu-fpar/sql-lab
