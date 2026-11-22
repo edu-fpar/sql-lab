@@ -237,6 +237,21 @@
       this.svg.setAttribute("height", Math.round(h * this.zoom));
     }
 
+    /** Pendant un déplacement : agrandit la zone de dessin sans changer le zoom */
+    grow() {
+      const vb = (this.svg.getAttribute("viewBox") || "0 0 0 0").split(" ").map(Number);
+      let w = vb[2], h = vb[3];
+      for (const t of this.tables) {
+        const p = this.pos[t.name];
+        w = Math.max(w, p.x + t.w + 60);
+        h = Math.max(h, p.y + t.h + MARGIN);
+      }
+      if (w === vb[2] && h === vb[3]) return;
+      this.svg.setAttribute("viewBox", `0 0 ${w} ${h}`);
+      this.svg.setAttribute("width", Math.round(w * this.zoom));
+      this.svg.setAttribute("height", Math.round(h * this.zoom));
+    }
+
     render() {
       this.host.textContent = "";
       const svg = el("svg", { class: "dg", role: "img", "aria-label": tr("Schéma relationnel") }, this.host);
@@ -416,6 +431,7 @@
         this.place(t);
         this.drawLinks();
         this.highlight(t.name, true);
+        this.grow();
       });
       const end = () => {
         if (!start) return;
@@ -434,6 +450,7 @@
       };
       g.addEventListener("pointerup", end);
       g.addEventListener("pointercancel", end);
+      g.addEventListener("lostpointercapture", end); // relâché hors de la page : on termine quand même
       g.addEventListener("pointerenter", () => this.highlight(t.name, true));
       g.addEventListener("pointerleave", () => { if (!start) this.highlight(t.name, false); });
       g.addEventListener("dblclick", () => this.opts.onOpenTable && this.opts.onOpenTable(t.name));
