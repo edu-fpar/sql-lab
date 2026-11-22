@@ -5,6 +5,9 @@
   const tr = I18N.t, trn = I18N.n;
   I18N.add({
     "📖 Aide": "📖 Help",
+    "Copier le lien de cette question": "Copy the link to this question",
+    "Lien copié : {url}": "Link copied: {url}",
+    "Copiez ce lien :": "Copy this link:",
     "Documentation : guide par profil et par thème": "Documentation: guide by profile and by topic",
     // ---- index.html (texte statique, traduit par I18N.dom)
     "Afficher / masquer la liste des questions": "Show / hide the question list",
@@ -864,6 +867,8 @@
     if (updateHash) history.replaceState(null, "", `#${state.ex.id}/${q.id}`);
 
     $("qTheme").textContent = q.theme;
+    // lien direct : inutile dans un paquet SCORM ou pour une question importée (absente chez les autres)
+    $("btnCopyLink").hidden = !!(CONFIG.locked || CONFIG.scorm || q.group);
     const rp = $("qRappel");
     if (rp) rp.innerHTML = window.SQLRappels && !isIntro(q) ? SQLRappels.button(q.theme) : "";
     const badge = q.annale ? tr("Annale {a}", { a: q.annale }) : q.group ? `★ ${q.group}` : "";
@@ -1143,6 +1148,29 @@
       `<p class="muted small">${i === 0 ? tr("Correction") : tr("Autre écriture possible")}</p><pre><code>${esc(lines(b))}</code></pre>`).join("");
   }
 
+  /** Copie l'adresse directe de la question affichée (avec la langue d'interface) */
+  async function copyQuestionLink() {
+    const q = current();
+    const u = new URL(location.href);
+    u.search = I18N.lang === "en" ? "?lang=en" : "";
+    u.hash = `${state.ex.id}/${q.id}`;
+    const url = u.toString();
+    const btn = $("btnCopyLink");
+    try {
+      await navigator.clipboard.writeText(url);
+      btn.classList.add("copied");
+      btn.innerHTML = '<i class="i i-check" aria-hidden="true"></i>';
+      btn.title = tr("Lien copié : {url}", { url });
+      setTimeout(() => {
+        btn.classList.remove("copied");
+        btn.innerHTML = '<i class="i i-link" aria-hidden="true"></i>';
+        btn.title = tr("Copier le lien de cette question");
+      }, 1800);
+    } catch (e) {
+      window.prompt(tr("Copiez ce lien :"), url); // presse-papiers indisponible (http, droits)
+    }
+  }
+
   /** Mode cinéma : la correction expliquée étape par étape, avec le schéma animé */
   function openCinema() {
     const q = current();
@@ -1190,6 +1218,7 @@
       }
     });
     $("correction").addEventListener("click", (e) => { if (e.target.closest("[data-cinema]")) openCinema(); });
+    $("btnCopyLink").addEventListener("click", copyQuestionLink);
     // ----- diagramme
     const dlg = $("diagramDialog");
     $("btnDiagram").addEventListener("click", openDiagram);

@@ -2,7 +2,8 @@
 
 ## L'utiliser en cours tel quel
 Il n'y a rien à installer. Donnez à vos étudiants le lien de l'application, ou un lien direct
-vers une question : `https://edu-fpar.github.io/sql-lab/#dcg2024/q14`. L'application propose :
+vers une question : `https://edu-fpar.github.io/sql-lab/#dcg2024/q14`. Le bouton
+<i class="i i-link"></i> à côté du numéro de la question copie ce lien. L'application propose :
 
 - 18 exercices tirés des annales du DCG, avec environ 450 questions SQL ;
 - au moins une question de schéma par exercice, et des questions de processus.

@@ -540,3 +540,7 @@ svg.dg.cn-on .dg-link:not(.cn-link) { opacity: .22; }
 .lg.del { background: color-mix(in srgb, var(--ko) 30%, transparent); }
 .cinema-dialog.cn-schema .cn-sql code { font-family: inherit; }
 a.btn, a.btn:hover { text-decoration: none; }
+
+/* lien direct vers la question */
+.copy-link { margin-left: .2rem; }
+.copy-link.copied { color: var(--ok); border-color: var(--ok); }

@@ -2,7 +2,8 @@
 
 ## Use it in class as is
 There is nothing to install. Give your students the link to the app, or a direct link to a
-question: `https://edu-fpar.github.io/sql-lab/?lang=en#demo-en/q11`. The app offers:
+question: `https://edu-fpar.github.io/sql-lab/?lang=en#demo-en/q11`. The
+<i class="i i-link"></i> button next to the question number copies that link. The app offers:
 
 - an English demo exercise and 18 French exam-based exercises, with about 450 SQL questions;
 - schema and process questions.
