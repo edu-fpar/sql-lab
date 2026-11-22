@@ -11,6 +11,7 @@
   const APP_FILES = [
     "index.html",
     "assets/style.css",
+    "assets/i18n.js",
     "assets/compat.js",
     "assets/compare.js",
     "assets/engine.js",
