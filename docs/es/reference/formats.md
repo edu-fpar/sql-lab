@@ -37,6 +37,7 @@ están en el idioma del ejercicio. El ejemplo completo más sencillo es
 | `type` | para actualizaciones | `"write"` para INSERT / UPDATE / DELETE |
 | `verif` | para actualizaciones | `SELECT * FROM <tabla>`: se compara la tabla antes/después |
 | `annale` | no | año del examen (etiqueta) |
+| `allerPlusLoin` | no | «Para ir más lejos»: el caso más complejo que conviene considerar, mostrado bajo la solución y en el último paso de la solución paso a paso (también para las preguntas de esquema) |
 | `cinema` | no | comentarios del profesor sobre la solución paso a paso: `{ "+jointures.2": "…", "lecture": "…" }` |
 
 Los nombres de paso para `cinema` son `tables`, `passages` (tablas intermedias), `alias`,

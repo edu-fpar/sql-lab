@@ -87,7 +87,7 @@ INSERT INTO REALISATION VALUES
   (112, 'Étanchéité toiture terrasse', 'Réfection complète de l''étanchéité de la toiture terrasse', '2009-05-25', 26500.0, 10, 2),
   (113, 'Entretien espaces verts', 'Tonte et taille annuelles', '2009-06-15', 1650.0, 8, 2),
   (114, 'Mise en conformité ascenseur', 'Travaux de sécurité imposés par la réglementation', '2010-02-01', 12900.0, 7, 2),
-  (120, 'Mise en place TNT', 'Remplacement de l''antenne collective pour la TNT', '2009-03-02', 2860.0, 3, 3),
+  (120, 'Remplacement antenne TNT', 'Remplacement de l''antenne collective pour la TNT', '2009-03-02', 2860.0, 3, 3),
   (121, 'Ravalement de façade', 'Ravalement des façades nord et ouest', '2008-04-14', 39500.0, 9, 3),
   (122, 'Remplacement portail automatique', 'Fourniture et pose d''un portail coulissant motorisé', '2009-12-07', 5400.0, 11, 3),
   (123, 'Désembouage chauffage', 'Nettoyage du circuit de chauffage collectif', '2010-01-18', 3150.0, 1, 3),

@@ -246,6 +246,10 @@ fichier ; `node tools/test_exercice.js` signale toute clé qui ne vise aucune é
   (indices à partir de 0) sur lesquelles porte le tri. Les ex æquo peuvent être dans n'importe quel ordre.
 - Pour une requête d'écriture : `"type": "write"` et `"verif": "SELECT * FROM TABLE ORDER BY …"`
   (requête qui photographie la table modifiée, avant et après).
+- `allerPlusLoin` (facultatif, aussi pour les questions de schéma) : le cas plus complexe à
+  envisager (homonymes, jointure externe, clé minimale…), affiché dans un encadré « Pour aller plus
+  loin » sous la correction et à la dernière étape du pas à pas. Texte avec `**gras**`, `` `code` ``
+  et des lignes `- `.
 
 ## Questions complémentaires (enseignants)
 
@@ -344,9 +348,16 @@ paquet dans `dist/test/<id>/`, puis ouvrir
 
 ## Ajouter un exercice
 
-1. Créer `exercices/<id>/db.sqlite` (par exemple avec un script sur le modèle de `tools/gen_dcg2024.py`).
+1. Écrire `exercices/<id>/db.sql` (CREATE TABLE avec REFERENCES + INSERT), puis
+   `node tools/build_db.js <id>` pour produire `db.sqlite` (`node tools/build_db.js --verifier`
+   contrôle que toutes les bases correspondent à leur script). Noms de tables et de colonnes
+   simples : lettres sans accent, chiffres, `_`, pas de mot réservé du SQL (`Date`, `Year`…) ;
+   les tests le vérifient.
 2. Écrire `exercices/<id>/questions.json`.
-3. Ajouter l'exercice dans `exercices/catalogue.json`.
+3. Ajouter l'exercice dans `exercices/catalogue.json`, avec un champ `source` dans
+   `questions.json` (« Inspiré du sujet DCG UE8 session 2024, dossier 3. Données entièrement
+   fictives. » : cette forme est traduite automatiquement). Pour modifier un champ d'une question
+   sans reformater le fichier : `node tools/set_field.js <id> <question> <champ> valeur.json`.
 4. Vérifier : `npm install` (une fois), puis `node tools/test_exercice.js <id>`
    (`npm test` pour dcg2024).
 

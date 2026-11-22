@@ -258,7 +258,7 @@
     },
     {
       "id": "q13",
-      "cinema": {"+passages":"L'énoncé précise « affectations prévues » : c'est AFFECTER qu'il faut traverser, pas EFFECTUER (les heures réellement faites). Les deux tables relient SALARIE et TACHE, mais ne racontent pas la même chose.","+select":"DISTINCT est nécessaire même si l'énoncé ne dit pas « sans doublon » : un salarié affecté à plusieurs tâches de plomberie apparaîtrait une fois par affectation (33 lignes pour 5 salariés). Attention aux homonymes : la base compte deux Kevin MARTIN ; ici un seul est concerné, mais un DISTINCT sur le seul nom et prénom les aurait fusionnés.","+jointures.2":"Piège principal : une tâche est identifiée par le **couple** (NumChantier, NumTache). Avec `AFFECTER.NumTache = TACHE.NumTache` seul, la tâche T002 d'un chantier est reliée aux T002 de tous les autres chantiers : 1 160 lignes et 28 salariés au lieu de 5.","+filtres":"La valeur est stockée en minuscules ('plomberie') dans CATEGORIE_TACHE. Le filtre porte sur Designation, d'où la jointure jusqu'à CATEGORIE_TACHE : TACHE ne contient que le numéro de catégorie."},
+      "cinema": {"+passages":"L'énoncé précise « affectations prévues » : c'est AFFECTER qu'il faut traverser, pas EFFECTUER (les heures réellement faites). Les deux tables relient SALARIE et TACHE, mais ne racontent pas la même chose.","+select":"DISTINCT est nécessaire même si l'énoncé ne dit pas « sans doublon » : un salarié affecté à plusieurs tâches de plomberie apparaîtrait une fois par affectation (33 lignes pour 5 salariés).","+jointures.2":"Piège principal : une tâche est identifiée par le **couple** (NumChantier, NumTache). Avec `AFFECTER.NumTache = TACHE.NumTache` seul, la tâche T002 d'un chantier est reliée aux T002 de tous les autres chantiers : 1 160 lignes et 28 salariés au lieu de 5.","+filtres":"La valeur est stockée en minuscules ('plomberie') dans CATEGORIE_TACHE. Le filtre porte sur Designation, d'où la jointure jusqu'à CATEGORIE_TACHE : TACHE ne contient que le numéro de catégorie."},
       "theme": "Jointures",
       "annale": "2012",
       "enonce": "Liste des salariés (prénom, nom) affectés à des travaux de plomberie, triée par ordre alphabétique (nom puis prénom). On s'intéresse aux affectations prévues (AFFECTER), et non aux heures effectuées.",
@@ -720,7 +720,8 @@
     },
     {
       "id": "s02",
-      "cinema": {"lecture":"Cinq règles à traduire :\n- « un stage est identifié par un code ; on enregistre sa date et sa durée » : nouvel objet STAGE, nouvelle table.\n- « chaque stage porte sur une seule compétence » : STAGE et COMPETENCE. Un stage → une seule compétence ; une compétence → plusieurs stages. Un à plusieurs : #CodeCompetence dans STAGE.\n- « soit en interne, animé par un salarié, soit en externe : lieu et nom de l'intervenant » : deux catégories de stages, avec des informations propres. Spécialisation : STAGE garde le commun, STAGE_INTERNE reçoit l'animateur (un seul salarié par stage : clé étrangère vers SALARIE), STAGE_EXTERNE reçoit le lieu et l'intervenant.\n- « les salariés inscrits à chaque stage » : SALARIE et STAGE, plusieurs dans les deux sens. Table de liaison INSCRIRE.\n- « ceux qui l'ont réellement suivi (il faut y avoir été inscrit) » : SALARIE et STAGE à nouveau, plusieurs dans les deux sens. Table de liaison ASSISTER, dont chaque ligne doit correspondre à une inscription.\nBilan : 5 tables à créer ; SALARIE et COMPETENCE ne changent pas.","+entites.1":"STAGE contient ce qui est **commun** à tous les stages : code, date, durée, compétence. L'animateur, le lieu et l'intervenant n'y figurent pas, car ils ne concernent qu'une des deux catégories.","+entites.2":"CodeStage est à la fois clé primaire et clé étrangère : un stage externe est d'abord un stage, avec le même code. L'intervenant est un simple nom (attribut), pas une clé étrangère : ce n'est pas un salarié de l'entreprise.","+entites.3":"Ici l'animateur **est** un salarié : on ne recopie pas son nom, on met son matricule en clé étrangère vers SALARIE. Le nom #MatriculeAnimateur évite de le confondre avec les salariés inscrits.","+associations.1":"Un salarié s'inscrit à plusieurs stages, un stage accueille plusieurs salariés : table de liaison. Ne la confondez pas avec STAGE_INTERNE : animer un stage et y être inscrit sont deux liens différents entre les mêmes tables.","+associations.3":"Pourquoi une deuxième table et pas seulement INSCRIRE ? Un salarié peut être inscrit sans venir : « inscrit » et « a suivi » sont deux listes différentes. ASSISTER a la même clé (Matricule, CodeStage) que INSCRIRE.","+associations.4":"« Pour suivre un stage, il faut y avoir été inscrit » : chaque couple de ASSISTER doit exister dans INSCRIRE. Les flèches vers SALARIE et STAGE ne le garantissent pas à elles seules ; c'est une contrainte d'inclusion à faire respecter.","+bilan":"Checklist :\n- STAGE avec #CodeCompetence ;\n- STAGE_INTERNE (avec #MatriculeAnimateur) et STAGE_EXTERNE (lieu, intervenant), dont la clé CodeStage renvoie à STAGE ;\n- INSCRIRE et ASSISTER, clé (Matricule, CodeStage).\nAutres solutions acceptées : une seule table STAGE avec l'animateur, le lieu et l'intervenant en colonnes facultatives ; ou une seule table INSCRIRE avec une colonne « présent » à la place d'ASSISTER (cette écriture garantit même qu'on ne peut avoir suivi qu'un stage où l'on était inscrit).\nErreur la plus fréquente : mettre #CodeStage dans SALARIE. Un salarié suit plusieurs stages au fil du temps : une seule case ne suffit pas, il faut les tables de liaison."},
+      "allerPlusLoin": "On peut aussi garder deux listes distinctes : INSCRIRE et une table **ASSISTER** de même clé (Matricule, CodeStage). Mais deux flèches vers SALARIE et STAGE ne suffisent pas à garantir « il faut avoir été inscrit » : un couple pourrait figurer dans ASSISTER sans exister dans INSCRIRE. Il faut alors une **contrainte d'inclusion**, que l'on peut traduire par une clé étrangère composée : `ASSISTER(Matricule, CodeStage)` → `INSCRIRE(Matricule, CodeStage)`. La colonne Present évite ce problème, d'où son choix comme solution principale.",
+      "cinema": {"lecture":"Cinq règles à traduire :\n- « un stage est identifié par un code ; on enregistre sa date et sa durée » : nouvel objet STAGE, nouvelle table.\n- « chaque stage porte sur une seule compétence » : STAGE et COMPETENCE. Un stage → une seule compétence ; une compétence → plusieurs stages. Un à plusieurs : #CodeCompetence dans STAGE.\n- « soit en interne, animé par un salarié, soit en externe : lieu et nom de l'intervenant » : deux catégories de stages, avec des informations propres. Spécialisation : STAGE garde le commun, STAGE_INTERNE reçoit l'animateur (un seul salarié par stage : clé étrangère vers SALARIE), STAGE_EXTERNE reçoit le lieu et l'intervenant.\n- « les salariés inscrits à chaque stage » : SALARIE et STAGE, plusieurs dans les deux sens. Table de liaison INSCRIRE.\n- « ceux qui l'ont réellement suivi (il faut y avoir été inscrit) » : on ne peut suivre qu'un stage où l'on est inscrit. Il suffit donc de noter, pour chaque inscription, si le salarié était présent : une colonne Present dans INSCRIRE.\nBilan : 4 tables à créer ; SALARIE et COMPETENCE ne changent pas.","+entites.1":"STAGE contient ce qui est **commun** à tous les stages : code, date, durée, compétence. L'animateur, le lieu et l'intervenant n'y figurent pas, car ils ne concernent qu'une des deux catégories.","+entites.2":"CodeStage est à la fois clé primaire et clé étrangère : un stage externe est d'abord un stage, avec le même code. L'intervenant est un simple nom (attribut), pas une clé étrangère : ce n'est pas un salarié de l'entreprise.","+entites.3":"Ici l'animateur **est** un salarié : on ne recopie pas son nom, on met son matricule en clé étrangère vers SALARIE. Le nom #MatriculeAnimateur évite de le confondre avec les salariés inscrits.","+associations.1":"Un salarié s'inscrit à plusieurs stages, un stage accueille plusieurs salariés : table de liaison. Ne la confondez pas avec STAGE_INTERNE : animer un stage et y être inscrit sont deux liens différents entre les mêmes tables.","+bilan":"Checklist :\n- STAGE avec #CodeCompetence ;\n- STAGE_INTERNE (avec #MatriculeAnimateur) et STAGE_EXTERNE (lieu, intervenant), dont la clé CodeStage renvoie à STAGE ;\n- INSCRIRE, clé (Matricule, CodeStage), avec la colonne Present.\nAutres solutions acceptées : une seule table STAGE avec l'animateur, le lieu et l'intervenant en colonnes facultatives ; ou une deuxième table de liaison ASSISTER (même clé que INSCRIRE) à la place de la colonne Present.\nErreur la plus fréquente : mettre #CodeStage dans SALARIE. Un salarié suit plusieurs stages au fil du temps : une seule case ne suffit pas, il faut une table de liaison.","+associations.2":"« Pour suivre un stage, il faut y avoir été inscrit » : la colonne Present (oui / non) se remplit sur la ligne de l'inscription. Un salarié non inscrit n'a pas de ligne dans INSCRIRE, il ne peut donc pas être noté présent : la règle est garantie par la structure même de la table."},
       "type": "schema",
       "theme": "Évolution du schéma",
       "annale": "2012",
@@ -811,30 +812,10 @@
             "fk": {
               "Matricule|MatriculeSalarie": "SALARIE",
               "CodeStage|NumStage|IdStage|CodeSt|NumeroStage": "STAGE"
-            }
-          },
-          {
-            "nom": "ASSISTER",
-            "alias": [
-              "SUIVRE",
-              "PARTICIPER",
-              "PARTICIPATION",
-              "PARTICIPATIONS",
-              "PRESENCE",
-              "SUIVI",
-              "ASSISTER_STAGE",
-              "SUIVRE_STAGE",
-              "ASSISTE"
-            ],
-            "role": "enregistrer les salariés qui ont réellement suivi chaque stage",
-            "pk": [
-              "Matricule|MatriculeSalarie",
-              "CodeStage|NumStage|IdStage|CodeSt|NumeroStage"
-            ],
-            "fk": {
-              "Matricule|MatriculeSalarie": "SALARIE",
-              "CodeStage|NumStage|IdStage|CodeSt|NumeroStage": "STAGE"
-            }
+            },
+            "attributs": [
+              "Present|Suivi|Assiste|Presence|AParticipe|StageSuivi|Participation|AssisteStage|AsuiviStage|Suivre"
+            ]
           }
         ]
       },
@@ -883,30 +864,10 @@
               "fk": {
                 "Matricule|MatriculeSalarie": "SALARIE",
                 "CodeStage|NumStage|IdStage|CodeSt|NumeroStage": "STAGE"
-              }
-            },
-            {
-              "nom": "ASSISTER",
-              "alias": [
-                "SUIVRE",
-                "PARTICIPER",
-                "PARTICIPATION",
-                "PARTICIPATIONS",
-                "PRESENCE",
-                "SUIVI",
-                "ASSISTER_STAGE",
-                "SUIVRE_STAGE",
-                "ASSISTE"
-              ],
-              "role": "enregistrer les salariés qui ont réellement suivi chaque stage",
-              "pk": [
-                "Matricule|MatriculeSalarie",
-                "CodeStage|NumStage|IdStage|CodeSt|NumeroStage"
-              ],
-              "fk": {
-                "Matricule|MatriculeSalarie": "SALARIE",
-                "CodeStage|NumStage|IdStage|CodeSt|NumeroStage": "STAGE"
-              }
+              },
+              "attributs": [
+                "Present|Suivi|Assiste|Presence|AParticipe|StageSuivi|Participation|AssisteStage|AsuiviStage|Suivre"
+              ]
             }
           ]
         },
@@ -986,10 +947,30 @@
               "fk": {
                 "Matricule|MatriculeSalarie": "SALARIE",
                 "CodeStage|NumStage|IdStage|CodeSt|NumeroStage": "STAGE"
-              },
-              "attributs": [
-                "Present|Suivi|Assiste|Presence|AParticipe|StageSuivi|Participation|AssisteStage|AsuiviStage|Suivre"
-              ]
+              }
+            },
+            {
+              "nom": "ASSISTER",
+              "alias": [
+                "SUIVRE",
+                "PARTICIPER",
+                "PARTICIPATION",
+                "PARTICIPATIONS",
+                "PRESENCE",
+                "SUIVI",
+                "ASSISTER_STAGE",
+                "SUIVRE_STAGE",
+                "ASSISTE"
+              ],
+              "role": "enregistrer les salariés qui ont réellement suivi chaque stage",
+              "pk": [
+                "Matricule|MatriculeSalarie",
+                "CodeStage|NumStage|IdStage|CodeSt|NumeroStage"
+              ],
+              "fk": {
+                "Matricule|MatriculeSalarie": "SALARIE",
+                "CodeStage|NumStage|IdStage|CodeSt|NumeroStage": "STAGE"
+              }
             }
           ]
         },
@@ -1037,15 +1018,35 @@
               "fk": {
                 "Matricule|MatriculeSalarie": "SALARIE",
                 "CodeStage|NumStage|IdStage|CodeSt|NumeroStage": "STAGE"
-              },
-              "attributs": [
-                "Present|Suivi|Assiste|Presence|AParticipe|StageSuivi|Participation|AssisteStage|AsuiviStage|Suivre"
-              ]
+              }
+            },
+            {
+              "nom": "ASSISTER",
+              "alias": [
+                "SUIVRE",
+                "PARTICIPER",
+                "PARTICIPATION",
+                "PARTICIPATIONS",
+                "PRESENCE",
+                "SUIVI",
+                "ASSISTER_STAGE",
+                "SUIVRE_STAGE",
+                "ASSISTE"
+              ],
+              "role": "enregistrer les salariés qui ont réellement suivi chaque stage",
+              "pk": [
+                "Matricule|MatriculeSalarie",
+                "CodeStage|NumStage|IdStage|CodeSt|NumeroStage"
+              ],
+              "fk": {
+                "Matricule|MatriculeSalarie": "SALARIE",
+                "CodeStage|NumStage|IdStage|CodeSt|NumeroStage": "STAGE"
+              }
             }
           ]
         }
       ],
-      "indice": "Les stages internes et externes ont des informations communes (code, date, durée, compétence) et des informations propres (l'animateur pour l'un, le lieu et l'intervenant pour l'autre) : pensez à une table STAGE complétée par une table par type de stage, dont la clé primaire est aussi une clé étrangère vers STAGE (une seule table STAGE avec des colonnes facultatives est aussi acceptée). Inscriptions et participations sont des relations « plusieurs à plusieurs » entre salariés et stages."
+      "indice": "Les stages internes et externes ont des informations communes (code, date, durée, compétence) et des informations propres (l'animateur pour l'un, le lieu et l'intervenant pour l'autre) : pensez à une table STAGE complétée par une table par type de stage, dont la clé primaire est aussi une clé étrangère vers STAGE (une seule table STAGE avec des colonnes facultatives est aussi acceptée). L'inscription est une relation « plusieurs à plusieurs » entre salariés et stages ; la présence se note sur la ligne de l'inscription."
     }
   ]
 }

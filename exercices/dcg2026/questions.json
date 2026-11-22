@@ -389,9 +389,10 @@
     },
     {
       "id": "q19",
+      "allerPlusLoin": "L'année utile ici est celle de la **prime** (`PAYER.Annee`), pas celle du **règlement** (`REGLEMENT.DateRegl`) : une échéance peut être réglée l'année suivante (une échéance 2023 a été réglée le 09/01/2024).\nSi l'on cherchait les contrats n'ayant reçu **aucun versement pendant l'année civile 2026**, il faudrait passer par REGLEMENT et filtrer sur la date : `PAYER.IDRegl = REGLEMENT.IDRegl AND DateRegl BETWEEN '2026-01-01' AND '2026-12-31'` dans la sous-requête. Dans cette base, les deux lectures donnent les mêmes 6 contrats, mais ce n'est pas garanti en début d'année.",
       "cinema": {"+tables":"L'information « a reçu un règlement pour 2026 » est dans la table **PAYER** (une ligne par échéance payée, avec l'année de la prime). Il n'est pas nécessaire d'aller dans REGLEMENT : l'année utile est `PAYER.Annee`, pas la date du règlement (une échéance 2023 a par exemple été réglée le 09/01/2024).","+filtres.2":"Une jointure CONTRAT–PAYER avec `Annee <> 2026` ne répond pas à la question : elle garderait les contrats qui ont payé **une autre année**, même s'ils ont aussi payé en 2026. « N'ayant pas encore reçu » est une absence : on construit la liste de ceux qui ont payé, puis on prend les autres avec NOT IN.","+resultat":"Vous devez obtenir 6 contrats. En remplaçant le statut par `DateFinContrat IS NULL`, vous en obtiendriez 10 : les 4 contrats en attente de signature s'ajouteraient."},
       "theme": "Sous-requêtes",
-      "enonce": "Afficher la liste des contrats dont le statut est « En cours » (identifiant contrat, identifiant client) n'ayant pas encore reçu de règlement d'échéance pour 2026.",
+      "enonce": "Afficher la liste des contrats dont le statut est « En cours » (identifiant contrat, identifiant client) n'ayant pas encore reçu de règlement d'échéance pour 2026 (année de la prime, colonne Annee de PAYER).",
       "annale": "2026",
       "correction": [
         "SELECT IDContrat, IDClient",

@@ -37,6 +37,7 @@ language. The simplest complete example is
 | `type` | for updates | `"write"` for INSERT / UPDATE / DELETE |
 | `verif` | for updates | `SELECT * FROM <table>`: the table is compared before/after |
 | `annale` | no | exam year (badge) |
+| `allerPlusLoin` | no | "Going further": the more complex case to consider, shown under the solution and at the last step-by-step step (also for schema questions) |
 | `cinema` | no | the teacher's comments on the step-by-step solution: `{ "+jointures.2": "…", "lecture": "…" }` |
 
 The step names for `cinema` are `tables`, `passages` (linking tables), `alias`, `select`,

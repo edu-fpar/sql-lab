@@ -89,7 +89,7 @@
     },
     {
       "id": "q05",
-      "cinema": {"+tables":"Avant d'écrire le filtre, regardez les valeurs réellement saisies dans ObjetAFinancer (double-clic sur DOSSIER) : les objets sont des libellés choisis par l'entreprise, ici « Achat véhicule neuf » et « Achat véhicule d'occasion ». C'est leur **début commun** qui permet de les retenir tous les deux.","+filtres":"`LIKE 'Achat véhicule%'` remplace deux égalités reliées par OR. Sans le %, `LIKE 'Achat véhicule'` se comporterait comme un `=` et ne trouverait rien. L'accent compte : 'Achat vehicule%' ne renvoie aucune ligne.","+resultat":"Vous devez obtenir 47 dossiers (26 d'occasion et 21 neufs). Les 4 dossiers « Camping-car » ne sont pas retenus : leur libellé ne commence pas par « Achat véhicule »."},
+      "cinema": {"+tables":"Avant d'écrire le filtre, regardez les valeurs réellement saisies dans ObjetAFinancer (double-clic sur DOSSIER) : les objets sont des libellés choisis par l'entreprise, ici « Achat véhicule neuf » et « Achat véhicule d'occasion ». C'est leur **début commun** qui permet de les retenir tous les deux.","+filtres":"`LIKE 'Achat véhicule%'` remplace deux égalités reliées par OR. Sans le %, `LIKE 'Achat véhicule'` se comporterait comme un `=` et ne trouverait rien. L'accent compte : 'Achat vehicule%' ne renvoie aucune ligne.","+resultat":"Vous devez obtenir 47 dossiers (26 d'occasion et 21 neufs)."},
       "theme": "Une seule table",
       "enonce": "Afficher les dossiers (numéro, objet, montant à financer) dont l'objet est un achat de véhicule (neuf ou d'occasion).",
       "correction": [

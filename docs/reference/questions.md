@@ -18,3 +18,7 @@
   (indices à partir de 0) sur lesquelles porte le tri. Les ex æquo peuvent être dans n'importe quel ordre.
 - Pour une requête d'écriture : `"type": "write"` et `"verif": "SELECT * FROM TABLE ORDER BY …"`
   (requête qui photographie la table modifiée, avant et après).
+- `allerPlusLoin` (facultatif, aussi pour les questions de schéma) : le cas plus complexe à
+  envisager (homonymes, jointure externe, clé minimale…), affiché dans un encadré « Pour aller plus
+  loin » sous la correction et à la dernière étape du pas à pas. Texte avec `**gras**`, `` `code` ``
+  et des lignes `- `.

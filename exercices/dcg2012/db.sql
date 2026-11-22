@@ -110,7 +110,7 @@ INSERT INTO SALARIE VALUES
   (1033, 'DIALLO', 'Moussa', 'Ouvrier d''exécution', 1, '2012-01-09', '2012-01-20'),
   (1034, 'VASSEUR', 'Alexis', 'Ouvrier d''exécution', 1, '2011-06-06', NULL),
   (1035, 'FERRAND', 'Julie', 'Ouvrier professionnel', 2, '2008-02-04', '2012-05-11'),
-  (1036, 'MARTIN', 'Kevin', 'Ouvrier professionnel', 2, '2012-04-16', NULL),
+  (1036, 'MOREL', 'Kevin', 'Ouvrier professionnel', 2, '2012-04-16', NULL),
   (1037, 'GAUTIER', 'Sandrine', 'Employé administratif', 3, '2012-03-01', NULL);
 
 INSERT INTO ARCHIVE_SALARIE VALUES

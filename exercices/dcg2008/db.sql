@@ -124,7 +124,7 @@ INSERT INTO PERSONNEL VALUES
   (54, 'DUPONT', 'Julien', '2006-07-21', 'SE', 'G7'),
   (55, 'MASSON', 'Julien', '1998-04-16', 'CB', 'G7'),
   (56, 'BOYER', 'Philippe', '1987-07-28', 'EC', 'G8'),
-  (57, 'LEROY', 'Éric', '2003-07-05', 'RE', 'G8'),
+  (57, 'LEROY', 'Éric', '2003-07-05', 'EC', 'G8'),
   (58, 'CLEMENT', 'Philippe', '1997-05-07', 'CB', 'G8'),
   (59, 'PICARD', 'Laurent', '2001-03-28', 'CA', 'G8'),
   (60, 'DUBOIS', 'Philippe', '2006-07-17', 'CA', 'G8'),
