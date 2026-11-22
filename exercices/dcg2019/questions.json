@@ -1,0 +1,1289 @@
+{
+  "id": "dcg2019",
+  "titre": "DCG 2019 – Azurova, hôtels de plein air",
+  "aujourdhui": "2019-05-15",
+  "contexte": "Le groupe Azurova, dont le siège est à Elne (Pyrénées-Orientales), exploite 18 hôtels de plein air (HOTEL : 16 en France, 2 en Espagne) qui louent des LODGE (bungalows, chalets, cabanes…). Un lodge est identifié par son numéro dans l'hôtel (couple NumLodge + NumHotel) et appartient à un TYPE_LODGE (tarif à la semaine et tarif à la nuitée, en euros). Chaque hôtel est organisé en secteurs (SECTEUR : administratif, sécurité, restauration…) ; la table CONCERNER indique quels secteurs existent dans chaque hôtel et qui en est le responsable (CodeEmpResponsable, un employé permanent). Chaque EMPLOYE travaille dans un secteur d'un hôtel : le couple (NumSecteur, NumHotel) de EMPLOYE fait référence à une ligne de CONCERNER. Les salaires sont mensuels bruts, en euros. Dans le sujet, les employés permanents et saisonniers étaient modélisés par un héritage (tables EMPLOYE_PERMANENT et EMPLOYE_SAISONNIER) ; ici, la colonne StatutEmp vaut simplement « Permanent » ou « Saisonnier ».",
+  "source": "Inspiré du sujet DCG UE8 session 2019, dossier 1. Données entièrement fictives.",
+  "schemaGrid": {
+    "SECTEUR": [
+      0,
+      0
+    ],
+    "CONCERNER": [
+      1,
+      0
+    ],
+    "HOTEL": [
+      2,
+      0
+    ],
+    "LODGE": [
+      3,
+      0
+    ],
+    "EMPLOYE": [
+      1,
+      1
+    ],
+    "TYPE_LODGE": [
+      3,
+      1
+    ]
+  },
+  "questions": [
+    {
+      "id": "q01",
+      "theme": "Une seule table",
+      "enonce": "Afficher la liste des secteurs d'activité du groupe Azurova (toutes les colonnes).",
+      "correction": [
+        "SELECT *",
+        "FROM SECTEUR;"
+      ],
+      "indice": "L'étoile * permet d'afficher toutes les colonnes d'une table."
+    },
+    {
+      "id": "q02",
+      "theme": "Une seule table",
+      "enonce": "Afficher le nom et la ville des hôtels trois étoiles, triés par ordre alphabétique des noms d'hôtel.",
+      "ordered": [
+        0
+      ],
+      "correction": [
+        "SELECT NomHotel, VilleHotel",
+        "FROM HOTEL",
+        "WHERE NbEtoiles = 3",
+        "ORDER BY NomHotel;"
+      ],
+      "indice": "NbEtoiles est un nombre : pas d'apostrophes autour de 3. Le tri se fait avec ORDER BY."
+    },
+    {
+      "id": "q03",
+      "theme": "Une seule table",
+      "enonce": "Afficher le nom, la ville et le nombre d'étoiles des hôtels situés en Espagne.",
+      "correction": [
+        "SELECT NomHotel, VilleHotel, NbEtoiles",
+        "FROM HOTEL",
+        "WHERE PaysHotel = 'Espagne';"
+      ],
+      "indice": "Une condition sur un texte s'écrit entre apostrophes : PaysHotel = 'Espagne'."
+    },
+    {
+      "id": "q04",
+      "theme": "Une seule table",
+      "enonce": "Afficher le nom, le prénom et le salaire des employés saisonniers dont le salaire mensuel est d'au moins 2 000 €, du salaire le plus élevé au plus faible.",
+      "ordered": [
+        2
+      ],
+      "correction": [
+        "SELECT NomEmp, PrenomEmp, Salaire",
+        "FROM EMPLOYE",
+        "WHERE StatutEmp = 'Saisonnier'",
+        "AND Salaire >= 2000",
+        "ORDER BY Salaire DESC;"
+      ],
+      "indice": "Deux conditions se combinent avec AND. « Au moins » se traduit par >=. DESC trie par ordre décroissant."
+    },
+    {
+      "id": "q05",
+      "theme": "Calculs et agrégats",
+      "enonce": "Pour chaque type de lodge, afficher le libellé, le tarif à la semaine, le prix de 7 nuitées et l'économie réalisée en louant à la semaine plutôt qu'à la nuitée (prix de 7 nuitées moins tarif semaine).",
+      "correction": [
+        "SELECT LibelleType, TarifSemaine, TarifNuitee * 7 AS Prix7Nuitees,",
+        "       TarifNuitee * 7 - TarifSemaine AS Economie",
+        "FROM TYPE_LODGE;"
+      ],
+      "indice": "On peut faire un calcul directement dans le SELECT et lui donner un nom avec AS."
+    },
+    {
+      "id": "q06",
+      "theme": "Calculs et agrégats",
+      "enonce": "Afficher, pour l'ensemble du groupe, le nombre d'employés, la masse salariale mensuelle (total des salaires) et le salaire moyen.",
+      "correction": [
+        "SELECT COUNT(*), SUM(Salaire), AVG(Salaire)",
+        "FROM EMPLOYE;"
+      ],
+      "indice": "Les fonctions COUNT, SUM et AVG calculent une valeur sur l'ensemble des lignes de la table."
+    },
+    {
+      "id": "q07",
+      "theme": "Calculs et agrégats",
+      "enonce": "Afficher, pour chaque statut d'employé (« Permanent » ou « Saisonnier »), le nombre d'employés et le salaire moyen.",
+      "correction": [
+        "SELECT StatutEmp, COUNT(*) AS NbEmployes, AVG(Salaire) AS SalaireMoyen",
+        "FROM EMPLOYE",
+        "GROUP BY StatutEmp;"
+      ],
+      "indice": "GROUP BY StatutEmp forme un groupe par statut ; les agrégats sont alors calculés pour chaque groupe."
+    },
+    {
+      "id": "q08",
+      "theme": "Calculs et agrégats",
+      "enonce": "Afficher le nombre d'hôtels pour chaque nombre d'étoiles, trié par nombre d'étoiles croissant.",
+      "ordered": [
+        0
+      ],
+      "correction": [
+        "SELECT NbEtoiles, COUNT(*) AS NbHotels",
+        "FROM HOTEL",
+        "GROUP BY NbEtoiles",
+        "ORDER BY NbEtoiles;"
+      ],
+      "indice": "Regroupez les hôtels par nombre d'étoiles, puis comptez les lignes de chaque groupe."
+    },
+    {
+      "id": "q09",
+      "theme": "Jointures",
+      "annale": "2019",
+      "enonce": "Quels sont les employés (numéro, nom, prénom) de l'hôtel de plein air « Les Portes de Bretagne » ?",
+      "correction": [
+        "SELECT E.CodeEmp, E.NomEmp, E.PrenomEmp",
+        "FROM EMPLOYE E, HOTEL H",
+        "WHERE E.NumHotel = H.NumHotel",
+        "AND H.NomHotel = 'Les Portes de Bretagne';"
+      ],
+      "variantes": [
+        [
+          "SELECT E.CodeEmp, E.NomEmp, E.PrenomEmp",
+          "FROM EMPLOYE E",
+          "INNER JOIN HOTEL H ON E.NumHotel = H.NumHotel",
+          "WHERE H.NomHotel = 'Les Portes de Bretagne';"
+        ]
+      ],
+      "indice": "Le nom de l'hôtel est dans HOTEL, les employés dans EMPLOYE : reliez-les par NumHotel. Si vous donnez un alias à une table (EMPLOYE E), utilisez ensuite l'alias (E.NomEmp) et non plus le nom de la table."
+    },
+    {
+      "id": "q10",
+      "theme": "Jointures",
+      "enonce": "Afficher les lodges de l'hôtel « Las Rosas » : nom du lodge, libellé de son type, capacité d'accueil et surface.",
+      "correction": [
+        "SELECT NomLodge, LibelleType, CapaciteAccueil, Surface",
+        "FROM LODGE, TYPE_LODGE, HOTEL",
+        "WHERE LODGE.CodeType = TYPE_LODGE.CodeType",
+        "AND LODGE.NumHotel = HOTEL.NumHotel",
+        "AND NomHotel = 'Las Rosas';"
+      ],
+      "variantes": [
+        [
+          "SELECT NomLodge, LibelleType, CapaciteAccueil, Surface",
+          "FROM LODGE",
+          "INNER JOIN TYPE_LODGE ON LODGE.CodeType = TYPE_LODGE.CodeType",
+          "INNER JOIN HOTEL ON LODGE.NumHotel = HOTEL.NumHotel",
+          "WHERE NomHotel = 'Las Rosas';"
+        ]
+      ],
+      "indice": "Trois tables sont nécessaires : LODGE (le lodge), TYPE_LODGE (le libellé du type) et HOTEL (le nom de l'hôtel). Il faut donc deux conditions de jointure."
+    },
+    {
+      "id": "q11",
+      "theme": "Jointures",
+      "enonce": "Les secteurs d'un hôtel sont ceux enregistrés dans la table CONCERNER, qui indique aussi leur responsable. Afficher, pour l'hôtel « La Plage », le nom de chaque secteur ainsi que le nom et le prénom de son responsable.",
+      "correction": [
+        "SELECT NomSecteur, NomEmp, PrenomEmp",
+        "FROM CONCERNER, SECTEUR, EMPLOYE, HOTEL",
+        "WHERE CONCERNER.NumSecteur = SECTEUR.NumSecteur",
+        "AND CONCERNER.CodeEmpResponsable = EMPLOYE.CodeEmp",
+        "AND CONCERNER.NumHotel = HOTEL.NumHotel",
+        "AND NomHotel = 'La Plage';"
+      ],
+      "variantes": [
+        [
+          "SELECT NomSecteur, NomEmp, PrenomEmp",
+          "FROM CONCERNER",
+          "INNER JOIN SECTEUR ON CONCERNER.NumSecteur = SECTEUR.NumSecteur",
+          "INNER JOIN EMPLOYE ON CONCERNER.CodeEmpResponsable = EMPLOYE.CodeEmp",
+          "INNER JOIN HOTEL ON CONCERNER.NumHotel = HOTEL.NumHotel",
+          "WHERE NomHotel = 'La Plage';"
+        ]
+      ],
+      "indice": "Le responsable est l'employé dont le code figure dans CONCERNER.CodeEmpResponsable : la jointure avec EMPLOYE se fait sur cette colonne, et non sur NumSecteur et NumHotel (qui donneraient tous les employés du secteur)."
+    },
+    {
+      "id": "q12",
+      "theme": "Jointures et regroupements",
+      "annale": "2019",
+      "enonce": "Quel est le montant total des salaires par hôtel (numéro et nom de l'hôtel), trié par ordre alphabétique des noms d'hôtel ?",
+      "ordered": [
+        1
+      ],
+      "correction": [
+        "SELECT H.NumHotel, H.NomHotel, SUM(E.Salaire) AS TotalSalaires",
+        "FROM HOTEL H, EMPLOYE E",
+        "WHERE H.NumHotel = E.NumHotel",
+        "GROUP BY H.NumHotel, H.NomHotel",
+        "ORDER BY H.NomHotel;"
+      ],
+      "variantes": [
+        [
+          "SELECT H.NumHotel, H.NomHotel, SUM(E.Salaire) AS TotalSalaires",
+          "FROM HOTEL H",
+          "INNER JOIN EMPLOYE E ON H.NumHotel = E.NumHotel",
+          "GROUP BY H.NumHotel, H.NomHotel",
+          "ORDER BY H.NomHotel;"
+        ]
+      ],
+      "indice": "Joignez HOTEL et EMPLOYE, regroupez par hôtel puis additionnez les salaires. Toute colonne du SELECT qui n'est pas un agrégat doit figurer dans le GROUP BY."
+    },
+    {
+      "id": "q13",
+      "theme": "Jointures et regroupements",
+      "annale": "2019",
+      "enonce": "Quels sont les hôtels trois étoiles (numéro et nom de l'hôtel) qui comportent au moins cinq secteurs ? Afficher aussi leur nombre de secteurs. Les secteurs d'un hôtel sont ceux enregistrés dans la table CONCERNER.",
+      "correction": [
+        "SELECT H.NumHotel, H.NomHotel, COUNT(*) AS NbSecteurs",
+        "FROM HOTEL H, CONCERNER C",
+        "WHERE C.NumHotel = H.NumHotel",
+        "AND H.NbEtoiles = 3",
+        "GROUP BY H.NumHotel, H.NomHotel",
+        "HAVING COUNT(*) >= 5;"
+      ],
+      "variantes": [
+        [
+          "SELECT H.NumHotel, H.NomHotel, COUNT(C.NumSecteur) AS NbSecteurs",
+          "FROM HOTEL H",
+          "INNER JOIN CONCERNER C ON C.NumHotel = H.NumHotel",
+          "WHERE H.NbEtoiles = 3",
+          "GROUP BY H.NumHotel, H.NomHotel",
+          "HAVING COUNT(C.NumSecteur) >= 5;"
+        ]
+      ],
+      "indice": "Chaque ligne de CONCERNER est un secteur d'un hôtel : comptez-les par hôtel. La condition sur les étoiles porte sur chaque ligne (WHERE), la condition sur le nombre de secteurs porte sur le groupe (HAVING). COUNT(C.*) n'existe pas : écrivez COUNT(*)."
+    },
+    {
+      "id": "q14",
+      "theme": "Jointures et regroupements",
+      "enonce": "Afficher la capacité d'accueil totale de chaque hôtel (nom de l'hôtel et nombre total de personnes pouvant être accueillies dans ses lodges), de la plus grande capacité à la plus petite.",
+      "ordered": [
+        1
+      ],
+      "correction": [
+        "SELECT NomHotel, SUM(CapaciteAccueil) AS CapaciteTotale",
+        "FROM HOTEL, LODGE",
+        "WHERE HOTEL.NumHotel = LODGE.NumHotel",
+        "GROUP BY HOTEL.NumHotel, NomHotel",
+        "ORDER BY SUM(CapaciteAccueil) DESC;"
+      ],
+      "variantes": [
+        [
+          "SELECT NomHotel, SUM(CapaciteAccueil) AS CapaciteTotale",
+          "FROM HOTEL",
+          "INNER JOIN LODGE ON HOTEL.NumHotel = LODGE.NumHotel",
+          "GROUP BY HOTEL.NumHotel, NomHotel",
+          "ORDER BY SUM(CapaciteAccueil) DESC;"
+        ]
+      ],
+      "indice": "Joignez HOTEL et LODGE, regroupez par hôtel et additionnez les capacités. On peut trier sur un agrégat : ORDER BY SUM(…) DESC."
+    },
+    {
+      "id": "q15",
+      "theme": "Jointures et regroupements",
+      "enonce": "Afficher le salaire moyen par secteur, tous hôtels confondus (nom du secteur et salaire moyen), du secteur le mieux payé au moins bien payé.",
+      "ordered": [
+        1
+      ],
+      "correction": [
+        "SELECT NomSecteur, AVG(Salaire) AS SalaireMoyen",
+        "FROM SECTEUR, EMPLOYE",
+        "WHERE SECTEUR.NumSecteur = EMPLOYE.NumSecteur",
+        "GROUP BY SECTEUR.NumSecteur, NomSecteur",
+        "ORDER BY AVG(Salaire) DESC;"
+      ],
+      "variantes": [
+        [
+          "SELECT NomSecteur, AVG(Salaire) AS SalaireMoyen",
+          "FROM SECTEUR",
+          "INNER JOIN EMPLOYE ON SECTEUR.NumSecteur = EMPLOYE.NumSecteur",
+          "GROUP BY SECTEUR.NumSecteur, NomSecteur",
+          "ORDER BY AVG(Salaire) DESC;"
+        ]
+      ],
+      "indice": "Le salaire et le secteur de chaque employé sont dans EMPLOYE ; le nom du secteur est dans SECTEUR."
+    },
+    {
+      "id": "q16",
+      "theme": "Jointures et regroupements",
+      "enonce": "Quels sont les hôtels (nom et ville) qui emploient plus de 20 personnes ? Afficher aussi leur nombre d'employés.",
+      "correction": [
+        "SELECT NomHotel, VilleHotel, COUNT(*) AS NbEmployes",
+        "FROM HOTEL, EMPLOYE",
+        "WHERE HOTEL.NumHotel = EMPLOYE.NumHotel",
+        "GROUP BY HOTEL.NumHotel, NomHotel, VilleHotel",
+        "HAVING COUNT(*) > 20;"
+      ],
+      "variantes": [
+        [
+          "SELECT NomHotel, VilleHotel, COUNT(*) AS NbEmployes",
+          "FROM HOTEL",
+          "INNER JOIN EMPLOYE ON HOTEL.NumHotel = EMPLOYE.NumHotel",
+          "GROUP BY HOTEL.NumHotel, NomHotel, VilleHotel",
+          "HAVING COUNT(*) > 20;"
+        ]
+      ],
+      "indice": "Une condition sur le résultat d'un COUNT se place dans HAVING (après GROUP BY), pas dans WHERE."
+    },
+    {
+      "id": "q17",
+      "theme": "Sous-requêtes",
+      "annale": "2019",
+      "enonce": "Quels sont les hôtels de plein air (nom et ville de l'hôtel) qui n'ont pas de secteur « Restauration » ? Les secteurs d'un hôtel sont ceux enregistrés dans la table CONCERNER.",
+      "correction": [
+        "SELECT H.NomHotel, H.VilleHotel",
+        "FROM HOTEL H",
+        "WHERE H.NumHotel NOT IN (SELECT C.NumHotel",
+        "                        FROM SECTEUR S, CONCERNER C",
+        "                        WHERE S.NumSecteur = C.NumSecteur",
+        "                        AND S.NomSecteur = 'Restauration');"
+      ],
+      "variantes": [
+        [
+          "SELECT H.NomHotel, H.VilleHotel",
+          "FROM HOTEL H",
+          "WHERE NOT EXISTS (SELECT *",
+          "                  FROM SECTEUR S, CONCERNER C",
+          "                  WHERE S.NumSecteur = C.NumSecteur",
+          "                  AND S.NomSecteur = 'Restauration'",
+          "                  AND C.NumHotel = H.NumHotel);"
+        ],
+        [
+          "SELECT H.NomHotel, H.VilleHotel",
+          "FROM HOTEL H",
+          "WHERE H.NumHotel NOT IN (SELECT C.NumHotel",
+          "                        FROM SECTEUR S",
+          "                        INNER JOIN CONCERNER C ON S.NumSecteur = C.NumSecteur",
+          "                        WHERE S.NomSecteur = 'Restauration');"
+        ]
+      ],
+      "indice": "La sous-requête donne les numéros des hôtels qui ont un secteur « Restauration » (SECTEUR ne contient pas NumHotel : passez par CONCERNER) ; NOT IN garde les autres hôtels."
+    },
+    {
+      "id": "q18",
+      "theme": "Sous-requêtes",
+      "annale": "2019",
+      "enonce": "Quel est le salarié (nom, prénom) qui a le salaire le plus élevé ? Attention : il peut y en avoir plusieurs.",
+      "correction": [
+        "SELECT NomEmp, PrenomEmp",
+        "FROM EMPLOYE",
+        "WHERE Salaire = (SELECT MAX(Salaire)",
+        "                 FROM EMPLOYE);"
+      ],
+      "indice": "On ne peut pas écrire WHERE Salaire = MAX(Salaire) : calculez le maximum dans une sous-requête, puis comparez-le au salaire de chaque employé. Ici, deux employés sont ex aequo : la sous-requête les retrouve tous les deux."
+    },
+    {
+      "id": "q19",
+      "theme": "Sous-requêtes",
+      "enonce": "Quels types de lodge (code et libellé) ne sont proposés dans aucun hôtel du groupe ?",
+      "correction": [
+        "SELECT CodeType, LibelleType",
+        "FROM TYPE_LODGE",
+        "WHERE CodeType NOT IN (SELECT CodeType",
+        "                       FROM LODGE);"
+      ],
+      "variantes": [
+        [
+          "SELECT CodeType, LibelleType",
+          "FROM TYPE_LODGE",
+          "WHERE NOT EXISTS (SELECT *",
+          "                  FROM LODGE",
+          "                  WHERE LODGE.CodeType = TYPE_LODGE.CodeType);"
+        ]
+      ],
+      "indice": "La sous-requête donne la liste des types effectivement utilisés par un lodge ; NOT IN garde les autres."
+    },
+    {
+      "id": "q20",
+      "theme": "Sous-requêtes",
+      "enonce": "Quels sont les secteurs (nom du secteur et salaire moyen), tous hôtels confondus, dont le salaire moyen est supérieur au salaire moyen de l'ensemble des employés du groupe ?",
+      "correction": [
+        "SELECT NomSecteur, AVG(Salaire) AS SalaireMoyen",
+        "FROM SECTEUR, EMPLOYE",
+        "WHERE SECTEUR.NumSecteur = EMPLOYE.NumSecteur",
+        "GROUP BY SECTEUR.NumSecteur, NomSecteur",
+        "HAVING AVG(Salaire) > (SELECT AVG(Salaire)",
+        "                       FROM EMPLOYE);"
+      ],
+      "variantes": [
+        [
+          "SELECT NomSecteur, AVG(Salaire) AS SalaireMoyen",
+          "FROM SECTEUR",
+          "INNER JOIN EMPLOYE ON SECTEUR.NumSecteur = EMPLOYE.NumSecteur",
+          "GROUP BY SECTEUR.NumSecteur, NomSecteur",
+          "HAVING AVG(Salaire) > (SELECT AVG(Salaire)",
+          "                       FROM EMPLOYE);"
+        ]
+      ],
+      "indice": "Le salaire moyen général se calcule dans une sous-requête ; on le compare à la moyenne de chaque groupe dans le HAVING."
+    },
+    {
+      "id": "q21",
+      "theme": "Auto-jointure",
+      "enonce": "Certains employés gagnent plus que le responsable de leur secteur (dans leur hôtel). Les retrouver : nom, prénom et salaire de l'employé, puis nom et salaire de son responsable. Le responsable d'un secteur d'un hôtel est indiqué dans CONCERNER.",
+      "correction": [
+        "SELECT E.NomEmp, E.PrenomEmp, E.Salaire, R.NomEmp, R.Salaire",
+        "FROM EMPLOYE E, CONCERNER C, EMPLOYE R",
+        "WHERE E.NumSecteur = C.NumSecteur",
+        "AND E.NumHotel = C.NumHotel",
+        "AND C.CodeEmpResponsable = R.CodeEmp",
+        "AND E.Salaire > R.Salaire;"
+      ],
+      "variantes": [
+        [
+          "SELECT E.NomEmp, E.PrenomEmp, E.Salaire, R.NomEmp, R.Salaire",
+          "FROM EMPLOYE E",
+          "INNER JOIN CONCERNER C ON E.NumSecteur = C.NumSecteur AND E.NumHotel = C.NumHotel",
+          "INNER JOIN EMPLOYE R ON C.CodeEmpResponsable = R.CodeEmp",
+          "WHERE E.Salaire > R.Salaire;"
+        ]
+      ],
+      "indice": "La table EMPLOYE est utilisée deux fois, avec deux alias : E pour l'employé et R pour le responsable. CONCERNER fait le lien : l'employé y est rattaché par (NumSecteur, NumHotel), le responsable par CodeEmpResponsable."
+    },
+    {
+      "id": "q22",
+      "theme": "Mises à jour",
+      "type": "write",
+      "annale": "2019",
+      "enonce": "Suite à un changement de législation, les hôtels quatre étoiles sont reclassés en hôtels cinq étoiles. Écrire la requête correspondante.",
+      "correction": [
+        "UPDATE HOTEL",
+        "SET NbEtoiles = 5",
+        "WHERE NbEtoiles = 4;"
+      ],
+      "variantes": [
+        [
+          "UPDATE HOTEL",
+          "SET NbEtoiles = NbEtoiles + 1",
+          "WHERE NbEtoiles = 4;"
+        ]
+      ],
+      "verif": "SELECT * FROM HOTEL ORDER BY NumHotel",
+      "indice": "UPDATE … SET … WHERE : sans WHERE, tous les hôtels passeraient à cinq étoiles. NbEtoiles est un nombre : pas d'apostrophes ni de guillemets."
+    },
+    {
+      "id": "q23",
+      "theme": "Mises à jour",
+      "type": "write",
+      "enonce": "Un nouveau lodge est installé dans l'hôtel « Les Portes de Bretagne » (hôtel n° 2), qui en compte déjà 4 : le lodge n° 5, nommé « Macareux », de type « Chalet bois » (code 3), pour 5 personnes, 2 pièces et 32 m². L'ajouter.",
+      "correction": [
+        "INSERT INTO LODGE",
+        "VALUES (5, 2, 'Macareux', 5, 2, 32, 3);"
+      ],
+      "variantes": [
+        [
+          "INSERT INTO LODGE (NumLodge, NumHotel, NomLodge, CapaciteAccueil, NbPieces, Surface, CodeType)",
+          "VALUES (5, 2, 'Macareux', 5, 2, 32, 3);"
+        ]
+      ],
+      "verif": "SELECT * FROM LODGE ORDER BY NumHotel, NumLodge",
+      "indice": "Un lodge est identifié par le couple (NumLodge, NumHotel) : le numéro 5 existe déjà dans d'autres hôtels, mais pas dans l'hôtel n° 2. Donnez les valeurs dans l'ordre des colonnes de la table."
+    },
+    {
+      "id": "q24",
+      "theme": "Mises à jour",
+      "type": "write",
+      "annale": "2019",
+      "enonce": "M. Jean LORDINO (code 108), responsable du secteur Restauration (n° 3) de l'hôtel « Les Flots Bleus » (n° 1), a démissionné. Il est remplacé comme responsable de ce secteur par Emma ROUSSEAU (code 109), employée permanente du même secteur. Enregistrer ce changement de responsable.",
+      "correction": [
+        "UPDATE CONCERNER",
+        "SET CodeEmpResponsable = 109",
+        "WHERE NumSecteur = 3",
+        "AND NumHotel = 1;"
+      ],
+      "variantes": [
+        [
+          "UPDATE CONCERNER",
+          "SET CodeEmpResponsable = 109",
+          "WHERE CodeEmpResponsable = 108;"
+        ]
+      ],
+      "verif": "SELECT * FROM CONCERNER ORDER BY NumSecteur, NumHotel",
+      "indice": "Le responsable d'un secteur d'un hôtel est enregistré dans CONCERNER : la ligne est identifiée par le couple (NumSecteur, NumHotel)."
+    },
+    {
+      "id": "q25",
+      "theme": "Mises à jour",
+      "type": "write",
+      "annale": "2019",
+      "enonce": "Il faut maintenant supprimer M. Jean LORDINO de la table EMPLOYE. Essayez d'abord la requête préparée par le service du personnel : DELETE FROM EMPLOYE WHERE NomEmp = 'Lordino' AND PrenomEmp = 'Jean'. Elle est refusée : pourquoi ? Écrivez ensuite un script qui remplace d'abord M. LORDINO par Emma ROUSSEAU (code 109) comme responsable (question précédente), puis le supprime. Chaque exécution repart de la base d'origine : les deux requêtes doivent figurer dans votre script, séparées par un point-virgule.",
+      "correction": [
+        "UPDATE CONCERNER",
+        "SET CodeEmpResponsable = 109",
+        "WHERE NumSecteur = 3",
+        "AND NumHotel = 1;",
+        "DELETE FROM EMPLOYE",
+        "WHERE NomEmp = 'Lordino'",
+        "AND PrenomEmp = 'Jean';"
+      ],
+      "variantes": [
+        [
+          "UPDATE CONCERNER",
+          "SET CodeEmpResponsable = 109",
+          "WHERE CodeEmpResponsable = 108;",
+          "DELETE FROM EMPLOYE",
+          "WHERE CodeEmp = 108;"
+        ]
+      ],
+      "verif": "SELECT * FROM EMPLOYE ORDER BY CodeEmp",
+      "indice": "Tant que M. LORDINO est responsable, son code (108) figure dans CONCERNER.CodeEmpResponsable, clé étrangère qui référence EMPLOYE.CodeEmp : l'intégrité référentielle interdit de supprimer un employé encore référencé. Supprimer la ligne de CONCERNER ne convient pas : le secteur Restauration de l'hôtel disparaîtrait, et cette suppression serait elle-même refusée car d'autres employés y sont rattachés. Il faut donc d'abord changer de responsable (UPDATE), puis supprimer l'employé."
+    },
+    {
+      "id": "s01",
+      "theme": "Évolution du schéma",
+      "type": "schema",
+      "annale": "2019",
+      "enonce": "Le groupe veut gérer les réservations de lodges. Un client remplit un bulletin de réservation : il y figure le numéro du client (C1967), son nom, son adresse (rue, code postal, ville) et son téléphone portable ; le numéro de la réservation (R65832), sa date, les dates d'arrivée et de départ, et le lodge réservé (n° 4812 de l'hôtel « Les criques de Porbail »). Les montants (location, TVA, acompte de 30 %) sont calculés et n'ont pas à être stockés. En fin de séjour, une facture identifiée par un numéro et datée est éditée ; elle reprend l'ensemble du séjour (une facture par réservation). Complétez le schéma ci-dessous.",
+      "depart": [
+        "HOTEL",
+        "LODGE"
+      ],
+      "solution": {
+        "tables": [
+          {
+            "nom": "CLIENT",
+            "alias": [
+              "CLIENTS"
+            ],
+            "role": "décrire les clients",
+            "pk": [
+              "NumCli|NumClient|CodeCli|CodeClient|IdCli|IdClient"
+            ],
+            "attributs": [
+              "NomCli|NomClient|Nom",
+              "RueCli|RueClient|AdresseCli|AdresseClient|AdrCli|Adresse|Rue",
+              "CPCli|CPClient|CodePostalCli|CodePostalClient|CodePostal|CP",
+              "VilleCli|VilleClient|Ville",
+              "TelPortable|TelPortableCli|TelPortableClient|PortableCli|TelMobile|TelCli|TelClient|Telephone|TelephoneCli|Tel"
+            ],
+            "optionnels": [
+              "PrenomCli|PrenomClient|Prenom",
+              "TelPrincipal|TelPrincipalCli|TelFixe|TelFixeCli|Tel2"
+            ]
+          },
+          {
+            "nom": "FACTURE",
+            "alias": [
+              "FACTURES"
+            ],
+            "role": "enregistrer les factures (numéro et date)",
+            "pk": [
+              "NumFact|NumFacture|IdFact|IdFacture|CodeFact"
+            ],
+            "attributs": [
+              "DateFact|DateFacture|DateFacturation|DateEdition"
+            ],
+            "optionnels": [
+              "MontantFact|MontantFacture|Montant|MontantTotal|TotalFacture"
+            ]
+          },
+          {
+            "nom": "RESERVATION",
+            "alias": [
+              "RESERVATIONS",
+              "RESA",
+              "SEJOUR",
+              "RESERVER"
+            ],
+            "role": "enregistrer les réservations (dates, client et lodge réservé)",
+            "pk": [
+              "NumResa|NumReservation|IdResa|IdReservation|CodeResa|RefResa"
+            ],
+            "fk": {
+              "NumCli|NumClient|CodeCli|CodeClient|IdCli|IdClient": "CLIENT",
+              "NumFact|NumFacture|IdFact|IdFacture|CodeFact": "FACTURE",
+              "NumLodge": "LODGE",
+              "NumHotel": "LODGE"
+            },
+            "attributs": [
+              "DateResa|DateReservation",
+              "DateArrivee|DateDebut|DateDebutSejour|DateArriveeSejour",
+              "DateDepart|DateFin|DateFinSejour|DateDepartSejour"
+            ],
+            "optionnels": [
+              "Acompte|MontantAcompte|MontantLocation|Montant"
+            ]
+          }
+        ]
+      },
+      "variantes": [
+        {
+          "tables": [
+            {
+              "nom": "CLIENT",
+              "alias": [
+                "CLIENTS"
+              ],
+              "role": "décrire les clients",
+              "pk": [
+                "NumCli|NumClient|CodeCli|CodeClient|IdCli|IdClient"
+              ],
+              "attributs": [
+                "NomCli|NomClient|Nom",
+                "RueCli|RueClient|AdresseCli|AdresseClient|AdrCli|Adresse|Rue",
+                "CPCli|CPClient|CodePostalCli|CodePostalClient|CodePostal|CP",
+                "VilleCli|VilleClient|Ville",
+                "TelPortable|TelPortableCli|TelPortableClient|PortableCli|TelMobile|TelCli|TelClient|Telephone|TelephoneCli|Tel"
+              ],
+              "optionnels": [
+                "PrenomCli|PrenomClient|Prenom",
+                "TelPrincipal|TelPrincipalCli|TelFixe|TelFixeCli|Tel2"
+              ]
+            },
+            {
+              "nom": "FACTURE",
+              "alias": [
+                "FACTURES"
+              ],
+              "role": "enregistrer les factures (numéro et date)",
+              "pk": [
+                "NumFact|NumFacture|IdFact|IdFacture|CodeFact"
+              ],
+              "attributs": [
+                "DateFact|DateFacture|DateFacturation|DateEdition"
+              ],
+              "optionnels": [
+                "MontantFact|MontantFacture|Montant|MontantTotal|TotalFacture"
+              ],
+              "fk": {
+                "NumResa|NumReservation|IdResa|IdReservation|CodeResa|RefResa": "RESERVATION"
+              }
+            },
+            {
+              "nom": "RESERVATION",
+              "alias": [
+                "RESERVATIONS",
+                "RESA",
+                "SEJOUR",
+                "RESERVER"
+              ],
+              "role": "enregistrer les réservations (dates, client et lodge réservé)",
+              "pk": [
+                "NumResa|NumReservation|IdResa|IdReservation|CodeResa|RefResa"
+              ],
+              "fk": {
+                "NumCli|NumClient|CodeCli|CodeClient|IdCli|IdClient": "CLIENT",
+                "NumLodge": "LODGE",
+                "NumHotel": "LODGE"
+              },
+              "attributs": [
+                "DateResa|DateReservation",
+                "DateArrivee|DateDebut|DateDebutSejour|DateArriveeSejour",
+                "DateDepart|DateFin|DateFinSejour|DateDepartSejour"
+              ],
+              "optionnels": [
+                "Acompte|MontantAcompte|MontantLocation|Montant"
+              ],
+              "interdits": [
+                "NumFact|NumFacture|IdFact|IdFacture|CodeFact"
+              ]
+            }
+          ]
+        },
+        {
+          "tables": [
+            {
+              "nom": "CLIENT",
+              "alias": [
+                "CLIENTS"
+              ],
+              "role": "décrire les clients",
+              "pk": [
+                "NumCli|NumClient|CodeCli|CodeClient|IdCli|IdClient"
+              ],
+              "attributs": [
+                "NomCli|NomClient|Nom",
+                "RueCli|RueClient|AdresseCli|AdresseClient|AdrCli|Adresse|Rue",
+                "CPCli|CPClient|CodePostalCli|CodePostalClient|CodePostal|CP",
+                "VilleCli|VilleClient|Ville",
+                "TelPortable|TelPortableCli|TelPortableClient|PortableCli|TelMobile|TelCli|TelClient|Telephone|TelephoneCli|Tel"
+              ],
+              "optionnels": [
+                "PrenomCli|PrenomClient|Prenom",
+                "TelPrincipal|TelPrincipalCli|TelFixe|TelFixeCli|Tel2"
+              ]
+            },
+            {
+              "nom": "FACTURE",
+              "alias": [
+                "FACTURES"
+              ],
+              "role": "enregistrer les factures (numéro et date)",
+              "pk": [
+                "NumFact|NumFacture|IdFact|IdFacture|CodeFact"
+              ],
+              "attributs": [
+                "DateFact|DateFacture|DateFacturation|DateEdition"
+              ],
+              "optionnels": [
+                "MontantFact|MontantFacture|Montant|MontantTotal|TotalFacture"
+              ]
+            },
+            {
+              "nom": "RESERVATION",
+              "alias": [
+                "RESERVATIONS",
+                "RESA",
+                "SEJOUR",
+                "RESERVER"
+              ],
+              "role": "enregistrer les réservations (dates, client et lodge réservé)",
+              "pk": [
+                "NumResa|NumReservation|IdResa|IdReservation|CodeResa|RefResa"
+              ],
+              "fk": {
+                "NumCli|NumClient|CodeCli|CodeClient|IdCli|IdClient": "CLIENT",
+                "NumFact|NumFacture|IdFact|IdFacture|CodeFact": "FACTURE",
+                "NumLodge": "LODGE"
+              },
+              "attributs": [
+                "DateResa|DateReservation",
+                "DateArrivee|DateDebut|DateDebutSejour|DateArriveeSejour",
+                "DateDepart|DateFin|DateFinSejour|DateDepartSejour"
+              ],
+              "optionnels": [
+                "Acompte|MontantAcompte|MontantLocation|Montant"
+              ],
+              "interdits": [
+                "NumHotel"
+              ]
+            }
+          ],
+          "partiel": "Presque : un lodge est identifié par le couple (NumLodge, NumHotel). Pour désigner le lodge réservé, RESERVATION doit donc contenir les deux attributs, qui forment ensemble une clé étrangère vers LODGE."
+        }
+      ],
+      "indice": "Il faut trois nouvelles tables : les clients, les réservations et les factures. Une réservation concerne un seul client, un seul lodge et donne lieu à une seule facture : ce sont des clés étrangères dans RESERVATION. Attention : la clé primaire de LODGE est composée."
+    },
+    {
+      "id": "s02",
+      "theme": "Évolution du schéma",
+      "type": "schema",
+      "annale": "2019",
+      "enonce": "Lors de la réservation ou à tout moment du séjour, le client peut choisir des activités (équitation, plongée, escalade, tennis…). Chaque activité a un code (EQ1, Plon…), un descriptif et un prix unitaire. Une fiche de synthèse liste, pour une réservation, les activités choisies avec, pour chaque ligne, la date et la quantité : la réservation R65832 comporte par exemple « EQ1 – Équitation 1h » le 13/07 (quantité 2), le 20/07 (quantité 1) et le 21/07 (quantité 2). Complétez le schéma à partir de la table RESERVATION.",
+      "depart": [
+        {
+          "nom": "RESERVATION",
+          "colonnes": [
+            "_NumResa",
+            "DateResa",
+            "DateArrivee",
+            "DateDepart",
+            "#NumCli>CLIENT",
+            "#NumFact>FACTURE",
+            "#NumLodge>LODGE",
+            "#NumHotel>LODGE"
+          ]
+        }
+      ],
+      "solution": {
+        "tables": [
+          {
+            "nom": "ACTIVITE",
+            "alias": [
+              "ACTIVITES"
+            ],
+            "role": "décrire les activités proposées",
+            "pk": [
+              "CodeActivite|NumActivite|IdActivite|CodeAct|NumAct|RefActivite"
+            ],
+            "attributs": [
+              "LibelleActivite|DescriptifActivite|Descriptif|Libelle|LibelleAct|NomActivite|DesignationActivite",
+              "Tarif|TarifActivite|PU|PrixUnitaire|Prix|PrixActivite|TarifUnitaire"
+            ]
+          },
+          {
+            "nom": "CHOISIR",
+            "alias": [
+              "CHOIX",
+              "CHOISIT",
+              "PRATIQUER",
+              "RESERVER_ACTIVITE",
+              "INSCRIRE",
+              "PARTICIPER",
+              "DETAIL_ACTIVITE"
+            ],
+            "role": "enregistrer les activités choisies pour une réservation (date et quantité)",
+            "pk": [
+              "NumResa|NumReservation|IdResa|IdReservation|CodeResa|RefResa",
+              "CodeActivite|NumActivite|IdActivite|CodeAct|NumAct|RefActivite",
+              "DateActivite|Date|DateChoix|DateAct|DatePratique|Jour|DateJour"
+            ],
+            "fk": {
+              "NumResa|NumReservation|IdResa|IdReservation|CodeResa|RefResa": "RESERVATION",
+              "CodeActivite|NumActivite|IdActivite|CodeAct|NumAct|RefActivite": "ACTIVITE"
+            },
+            "attributs": [
+              "Qte|Quantite|QteChoisie|NbPersonnes|Nombre|QteActivite"
+            ]
+          }
+        ],
+        "tablesOptionnelles": [
+          "DATE",
+          "DATES",
+          "JOUR",
+          "CALENDRIER",
+          "DATE_ACTIVITE"
+        ]
+      },
+      "variantes": [
+        {
+          "tables": [
+            {
+              "nom": "ACTIVITE",
+              "alias": [
+                "ACTIVITES"
+              ],
+              "role": "décrire les activités proposées",
+              "pk": [
+                "CodeActivite|NumActivite|IdActivite|CodeAct|NumAct|RefActivite"
+              ],
+              "attributs": [
+                "LibelleActivite|DescriptifActivite|Descriptif|Libelle|LibelleAct|NomActivite|DesignationActivite",
+                "Tarif|TarifActivite|PU|PrixUnitaire|Prix|PrixActivite|TarifUnitaire"
+              ]
+            },
+            {
+              "nom": "CHOISIR",
+              "alias": [
+                "CHOIX",
+                "CHOISIT",
+                "PRATIQUER",
+                "RESERVER_ACTIVITE",
+                "INSCRIRE",
+                "PARTICIPER",
+                "DETAIL_ACTIVITE"
+              ],
+              "role": "enregistrer les activités choisies pour une réservation (date et quantité)",
+              "pk": [
+                "NumResa|NumReservation|IdResa|IdReservation|CodeResa|RefResa",
+                "CodeActivite|NumActivite|IdActivite|CodeAct|NumAct|RefActivite"
+              ],
+              "fk": {
+                "NumResa|NumReservation|IdResa|IdReservation|CodeResa|RefResa": "RESERVATION",
+                "CodeActivite|NumActivite|IdActivite|CodeAct|NumAct|RefActivite": "ACTIVITE"
+              },
+              "attributs": [
+                "Qte|Quantite|QteChoisie|NbPersonnes|Nombre|QteActivite",
+                "DateActivite|Date|DateChoix|DateAct|DatePratique|Jour|DateJour"
+              ]
+            }
+          ],
+          "tablesOptionnelles": [
+            "DATE",
+            "DATES",
+            "JOUR",
+            "CALENDRIER",
+            "DATE_ACTIVITE"
+          ],
+          "partiel": "Presque : avec la clé (NumResa, CodeActivite), une même activité ne pourrait être choisie qu'une seule fois par réservation. Or la fiche montre l'équitation choisie le 13, le 20 et le 21 juillet pour la même réservation : la date doit faire partie de la clé primaire de la table d'association."
+        }
+      ],
+      "indice": "Entre RESERVATION et ACTIVITE, la relation est « plusieurs à plusieurs » : elle devient une table d'association qui porte la quantité. Regardez la fiche : la même activité apparaît plusieurs fois pour la même réservation. Qu'est-ce qui distingue ces lignes ?"
+    },
+    {
+      "id": "p01",
+      "type": "processus",
+      "theme": "Processus",
+      "annale": "2019",
+      "enonce": "Dossier 2 – Gestion du recrutement des salariés. Dans chaque secteur, un employé fait office de chef, il en est le responsable. « Lorsqu'un poste devient vacant, le chef du secteur concerné fait une demande de recrutement en précisant le poste concerné, le niveau souhaité, le profil, le salaire proposé. Celle-ci est envoyée au service administratif de l'établissement. Le service administratif vérifie la cohérence de la demande : si la demande comporte une anomalie, elle est renvoyée au chef du secteur qui devra la corriger, sinon le service administratif lance la procédure de recrutement en visant la demande et en publiant une annonce. Lorsqu'un candidat répond à une annonce, la candidature est examinée par le chef de secteur : si elle correspond à la demande, il envoie une lettre de convocation pour un entretien ; si elle s'écarte trop de la demande, elle est placée dans les « refusés » et le candidat est avisé du refus. Lorsque le candidat vient passer l'entretien, il est reçu par le chef de secteur qui à l'issue de l'entretien rédige un compte-rendu. Un mois après la publication de l'annonce, le chef de secteur reprend pour examen les comptes rendus et notifie au candidat choisi son acceptation. » Modélisez le processus de recrutement des salariés en mobilisant les acteurs, sous la forme d'un modèle événements-résultats.",
+      "elements": [
+        {
+          "kind": "event",
+          "label": "Poste vacant"
+        },
+        {
+          "kind": "event",
+          "label": "Demande de recrutement"
+        },
+        {
+          "kind": "event",
+          "label": "Demande retournée"
+        },
+        {
+          "kind": "event",
+          "label": "Annonce"
+        },
+        {
+          "kind": "event",
+          "label": "Réponse"
+        },
+        {
+          "kind": "event",
+          "label": "Lettre de convocation"
+        },
+        {
+          "kind": "event",
+          "label": "Avis de refus"
+        },
+        {
+          "kind": "event",
+          "label": "Compte rendu d'entretien"
+        },
+        {
+          "kind": "event",
+          "label": "Un mois après l'annonce"
+        },
+        {
+          "kind": "event",
+          "label": "Notification d'acceptation"
+        },
+        {
+          "kind": "operation",
+          "label": "Faire une demande"
+        },
+        {
+          "kind": "operation",
+          "label": "Examen demande"
+        },
+        {
+          "kind": "operation",
+          "label": "Examen candidature"
+        },
+        {
+          "kind": "operation",
+          "label": "Entretien"
+        },
+        {
+          "kind": "operation",
+          "label": "Choix du candidat"
+        }
+      ],
+      "attendus": [
+        {
+          "operation": "Examen demande",
+          "alias": [
+            "Examen de la demande",
+            "Vérification demande",
+            "Vérification de la demande",
+            "Contrôle demande",
+            "Contrôle cohérence",
+            "Vérification cohérence"
+          ],
+          "regles": [
+            "Pas cohérente",
+            "Cohérente"
+          ]
+        },
+        {
+          "operation": "Examen candidature",
+          "alias": [
+            "Examen de la candidature",
+            "Étude candidature",
+            "Étude de la candidature",
+            "Traitement candidature",
+            "Sélection candidature"
+          ],
+          "regles": [
+            "Bonne",
+            "Mauvaise"
+          ]
+        },
+        {
+          "operation": "Choix du candidat",
+          "alias": [
+            "Choix candidat",
+            "Sélection du candidat",
+            "Sélection candidat",
+            "Examen des comptes rendus",
+            "Décision",
+            "Recrutement"
+          ],
+          "synchronisation": "Compte rendu d'entretien ET Un mois après l'annonce"
+        }
+      ],
+      "equivalents": {
+        "Pas cohérente": [
+          "Non cohérente",
+          "Incohérente",
+          "Anomalie",
+          "Demande incohérente",
+          "Demande non conforme"
+        ],
+        "Cohérente": [
+          "Demande cohérente",
+          "Pas d'anomalie",
+          "Conforme",
+          "Demande conforme"
+        ],
+        "Bonne": [
+          "Correspond",
+          "Candidature retenue",
+          "Conforme",
+          "Correspond à la demande",
+          "Acceptée"
+        ],
+        "Mauvaise": [
+          "Ne correspond pas",
+          "Refusée",
+          "Candidature refusée",
+          "S'écarte de la demande",
+          "Non conforme"
+        ],
+        "Compte rendu d'entretien": [
+          "Compte-rendu",
+          "Compte rendu",
+          "Comptes rendus",
+          "Compte rendu rédigé",
+          "CR entretien"
+        ],
+        "Un mois après l'annonce": [
+          "Fin du délai",
+          "Délai d'un mois",
+          "Un mois après publication",
+          "Un mois après la publication",
+          "Fin de la période de recrutement",
+          "Délai écoulé",
+          "1 mois"
+        ]
+      },
+      "solution": {
+        "lanes": [
+          "Chef de secteur",
+          "Service administratif",
+          "Candidat"
+        ],
+        "nodes": [
+          {
+            "id": "n1",
+            "kind": "event",
+            "label": "Poste vacant",
+            "x": 120,
+            "y": 95
+          },
+          {
+            "id": "n2",
+            "kind": "operation",
+            "label": "Faire une demande",
+            "x": 120,
+            "y": 200,
+            "actions": [
+              "Rédaction de la demande (poste, niveau, profil, salaire)"
+            ],
+            "rules": [
+              "Toujours"
+            ]
+          },
+          {
+            "id": "n3",
+            "kind": "event",
+            "label": "Demande de recrutement",
+            "x": 360,
+            "y": 300
+          },
+          {
+            "id": "n4",
+            "kind": "operation",
+            "label": "Examen demande",
+            "x": 360,
+            "y": 425,
+            "actions": [
+              "Vérification de la cohérence de la demande",
+              "Visa de la demande et publication de l'annonce"
+            ],
+            "rules": [
+              "Pas cohérente",
+              "Cohérente"
+            ]
+          },
+          {
+            "id": "n5",
+            "kind": "event",
+            "label": "Demande retournée",
+            "x": 120,
+            "y": 560
+          },
+          {
+            "id": "n6",
+            "kind": "event",
+            "label": "Annonce",
+            "x": 600,
+            "y": 560
+          },
+          {
+            "id": "n7",
+            "kind": "event",
+            "label": "Réponse",
+            "x": 600,
+            "y": 660
+          },
+          {
+            "id": "n8",
+            "kind": "operation",
+            "label": "Examen candidature",
+            "x": 120,
+            "y": 730,
+            "actions": [
+              "Comparaison de la candidature avec la demande"
+            ],
+            "rules": [
+              "Bonne",
+              "Mauvaise"
+            ]
+          },
+          {
+            "id": "n9",
+            "kind": "event",
+            "label": "Lettre de convocation",
+            "x": 600,
+            "y": 890
+          },
+          {
+            "id": "n10",
+            "kind": "event",
+            "label": "Avis de refus",
+            "x": 360,
+            "y": 890
+          },
+          {
+            "id": "n11",
+            "kind": "operation",
+            "label": "Entretien",
+            "x": 120,
+            "y": 1020,
+            "actions": [
+              "Réception du candidat",
+              "Rédaction du compte rendu"
+            ],
+            "rules": [
+              "Toujours"
+            ]
+          },
+          {
+            "id": "n12",
+            "kind": "event",
+            "label": "Compte rendu d'entretien",
+            "x": 120,
+            "y": 1150
+          },
+          {
+            "id": "n13",
+            "kind": "event",
+            "label": "Un mois après l'annonce",
+            "x": 360,
+            "y": 1150
+          },
+          {
+            "id": "n14",
+            "kind": "sync",
+            "label": "",
+            "x": 120,
+            "y": 1250,
+            "cond": "A et B"
+          },
+          {
+            "id": "n15",
+            "kind": "operation",
+            "label": "Choix du candidat",
+            "x": 120,
+            "y": 1360,
+            "actions": [
+              "Examen des comptes rendus",
+              "Choix du candidat retenu"
+            ],
+            "rules": [
+              "Toujours"
+            ]
+          },
+          {
+            "id": "n16",
+            "kind": "event",
+            "label": "Notification d'acceptation",
+            "x": 600,
+            "y": 1480
+          }
+        ],
+        "arrows": [
+          {
+            "id": "a1",
+            "from": "n1",
+            "rule": null,
+            "to": "n2"
+          },
+          {
+            "id": "a2",
+            "from": "n2",
+            "rule": 0,
+            "to": "n3"
+          },
+          {
+            "id": "a3",
+            "from": "n3",
+            "rule": null,
+            "to": "n4"
+          },
+          {
+            "id": "a4",
+            "from": "n4",
+            "rule": 0,
+            "to": "n5"
+          },
+          {
+            "id": "a5",
+            "from": "n4",
+            "rule": 1,
+            "to": "n6"
+          },
+          {
+            "id": "a6",
+            "from": "n7",
+            "rule": null,
+            "to": "n8"
+          },
+          {
+            "id": "a7",
+            "from": "n8",
+            "rule": 0,
+            "to": "n9"
+          },
+          {
+            "id": "a8",
+            "from": "n8",
+            "rule": 1,
+            "to": "n10"
+          },
+          {
+            "id": "a9",
+            "from": "n9",
+            "rule": null,
+            "to": "n11"
+          },
+          {
+            "id": "a10",
+            "from": "n11",
+            "rule": 0,
+            "to": "n12"
+          },
+          {
+            "id": "a11",
+            "from": "n12",
+            "rule": null,
+            "to": "n14",
+            "letter": "A"
+          },
+          {
+            "id": "a12",
+            "from": "n13",
+            "rule": null,
+            "to": "n14",
+            "letter": "B"
+          },
+          {
+            "id": "a13",
+            "from": "n14",
+            "rule": null,
+            "to": "n15"
+          },
+          {
+            "id": "a14",
+            "from": "n15",
+            "rule": 0,
+            "to": "n16"
+          }
+        ]
+      },
+      "autoevaluation": [
+        "Trois acteurs : le chef de secteur, le service administratif et le candidat (acteur externe, qui ne réalise pas d'opération).",
+        "Le poste vacant déclenche la demande du chef de secteur, que le service administratif examine.",
+        "L'examen de la demande a deux règles d'émission : pas cohérente (demande retournée) / cohérente (annonce publiée).",
+        "L'examen de la candidature, par le chef de secteur, a deux règles d'émission : bonne (lettre de convocation) / mauvaise (avis de refus).",
+        "Le choix final attend les comptes rendus d'entretien ET l'échéance d'un mois après l'annonce : synchronisation avec un événement temporel."
+      ],
+      "indice": "Chaque « si … sinon … » de la description correspond à une opération avec deux règles d'émission. Le candidat est un acteur externe : il produit et reçoit des événements, mais ne réalise pas d'opération. Pour la dernière étape, demandez-vous ce qui doit être réuni avant que le chef de secteur choisisse : un document et une date."
+    }
+  ]
+}

@@ -1,0 +1,1565 @@
+{
+  "id": "dcg2011",
+  "titre": "DCG 2011 – CREF Sport Adapté, formations",
+  "aujourdhui": "2011-05-15",
+  "contexte": "Le Centre Régional d'Entraînement et de Formation Sport Adapté (CREF SA) de Poitou-Charentes forme les entraîneurs qui encadrent des sportifs handicapés mentaux ou psychiques. Chaque FORMATION porte sur un SPORT ; elle peut permettre d'obtenir un diplôme (CodeDiplomeDelivre) et peut exiger un diplôme pour s'inscrire (CodeDiplomeNecessaire) : ce sont deux clés étrangères vers la même table DIPLOME, chacune pouvant être vide. Une formation est organisée en sessions numérotées 1, 2, 3… dans chaque formation : une session est identifiée par le couple (CodeFormation, NumSession). La table SESSION du sujet s'appelle ici SESSION_FORMATION (SESSION est un mot réservé dans plusieurs SGBD) ; Cout est en euros, DateLimitIns est la date limite d'inscription. Les formateurs (FORMATEUR) interviennent dans les sessions pour un nombre d'heures (INTERVENIR, colonne NBH). Un formateur peut avoir une spécialité sportive (CodeSport, vide pour les médecins et les psychologues) et être rattaché à une ASSOCIATION (CodeAssoc, vide pour les salariés à plein temps du CREF SA) ; POSSEDER indique ses diplômes. Attention : la spécialité d'un formateur n'est pas forcément le sport des formations dans lesquelles il intervient. Les adresses des formateurs ont été retirées du modèle.",
+  "source": "Inspiré du sujet DCG UE8 session 2011. Données entièrement fictives.",
+  "schemaGrid": {
+    "ASSOCIATION": [
+      0,
+      0
+    ],
+    "FORMATEUR": [
+      1,
+      0
+    ],
+    "POSSEDER": [
+      2,
+      0
+    ],
+    "SPORT": [
+      0,
+      1
+    ],
+    "INTERVENIR": [
+      1,
+      1
+    ],
+    "DIPLOME": [
+      2,
+      1
+    ],
+    "SESSION_FORMATION": [
+      1,
+      2
+    ],
+    "FORMATION": [
+      2,
+      2
+    ]
+  },
+  "questions": [
+    {
+      "id": "q01",
+      "theme": "Une seule table",
+      "enonce": "Afficher la liste des sports (toutes les colonnes).",
+      "correction": [
+        "SELECT *",
+        "FROM SPORT;"
+      ],
+      "indice": "L'étoile * permet d'afficher toutes les colonnes d'une table."
+    },
+    {
+      "id": "q02",
+      "theme": "Une seule table",
+      "enonce": "Afficher les formateurs salariés à plein temps du CREF SA, c'est-à-dire rattachés à aucune association : numéro, nom et prénom, triés par nom.",
+      "ordered": [
+        1
+      ],
+      "correction": [
+        "SELECT NumFormateur, NomFormateur, PrenomFormateur",
+        "FROM FORMATEUR",
+        "WHERE CodeAssoc IS NULL",
+        "ORDER BY NomFormateur;"
+      ],
+      "indice": "Un formateur sans association a une clé étrangère CodeAssoc vide : testez-la avec IS NULL (et non = NULL)."
+    },
+    {
+      "id": "q03",
+      "theme": "Une seule table",
+      "enonce": "Afficher les formations (code et libellé) qui permettent d'obtenir un diplôme sans en exiger aucun pour s'inscrire.",
+      "correction": [
+        "SELECT CodeFormation, LibelleFormation",
+        "FROM FORMATION",
+        "WHERE CodeDiplomeDelivre IS NOT NULL",
+        "AND CodeDiplomeNecessaire IS NULL;"
+      ],
+      "indice": "FORMATION contient deux clés étrangères vers DIPLOME : CodeDiplomeDelivre (diplôme obtenu) et CodeDiplomeNecessaire (diplôme exigé). Combinez IS NOT NULL et IS NULL."
+    },
+    {
+      "id": "q04",
+      "theme": "Une seule table",
+      "enonce": "Afficher les sessions dont le coût dépasse 500 € : code de la formation, numéro de session, coût et lieu, de la plus chère à la moins chère.",
+      "ordered": [
+        2
+      ],
+      "correction": [
+        "SELECT CodeFormation, NumSession, Cout, Lieu",
+        "FROM SESSION_FORMATION",
+        "WHERE Cout > 500",
+        "ORDER BY Cout DESC;"
+      ],
+      "indice": "Une session est identifiée par le couple (CodeFormation, NumSession). Tri décroissant : ORDER BY … DESC."
+    },
+    {
+      "id": "q05",
+      "theme": "Calculs et agrégats",
+      "enonce": "Combien de formateurs ont une spécialité sportive ? (Les médecins et les psychologues n'en ont pas.)",
+      "correction": [
+        "SELECT COUNT(CodeSport)",
+        "FROM FORMATEUR;"
+      ],
+      "variantes": [
+        [
+          "SELECT COUNT(*)",
+          "FROM FORMATEUR",
+          "WHERE CodeSport IS NOT NULL;"
+        ]
+      ],
+      "indice": "COUNT(*) compte toutes les lignes ; COUNT(colonne) ne compte que les lignes où la colonne est renseignée (non NULL)."
+    },
+    {
+      "id": "q06",
+      "theme": "Calculs et agrégats",
+      "enonce": "Afficher le coût moyen, le coût le plus bas et le coût le plus élevé des sessions de formation.",
+      "correction": [
+        "SELECT AVG(Cout), MIN(Cout), MAX(Cout)",
+        "FROM SESSION_FORMATION;"
+      ],
+      "indice": "AVG, MIN et MAX s'appliquent à une colonne numérique ; sans GROUP BY, le résultat tient en une seule ligne."
+    },
+    {
+      "id": "q07",
+      "theme": "Dates",
+      "enonce": "Afficher les sessions qui ont débuté en 2010 : code de la formation, numéro de session, date de début et date de fin, triées par date de début.",
+      "ordered": [
+        2
+      ],
+      "correction": [
+        "SELECT CodeFormation, NumSession, DateDebut, DateFin",
+        "FROM SESSION_FORMATION",
+        "WHERE YEAR(DateDebut) = 2010",
+        "ORDER BY DateDebut;"
+      ],
+      "variantes": [
+        [
+          "SELECT CodeFormation, NumSession, DateDebut, DateFin",
+          "FROM SESSION_FORMATION",
+          "WHERE DateDebut BETWEEN '01/01/2010' AND '31/12/2010'",
+          "ORDER BY DateDebut;"
+        ]
+      ],
+      "indice": "YEAR(date) donne l'année d'une date. Une session qui commence le 31/12/2009 et se termine en 2010 n'a pas débuté en 2010."
+    },
+    {
+      "id": "q08",
+      "theme": "Dates",
+      "enonce": "Nous sommes le 15/05/2011. Afficher les sessions auxquelles il est encore possible de s'inscrire (date limite d'inscription non dépassée) : code de la formation, numéro de session, date de début et date limite d'inscription.",
+      "correction": [
+        "SELECT CodeFormation, NumSession, DateDebut, DateLimitIns",
+        "FROM SESSION_FORMATION",
+        "WHERE DateLimitIns >= NOW();"
+      ],
+      "variantes": [
+        [
+          "SELECT CodeFormation, NumSession, DateDebut, DateLimitIns",
+          "FROM SESSION_FORMATION",
+          "WHERE DateLimitIns >= '15/05/2011';"
+        ],
+        [
+          "SELECT CodeFormation, NumSession, DateDebut, DateLimitIns",
+          "FROM SESSION_FORMATION",
+          "WHERE DateLimitIns >= CURDATE();"
+        ]
+      ],
+      "indice": "NOW() (ou CURDATE()) donne la date du jour. Attention : c'est la date limite d'inscription qui compte, pas la date de début ; une session à venir peut déjà être close aux inscriptions."
+    },
+    {
+      "id": "q09",
+      "theme": "Dates",
+      "enonce": "Afficher, pour chaque session de la formation F605, le numéro de session, la date de début, la date de fin et la durée de la session en jours (le premier et le dernier jour comptent tous les deux).",
+      "correction": [
+        "SELECT NumSession, DateDebut, DateFin, DATEDIFF(DateFin, DateDebut) + 1 AS DureeJours",
+        "FROM SESSION_FORMATION",
+        "WHERE CodeFormation = 'F605';"
+      ],
+      "indice": "DATEDIFF(fin, début) donne le nombre de jours entre deux dates : une session du lundi au vendredi donne 4, il faut donc ajouter 1."
+    },
+    {
+      "id": "q10",
+      "theme": "Jointures",
+      "annale": "2011",
+      "enonce": "Liste des formateurs (nom et prénom) triés par libellé des sports. On s'intéresse ici au sport de spécialité de chaque formateur (et non aux sports des formations où il intervient) ; afficher aussi le libellé de ce sport. Les formateurs sans spécialité n'apparaissent pas.",
+      "ordered": [
+        0
+      ],
+      "correction": [
+        "SELECT LibelleSport, NomFormateur, PrenomFormateur",
+        "FROM FORMATEUR F, SPORT S",
+        "WHERE F.CodeSport = S.CodeSport",
+        "ORDER BY LibelleSport;"
+      ],
+      "variantes": [
+        [
+          "SELECT LibelleSport, NomFormateur, PrenomFormateur",
+          "FROM FORMATEUR",
+          "INNER JOIN SPORT ON FORMATEUR.CodeSport = SPORT.CodeSport",
+          "ORDER BY LibelleSport;"
+        ]
+      ],
+      "indice": "Le libellé du sport est dans SPORT, le formateur dans FORMATEUR : reliez-les par CodeSport. Comme CodeSport existe dans les deux tables, préfixez-le (F.CodeSport, S.CodeSport)."
+    },
+    {
+      "id": "q11",
+      "theme": "Jointures",
+      "annale": "2011",
+      "enonce": "Nombre de formations permettant d'obtenir le diplôme d'« initiateur FFSA ».",
+      "correction": [
+        "SELECT COUNT(CodeFormation)",
+        "FROM DIPLOME D, FORMATION F",
+        "WHERE D.CodeDiplome = F.CodeDiplomeDelivre",
+        "AND LibelleDiplome = 'initiateur FFSA';"
+      ],
+      "variantes": [
+        [
+          "SELECT COUNT(*)",
+          "FROM FORMATION",
+          "INNER JOIN DIPLOME ON DIPLOME.CodeDiplome = FORMATION.CodeDiplomeDelivre",
+          "WHERE LibelleDiplome = 'initiateur FFSA';"
+        ]
+      ],
+      "indice": "FORMATION a deux liens vers DIPLOME : le diplôme délivré et le diplôme nécessaire. « Permettant d'obtenir » : c'est CodeDiplomeDelivre qu'il faut relier à DIPLOME."
+    },
+    {
+      "id": "q12",
+      "theme": "Jointures",
+      "enonce": "Afficher les formateurs rattachés à une association : nom et prénom du formateur, nom de l'association, triés par nom d'association puis par nom de formateur.",
+      "ordered": [
+        2,
+        0
+      ],
+      "correction": [
+        "SELECT NomFormateur, PrenomFormateur, NomAssoc",
+        "FROM FORMATEUR, ASSOCIATION",
+        "WHERE FORMATEUR.CodeAssoc = ASSOCIATION.CodeAssoc",
+        "ORDER BY NomAssoc, NomFormateur;"
+      ],
+      "variantes": [
+        [
+          "SELECT NomFormateur, PrenomFormateur, NomAssoc",
+          "FROM FORMATEUR",
+          "INNER JOIN ASSOCIATION ON FORMATEUR.CodeAssoc = ASSOCIATION.CodeAssoc",
+          "ORDER BY NomAssoc, NomFormateur;"
+        ]
+      ],
+      "indice": "La jointure FORMATEUR – ASSOCIATION écarte d'elle-même les salariés à plein temps (CodeAssoc vide). Deux critères de tri : ORDER BY NomAssoc, NomFormateur."
+    },
+    {
+      "id": "q13",
+      "theme": "Jointures",
+      "enonce": "Pour les formations qui exigent un diplôme pour s'inscrire et qui en délivrent un, afficher le libellé de la formation, le libellé du diplôme exigé et le libellé du diplôme obtenu.",
+      "correction": [
+        "SELECT LibelleFormation, DN.LibelleDiplome AS DiplomeExige, DD.LibelleDiplome AS DiplomeObtenu",
+        "FROM FORMATION F, DIPLOME DN, DIPLOME DD",
+        "WHERE F.CodeDiplomeNecessaire = DN.CodeDiplome",
+        "AND F.CodeDiplomeDelivre = DD.CodeDiplome;"
+      ],
+      "variantes": [
+        [
+          "SELECT LibelleFormation, DN.LibelleDiplome, DD.LibelleDiplome",
+          "FROM FORMATION F",
+          "INNER JOIN DIPLOME DN ON F.CodeDiplomeNecessaire = DN.CodeDiplome",
+          "INNER JOIN DIPLOME DD ON F.CodeDiplomeDelivre = DD.CodeDiplome;"
+        ]
+      ],
+      "indice": "Il faut deux libellés de diplômes différents sur la même ligne : la table DIPLOME doit figurer deux fois dans le FROM, avec deux alias (par exemple DN pour le diplôme nécessaire et DD pour le diplôme délivré), chacune reliée à sa propre clé étrangère."
+    },
+    {
+      "id": "q14",
+      "theme": "Jointures",
+      "enonce": "Afficher les formateurs (numéro, nom, prénom) titulaires du diplôme « Entraîneur FFSA 1er degré », triés par nom.",
+      "ordered": [
+        1
+      ],
+      "correction": [
+        "SELECT FORMATEUR.NumFormateur, NomFormateur, PrenomFormateur",
+        "FROM FORMATEUR, POSSEDER, DIPLOME",
+        "WHERE FORMATEUR.NumFormateur = POSSEDER.NumFormateur",
+        "AND POSSEDER.CodeDiplome = DIPLOME.CodeDiplome",
+        "AND LibelleDiplome = 'Entraîneur FFSA 1er degré'",
+        "ORDER BY NomFormateur;"
+      ],
+      "variantes": [
+        [
+          "SELECT FORMATEUR.NumFormateur, NomFormateur, PrenomFormateur",
+          "FROM FORMATEUR",
+          "INNER JOIN POSSEDER ON FORMATEUR.NumFormateur = POSSEDER.NumFormateur",
+          "INNER JOIN DIPLOME ON POSSEDER.CodeDiplome = DIPLOME.CodeDiplome",
+          "WHERE LibelleDiplome = 'Entraîneur FFSA 1er degré'",
+          "ORDER BY NomFormateur;"
+        ]
+      ],
+      "indice": "Les diplômes d'un formateur sont dans POSSEDER, qui relie FORMATEUR et DIPLOME : trois tables, deux conditions de jointure."
+    },
+    {
+      "id": "q15",
+      "theme": "Jointures",
+      "enonce": "Afficher sans doublon les formateurs (numéro, nom, prénom) qui sont intervenus dans au moins une session d'une formation de natation. Le sport à considérer est celui de la formation, et non la spécialité du formateur : un médecin ou un pongiste peut intervenir dans une formation de natation.",
+      "correction": [
+        "SELECT DISTINCT FORMATEUR.NumFormateur, NomFormateur, PrenomFormateur",
+        "FROM FORMATEUR, INTERVENIR, FORMATION, SPORT",
+        "WHERE FORMATEUR.NumFormateur = INTERVENIR.NumFormateur",
+        "AND INTERVENIR.CodeFormation = FORMATION.CodeFormation",
+        "AND FORMATION.CodeSport = SPORT.CodeSport",
+        "AND LibelleSport = 'Natation';"
+      ],
+      "variantes": [
+        [
+          "SELECT DISTINCT FORMATEUR.NumFormateur, NomFormateur, PrenomFormateur",
+          "FROM FORMATEUR",
+          "INNER JOIN INTERVENIR ON FORMATEUR.NumFormateur = INTERVENIR.NumFormateur",
+          "INNER JOIN FORMATION ON INTERVENIR.CodeFormation = FORMATION.CodeFormation",
+          "INNER JOIN SPORT ON FORMATION.CodeSport = SPORT.CodeSport",
+          "WHERE LibelleSport = 'Natation';"
+        ]
+      ],
+      "indice": "Chemin : FORMATEUR → INTERVENIR → FORMATION → SPORT (le CodeSport de FORMATION, pas celui de FORMATEUR). Un formateur intervenu dans plusieurs sessions apparaîtrait plusieurs fois : DISTINCT."
+    },
+    {
+      "id": "q16",
+      "theme": "Jointures et regroupements",
+      "annale": "2011",
+      "enonce": "Nombre de sessions organisées en 2009 (date de début en 2009) par formation (afficher le libellé de la formation).",
+      "correction": [
+        "SELECT LibelleFormation, COUNT(NumSession)",
+        "FROM SESSION_FORMATION S, FORMATION F",
+        "WHERE S.CodeFormation = F.CodeFormation",
+        "AND DateDebut BETWEEN '01/01/2009' AND '31/12/2009'",
+        "GROUP BY F.CodeFormation, LibelleFormation;"
+      ],
+      "variantes": [
+        [
+          "SELECT LibelleFormation, COUNT(*)",
+          "FROM SESSION_FORMATION",
+          "INNER JOIN FORMATION ON SESSION_FORMATION.CodeFormation = FORMATION.CodeFormation",
+          "WHERE YEAR(DateDebut) = 2009",
+          "GROUP BY FORMATION.CodeFormation, LibelleFormation;"
+        ],
+        [
+          "SELECT LibelleFormation, COUNT(NumSession)",
+          "FROM SESSION_FORMATION S, FORMATION F",
+          "WHERE S.CodeFormation = F.CodeFormation",
+          "AND YEAR(DateDebut) = 2009",
+          "GROUP BY LibelleFormation;"
+        ]
+      ],
+      "indice": "Joindre les sessions à leur formation, ne garder que les débuts en 2009 (WHERE), puis regrouper par formation. Une session qui commence le 29/12/2008 n'est pas une session de 2009, une session qui commence le 31/12/2009 en est une."
+    },
+    {
+      "id": "q17",
+      "theme": "Jointures et regroupements",
+      "annale": "2011",
+      "enonce": "Liste des formateurs (numéro et nom) et du total de leur nombre d'heures d'intervention, à condition que ce total soit supérieur à 20.",
+      "correction": [
+        "SELECT F.NumFormateur, NomFormateur, SUM(NBH)",
+        "FROM FORMATEUR F, INTERVENIR I",
+        "WHERE I.NumFormateur = F.NumFormateur",
+        "GROUP BY F.NumFormateur, NomFormateur",
+        "HAVING SUM(NBH) > 20;"
+      ],
+      "variantes": [
+        [
+          "SELECT FORMATEUR.NumFormateur, NomFormateur, SUM(NBH) AS TotalHeures",
+          "FROM FORMATEUR",
+          "INNER JOIN INTERVENIR ON INTERVENIR.NumFormateur = FORMATEUR.NumFormateur",
+          "GROUP BY FORMATEUR.NumFormateur, NomFormateur",
+          "HAVING SUM(NBH) > 20;"
+        ]
+      ],
+      "indice": "La condition porte sur un total (SUM) : elle s'écrit dans HAVING, après le GROUP BY. NumFormateur existe dans les deux tables : dans le SELECT aussi, il faut préciser F.NumFormateur."
+    },
+    {
+      "id": "q18",
+      "theme": "Jointures et regroupements",
+      "enonce": "Afficher, pour chaque sport, le libellé du sport et le coût moyen des sessions des formations qui portent sur ce sport.",
+      "correction": [
+        "SELECT LibelleSport, AVG(Cout)",
+        "FROM SESSION_FORMATION, FORMATION, SPORT",
+        "WHERE SESSION_FORMATION.CodeFormation = FORMATION.CodeFormation",
+        "AND FORMATION.CodeSport = SPORT.CodeSport",
+        "GROUP BY SPORT.CodeSport, LibelleSport;"
+      ],
+      "variantes": [
+        [
+          "SELECT LibelleSport, AVG(Cout)",
+          "FROM SESSION_FORMATION",
+          "INNER JOIN FORMATION ON SESSION_FORMATION.CodeFormation = FORMATION.CodeFormation",
+          "INNER JOIN SPORT ON FORMATION.CodeSport = SPORT.CodeSport",
+          "GROUP BY SPORT.CodeSport, LibelleSport;"
+        ]
+      ],
+      "indice": "Le sport d'une session se trouve en passant par sa formation : SESSION_FORMATION → FORMATION → SPORT. Regroupez ensuite par sport."
+    },
+    {
+      "id": "q19",
+      "theme": "Sous-requêtes",
+      "annale": "2011",
+      "enonce": "Liste des sports (libellé) qui n'ont pas de formateur, c'est-à-dire qui ne sont la spécialité d'aucun formateur.",
+      "correction": [
+        "SELECT LibelleSport",
+        "FROM SPORT",
+        "WHERE CodeSport NOT IN (SELECT CodeSport",
+        "                        FROM FORMATEUR",
+        "                        WHERE CodeSport IS NOT NULL);"
+      ],
+      "variantes": [
+        [
+          "SELECT LibelleSport",
+          "FROM SPORT S",
+          "WHERE NOT EXISTS (SELECT *",
+          "                  FROM FORMATEUR F",
+          "                  WHERE F.CodeSport = S.CodeSport);"
+        ],
+        [
+          "SELECT LibelleSport",
+          "FROM SPORT",
+          "LEFT JOIN FORMATEUR ON SPORT.CodeSport = FORMATEUR.CodeSport",
+          "WHERE FORMATEUR.NumFormateur IS NULL;"
+        ]
+      ],
+      "indice": "Piège : certains formateurs (médecins, psychologues) n'ont pas de spécialité. Si la sous-requête renvoie une valeur NULL, « CodeSport NOT IN (…) » n'est jamais vrai et le résultat est vide ! Écartez les NULL dans la sous-requête (IS NOT NULL) ou utilisez NOT EXISTS."
+    },
+    {
+      "id": "q20",
+      "theme": "Sous-requêtes",
+      "enonce": "Afficher les sessions pour lesquelles aucun formateur n'est encore prévu : code et libellé de la formation, numéro de session et date de début.",
+      "correction": [
+        "SELECT S.CodeFormation, LibelleFormation, S.NumSession, DateDebut",
+        "FROM SESSION_FORMATION S, FORMATION F",
+        "WHERE S.CodeFormation = F.CodeFormation",
+        "AND NOT EXISTS (SELECT *",
+        "                FROM INTERVENIR I",
+        "                WHERE I.CodeFormation = S.CodeFormation",
+        "                AND I.NumSession = S.NumSession);"
+      ],
+      "variantes": [
+        [
+          "SELECT S.CodeFormation, LibelleFormation, S.NumSession, DateDebut",
+          "FROM FORMATION F",
+          "INNER JOIN SESSION_FORMATION S ON S.CodeFormation = F.CodeFormation",
+          "LEFT JOIN INTERVENIR I ON I.CodeFormation = S.CodeFormation AND I.NumSession = S.NumSession",
+          "WHERE I.NumFormateur IS NULL;"
+        ]
+      ],
+      "indice": "Une session est identifiée par deux colonnes (CodeFormation, NumSession) : NOT IN sur une seule colonne ne suffit pas. Avec NOT EXISTS, la sous-requête cherche une intervention ayant le même code de formation ET le même numéro de session."
+    },
+    {
+      "id": "q21",
+      "theme": "Sous-requêtes",
+      "enonce": "Afficher la session la plus chère : code de la formation, numéro de session et coût.",
+      "correction": [
+        "SELECT CodeFormation, NumSession, Cout",
+        "FROM SESSION_FORMATION",
+        "WHERE Cout = (SELECT MAX(Cout)",
+        "              FROM SESSION_FORMATION);"
+      ],
+      "indice": "Calculez d'abord le coût maximal dans une sous-requête, puis cherchez la (ou les) session(s) qui ont ce coût."
+    },
+    {
+      "id": "q22",
+      "theme": "Sous-requêtes",
+      "enonce": "Afficher les formateurs (numéro, nom, prénom) qui ne sont jamais intervenus dans une session.",
+      "correction": [
+        "SELECT NumFormateur, NomFormateur, PrenomFormateur",
+        "FROM FORMATEUR",
+        "WHERE NumFormateur NOT IN (SELECT NumFormateur",
+        "                           FROM INTERVENIR);"
+      ],
+      "variantes": [
+        [
+          "SELECT NumFormateur, NomFormateur, PrenomFormateur",
+          "FROM FORMATEUR F",
+          "WHERE NOT EXISTS (SELECT *",
+          "                  FROM INTERVENIR I",
+          "                  WHERE I.NumFormateur = F.NumFormateur);"
+        ]
+      ],
+      "indice": "Les interventions sont enregistrées dans INTERVENIR : cherchez les formateurs dont le numéro n'y figure pas (NOT IN ou NOT EXISTS)."
+    },
+    {
+      "id": "q23",
+      "theme": "Mises à jour",
+      "type": "write",
+      "annale": "2011",
+      "enonce": "Rédiger la requête permettant d'augmenter de 8 % le prix (le coût) de toutes les sessions de la formation ayant pour code formation « F613 ».",
+      "correction": [
+        "UPDATE SESSION_FORMATION",
+        "SET Cout = Cout * 1.08",
+        "WHERE CodeFormation = 'F613';"
+      ],
+      "variantes": [
+        [
+          "UPDATE SESSION_FORMATION",
+          "SET Cout = Cout + Cout * 8 / 100",
+          "WHERE CodeFormation = 'F613';"
+        ]
+      ],
+      "verif": "SELECT * FROM SESSION_FORMATION ORDER BY CodeFormation, NumSession",
+      "indice": "Augmenter de 8 %, c'est multiplier par 1,08 (écrit 1.08 en SQL). Sans WHERE, toutes les sessions seraient augmentées."
+    },
+    {
+      "id": "q24",
+      "theme": "Mises à jour",
+      "type": "write",
+      "enonce": "Une 4e session de la formation F613 (Tennis de table adapté) est programmée du 10/02/2012 au 12/02/2012 au « CREPS de Poitiers », pour un coût de 320 € ; la date limite d'inscription est le 20/01/2012. L'ajouter.",
+      "correction": [
+        "INSERT INTO SESSION_FORMATION",
+        "VALUES ('F613', 4, 320, '2012-02-10', '2012-02-12', '2012-01-20', 'CREPS de Poitiers');"
+      ],
+      "variantes": [
+        [
+          "INSERT INTO SESSION_FORMATION (CodeFormation, NumSession, Cout, DateDebut, DateFin, DateLimitIns, Lieu)",
+          "VALUES ('F613', 4, 320, '10/02/2012', '12/02/2012', '20/01/2012', 'CREPS de Poitiers');"
+        ]
+      ],
+      "verif": "SELECT * FROM SESSION_FORMATION ORDER BY CodeFormation, NumSession",
+      "indice": "Les sessions sont numérotées dans chaque formation : la nouvelle session de F613 porte le numéro 4. Donnez les valeurs dans l'ordre des colonnes (CodeFormation, NumSession, Cout, DateDebut, DateFin, DateLimitIns, Lieu)."
+    },
+    {
+      "id": "q25",
+      "theme": "Mises à jour",
+      "type": "write",
+      "enonce": "Aurélie ROBIN (formatrice n° 125) quitte le CREF SA ; elle n'est jamais intervenue dans une session. Essayez d'abord : DELETE FROM FORMATEUR WHERE NumFormateur = 125. La suppression est refusée : pourquoi ? Écrivez ensuite un script qui supprime d'abord les lignes qui la référencent, puis la formatrice (chaque exécution repart de la base d'origine : les deux requêtes doivent figurer dans votre script, séparées par un point-virgule).",
+      "correction": [
+        "DELETE FROM POSSEDER",
+        "WHERE NumFormateur = 125;",
+        "DELETE FROM FORMATEUR",
+        "WHERE NumFormateur = 125;"
+      ],
+      "verif": "SELECT * FROM FORMATEUR ORDER BY NumFormateur",
+      "indice": "Ses diplômes sont enregistrés dans POSSEDER, dont la clé étrangère NumFormateur fait référence à FORMATEUR : l'intégrité référentielle interdit de supprimer un formateur encore référencé. Il faut d'abord supprimer ses lignes de POSSEDER."
+    },
+    {
+      "id": "s01",
+      "type": "schema",
+      "theme": "Évolution du schéma",
+      "annale": "2011",
+      "enonce": "Le CREF SA organise aussi des stages pour préparer les sportifs inscrits sur sa liste. Un sportif est identifié par son numéro CREF ; on connaît son nom, son prénom, son numéro de licence à la Fédération Française du Sport Adapté (FFSA) et son numéro de licence dans la fédération de son sport (FF). Un stage a un numéro, un libellé, une heure de début et une heure de fin ; il concerne un ou plusieurs sports. Un stage se déroule sur plusieurs jours : chaque jour, il a lieu dans une seule salle, mais la salle peut changer d'un jour à l'autre (une salle a un code et un nom). Plusieurs formateurs encadrent un stage, chacun pour un nombre d'heures attribué ; l'un d'eux est le coordonnateur (contact) du stage. Les sportifs s'inscrivent aux stages, et l'on conserve pour chaque sportif un commentaire sur le déroulement de chaque stage qu'il a suivi. Complétez le schéma ci-dessous.",
+      "depart": [
+        "SPORT",
+        "FORMATEUR"
+      ],
+      "solution": {
+        "tables": [
+          {
+            "nom": "SPORTIF",
+            "alias": [
+              "SPORTIF_INSCRIT",
+              "SPORTIFS",
+              "SPORTIFS_INSCRITS",
+              "ATHLETE"
+            ],
+            "role": "décrire les sportifs inscrits sur la liste du CREF SA",
+            "pk": [
+              "NumCREF|NumSportif|NumeroCREF|IdSportif|CodeSportif|NumCREFSA"
+            ],
+            "attributs": [
+              "Nom|NomSportif",
+              "Prenom|PrenomSportif",
+              "LicenceFFSA|NumLicenceFFSA|LicFFSA|NumeroLicenceFFSA",
+              "LicenceFF|NumLicenceFF|LicFF|LicenceFederation|LicenceClub|NumLicence|NumeroLicenceFF"
+            ]
+          },
+          {
+            "nom": "SALLE",
+            "alias": [
+              "SALLES"
+            ],
+            "role": "décrire les salles (code et nom)",
+            "pk": [
+              "CodeS|CodeSalle|NumSalle|IdSalle"
+            ],
+            "attributs": [
+              "NomS|NomSalle|LibelleSalle|Nom"
+            ]
+          },
+          {
+            "nom": "STAGE",
+            "alias": [
+              "STAGES"
+            ],
+            "role": "décrire les stages (libellé, horaires, coordonnateur)",
+            "pk": [
+              "NumSt|NumStage|CodeStage|IdStage|NumeroStage|CodeSt"
+            ],
+            "fk": {
+              "NumFormateurCoord|NumCoordonnateur|NumFormateurCoordonnateur|NumFormateurContact|NumContact|Coordonnateur|NumCoord|NumFormateur": "FORMATEUR"
+            },
+            "attributs": [
+              "LibelleSt|LibelleStage|Libelle|NomStage",
+              "HeureD|HeureDebut|HeureDeb|HeureDebutStage",
+              "HeureF|HeureFin|HeureFinStage"
+            ],
+            "optionnels": [
+              "DateDebut|DateDebutStage|DateD",
+              "DateFin|DateFinStage|DateF"
+            ]
+          },
+          {
+            "nom": "CONCERNER",
+            "alias": [
+              "CONCERNER_STAGE",
+              "STAGE_SPORT",
+              "SPORT_STAGE",
+              "PORTER_SUR",
+              "CONCERNE"
+            ],
+            "role": "indiquer les sports concernés par chaque stage",
+            "pk": [
+              "NumSt|NumStage|CodeStage|IdStage|NumeroStage|CodeSt",
+              "CodeSport"
+            ],
+            "fk": {
+              "NumSt|NumStage|CodeStage|IdStage|NumeroStage|CodeSt": "STAGE",
+              "CodeSport": "SPORT"
+            }
+          },
+          {
+            "nom": "AVOIR_LIEU",
+            "alias": [
+              "SE_DEROULER",
+              "DEROULER",
+              "JOURNEE",
+              "JOURNEE_STAGE",
+              "PLANNING",
+              "OCCUPER",
+              "DEROULEMENT",
+              "LIEU",
+              "AVOIR_LIEU_STAGE"
+            ],
+            "role": "indiquer, pour chaque jour d'un stage, la salle utilisée",
+            "pk": [
+              "NumSt|NumStage|CodeStage|IdStage|NumeroStage|CodeSt",
+              "DateJour|Date|DateStage|Jour|DateJournee"
+            ],
+            "fk": {
+              "NumSt|NumStage|CodeStage|IdStage|NumeroStage|CodeSt": "STAGE",
+              "CodeS|CodeSalle|NumSalle|IdSalle": "SALLE"
+            }
+          },
+          {
+            "nom": "INTERVENIR_STAGE",
+            "alias": [
+              "INTERVENIR",
+              "ENCADRER",
+              "ANIMER",
+              "INTERVENTION",
+              "INTERVENTIONS",
+              "INTERVENTION_STAGE",
+              "INTERVENIR_ST",
+              "ENCADRER_STAGE"
+            ],
+            "role": "enregistrer le nombre d'heures attribué à chaque formateur dans un stage",
+            "pk": [
+              "NumFormateur|NumeroFormateur",
+              "NumSt|NumStage|CodeStage|IdStage|NumeroStage|CodeSt"
+            ],
+            "fk": {
+              "NumFormateur|NumeroFormateur": "FORMATEUR",
+              "NumSt|NumStage|CodeStage|IdStage|NumeroStage|CodeSt": "STAGE"
+            },
+            "attributs": [
+              "NBH|NbHeures|NombreHeures|NbreHeures|NbH"
+            ]
+          },
+          {
+            "nom": "INSCRIRE",
+            "alias": [
+              "INSCRIPTION",
+              "INSCRIPTIONS",
+              "S_INSCRIRE",
+              "SINSCRIRE",
+              "PARTICIPER",
+              "PARTICIPATION"
+            ],
+            "role": "enregistrer les inscriptions des sportifs aux stages, avec le commentaire sur leur déroulement",
+            "pk": [
+              "NumCREF|NumSportif|NumeroCREF|IdSportif|CodeSportif|NumCREFSA",
+              "NumSt|NumStage|CodeStage|IdStage|NumeroStage|CodeSt"
+            ],
+            "fk": {
+              "NumCREF|NumSportif|NumeroCREF|IdSportif|CodeSportif|NumCREFSA": "SPORTIF",
+              "NumSt|NumStage|CodeStage|IdStage|NumeroStage|CodeSt": "STAGE"
+            },
+            "attributs": [
+              "Commentaire|CommentaireStage|Comment|Remarque"
+            ]
+          }
+        ],
+        "tablesOptionnelles": [
+          "DATE",
+          "DATES",
+          "JOUR",
+          "JOURS",
+          "CALENDRIER",
+          "DATE_JOUR"
+        ]
+      },
+      "variantes": [
+        {
+          "tables": [
+            {
+              "nom": "SPORTIF",
+              "alias": [
+                "SPORTIF_INSCRIT",
+                "SPORTIFS",
+                "SPORTIFS_INSCRITS",
+                "ATHLETE"
+              ],
+              "role": "décrire les sportifs inscrits sur la liste du CREF SA",
+              "pk": [
+                "NumCREF|NumSportif|NumeroCREF|IdSportif|CodeSportif|NumCREFSA"
+              ],
+              "attributs": [
+                "Nom|NomSportif",
+                "Prenom|PrenomSportif",
+                "LicenceFFSA|NumLicenceFFSA|LicFFSA|NumeroLicenceFFSA",
+                "LicenceFF|NumLicenceFF|LicFF|LicenceFederation|LicenceClub|NumLicence|NumeroLicenceFF"
+              ]
+            },
+            {
+              "nom": "SALLE",
+              "alias": [
+                "SALLES"
+              ],
+              "role": "décrire les salles (code et nom)",
+              "pk": [
+                "CodeS|CodeSalle|NumSalle|IdSalle"
+              ],
+              "attributs": [
+                "NomS|NomSalle|LibelleSalle|Nom"
+              ]
+            },
+            {
+              "nom": "STAGE",
+              "alias": [
+                "STAGES"
+              ],
+              "role": "décrire les stages (libellé, horaires, coordonnateur)",
+              "pk": [
+                "NumSt|NumStage|CodeStage|IdStage|NumeroStage|CodeSt"
+              ],
+              "fk": {
+                "NumFormateurCoord|NumCoordonnateur|NumFormateurCoordonnateur|NumFormateurContact|NumContact|Coordonnateur|NumCoord|NumFormateur": "FORMATEUR"
+              },
+              "attributs": [
+                "LibelleSt|LibelleStage|Libelle|NomStage",
+                "HeureD|HeureDebut|HeureDeb|HeureDebutStage",
+                "HeureF|HeureFin|HeureFinStage"
+              ],
+              "optionnels": [
+                "DateDebut|DateDebutStage|DateD",
+                "DateFin|DateFinStage|DateF"
+              ]
+            },
+            {
+              "nom": "CONCERNER",
+              "alias": [
+                "CONCERNER_STAGE",
+                "STAGE_SPORT",
+                "SPORT_STAGE",
+                "PORTER_SUR",
+                "CONCERNE"
+              ],
+              "role": "indiquer les sports concernés par chaque stage",
+              "pk": [
+                "NumSt|NumStage|CodeStage|IdStage|NumeroStage|CodeSt",
+                "CodeSport"
+              ],
+              "fk": {
+                "NumSt|NumStage|CodeStage|IdStage|NumeroStage|CodeSt": "STAGE",
+                "CodeSport": "SPORT"
+              }
+            },
+            {
+              "nom": "AVOIR_LIEU",
+              "alias": [
+                "SE_DEROULER",
+                "DEROULER",
+                "JOURNEE",
+                "JOURNEE_STAGE",
+                "PLANNING",
+                "OCCUPER",
+                "DEROULEMENT",
+                "LIEU",
+                "AVOIR_LIEU_STAGE"
+              ],
+              "role": "indiquer, pour chaque jour d'un stage, la salle utilisée",
+              "pk": [
+                "NumSt|NumStage|CodeStage|IdStage|NumeroStage|CodeSt",
+                "DateJour|Date|DateStage|Jour|DateJournee",
+                "CodeS|CodeSalle|NumSalle|IdSalle"
+              ],
+              "fk": {
+                "NumSt|NumStage|CodeStage|IdStage|NumeroStage|CodeSt": "STAGE",
+                "CodeS|CodeSalle|NumSalle|IdSalle": "SALLE"
+              }
+            },
+            {
+              "nom": "INTERVENIR_STAGE",
+              "alias": [
+                "INTERVENIR",
+                "ENCADRER",
+                "ANIMER",
+                "INTERVENTION",
+                "INTERVENTIONS",
+                "INTERVENTION_STAGE",
+                "INTERVENIR_ST",
+                "ENCADRER_STAGE"
+              ],
+              "role": "enregistrer le nombre d'heures attribué à chaque formateur dans un stage",
+              "pk": [
+                "NumFormateur|NumeroFormateur",
+                "NumSt|NumStage|CodeStage|IdStage|NumeroStage|CodeSt"
+              ],
+              "fk": {
+                "NumFormateur|NumeroFormateur": "FORMATEUR",
+                "NumSt|NumStage|CodeStage|IdStage|NumeroStage|CodeSt": "STAGE"
+              },
+              "attributs": [
+                "NBH|NbHeures|NombreHeures|NbreHeures|NbH"
+              ]
+            },
+            {
+              "nom": "INSCRIRE",
+              "alias": [
+                "INSCRIPTION",
+                "INSCRIPTIONS",
+                "S_INSCRIRE",
+                "SINSCRIRE",
+                "PARTICIPER",
+                "PARTICIPATION"
+              ],
+              "role": "enregistrer les inscriptions des sportifs aux stages, avec le commentaire sur leur déroulement",
+              "pk": [
+                "NumCREF|NumSportif|NumeroCREF|IdSportif|CodeSportif|NumCREFSA",
+                "NumSt|NumStage|CodeStage|IdStage|NumeroStage|CodeSt"
+              ],
+              "fk": {
+                "NumCREF|NumSportif|NumeroCREF|IdSportif|CodeSportif|NumCREFSA": "SPORTIF",
+                "NumSt|NumStage|CodeStage|IdStage|NumeroStage|CodeSt": "STAGE"
+              },
+              "attributs": [
+                "Commentaire|CommentaireStage|Comment|Remarque"
+              ]
+            }
+          ],
+          "tablesOptionnelles": [
+            "DATE",
+            "DATES",
+            "JOUR",
+            "JOURS",
+            "CALENDRIER",
+            "DATE_JOUR"
+          ],
+          "partiel": "Presque : un stage n'a lieu que dans une seule salle par jour. La salle est donc déterminée par le couple (stage, date) : CodeS est une simple clé étrangère dans la table des journées de stage, il ne doit pas faire partie de sa clé primaire."
+        },
+        {
+          "tables": [
+            {
+              "nom": "SPORTIF",
+              "alias": [
+                "SPORTIF_INSCRIT",
+                "SPORTIFS",
+                "SPORTIFS_INSCRITS",
+                "ATHLETE"
+              ],
+              "role": "décrire les sportifs inscrits sur la liste du CREF SA",
+              "pk": [
+                "NumCREF|NumSportif|NumeroCREF|IdSportif|CodeSportif|NumCREFSA"
+              ],
+              "attributs": [
+                "Nom|NomSportif",
+                "Prenom|PrenomSportif",
+                "LicenceFFSA|NumLicenceFFSA|LicFFSA|NumeroLicenceFFSA",
+                "LicenceFF|NumLicenceFF|LicFF|LicenceFederation|LicenceClub|NumLicence|NumeroLicenceFF"
+              ]
+            },
+            {
+              "nom": "SALLE",
+              "alias": [
+                "SALLES"
+              ],
+              "role": "décrire les salles (code et nom)",
+              "pk": [
+                "CodeS|CodeSalle|NumSalle|IdSalle"
+              ],
+              "attributs": [
+                "NomS|NomSalle|LibelleSalle|Nom"
+              ]
+            },
+            {
+              "nom": "STAGE",
+              "alias": [
+                "STAGES"
+              ],
+              "role": "décrire les stages (libellé, horaires, coordonnateur)",
+              "pk": [
+                "NumSt|NumStage|CodeStage|IdStage|NumeroStage|CodeSt"
+              ],
+              "fk": {
+                "NumFormateurCoord|NumCoordonnateur|NumFormateurCoordonnateur|NumFormateurContact|NumContact|Coordonnateur|NumCoord|NumFormateur": "FORMATEUR",
+                "CodeS|CodeSalle|NumSalle|IdSalle": "SALLE"
+              },
+              "attributs": [
+                "LibelleSt|LibelleStage|Libelle|NomStage",
+                "HeureD|HeureDebut|HeureDeb|HeureDebutStage",
+                "HeureF|HeureFin|HeureFinStage"
+              ],
+              "optionnels": [
+                "DateDebut|DateDebutStage|DateD",
+                "DateFin|DateFinStage|DateF"
+              ]
+            },
+            {
+              "nom": "CONCERNER",
+              "alias": [
+                "CONCERNER_STAGE",
+                "STAGE_SPORT",
+                "SPORT_STAGE",
+                "PORTER_SUR",
+                "CONCERNE"
+              ],
+              "role": "indiquer les sports concernés par chaque stage",
+              "pk": [
+                "NumSt|NumStage|CodeStage|IdStage|NumeroStage|CodeSt",
+                "CodeSport"
+              ],
+              "fk": {
+                "NumSt|NumStage|CodeStage|IdStage|NumeroStage|CodeSt": "STAGE",
+                "CodeSport": "SPORT"
+              }
+            },
+            {
+              "nom": "INTERVENIR_STAGE",
+              "alias": [
+                "INTERVENIR",
+                "ENCADRER",
+                "ANIMER",
+                "INTERVENTION",
+                "INTERVENTIONS",
+                "INTERVENTION_STAGE",
+                "INTERVENIR_ST",
+                "ENCADRER_STAGE"
+              ],
+              "role": "enregistrer le nombre d'heures attribué à chaque formateur dans un stage",
+              "pk": [
+                "NumFormateur|NumeroFormateur",
+                "NumSt|NumStage|CodeStage|IdStage|NumeroStage|CodeSt"
+              ],
+              "fk": {
+                "NumFormateur|NumeroFormateur": "FORMATEUR",
+                "NumSt|NumStage|CodeStage|IdStage|NumeroStage|CodeSt": "STAGE"
+              },
+              "attributs": [
+                "NBH|NbHeures|NombreHeures|NbreHeures|NbH"
+              ]
+            },
+            {
+              "nom": "INSCRIRE",
+              "alias": [
+                "INSCRIPTION",
+                "INSCRIPTIONS",
+                "S_INSCRIRE",
+                "SINSCRIRE",
+                "PARTICIPER",
+                "PARTICIPATION"
+              ],
+              "role": "enregistrer les inscriptions des sportifs aux stages, avec le commentaire sur leur déroulement",
+              "pk": [
+                "NumCREF|NumSportif|NumeroCREF|IdSportif|CodeSportif|NumCREFSA",
+                "NumSt|NumStage|CodeStage|IdStage|NumeroStage|CodeSt"
+              ],
+              "fk": {
+                "NumCREF|NumSportif|NumeroCREF|IdSportif|CodeSportif|NumCREFSA": "SPORTIF",
+                "NumSt|NumStage|CodeStage|IdStage|NumeroStage|CodeSt": "STAGE"
+              },
+              "attributs": [
+                "Commentaire|CommentaireStage|Comment|Remarque"
+              ]
+            }
+          ],
+          "tablesOptionnelles": [
+            "DATE",
+            "DATES",
+            "JOUR",
+            "JOURS",
+            "CALENDRIER",
+            "DATE_JOUR"
+          ],
+          "partiel": "Presque : avec la salle dans STAGE, un stage aurait toujours lieu dans la même salle. Or la salle peut changer chaque jour : il faut une table qui associe un stage et une date à la salle utilisée ce jour-là."
+        }
+      ],
+      "indice": "Sept tables sont à créer : les sportifs, les salles, les stages, et quatre tables issues des associations. Le coordonnateur est unique pour un stage : simple clé étrangère dans STAGE. Sports d'un stage, formateurs d'un stage (avec le nombre d'heures) et inscriptions (avec le commentaire) sont des relations « plusieurs à plusieurs ». Pour la salle, demandez-vous ce qui la détermine : le stage seul, ou le stage et le jour ?"
+    },
+    {
+      "id": "p01",
+      "type": "processus",
+      "theme": "Processus",
+      "annale": "2011",
+      "enonce": "Interview de Monsieur Drapeau concernant l'inscription des sportifs au CREF SA (annexe 4).\n– Comment procédez-vous pour proposer aux sportifs de s'inscrire au CREF SA ? « Je me base sur les résultats des différentes fédérations lors des compétitions départementales et régionales. En fin de saison (juin), j'établis la liste des candidats potentiels pour l'année. »\n– Et ensuite ? « À partir de cette liste, courant juillet, j'envoie un courrier à chacun des sportifs afin de lui proposer l'inscription au CREF SA. Un contrat est joint au courrier. Les sportifs ont un délai d'un mois maximum pour répondre. En parallèle, j'envoie cette liste de candidatures potentielles à la Direction Régionale de Jeunesse et Sport et au Conseil Régional, pour information. »\n– Quand traitez-vous les réponses ? « Lorsqu'une réponse arrive, je l'étudie immédiatement afin de vérifier le délai. Si le délai d'un mois est dépassé, le dossier est annulé, sinon le dossier est mis en attente pour vérification. »\n– Quand est-il vérifié et sur quoi porte la vérification ? « Tous les lundis et jeudis, je vérifie les dossiers en attente de vérification. Pour être validé le dossier doit être complet, c'est-à-dire qu'il doit comporter la signature du contrat par le sportif, mais le sportif doit aussi être titulaire de 2 licences fédérales, une en Sport Adapté et l'autre dans la fédération correspondant au sport présenté. »\n– Que se passe-t-il si le dossier n'est pas complet ? « J'envoie au sportif une demande de complément de dossier, qu'il doit bien sûr me renvoyer dans le délai d'un mois. »\n– Comment traitez-vous ces nouvelles réponses ? « De la même façon que les premières : elles sont d'abord étudiées par rapport au délai, puis elles sont mises en attente et vérifiées les lundis et jeudis comme les autres. »\n– Et lorsque le dossier est complet ? « Le contrat est alors valide. Je crée une liste définitive des inscrits que j'envoie à la Direction Régionale de Jeunesse et Sport, ainsi qu'au Conseil Régional. »\nModélisez le processus d'inscription des sportifs au CREF SA (schéma événements-résultats).",
+      "elements": [
+        {
+          "kind": "event",
+          "label": "Juin"
+        },
+        {
+          "kind": "event",
+          "label": "Résultats compétitions"
+        },
+        {
+          "kind": "operation",
+          "label": "Établissement liste candidats"
+        },
+        {
+          "kind": "event",
+          "label": "Liste candidats potentiels"
+        },
+        {
+          "kind": "event",
+          "label": "Mi-juillet"
+        },
+        {
+          "kind": "operation",
+          "label": "Proposition sportifs"
+        },
+        {
+          "kind": "event",
+          "label": "Courrier et proposition de contrat au sportif"
+        },
+        {
+          "kind": "event",
+          "label": "Liste candidatures potentielles envoyée à la DRJS"
+        },
+        {
+          "kind": "event",
+          "label": "Liste candidatures potentielles envoyée au Conseil régional"
+        },
+        {
+          "kind": "event",
+          "label": "Réception dossier et contrat"
+        },
+        {
+          "kind": "operation",
+          "label": "Vérification du délai"
+        },
+        {
+          "kind": "event",
+          "label": "Dossier annulé"
+        },
+        {
+          "kind": "event",
+          "label": "Dossier en attente de vérification"
+        },
+        {
+          "kind": "event",
+          "label": "Lundi ou jeudi"
+        },
+        {
+          "kind": "operation",
+          "label": "Vérification du dossier"
+        },
+        {
+          "kind": "event",
+          "label": "Dossier à compléter"
+        },
+        {
+          "kind": "event",
+          "label": "Contrat valide"
+        },
+        {
+          "kind": "event",
+          "label": "Liste définitive envoyée à la DRJS"
+        },
+        {
+          "kind": "event",
+          "label": "Liste définitive envoyée au Conseil régional"
+        }
+      ],
+      "attendus": [
+        {
+          "operation": "Établissement liste candidats",
+          "alias": [
+            "Établissement de la liste des candidats",
+            "Etablir liste candidats",
+            "Liste des candidats",
+            "Sélection candidats",
+            "Sélection des candidats"
+          ],
+          "synchronisation": "Juin ET Résultats compétitions"
+        },
+        {
+          "operation": "Proposition sportifs",
+          "alias": [
+            "Proposition aux sportifs",
+            "Envoi proposition",
+            "Envoi des propositions",
+            "Proposition d'inscription",
+            "Envoi courrier"
+          ],
+          "synchronisation": "Mi-juillet ET Liste candidats potentiels"
+        },
+        {
+          "operation": "Vérification du délai",
+          "alias": [
+            "Vérification délai",
+            "Contrôle du délai",
+            "Contrôle délai",
+            "Étude de la réponse",
+            "Traitement réponse"
+          ],
+          "synchronisation": "Réception dossier OU Dossier à compléter",
+          "regles": [
+            "Retour dans le délai",
+            "Retour après délai"
+          ]
+        },
+        {
+          "operation": "Vérification du dossier",
+          "alias": [
+            "Vérification dossier",
+            "Contrôle du dossier",
+            "Contrôle dossier",
+            "Validation dossier",
+            "Validation du dossier"
+          ],
+          "synchronisation": "Dossier en attente de vérification ET Lundi/jeudi",
+          "regles": [
+            "Complet",
+            "Non complet"
+          ]
+        }
+      ],
+      "equivalents": {
+        "Juin": [
+          "Fin de saison",
+          "Fin de saison (juin)",
+          "Fin juin"
+        ],
+        "Résultats compétitions": [
+          "Résultats des compétitions",
+          "Résultats fédérations",
+          "Résultats des fédérations",
+          "Résultats"
+        ],
+        "Mi-juillet": [
+          "Mi juillet",
+          "Juillet",
+          "Courant juillet",
+          "Début juillet"
+        ],
+        "Liste candidats potentiels": [
+          "Liste des candidats potentiels",
+          "Liste des candidats",
+          "Candidats potentiels",
+          "Liste candidats"
+        ],
+        "Réception dossier": [
+          "Réception dossier et contrat",
+          "Réponse",
+          "Réponse du sportif",
+          "Retour du contrat",
+          "Contrat reçu",
+          "Réception de la réponse",
+          "Retour dossier",
+          "Réception contrat"
+        ],
+        "Dossier à compléter": [
+          "Demande de complément",
+          "Complément de dossier",
+          "Demande de complément de dossier",
+          "Complément reçu",
+          "Retour du complément"
+        ],
+        "Dossier en attente de vérification": [
+          "Dossier en attente",
+          "Dossier mis en attente",
+          "Dossier à vérifier"
+        ],
+        "Lundi/jeudi": [
+          "Lundi ou jeudi",
+          "Lundi jeudi",
+          "Jour de vérification",
+          "Tous les lundis et jeudis",
+          "Lundis et jeudis",
+          "Lundi et jeudi"
+        ],
+        "Retour dans le délai": [
+          "Dans le délai",
+          "Délai respecté",
+          "Délai OK",
+          "Moins d'un mois"
+        ],
+        "Retour après délai": [
+          "Hors délai",
+          "Délai dépassé",
+          "Après délai",
+          "Plus d'un mois"
+        ],
+        "Complet": [
+          "Dossier complet",
+          "Valide",
+          "Conforme"
+        ],
+        "Non complet": [
+          "Incomplet",
+          "Dossier incomplet",
+          "Non valide",
+          "Non conforme"
+        ]
+      },
+      "solution": {
+        "lanes": [
+          "Sportif",
+          "Directeur CREF SA",
+          "DRJS / Conseil régional"
+        ],
+        "nodes": [
+          {
+            "id": "n1",
+            "kind": "event",
+            "label": "Juin",
+            "x": 300,
+            "y": 95
+          },
+          {
+            "id": "n2",
+            "kind": "event",
+            "label": "Résultats compétitions",
+            "x": 420,
+            "y": 95
+          },
+          {
+            "id": "n3",
+            "kind": "sync",
+            "label": "",
+            "x": 360,
+            "y": 185,
+            "cond": "A et B"
+          },
+          {
+            "id": "n4",
+            "kind": "operation",
+            "label": "Établissement liste candidats",
+            "x": 360,
+            "y": 290,
+            "actions": [
+              "Sélection d'après les résultats des fédérations (compétitions départementales et régionales)"
+            ],
+            "rules": [
+              "Toujours"
+            ]
+          },
+          {
+            "id": "n5",
+            "kind": "event",
+            "label": "Liste candidats potentiels",
+            "x": 300,
+            "y": 420
+          },
+          {
+            "id": "n6",
+            "kind": "event",
+            "label": "Mi-juillet",
+            "x": 420,
+            "y": 420
+          },
+          {
+            "id": "n7",
+            "kind": "sync",
+            "label": "",
+            "x": 360,
+            "y": 510,
+            "cond": "A et B"
+          },
+          {
+            "id": "n8",
+            "kind": "operation",
+            "label": "Proposition sportifs",
+            "x": 360,
+            "y": 615,
+            "actions": [
+              "Envoi d'un courrier et d'un contrat à chaque sportif",
+              "Envoi de la liste à la DRJS et au Conseil régional"
+            ],
+            "rules": [
+              "Toujours"
+            ]
+          },
+          {
+            "id": "n9",
+            "kind": "event",
+            "label": "Courrier et proposition de contrat au sportif",
+            "x": 120,
+            "y": 760
+          },
+          {
+            "id": "n10",
+            "kind": "event",
+            "label": "Liste candidatures potentielles envoyée à la DRJS",
+            "x": 600,
+            "y": 760
+          },
+          {
+            "id": "n11",
+            "kind": "event",
+            "label": "Liste candidatures potentielles envoyée au Conseil régional",
+            "x": 600,
+            "y": 870
+          },
+          {
+            "id": "n12",
+            "kind": "event",
+            "label": "Réception dossier et contrat",
+            "x": 120,
+            "y": 990
+          },
+          {
+            "id": "n13",
+            "kind": "sync",
+            "label": "",
+            "x": 340,
+            "y": 1080,
+            "cond": "A ou B"
+          },
+          {
+            "id": "n14",
+            "kind": "operation",
+            "label": "Vérification du délai",
+            "x": 360,
+            "y": 1190,
+            "actions": [
+              "Étude de la réponse dès son arrivée : délai d'un mois respecté ?"
+            ],
+            "rules": [
+              "Retour dans le délai",
+              "Retour après délai"
+            ]
+          },
+          {
+            "id": "n15",
+            "kind": "event",
+            "label": "Dossier annulé",
+            "x": 80,
+            "y": 1330
+          },
+          {
+            "id": "n16",
+            "kind": "event",
+            "label": "Dossier en attente de vérification",
+            "x": 300,
+            "y": 1330
+          },
+          {
+            "id": "n17",
+            "kind": "event",
+            "label": "Lundi ou jeudi",
+            "x": 420,
+            "y": 1440
+          },
+          {
+            "id": "n18",
+            "kind": "sync",
+            "label": "",
+            "x": 360,
+            "y": 1530,
+            "cond": "A et B"
+          },
+          {
+            "id": "n19",
+            "kind": "operation",
+            "label": "Vérification du dossier",
+            "x": 360,
+            "y": 1640,
+            "actions": [
+              "Contrôle de la signature du contrat",
+              "Contrôle des 2 licences fédérales"
+            ],
+            "rules": [
+              "Non complet",
+              "Complet"
+            ]
+          },
+          {
+            "id": "n20",
+            "kind": "event",
+            "label": "Dossier à compléter",
+            "x": 80,
+            "y": 1790
+          },
+          {
+            "id": "n21",
+            "kind": "event",
+            "label": "Contrat valide",
+            "x": 360,
+            "y": 1790
+          },
+          {
+            "id": "n22",
+            "kind": "event",
+            "label": "Liste définitive envoyée à la DRJS",
+            "x": 600,
+            "y": 1790
+          },
+          {
+            "id": "n23",
+            "kind": "event",
+            "label": "Liste définitive envoyée au Conseil régional",
+            "x": 600,
+            "y": 1900
+          }
+        ],
+        "arrows": [
+          {
+            "id": "a1",
+            "from": "n1",
+            "rule": null,
+            "to": "n3",
+            "letter": "A"
+          },
+          {
+            "id": "a2",
+            "from": "n2",
+            "rule": null,
+            "to": "n3",
+            "letter": "B"
+          },
+          {
+            "id": "a3",
+            "from": "n3",
+            "rule": null,
+            "to": "n4"
+          },
+          {
+            "id": "a4",
+            "from": "n4",
+            "rule": 0,
+            "to": "n5"
+          },
+          {
+            "id": "a5",
+            "from": "n6",
+            "rule": null,
+            "to": "n7",
+            "letter": "A"
+          },
+          {
+            "id": "a6",
+            "from": "n5",
+            "rule": null,
+            "to": "n7",
+            "letter": "B"
+          },
+          {
+            "id": "a7",
+            "from": "n7",
+            "rule": null,
+            "to": "n8"
+          },
+          {
+            "id": "a8",
+            "from": "n8",
+            "rule": 0,
+            "to": "n9"
+          },
+          {
+            "id": "a9",
+            "from": "n8",
+            "rule": 0,
+            "to": "n10"
+          },
+          {
+            "id": "a10",
+            "from": "n8",
+            "rule": 0,
+            "to": "n11"
+          },
+          {
+            "id": "a11",
+            "from": "n12",
+            "rule": null,
+            "to": "n13",
+            "letter": "A"
+          },
+          {
+            "id": "a12",
+            "from": "n20",
+            "rule": null,
+            "to": "n13",
+            "letter": "B"
+          },
+          {
+            "id": "a13",
+            "from": "n13",
+            "rule": null,
+            "to": "n14"
+          },
+          {
+            "id": "a14",
+            "from": "n14",
+            "rule": 0,
+            "to": "n16"
+          },
+          {
+            "id": "a15",
+            "from": "n14",
+            "rule": 1,
+            "to": "n15"
+          },
+          {
+            "id": "a16",
+            "from": "n16",
+            "rule": null,
+            "to": "n18",
+            "letter": "A"
+          },
+          {
+            "id": "a17",
+            "from": "n17",
+            "rule": null,
+            "to": "n18",
+            "letter": "B"
+          },
+          {
+            "id": "a18",
+            "from": "n18",
+            "rule": null,
+            "to": "n19"
+          },
+          {
+            "id": "a19",
+            "from": "n19",
+            "rule": 0,
+            "to": "n20"
+          },
+          {
+            "id": "a20",
+            "from": "n19",
+            "rule": 1,
+            "to": "n21"
+          },
+          {
+            "id": "a21",
+            "from": "n19",
+            "rule": 1,
+            "to": "n22"
+          },
+          {
+            "id": "a22",
+            "from": "n19",
+            "rule": 1,
+            "to": "n23"
+          }
+        ]
+      },
+      "autoevaluation": [
+        "Le processus démarre par deux événements, dont un temporel : « juin » ET les résultats des compétitions déclenchent l'établissement de la liste des candidats.",
+        "La proposition aux sportifs attend la mi-juillet ET la liste des candidats potentiels, et produit trois résultats : le courrier avec le contrat au sportif et la liste envoyée à la DRJS et au Conseil régional.",
+        "La vérification du délai est déclenchée par la réception d'un dossier OU d'un complément de dossier (synchronisation en « ou ») et a deux règles : dans le délai / après délai (dossier annulé).",
+        "La vérification du dossier attend le dossier en attente ET le jour de vérification (lundi ou jeudi).",
+        "La vérification du dossier a deux règles : non complet (demande de complément, qui reboucle sur la vérification du délai) / complet (contrat valide et listes définitives envoyées)."
+      ],
+      "indice": "Repérez les événements temporels de l'interview (juin, juillet, lundi ou jeudi) : ils se combinent avec un autre événement dans une synchronisation. Les réponses des sportifs et les compléments de dossier sont traités « de la même façon » : une même opération peut être déclenchée par l'un OU l'autre. Deux opérations aboutissent à deux cas différents (règles d'émission)."
+    }
+  ]
+}

@@ -1,0 +1,43 @@
+{
+  "format": "sql-lab-exercice/1",
+  "id": "perso-mediatheque",
+  "titre": "Exemple – Médiathèque municipale",
+  "auteur": "SQL Lab",
+  "aujourdhui": "2024-06-15",
+  "contexte": "La médiathèque enregistre ses ADHERENT, ses LIVRE et les EMPRUNT. Un emprunt non rendu n'a pas de date de retour (DateRetour vide).",
+  "source": "Exemple d'exercice personnel : un enseignant peut fournir sa propre base de la même façon.",
+  "schemaGrid": { "ADHERENT": [0, 0], "EMPRUNT": [1, 0], "LIVRE": [2, 0] },
+  "questions": [
+    {
+      "id": "m01",
+      "theme": "Une seule table",
+      "enonce": "Afficher le titre et l'auteur des romans, triés par titre.",
+      "correction": ["SELECT Titre, Auteur", "FROM LIVRE", "WHERE Genre = 'Roman'", "ORDER BY Titre;"],
+      "ordered": [0],
+      "indice": "Condition sur la colonne Genre, puis ORDER BY."
+    },
+    {
+      "id": "m02",
+      "theme": "Jointures",
+      "enonce": "Afficher le nom de l'adhérent et le titre du livre pour les emprunts non encore rendus.",
+      "correction": ["SELECT NomAdh, Titre", "FROM ADHERENT, EMPRUNT, LIVRE", "WHERE ADHERENT.NumAdh = EMPRUNT.NumAdh", "AND EMPRUNT.CodeLivre = LIVRE.CodeLivre", "AND DateRetour IS NULL;"],
+      "variantes": [["SELECT NomAdh, Titre", "FROM EMPRUNT", "INNER JOIN ADHERENT ON ADHERENT.NumAdh = EMPRUNT.NumAdh", "INNER JOIN LIVRE ON EMPRUNT.CodeLivre = LIVRE.CodeLivre", "WHERE DateRetour IS NULL;"]],
+      "indice": "Trois tables à relier ; un livre non rendu n'a pas de date de retour."
+    },
+    {
+      "id": "m03",
+      "theme": "Regroupements",
+      "enonce": "Afficher, pour chaque genre, le nombre d'emprunts réalisés.",
+      "correction": ["SELECT Genre, COUNT(*)", "FROM EMPRUNT, LIVRE", "WHERE EMPRUNT.CodeLivre = LIVRE.CodeLivre", "GROUP BY Genre;"],
+      "indice": "Jointure EMPRUNT–LIVRE puis GROUP BY Genre."
+    },
+    {
+      "id": "m04",
+      "theme": "Mises à jour",
+      "enonce": "Le livre de l'emprunt n° 103 vient d'être rendu aujourd'hui : enregistrer le retour.",
+      "correction": "UPDATE EMPRUNT SET DateRetour = '15/06/2024' WHERE NumEmprunt = 103;",
+      "variantes": ["UPDATE EMPRUNT SET DateRetour = NOW() WHERE NumEmprunt = 103;"],
+      "indice": "UPDATE … SET DateRetour = … WHERE NumEmprunt = …"
+    }
+  ]
+}

@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Simulateur SCORM 1.2</title>
+  <style>
+    :root { --bg: #f5f6f8; --fg: #1d2330; --muted: #5d6676; --border: #dde1e7; --panel: #fff; --accent: #1f5fbf; }
+    @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg: #14171c; --fg: #e6e9ef; --muted: #9aa3b2; --border: #333a46; --panel: #1c2027; --accent: #6ea1ff; } }
+    body { margin: 0; font: 14px/1.45 system-ui, sans-serif; background: var(--bg); color: var(--fg); }
+    header { display: flex; flex-wrap: wrap; gap: .6rem; align-items: center; padding: .6rem 1rem; border-bottom: 1px solid var(--border); background: var(--panel); }
+    header input { flex: 1; min-width: 240px; padding: .35rem .5rem; font: inherit; color: var(--fg); background: var(--bg); border: 1px solid var(--border); border-radius: 6px; }
+    button { font: inherit; padding: .35rem .7rem; border-radius: 6px; border: 1px solid var(--border); background: var(--bg); color: var(--fg); cursor: pointer; }
+    main { display: grid; grid-template-columns: minmax(0, 1fr) 340px; height: calc(100vh - 54px); }
+    iframe { width: 100%; height: 100%; border: 0; background: #fff; }
+    aside { border-left: 1px solid var(--border); background: var(--panel); padding: .8rem; overflow: auto; }
+    dl { display: grid; grid-template-columns: auto 1fr; gap: .2rem .6rem; margin: 0 0 1rem; font-size: 13px; }
+    dt { color: var(--muted); }
+    dd { margin: 0; word-break: break-all; font-family: ui-monospace, Consolas, monospace; }
+    #log { font: 12px ui-monospace, Consolas, monospace; white-space: pre-wrap; color: var(--muted); }
+    h2 { font-size: 14px; margin: .2rem 0 .5rem; }
+    @media (max-width: 800px) { main { grid-template-columns: 1fr; grid-template-rows: 70vh auto; height: auto; } }
+  </style>
+</head>
+<body>
+  <header>
+    <strong>Simulateur SCORM 1.2</strong>
+    <input id="url" value="../dist/test/dcg2024/index.html" aria-label="Adresse de la page du paquet">
+    <button id="go">Lancer une session</button>
+    <button id="reset">Effacer les données de l'apprenant</button>
+  </header>
+  <main>
+    <iframe id="frame" title="Contenu SCORM"></iframe>
+    <aside>
+      <h2>Données reçues par la plateforme</h2>
+      <dl id="cmi"></dl>
+      <h2>Journal des appels</h2>
+      <div id="log"></div>
+    </aside>
+  </main>
+  <script>
+    // Plateforme simulée : objet API SCORM 1.2 dans la fenêtre parente du contenu.
+    const KEY = "scormtest:data";
+    const load = () => { try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch (e) { return {}; } };
+    let data = load();
+    const defaults = { "cmi.core.student_name": "Dupont, Camille", "cmi.core.student_id": "etu42", "cmi.core.lesson_status": "not attempted", "cmi.core.entry": "ab-initio" };
+    const logEl = document.getElementById("log");
+    const log = (s) => { logEl.textContent = s + "\n" + logEl.textContent.slice(0, 6000); };
+    function show() {
+      const keys = ["cmi.core.lesson_status", "cmi.core.score.raw", "cmi.core.lesson_location", "cmi.suspend_data", "cmi.core.session_time", "cmi.core.exit", "cmi.interactions._count"];
+      document.getElementById("cmi").innerHTML = keys.map((k) => `<dt>${k.replace("cmi.", "")}</dt><dd>${(data[k] ?? "").toString().replace(/</g, "&lt;") || "—"}</dd>`).join("");
+    }
+    window.API = {
+      LMSInitialize() { log("LMSInitialize"); data = { ...defaults, ...load() }; if (data["cmi.suspend_data"]) data["cmi.core.entry"] = "resume"; show(); return "true"; },
+      LMSGetValue(k) {
+        let v = data[k];
+        if (k === "cmi.interactions._count") v = String(Object.keys(data).filter((x) => /^cmi\.interactions\.\d+\.id$/.test(x)).length);
+        log(`Get ${k} → ${v ?? ""}`);
+        return v ?? "";
+      },
+      LMSSetValue(k, v) { data[k] = String(v); log(`Set ${k} = ${String(v).slice(0, 120)}`); show(); return "true"; },
+      LMSCommit() { localStorage.setItem(KEY, JSON.stringify(data)); log("LMSCommit"); data["cmi.interactions._count"] = window.API.LMSGetValue("cmi.interactions._count"); show(); return "true"; },
+      LMSFinish() { localStorage.setItem(KEY, JSON.stringify(data)); log("LMSFinish"); show(); return "true"; },
+      LMSGetLastError() { return "0"; },
+      LMSGetErrorString() { return ""; },
+      LMSGetDiagnostic() { return ""; },
+    };
+    const frame = document.getElementById("frame");
+    document.getElementById("go").onclick = () => { frame.src = "about:blank"; setTimeout(() => { frame.src = document.getElementById("url").value; }, 50); };
+    document.getElementById("reset").onclick = () => { localStorage.removeItem(KEY); data = {}; show(); log("Données effacées"); };
+    const q = new URLSearchParams(location.search).get("paquet");
+    if (q) document.getElementById("url").value = q;
+    show();
+  </script>
+</body>
+</html>

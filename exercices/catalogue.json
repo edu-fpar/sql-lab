@@ -1,0 +1,92 @@
+[
+  {
+    "id": "dcg2026",
+    "titre": "DCG 2026 – Elassure",
+    "description": "Assurance automobile : clients, contrats, formules et garanties, règlements d'échéances, sinistres."
+  },
+  {
+    "id": "dcg2025",
+    "titre": "DCG 2025 – SAS Ambulance Est",
+    "description": "Transport sanitaire : patients, véhicules et équipements, salariés et diplômes, transports."
+  },
+  {
+    "id": "dcg2024",
+    "titre": "DCG 2024 – Crédit'Partner",
+    "description": "Crédits à la consommation : clients, dossiers, offres, pièces jointes, chargés de clientèle."
+  },
+  {
+    "id": "dcg2023",
+    "titre": "DCG 2023 – Domaine de Morange",
+    "description": "Domaine viticole : parcelles et cépages, vins et critiques, clients et commandes."
+  },
+  {
+    "id": "dcg2022",
+    "titre": "DCG 2022 – Thermes Marins de Saint-Malo",
+    "description": "Thalassothérapie : clients, séjours, soins, salons, personnel et planning des soins."
+  },
+  {
+    "id": "dcg2021",
+    "titre": "DCG 2021 – eRecycle",
+    "description": "Collecte de déchets de bureau : clients, abonnements, types de déchets, collectes et pesées."
+  },
+  {
+    "id": "dcg2020",
+    "titre": "DCG 2020 – Port de Mériadeck, escales",
+    "description": "Port maritime : navires et pavillons, escales, agents consignataires, cargaisons et clients."
+  },
+  {
+    "id": "dcg2019",
+    "titre": "DCG 2019 – Azurova, hôtels de plein air",
+    "description": "Hôtellerie de plein air : hôtels, secteurs et responsables, employés, lodges et types de lodges."
+  },
+  {
+    "id": "dcg2018",
+    "titre": "DCG 2018 – 3D logistic, livraisons",
+    "description": "Logistique : entrepôts, chauffeurs et manutentionnaires, véhicules, tournées et points de livraison."
+  },
+  {
+    "id": "dcg2017",
+    "titre": "DCG 2017 – Soufflé, agences de voyage",
+    "description": "Agences de voyage : personnel, matériel informatique, demandes d'intervention et suivi."
+  },
+  {
+    "id": "dcg2016",
+    "titre": "DCG 2016 – LocaEst, location de véhicules",
+    "description": "Location de véhicules : agences, clients, véhicules avec ou sans chauffeur, contrats et contentieux."
+  },
+  {
+    "id": "dcg2015",
+    "titre": "DCG 2015 – Gaya, hôtels en Bretagne",
+    "description": "Hôtellerie : hôtels, types de chambre, tarifs et réductions, clients, réservations et factures."
+  },
+  {
+    "id": "dcg2014",
+    "titre": "DCG 2014 – Fédération de taekwondo",
+    "description": "Fédération sportive : ligues, clubs, adhérents, instructeurs, salles et créneaux."
+  },
+  {
+    "id": "dcg2012",
+    "titre": "DCG 2012 – RENOV'PLUS, rénovation",
+    "description": "Rénovation : salariés, clients, chantiers, tâches, affectations et heures effectuées."
+  },
+  {
+    "id": "dcg2011",
+    "titre": "DCG 2011 – CREF Sport Adapté, formations",
+    "description": "Formation sportive : sports, diplômes, formations, sessions et formateurs."
+  },
+  {
+    "id": "dcg2010",
+    "titre": "DCG 2010 – IMMO-DO, syndic de copropriétés",
+    "description": "Syndic : copropriétés, propriétaires, entreprises, réalisations de travaux, appels de fonds et paiements."
+  },
+  {
+    "id": "dcg2009",
+    "titre": "DCG 2009 – STAR FINANCE, gestion privée",
+    "description": "Banque privée : clients, comptes, catégories, valeurs, opérations et archives."
+  },
+  {
+    "id": "dcg2008",
+    "titre": "DCG 2008 – COMPTA-CONSEIL, cabinet d'expertise comptable",
+    "description": "Cabinet comptable : personnel, postes, groupes, compétences et missions."
+  }
+]

@@ -1,0 +1,1107 @@
+{
+  "id": "dcg2016",
+  "titre": "DCG 2016 – LocaEst, location de véhicules",
+  "aujourdhui": "2016-05-20",
+  "contexte": "LocaEst loue des véhicules avec ou sans chauffeur depuis ses agences du Grand Est (AGENCE). Un CONTRAT est identifié par son agence et son numéro dans l'agence (NumAgence, NumContrat) : le contrat n° 14 existe dans plusieurs agences. Il concerne un CLIENT et un VEHICULE ; DateContrat est la date de signature, DateDebut et DateFin les dates de la location. Le kilométrage du compteur est relevé à la remise du véhicule (KmsRemise, seulement quand la location devient effective) et à son retour (KmsRetour) ; les kilomètres parcourus valent KmsRetour - KmsRemise. Un CONTENTIEUX se rapporte à un contrat et est numéroté dans ce contrat (NumDossier) ; un contentieux non clos n'a pas de date de clôture. Les véhicules sans chauffeur sont facturés au kilomètre selon le tarif de leur CATEGORIE (TarifKm, en euros par km) ; les véhicules avec chauffeur, au forfait journalier propre au véhicule (ForfaitJour). Simplification par rapport au sujet : les sous-types SANS_CHAUFFEUR et AVEC_CHAUFFEUR sont regroupés dans VEHICULE, où TypeLocation vaut « Avec chauffeur » (ForfaitJour renseigné) ou « Sans chauffeur » (NumCategorie renseigné) ; les parkings ne sont pas gérés. LITIGES_ANCIENS, de même structure que CONTENTIEUX, est vide.",
+  "source": "Inspiré du sujet DCG UE8 session 2016. Données entièrement fictives.",
+  "schemaGrid": {
+    "AGENCE": [
+      0,
+      0
+    ],
+    "CONTRAT": [
+      1,
+      0
+    ],
+    "CLIENT": [
+      2,
+      0
+    ],
+    "CONTENTIEUX": [
+      0,
+      1
+    ],
+    "VEHICULE": [
+      1,
+      1
+    ],
+    "CATEGORIE": [
+      2,
+      1
+    ],
+    "LITIGES_ANCIENS": [
+      0,
+      2
+    ]
+  },
+  "questions": [
+    {
+      "id": "q01",
+      "theme": "Une seule table",
+      "annale": "2016",
+      "enonce": "Afficher la liste des agences (nom et adresse) situées à Strasbourg.",
+      "correction": [
+        "SELECT NomAgence, AdresseAgence",
+        "FROM AGENCE",
+        "WHERE VilleAgence = 'Strasbourg';"
+      ],
+      "variantes": [
+        [
+          "SELECT *",
+          "FROM AGENCE",
+          "WHERE VilleAgence = 'Strasbourg';"
+        ]
+      ],
+      "indice": "La ville est dans VilleAgence ; un texte s'écrit entre apostrophes : 'Strasbourg'. Attention, l'agence « Strasbourg Aéroport » est située à Entzheim : le nom d'une agence n'est pas sa ville."
+    },
+    {
+      "id": "q02",
+      "theme": "Une seule table",
+      "enonce": "Afficher le nom et le tarif kilométrique (en euros par km) de chaque catégorie de véhicule, de la plus chère à la moins chère.",
+      "ordered": [
+        1
+      ],
+      "correction": [
+        "SELECT NomCategorie, TarifKm",
+        "FROM CATEGORIE",
+        "ORDER BY TarifKm DESC;"
+      ],
+      "indice": "Le tri décroissant s'obtient avec ORDER BY … DESC."
+    },
+    {
+      "id": "q03",
+      "theme": "Une seule table",
+      "enonce": "Afficher l'immatriculation, le modèle et le forfait journalier des véhicules loués avec chauffeur, du forfait le plus élevé au moins élevé.",
+      "ordered": [
+        2
+      ],
+      "correction": [
+        "SELECT Immatriculation, Modele, ForfaitJour",
+        "FROM VEHICULE",
+        "WHERE TypeLocation = 'Avec chauffeur'",
+        "ORDER BY ForfaitJour DESC;"
+      ],
+      "variantes": [
+        [
+          "SELECT Immatriculation, Modele, ForfaitJour",
+          "FROM VEHICULE",
+          "WHERE ForfaitJour IS NOT NULL",
+          "ORDER BY ForfaitJour DESC;"
+        ]
+      ],
+      "indice": "TypeLocation vaut 'Avec chauffeur' ou 'Sans chauffeur'."
+    },
+    {
+      "id": "q04",
+      "theme": "Une seule table",
+      "enonce": "Quelles sont les locations en cours ? Afficher le numéro d'agence, le numéro de contrat, la date de début et le numéro du véhicule des contrats dont le véhicule a été remis au client (kilométrage de remise relevé) mais pas encore rendu (kilométrage de retour non relevé).",
+      "correction": [
+        "SELECT NumAgence, NumContrat, DateDebut, NumVeh",
+        "FROM CONTRAT",
+        "WHERE KmsRemise IS NOT NULL",
+        "AND KmsRetour IS NULL;"
+      ],
+      "indice": "Un kilométrage non relevé est une valeur absente : IS NULL ; un kilométrage relevé : IS NOT NULL."
+    },
+    {
+      "id": "q05",
+      "theme": "Calculs et agrégats",
+      "enonce": "Afficher le nombre de véhicules de chaque type de location (avec ou sans chauffeur).",
+      "correction": [
+        "SELECT TypeLocation, COUNT(*) AS NbVehicules",
+        "FROM VEHICULE",
+        "GROUP BY TypeLocation;"
+      ],
+      "indice": "GROUP BY TypeLocation forme deux groupes ; COUNT(*) compte les véhicules de chacun."
+    },
+    {
+      "id": "q06",
+      "theme": "Dates",
+      "enonce": "Combien de contrats ont été signés en 2015 ?",
+      "correction": [
+        "SELECT COUNT(*)",
+        "FROM CONTRAT",
+        "WHERE YEAR(DateContrat) = 2015;"
+      ],
+      "variantes": [
+        [
+          "SELECT COUNT(*)",
+          "FROM CONTRAT",
+          "WHERE DateContrat BETWEEN '01/01/2015' AND '31/12/2015';"
+        ]
+      ],
+      "indice": "La date de signature du contrat est DateContrat (DateDebut est la date de remise du véhicule)."
+    },
+    {
+      "id": "q07",
+      "theme": "Dates",
+      "enonce": "Certains contrats sont signés une année pour une location qui débute l'année suivante. Afficher le numéro d'agence, le numéro de contrat, la date de signature et la date de début de ces contrats.",
+      "correction": [
+        "SELECT NumAgence, NumContrat, DateContrat, DateDebut",
+        "FROM CONTRAT",
+        "WHERE YEAR(DateDebut) > YEAR(DateContrat);"
+      ],
+      "variantes": [
+        [
+          "SELECT NumAgence, NumContrat, DateContrat, DateDebut",
+          "FROM CONTRAT",
+          "WHERE YEAR(DateDebut) = YEAR(DateContrat) + 1;"
+        ]
+      ],
+      "indice": "Comparez l'année de la date de début et celle de la date de signature avec YEAR()."
+    },
+    {
+      "id": "q08",
+      "theme": "Dates",
+      "enonce": "Le kilométrage de remise n'est relevé que lorsque la location devient effective. Afficher le numéro d'agence, le numéro de contrat, la date de début et le numéro de client des contrats dont la date de début est antérieure à la date du jour mais dont la location n'est jamais devenue effective.",
+      "correction": [
+        "SELECT NumAgence, NumContrat, DateDebut, NumClient",
+        "FROM CONTRAT",
+        "WHERE DateDebut < NOW()",
+        "AND KmsRemise IS NULL;"
+      ],
+      "variantes": [
+        [
+          "SELECT NumAgence, NumContrat, DateDebut, NumClient",
+          "FROM CONTRAT",
+          "WHERE DateDebut < CURDATE()",
+          "AND KmsRemise IS NULL;"
+        ]
+      ],
+      "indice": "NOW() (ou CURDATE()) donne la date du jour ; une location non effective n'a pas de kilométrage de remise (IS NULL)."
+    },
+    {
+      "id": "q09",
+      "theme": "Jointures",
+      "annale": "2016",
+      "enonce": "Afficher le kilométrage moyen parcouru par les véhicules avec chauffeur pour un contrat signé en 2015 (une seule valeur : la moyenne de tous ces contrats).",
+      "correction": [
+        "SELECT AVG(KmsRetour - KmsRemise) AS KmMoyen",
+        "FROM CONTRAT, VEHICULE",
+        "WHERE CONTRAT.NumVeh = VEHICULE.NumVeh",
+        "AND TypeLocation = 'Avec chauffeur'",
+        "AND YEAR(DateContrat) = 2015;"
+      ],
+      "variantes": [
+        [
+          "SELECT AVG(KmsRetour - KmsRemise)",
+          "FROM CONTRAT",
+          "INNER JOIN VEHICULE ON CONTRAT.NumVeh = VEHICULE.NumVeh",
+          "WHERE TypeLocation = 'Avec chauffeur'",
+          "AND DateContrat BETWEEN '01/01/2015' AND '31/12/2015';"
+        ],
+        [
+          "SELECT AVG(KmsRetour - KmsRemise)",
+          "FROM CONTRAT",
+          "WHERE YEAR(DateContrat) = 2015",
+          "AND NumVeh IN (SELECT NumVeh",
+          "               FROM VEHICULE",
+          "               WHERE TypeLocation = 'Avec chauffeur');"
+        ]
+      ],
+      "indice": "Kilomètres parcourus = KmsRetour - KmsRemise. « Signé » renvoie à DateContrat, pas à DateDebut : un contrat signé fin 2015 peut débuter en 2016. Le type de location est dans VEHICULE."
+    },
+    {
+      "id": "q10",
+      "theme": "Jointures",
+      "annale": "2016",
+      "enonce": "Pour l'agence n° 6 (Nancy Gare), afficher le montant facturé de chaque contrat signé au cours de l'année 2015 pour un véhicule sans chauffeur : numéro d'agence, numéro de contrat et montant (kilomètres parcourus × tarif kilométrique de la catégorie du véhicule).",
+      "correction": [
+        "SELECT CONTRAT.NumAgence, NumContrat, (KmsRetour - KmsRemise) * TarifKm AS Montant",
+        "FROM CONTRAT, VEHICULE, CATEGORIE",
+        "WHERE CONTRAT.NumVeh = VEHICULE.NumVeh",
+        "AND VEHICULE.NumCategorie = CATEGORIE.NumCategorie",
+        "AND YEAR(DateContrat) = 2015",
+        "AND CONTRAT.NumAgence = 6;"
+      ],
+      "variantes": [
+        [
+          "SELECT CONTRAT.NumAgence, NumContrat, (KmsRetour - KmsRemise) * TarifKm",
+          "FROM CONTRAT",
+          "INNER JOIN VEHICULE ON CONTRAT.NumVeh = VEHICULE.NumVeh",
+          "INNER JOIN CATEGORIE ON VEHICULE.NumCategorie = CATEGORIE.NumCategorie",
+          "WHERE TypeLocation = 'Sans chauffeur'",
+          "AND DateContrat BETWEEN '01/01/2015' AND '31/12/2015'",
+          "AND CONTRAT.NumAgence = 6;"
+        ]
+      ],
+      "indice": "Le tarif kilométrique est dans CATEGORIE, reliée au contrat par VEHICULE. Seuls les véhicules sans chauffeur ont une catégorie. Un contrat est identifié par son agence ET son numéro : affichez les deux."
+    },
+    {
+      "id": "q11",
+      "theme": "Jointures",
+      "enonce": "Afficher les contrats du client « Champagne Lefort » : nom de l'agence, numéro de contrat, date de signature et modèle du véhicule, du plus récent au plus ancien.",
+      "ordered": [
+        2
+      ],
+      "correction": [
+        "SELECT NomAgence, NumContrat, DateContrat, Modele",
+        "FROM CONTRAT, CLIENT, AGENCE, VEHICULE",
+        "WHERE CONTRAT.NumClient = CLIENT.NumClient",
+        "AND CONTRAT.NumAgence = AGENCE.NumAgence",
+        "AND CONTRAT.NumVeh = VEHICULE.NumVeh",
+        "AND NomClient = 'Champagne Lefort'",
+        "ORDER BY DateContrat DESC;"
+      ],
+      "variantes": [
+        [
+          "SELECT NomAgence, NumContrat, DateContrat, Modele",
+          "FROM CONTRAT",
+          "INNER JOIN CLIENT ON CONTRAT.NumClient = CLIENT.NumClient",
+          "INNER JOIN AGENCE ON CONTRAT.NumAgence = AGENCE.NumAgence",
+          "INNER JOIN VEHICULE ON CONTRAT.NumVeh = VEHICULE.NumVeh",
+          "WHERE NomClient = 'Champagne Lefort'",
+          "ORDER BY DateContrat DESC;"
+        ]
+      ],
+      "indice": "CONTRAT est au centre : il se relie à CLIENT, à AGENCE et à VEHICULE."
+    },
+    {
+      "id": "q12",
+      "theme": "Jointures",
+      "enonce": "Afficher les contentieux ouverts en 2015 : nom du client, numéro d'agence, numéro de contrat, numéro de dossier et date d'ouverture.",
+      "correction": [
+        "SELECT NomClient, CONTENTIEUX.NumAgence, CONTENTIEUX.NumContrat, NumDossier, DateOuverture",
+        "FROM CONTENTIEUX, CONTRAT, CLIENT",
+        "WHERE CONTENTIEUX.NumAgence = CONTRAT.NumAgence",
+        "AND CONTENTIEUX.NumContrat = CONTRAT.NumContrat",
+        "AND CONTRAT.NumClient = CLIENT.NumClient",
+        "AND YEAR(DateOuverture) = 2015;"
+      ],
+      "variantes": [
+        [
+          "SELECT NomClient, CONTENTIEUX.NumAgence, CONTENTIEUX.NumContrat, NumDossier, DateOuverture",
+          "FROM CONTENTIEUX",
+          "INNER JOIN CONTRAT ON CONTENTIEUX.NumAgence = CONTRAT.NumAgence AND CONTENTIEUX.NumContrat = CONTRAT.NumContrat",
+          "INNER JOIN CLIENT ON CONTRAT.NumClient = CLIENT.NumClient",
+          "WHERE DateOuverture BETWEEN '01/01/2015' AND '31/12/2015';"
+        ]
+      ],
+      "indice": "Les contrats sont numérotés dans chaque agence : le contrat n° 14 existe dans plusieurs agences. La jointure entre CONTENTIEUX et CONTRAT porte donc sur DEUX colonnes (NumAgence ET NumContrat)."
+    },
+    {
+      "id": "q13",
+      "theme": "Jointures",
+      "enonce": "Un véhicule avec chauffeur est facturé au forfait journalier, pour un nombre de jours égal à DATEDIFF(DateFin, DateDebut) + 1 (une location qui commence et se termine le même jour compte pour un jour). Pour les contrats avec chauffeur terminés en mars 2016, afficher le numéro d'agence, le numéro de contrat, le modèle du véhicule, le nombre de jours et le montant facturé.",
+      "correction": [
+        "SELECT NumAgence, NumContrat, Modele, DATEDIFF(DateFin, DateDebut) + 1 AS NbJours,",
+        "       ForfaitJour * (DATEDIFF(DateFin, DateDebut) + 1) AS Montant",
+        "FROM CONTRAT, VEHICULE",
+        "WHERE CONTRAT.NumVeh = VEHICULE.NumVeh",
+        "AND TypeLocation = 'Avec chauffeur'",
+        "AND YEAR(DateFin) = 2016",
+        "AND MONTH(DateFin) = 3;"
+      ],
+      "variantes": [
+        [
+          "SELECT NumAgence, NumContrat, Modele, DATEDIFF(DateFin, DateDebut) + 1,",
+          "       (DATEDIFF(DateFin, DateDebut) + 1) * ForfaitJour",
+          "FROM CONTRAT",
+          "INNER JOIN VEHICULE ON CONTRAT.NumVeh = VEHICULE.NumVeh",
+          "WHERE ForfaitJour IS NOT NULL",
+          "AND DateFin BETWEEN '01/03/2016' AND '31/03/2016';"
+        ]
+      ],
+      "indice": "Le forfait est dans VEHICULE. DATEDIFF(fin, début) donne le nombre de jours entre deux dates ; on peut faire des calculs dans le SELECT."
+    },
+    {
+      "id": "q14",
+      "theme": "Jointures et regroupements",
+      "annale": "2016",
+      "enonce": "Afficher la liste des agences (numéro et nom) qui ont eu, au mois d'avril 2016, au moins 4 véhicules différents loués avec chauffeur, avec ce nombre de véhicules. On retient les locations qui ont débuté en avril 2016 et qui sont devenues effectives (le kilométrage de remise n'est relevé que lorsque la location devient effective). Le sujet d'origine fixait le seuil à 50 véhicules.",
+      "correction": [
+        "SELECT AGENCE.NumAgence, NomAgence, COUNT(DISTINCT CONTRAT.NumVeh) AS NbVehicules",
+        "FROM AGENCE, CONTRAT, VEHICULE",
+        "WHERE AGENCE.NumAgence = CONTRAT.NumAgence",
+        "AND CONTRAT.NumVeh = VEHICULE.NumVeh",
+        "AND TypeLocation = 'Avec chauffeur'",
+        "AND KmsRemise IS NOT NULL",
+        "AND YEAR(DateDebut) = 2016",
+        "AND MONTH(DateDebut) = 4",
+        "GROUP BY AGENCE.NumAgence, NomAgence",
+        "HAVING COUNT(DISTINCT CONTRAT.NumVeh) >= 4;"
+      ],
+      "variantes": [
+        [
+          "SELECT AGENCE.NumAgence, NomAgence, COUNT(DISTINCT CONTRAT.NumVeh)",
+          "FROM AGENCE",
+          "INNER JOIN CONTRAT ON AGENCE.NumAgence = CONTRAT.NumAgence",
+          "INNER JOIN VEHICULE ON CONTRAT.NumVeh = VEHICULE.NumVeh",
+          "WHERE TypeLocation = 'Avec chauffeur'",
+          "AND KmsRemise IS NOT NULL",
+          "AND DateDebut BETWEEN '01/04/2016' AND '30/04/2016'",
+          "GROUP BY AGENCE.NumAgence, NomAgence",
+          "HAVING COUNT(DISTINCT CONTRAT.NumVeh) > 3;"
+        ]
+      ],
+      "indice": "Quatre filtres dans le WHERE (avec chauffeur, location effective, mois et année de début), puis un regroupement par agence. Un même véhicule loué deux fois dans le mois ne compte qu'une fois : COUNT(DISTINCT …). « Au moins 4 » s'écrit >= 4."
+    },
+    {
+      "id": "q15",
+      "theme": "Jointures et regroupements",
+      "enonce": "Afficher, pour chaque agence, son nom et le nombre de contrats signés en 2015, de l'agence qui en a signé le plus à celle qui en a signé le moins.",
+      "ordered": [
+        1
+      ],
+      "correction": [
+        "SELECT NomAgence, COUNT(*) AS NbContrats",
+        "FROM AGENCE, CONTRAT",
+        "WHERE AGENCE.NumAgence = CONTRAT.NumAgence",
+        "AND YEAR(DateContrat) = 2015",
+        "GROUP BY AGENCE.NumAgence, NomAgence",
+        "ORDER BY COUNT(*) DESC;"
+      ],
+      "variantes": [
+        [
+          "SELECT NomAgence, COUNT(NumContrat) AS NbContrats",
+          "FROM AGENCE",
+          "INNER JOIN CONTRAT ON AGENCE.NumAgence = CONTRAT.NumAgence",
+          "WHERE DateContrat BETWEEN '01/01/2015' AND '31/12/2015'",
+          "GROUP BY AGENCE.NumAgence, NomAgence",
+          "ORDER BY NbContrats DESC;"
+        ]
+      ],
+      "indice": "Filtrez l'année dans le WHERE, regroupez par agence, triez sur le nombre avec ORDER BY … DESC."
+    },
+    {
+      "id": "q16",
+      "theme": "Jointures et regroupements",
+      "enonce": "Afficher, pour chaque catégorie de véhicule, son nom et le chiffre d'affaires kilométrique des contrats signés en 2015 (somme des kilomètres parcourus × tarif kilométrique).",
+      "correction": [
+        "SELECT NomCategorie, SUM((KmsRetour - KmsRemise) * TarifKm) AS CA",
+        "FROM CATEGORIE, VEHICULE, CONTRAT",
+        "WHERE CATEGORIE.NumCategorie = VEHICULE.NumCategorie",
+        "AND VEHICULE.NumVeh = CONTRAT.NumVeh",
+        "AND YEAR(DateContrat) = 2015",
+        "GROUP BY CATEGORIE.NumCategorie, NomCategorie;"
+      ],
+      "variantes": [
+        [
+          "SELECT NomCategorie, SUM(KmsRetour * TarifKm - KmsRemise * TarifKm)",
+          "FROM CATEGORIE",
+          "INNER JOIN VEHICULE ON CATEGORIE.NumCategorie = VEHICULE.NumCategorie",
+          "INNER JOIN CONTRAT ON VEHICULE.NumVeh = CONTRAT.NumVeh",
+          "WHERE DateContrat BETWEEN '01/01/2015' AND '31/12/2015'",
+          "GROUP BY CATEGORIE.NumCategorie, NomCategorie;"
+        ]
+      ],
+      "indice": "Trois tables : CATEGORIE → VEHICULE → CONTRAT. Le calcul se fait à l'intérieur de SUM, ligne par ligne."
+    },
+    {
+      "id": "q17",
+      "theme": "Jointures et regroupements",
+      "enonce": "Afficher les clients (numéro et nom) qui ont signé au moins 8 contrats en 2015, avec leur nombre de contrats.",
+      "correction": [
+        "SELECT CLIENT.NumClient, NomClient, COUNT(*) AS NbContrats",
+        "FROM CLIENT, CONTRAT",
+        "WHERE CLIENT.NumClient = CONTRAT.NumClient",
+        "AND YEAR(DateContrat) = 2015",
+        "GROUP BY CLIENT.NumClient, NomClient",
+        "HAVING COUNT(*) >= 8;"
+      ],
+      "variantes": [
+        [
+          "SELECT CLIENT.NumClient, NomClient, COUNT(NumContrat)",
+          "FROM CLIENT",
+          "INNER JOIN CONTRAT ON CLIENT.NumClient = CONTRAT.NumClient",
+          "WHERE DateContrat BETWEEN '01/01/2015' AND '31/12/2015'",
+          "GROUP BY CLIENT.NumClient, NomClient",
+          "HAVING COUNT(NumContrat) > 7;"
+        ]
+      ],
+      "indice": "La condition sur l'année va dans WHERE, la condition sur le nombre de contrats dans HAVING."
+    },
+    {
+      "id": "q18",
+      "theme": "Sous-requêtes",
+      "annale": "2016",
+      "enonce": "Afficher la liste des contrats signés en avril 2016 (numéro de contrat, date de signature) qui ne concernent pas des véhicules avec chauffeur, classés par agence (numéro, nom).",
+      "ordered": [
+        2
+      ],
+      "correction": [
+        "SELECT NumContrat, DateContrat, AGENCE.NumAgence, NomAgence",
+        "FROM CONTRAT, AGENCE",
+        "WHERE CONTRAT.NumAgence = AGENCE.NumAgence",
+        "AND YEAR(DateContrat) = 2016",
+        "AND MONTH(DateContrat) = 4",
+        "AND NumVeh NOT IN (SELECT NumVeh",
+        "                   FROM VEHICULE",
+        "                   WHERE TypeLocation = 'Avec chauffeur')",
+        "ORDER BY AGENCE.NumAgence, NomAgence;"
+      ],
+      "variantes": [
+        [
+          "SELECT NumContrat, DateContrat, AGENCE.NumAgence, NomAgence",
+          "FROM CONTRAT",
+          "INNER JOIN AGENCE ON CONTRAT.NumAgence = AGENCE.NumAgence",
+          "INNER JOIN VEHICULE ON CONTRAT.NumVeh = VEHICULE.NumVeh",
+          "WHERE TypeLocation = 'Sans chauffeur'",
+          "AND DateContrat BETWEEN '01/04/2016' AND '30/04/2016'",
+          "ORDER BY AGENCE.NumAgence;"
+        ]
+      ],
+      "indice": "La sous-requête donne les véhicules avec chauffeur ; NOT IN garde les contrats des autres véhicules. « Classés par agence » : ORDER BY sur le numéro d'agence (le corrigé officiel l'avait oublié)."
+    },
+    {
+      "id": "q19",
+      "theme": "Sous-requêtes",
+      "enonce": "Afficher le numéro, l'immatriculation, le modèle et la date d'achat des véhicules qui n'ont jamais été loués.",
+      "correction": [
+        "SELECT NumVeh, Immatriculation, Modele, DateAchat",
+        "FROM VEHICULE",
+        "WHERE NumVeh NOT IN (SELECT NumVeh",
+        "                     FROM CONTRAT);"
+      ],
+      "variantes": [
+        [
+          "SELECT NumVeh, Immatriculation, Modele, DateAchat",
+          "FROM VEHICULE",
+          "WHERE NOT EXISTS (SELECT *",
+          "                  FROM CONTRAT",
+          "                  WHERE CONTRAT.NumVeh = VEHICULE.NumVeh);"
+        ]
+      ],
+      "indice": "La sous-requête donne les véhicules présents dans CONTRAT ; NOT IN garde les autres."
+    },
+    {
+      "id": "q20",
+      "theme": "Sous-requêtes",
+      "enonce": "Quel est le véhicule avec chauffeur dont le forfait journalier est le plus élevé ? Afficher son immatriculation, son modèle et son forfait.",
+      "correction": [
+        "SELECT Immatriculation, Modele, ForfaitJour",
+        "FROM VEHICULE",
+        "WHERE ForfaitJour = (SELECT MAX(ForfaitJour)",
+        "                     FROM VEHICULE);"
+      ],
+      "variantes": [
+        [
+          "SELECT Immatriculation, Modele, ForfaitJour",
+          "FROM VEHICULE",
+          "WHERE TypeLocation = 'Avec chauffeur'",
+          "AND ForfaitJour = (SELECT MAX(ForfaitJour)",
+          "                    FROM VEHICULE",
+          "                    WHERE TypeLocation = 'Avec chauffeur');"
+        ]
+      ],
+      "indice": "La sous-requête calcule le forfait maximum ; la requête principale cherche le véhicule qui a ce forfait. Deux véhicules du même modèle n'ont pas forcément le même forfait."
+    },
+    {
+      "id": "q21",
+      "theme": "Sous-requêtes",
+      "enonce": "Afficher le nom et la ville des agences qui n'ont jamais eu de contentieux.",
+      "correction": [
+        "SELECT NomAgence, VilleAgence",
+        "FROM AGENCE",
+        "WHERE NumAgence NOT IN (SELECT NumAgence",
+        "                        FROM CONTENTIEUX);"
+      ],
+      "variantes": [
+        [
+          "SELECT NomAgence, VilleAgence",
+          "FROM AGENCE",
+          "WHERE NOT EXISTS (SELECT *",
+          "                  FROM CONTENTIEUX",
+          "                  WHERE CONTENTIEUX.NumAgence = AGENCE.NumAgence);"
+        ]
+      ],
+      "indice": "CONTENTIEUX contient le numéro d'agence (première partie de sa clé) : pas besoin de passer par CONTRAT."
+    },
+    {
+      "id": "q22",
+      "theme": "Mises à jour",
+      "type": "write",
+      "annale": "2016",
+      "enonce": "Les tarifs kilométriques augmentent de 2 % au premier juillet. Rédiger la requête qui les met à jour dans la base.",
+      "correction": [
+        "UPDATE CATEGORIE",
+        "SET TarifKm = TarifKm * 1.02;"
+      ],
+      "variantes": [
+        [
+          "UPDATE CATEGORIE",
+          "SET TarifKm = TarifKm + TarifKm * 2 / 100;"
+        ]
+      ],
+      "verif": "SELECT * FROM CATEGORIE ORDER BY NumCategorie",
+      "indice": "Augmenter de 2 %, c'est multiplier par 1,02 (écrit 1.02 en SQL). Toutes les catégories sont concernées : pas de WHERE."
+    },
+    {
+      "id": "q23",
+      "theme": "Mises à jour",
+      "type": "write",
+      "annale": "2016",
+      "enonce": "La table LITIGES_ANCIENS a déjà été créée (vide) avec la même structure que CONTENTIEUX. Y insérer toutes les informations relatives aux contentieux ouverts avant le 1er janvier 2015 et non clos à ce jour (un contentieux non clos n'a pas de date de clôture).",
+      "correction": [
+        "INSERT INTO LITIGES_ANCIENS",
+        "SELECT *",
+        "FROM CONTENTIEUX",
+        "WHERE DateOuverture < '01/01/2015'",
+        "AND DateCloture IS NULL;"
+      ],
+      "variantes": [
+        [
+          "INSERT INTO LITIGES_ANCIENS (NumAgence, NumContrat, NumDossier, DateOuverture, DateCloture)",
+          "SELECT NumAgence, NumContrat, NumDossier, DateOuverture, DateCloture",
+          "FROM CONTENTIEUX",
+          "WHERE YEAR(DateOuverture) < 2015",
+          "AND DateCloture IS NULL;"
+        ]
+      ],
+      "verif": "SELECT * FROM LITIGES_ANCIENS ORDER BY NumAgence, NumContrat, NumDossier",
+      "indice": "INSERT INTO table SELECT … FROM … WHERE … : pas de VALUES, et pas de parenthèses autour du SELECT. « Avant le 1er janvier 2015 » exclut le 01/01/2015 : opérateur <."
+    },
+    {
+      "id": "q24",
+      "theme": "Mises à jour",
+      "type": "write",
+      "enonce": "Le véhicule du contrat n° 70 de l'agence n° 2 (Strasbourg Gare) vient d'être rendu : le compteur indique 56 812 km. Enregistrer ce kilométrage de retour.",
+      "correction": [
+        "UPDATE CONTRAT",
+        "SET KmsRetour = 56812",
+        "WHERE NumAgence = 2",
+        "AND NumContrat = 70;"
+      ],
+      "verif": "SELECT * FROM CONTRAT ORDER BY NumAgence, NumContrat",
+      "indice": "Un contrat est identifié par le couple (NumAgence, NumContrat) : l'agence de Mulhouse a aussi un contrat n° 70. Les deux conditions sont nécessaires dans le WHERE."
+    },
+    {
+      "id": "q25",
+      "theme": "Mises à jour",
+      "type": "write",
+      "enonce": "Le client « SA Textiles Vosgiens » a été saisi deux fois par erreur : la fiche n° 1207 est un doublon de la fiche n° 1030 et n'a aucun contrat. Supprimer la fiche n° 1207.",
+      "correction": [
+        "DELETE FROM CLIENT",
+        "WHERE NumClient = 1207;"
+      ],
+      "verif": "SELECT * FROM CLIENT ORDER BY NumClient",
+      "indice": "DELETE FROM … WHERE … sur la clé primaire. Supprimer un client qui a des contrats serait refusé par l'intégrité référentielle (CONTRAT.NumClient y fait référence) : c'est pourquoi on ne peut supprimer que la fiche en double."
+    },
+    {
+      "id": "s01",
+      "type": "schema",
+      "theme": "Évolution du schéma",
+      "annale": "2016",
+      "enonce": "Dans la base d'entraînement, les véhicules avec et sans chauffeur sont regroupés dans la seule table VEHICULE (colonne TypeLocation) : ForfaitJour n'est renseigné que pour les véhicules avec chauffeur et NumCategorie que pour les véhicules sans chauffeur. Le modèle conceptuel du sujet représente cette situation par une spécialisation de VEHICULE en deux sous-types : AVEC_CHAUFFEUR (loué avec chauffeur, au forfait journalier propre à chaque véhicule) et SANS_CHAUFFEUR (facturé au kilomètre selon sa catégorie), avec une contrainte de partition (XT : tout véhicule est de l'un des deux types, jamais des deux). Transformez le schéma ci-dessous pour traduire cette spécialisation.",
+      "depart": [
+        {
+          "nom": "VEHICULE",
+          "colonnes": [
+            "_NumVeh",
+            "Immatriculation",
+            "Modele",
+            "DateAchat",
+            "Capacite",
+            "MontantCaution",
+            "TypeLocation",
+            "ForfaitJour",
+            "#NumCategorie>CATEGORIE"
+          ]
+        },
+        "CATEGORIE"
+      ],
+      "solution": {
+        "tables": [
+          {
+            "nom": "VEHICULE",
+            "interdits": [
+              "ForfaitJour",
+              "NumCategorie"
+            ]
+          },
+          {
+            "nom": "SANS_CHAUFFEUR",
+            "alias": [
+              "SANSCHAUFFEUR",
+              "VEHICULE_SANS_CHAUFFEUR",
+              "VEHICULESANSCHAUFFEUR",
+              "VEH_SANS_CHAUFFEUR"
+            ],
+            "role": "les véhicules loués sans chauffeur (facturés au kilomètre selon leur catégorie)",
+            "pk": [
+              "NumVeh|NumVehSansChauffeur|NumVehiculeSansChauffeur|NumVehicule"
+            ],
+            "fk": {
+              "NumVeh|NumVehSansChauffeur|NumVehiculeSansChauffeur|NumVehicule": "VEHICULE",
+              "NumCategorie": "CATEGORIE"
+            }
+          },
+          {
+            "nom": "AVEC_CHAUFFEUR",
+            "alias": [
+              "AVECCHAUFFEUR",
+              "VEHICULE_AVEC_CHAUFFEUR",
+              "VEHICULEAVECCHAUFFEUR",
+              "VEH_AVEC_CHAUFFEUR"
+            ],
+            "role": "les véhicules loués avec chauffeur (facturés au forfait journalier)",
+            "pk": [
+              "NumVeh|NumVehAvecChauffeur|NumVehiculeAvecChauffeur|NumVehicule"
+            ],
+            "fk": {
+              "NumVeh|NumVehAvecChauffeur|NumVehiculeAvecChauffeur|NumVehicule": "VEHICULE"
+            },
+            "attributs": [
+              "ForfaitJour|Forfait|ForfaitJournalier"
+            ]
+          }
+        ]
+      },
+      "variantes": [
+        {
+          "tables": [
+            {
+              "nom": "VEHICULE",
+              "interdits": [
+                "ForfaitJour"
+              ]
+            },
+            {
+              "nom": "SANS_CHAUFFEUR",
+              "alias": [
+                "SANSCHAUFFEUR",
+                "VEHICULE_SANS_CHAUFFEUR",
+                "VEHICULESANSCHAUFFEUR",
+                "VEH_SANS_CHAUFFEUR"
+              ],
+              "role": "les véhicules loués sans chauffeur (facturés au kilomètre selon leur catégorie)",
+              "pk": [
+                "NumVeh|NumVehSansChauffeur|NumVehiculeSansChauffeur|NumVehicule"
+              ],
+              "fk": {
+                "NumVeh|NumVehSansChauffeur|NumVehiculeSansChauffeur|NumVehicule": "VEHICULE"
+              }
+            },
+            {
+              "nom": "AVEC_CHAUFFEUR",
+              "alias": [
+                "AVECCHAUFFEUR",
+                "VEHICULE_AVEC_CHAUFFEUR",
+                "VEHICULEAVECCHAUFFEUR",
+                "VEH_AVEC_CHAUFFEUR"
+              ],
+              "role": "les véhicules loués avec chauffeur (facturés au forfait journalier)",
+              "pk": [
+                "NumVeh|NumVehAvecChauffeur|NumVehiculeAvecChauffeur|NumVehicule"
+              ],
+              "fk": {
+                "NumVeh|NumVehAvecChauffeur|NumVehiculeAvecChauffeur|NumVehicule": "VEHICULE"
+              },
+              "attributs": [
+                "ForfaitJour|Forfait|ForfaitJournalier"
+              ]
+            }
+          ],
+          "partiel": "Presque : la catégorie (donc le tarif kilométrique) ne concerne que les véhicules sans chauffeur. La clé étrangère NumCategorie doit passer de VEHICULE dans SANS_CHAUFFEUR."
+        }
+      ],
+      "indice": "Chaque sous-type devient une table dont la clé primaire NumVeh est aussi une clé étrangère vers VEHICULE ; les informations propres à un sous-type (forfait, catégorie) quittent VEHICULE pour la table du sous-type. La contrainte XT, elle, n'apparaît pas dans les tables (si un même véhicule pouvait être loué des deux façons, les tables resteraient les mêmes)."
+    },
+    {
+      "id": "s02",
+      "type": "schema",
+      "theme": "Évolution du schéma",
+      "annale": "2016",
+      "enonce": "LocaEst veut suivre les interventions sur ses véhicules (le schéma de départ ne reprend que VEHICULE). Chaque véhicule appartient à un type de véhicule (code, libellé : tourisme, utilitaire, poids lourd). Une intervention (numéro, date de début d'opération, objet, durée prévue, origine : maintenance ou réparation, montant facturé par le garagiste) concerne un seul véhicule et est réalisée par un seul garagiste. Un garagiste (numéro, nom, adresse, code postal, ville, mél, téléphone, nom du contact) est spécialisé dans un seul type de véhicule. Lorsqu'un véhicule est accidenté, un expert (numéro, nom, prénom, adresse, code postal, ville, mél, téléphone) rédige un rapport d'expertise : numéroté, daté, avec le montant total des travaux prévus et l'indication « hors d'usage » (O/N) ; chaque rapport est rédigé par un seul expert et prévoit une intervention, et une intervention fait suite à au plus un rapport (les interventions de maintenance n'en ont pas). Complétez le schéma.",
+      "depart": [
+        {
+          "nom": "VEHICULE",
+          "colonnes": [
+            "_NumVeh",
+            "DateAchat",
+            "Capacite",
+            "MontantCaution",
+            "CumulKms"
+          ]
+        }
+      ],
+      "solution": {
+        "tables": [
+          {
+            "nom": "TYPE_VEHICULE",
+            "alias": [
+              "TYPEVEHICULE",
+              "TYPE_VEH",
+              "TYPES_VEHICULE",
+              "TYPEVEH",
+              "TYPE_DE_VEHICULE"
+            ],
+            "role": "décrire les types de véhicules (tourisme, utilitaire, poids lourd)",
+            "pk": [
+              "CodeTypeVehicule|CodeType|NumType|NumTypeVehicule|IdType|CodeTypeVeh|IdTypeVehicule"
+            ],
+            "attributs": [
+              "LibelleType|Libelle|LibelleTypeVehicule|NomType|LibType"
+            ]
+          },
+          {
+            "nom": "VEHICULE",
+            "fk": {
+              "CodeTypeVehicule|CodeType|NumType|NumTypeVehicule|IdType|CodeTypeVeh|IdTypeVehicule": "TYPE_VEHICULE"
+            }
+          },
+          {
+            "nom": "GARAGE",
+            "alias": [
+              "GARAGES",
+              "GARAGISTE",
+              "GARAGISTES"
+            ],
+            "role": "décrire les garagistes (coordonnées, contact, type de véhicule dont ils sont spécialistes)",
+            "pk": [
+              "NumGarage|CodeGarage|IdGarage|NumGaragiste"
+            ],
+            "fk": {
+              "CodeTypeVehicule|CodeType|NumType|NumTypeVehicule|IdType|CodeTypeVeh|IdTypeVehicule": "TYPE_VEHICULE"
+            },
+            "attributs": [
+              "NomGarage|Nom|NomGaragiste",
+              "AdresseGarage|Adresse|RueGarage|AdrGarage",
+              "CPGarage|CP|CodePostalGarage|CodePostal",
+              "VilleGarage|Ville",
+              "TelGarage|Tel|Telephone|TelephoneGarage"
+            ],
+            "optionnels": [
+              "MelGarage|Mel|Mail|EmailGarage|MailGarage|Email|Courriel",
+              "Contact|ContactGarage|NomContact"
+            ]
+          },
+          {
+            "nom": "EXPERT",
+            "alias": [
+              "EXPERTS"
+            ],
+            "role": "décrire les experts (coordonnées)",
+            "pk": [
+              "NumExpert|CodeExpert|IdExpert"
+            ],
+            "attributs": [
+              "NomExpert|Nom",
+              "PrenomExpert|Prenom",
+              "AdresseExpert|Adresse|RueExpert|AdrExpert",
+              "CPExpert|CP|CodePostalExpert|CodePostal",
+              "VilleExpert|Ville",
+              "TelExpert|Tel|Telephone|TelephoneExpert"
+            ],
+            "optionnels": [
+              "MelExpert|Mel|Mail|EmailExpert|MailExpert|Email|Courriel"
+            ]
+          },
+          {
+            "nom": "INTERVENTION",
+            "alias": [
+              "INTERVENTIONS"
+            ],
+            "role": "enregistrer les interventions réalisées par les garagistes sur les véhicules",
+            "pk": [
+              "NumIntervention|CodeIntervention|IdIntervention|RefIntervention"
+            ],
+            "fk": {
+              "NumVeh|NumVehicule": "VEHICULE",
+              "NumGarage|CodeGarage|IdGarage|NumGaragiste": "GARAGE"
+            },
+            "attributs": [
+              "DateIntervention|DateDebut|DateDebutIntervention|DateDebutOperation|Date",
+              "Objet|ObjetIntervention",
+              "Duree|DureePrevue|DureeIntervention",
+              "MontantFacture|Montant|MontantIntervention|MontantHT|MontantFactureHT"
+            ],
+            "optionnels": [
+              "Origine|OrigineIntervention|TypeIntervention|Nature|NatureIntervention"
+            ]
+          },
+          {
+            "nom": "RAPPORT",
+            "alias": [
+              "RAPPORTS",
+              "RAPPORT_EXPERTISE",
+              "RAPPORTEXPERTISE",
+              "EXPERTISE",
+              "EXPERTISES"
+            ],
+            "role": "enregistrer les rapports d'expertise des véhicules accidentés",
+            "pk": [
+              "NumRapport|RefRapport|NumExpertise|CodeRapport|IdRapport|NumDossierExpertise|RefDossier"
+            ],
+            "fk": {
+              "NumExpert|CodeExpert|IdExpert": "EXPERT",
+              "NumIntervention|CodeIntervention|IdIntervention|RefIntervention": "INTERVENTION"
+            },
+            "attributs": [
+              "DateRapport|Date|DateExpertise",
+              "MontantTravaux|Montant|CoutPrevu|CoutTotal|CoutTotalPrevu|MontantPrevu|CoutTravaux|MontantExpertise"
+            ],
+            "optionnels": [
+              "HorsUsage|VehiculeHorsUsage|Epave",
+              "NumVeh|NumVehicule"
+            ]
+          }
+        ]
+      },
+      "variantes": [
+        {
+          "tables": [
+            {
+              "nom": "TYPE_VEHICULE",
+              "alias": [
+                "TYPEVEHICULE",
+                "TYPE_VEH",
+                "TYPES_VEHICULE",
+                "TYPEVEH",
+                "TYPE_DE_VEHICULE"
+              ],
+              "role": "décrire les types de véhicules (tourisme, utilitaire, poids lourd)",
+              "pk": [
+                "CodeTypeVehicule|CodeType|NumType|NumTypeVehicule|IdType|CodeTypeVeh|IdTypeVehicule"
+              ],
+              "attributs": [
+                "LibelleType|Libelle|LibelleTypeVehicule|NomType|LibType"
+              ]
+            },
+            {
+              "nom": "VEHICULE",
+              "fk": {
+                "CodeTypeVehicule|CodeType|NumType|NumTypeVehicule|IdType|CodeTypeVeh|IdTypeVehicule": "TYPE_VEHICULE"
+              }
+            },
+            {
+              "nom": "INTERVENANT",
+              "alias": [
+                "INTERVENANTS",
+                "PRESTATAIRE",
+                "PRESTATAIRES"
+              ],
+              "role": "décrire les intervenants (coordonnées communes aux garagistes et aux experts)",
+              "pk": [
+                "NumIntervenant|CodeIntervenant|IdIntervenant|NumGarage|NumExpert"
+              ],
+              "attributs": [
+                "NomIntervenant|Nom",
+                "AdresseIntervenant|Adresse|RueIntervenant",
+                "CPIntervenant|CP|CodePostal|CodePostalIntervenant",
+                "VilleIntervenant|Ville",
+                "TelIntervenant|Tel|Telephone"
+              ],
+              "optionnels": [
+                "MelIntervenant|Mel|Mail|Email|Courriel",
+                "PrenomIntervenant|Prenom"
+              ]
+            },
+            {
+              "nom": "GARAGE",
+              "alias": [
+                "GARAGES",
+                "GARAGISTE",
+                "GARAGISTES"
+              ],
+              "role": "décrire les garagistes (coordonnées, contact, type de véhicule dont ils sont spécialistes)",
+              "pk": [
+                "NumGarage|NumIntervenant|CodeIntervenant|IdIntervenant|CodeGarage|IdGarage"
+              ],
+              "fk": {
+                "NumGarage|NumIntervenant|CodeIntervenant|IdIntervenant|CodeGarage|IdGarage": "INTERVENANT",
+                "CodeTypeVehicule|CodeType|NumType|NumTypeVehicule|IdType|CodeTypeVeh|IdTypeVehicule": "TYPE_VEHICULE"
+              },
+              "optionnels": [
+                "Contact|ContactGarage|NomContact"
+              ]
+            },
+            {
+              "nom": "EXPERT",
+              "alias": [
+                "EXPERTS"
+              ],
+              "role": "décrire les experts (coordonnées)",
+              "pk": [
+                "NumExpert|NumIntervenant|CodeIntervenant|IdIntervenant|CodeExpert|IdExpert"
+              ],
+              "fk": {
+                "NumExpert|NumIntervenant|CodeIntervenant|IdIntervenant|CodeExpert|IdExpert": "INTERVENANT"
+              },
+              "optionnels": [
+                "PrenomExpert|Prenom"
+              ]
+            },
+            {
+              "nom": "INTERVENTION",
+              "alias": [
+                "INTERVENTIONS"
+              ],
+              "role": "enregistrer les interventions réalisées par les garagistes sur les véhicules",
+              "pk": [
+                "NumIntervention|CodeIntervention|IdIntervention|RefIntervention"
+              ],
+              "fk": {
+                "NumVeh|NumVehicule": "VEHICULE",
+                "NumGarage|NumIntervenant|CodeIntervenant|IdIntervenant|CodeGarage|IdGarage": "GARAGE"
+              },
+              "attributs": [
+                "DateIntervention|DateDebut|DateDebutIntervention|DateDebutOperation|Date",
+                "Objet|ObjetIntervention",
+                "Duree|DureePrevue|DureeIntervention",
+                "MontantFacture|Montant|MontantIntervention|MontantHT|MontantFactureHT"
+              ],
+              "optionnels": [
+                "Origine|OrigineIntervention|TypeIntervention|Nature|NatureIntervention"
+              ]
+            },
+            {
+              "nom": "RAPPORT",
+              "alias": [
+                "RAPPORTS",
+                "RAPPORT_EXPERTISE",
+                "RAPPORTEXPERTISE",
+                "EXPERTISE",
+                "EXPERTISES"
+              ],
+              "role": "enregistrer les rapports d'expertise des véhicules accidentés",
+              "pk": [
+                "NumRapport|RefRapport|NumExpertise|CodeRapport|IdRapport|NumDossierExpertise|RefDossier"
+              ],
+              "fk": {
+                "NumExpert|NumIntervenant|CodeIntervenant|IdIntervenant|CodeExpert|IdExpert": "EXPERT",
+                "NumIntervention|CodeIntervention|IdIntervention|RefIntervention": "INTERVENTION"
+              },
+              "attributs": [
+                "DateRapport|Date|DateExpertise",
+                "MontantTravaux|Montant|CoutPrevu|CoutTotal|CoutTotalPrevu|MontantPrevu|CoutTravaux|MontantExpertise"
+              ],
+              "optionnels": [
+                "HorsUsage|VehiculeHorsUsage|Epave",
+                "NumVeh|NumVehicule"
+              ]
+            }
+          ]
+        },
+        {
+          "tables": [
+            {
+              "nom": "TYPE_VEHICULE",
+              "alias": [
+                "TYPEVEHICULE",
+                "TYPE_VEH",
+                "TYPES_VEHICULE",
+                "TYPEVEH",
+                "TYPE_DE_VEHICULE"
+              ],
+              "role": "décrire les types de véhicules (tourisme, utilitaire, poids lourd)",
+              "pk": [
+                "CodeTypeVehicule|CodeType|NumType|NumTypeVehicule|IdType|CodeTypeVeh|IdTypeVehicule"
+              ],
+              "attributs": [
+                "LibelleType|Libelle|LibelleTypeVehicule|NomType|LibType"
+              ]
+            },
+            {
+              "nom": "VEHICULE",
+              "fk": {
+                "CodeTypeVehicule|CodeType|NumType|NumTypeVehicule|IdType|CodeTypeVeh|IdTypeVehicule": "TYPE_VEHICULE"
+              }
+            },
+            {
+              "nom": "GARAGE",
+              "alias": [
+                "GARAGES",
+                "GARAGISTE",
+                "GARAGISTES"
+              ],
+              "role": "décrire les garagistes (coordonnées, contact, type de véhicule dont ils sont spécialistes)",
+              "pk": [
+                "NumGarage|CodeGarage|IdGarage|NumGaragiste"
+              ],
+              "fk": {
+                "CodeTypeVehicule|CodeType|NumType|NumTypeVehicule|IdType|CodeTypeVeh|IdTypeVehicule": "TYPE_VEHICULE"
+              },
+              "attributs": [
+                "NomGarage|Nom|NomGaragiste",
+                "AdresseGarage|Adresse|RueGarage|AdrGarage",
+                "CPGarage|CP|CodePostalGarage|CodePostal",
+                "VilleGarage|Ville",
+                "TelGarage|Tel|Telephone|TelephoneGarage"
+              ],
+              "optionnels": [
+                "MelGarage|Mel|Mail|EmailGarage|MailGarage|Email|Courriel",
+                "Contact|ContactGarage|NomContact"
+              ]
+            },
+            {
+              "nom": "EXPERT",
+              "alias": [
+                "EXPERTS"
+              ],
+              "role": "décrire les experts (coordonnées)",
+              "pk": [
+                "NumExpert|CodeExpert|IdExpert"
+              ],
+              "attributs": [
+                "NomExpert|Nom",
+                "PrenomExpert|Prenom",
+                "AdresseExpert|Adresse|RueExpert|AdrExpert",
+                "CPExpert|CP|CodePostalExpert|CodePostal",
+                "VilleExpert|Ville",
+                "TelExpert|Tel|Telephone|TelephoneExpert"
+              ],
+              "optionnels": [
+                "MelExpert|Mel|Mail|EmailExpert|MailExpert|Email|Courriel"
+              ]
+            },
+            {
+              "nom": "INTERVENTION",
+              "alias": [
+                "INTERVENTIONS"
+              ],
+              "role": "enregistrer les interventions réalisées par les garagistes sur les véhicules",
+              "pk": [
+                "NumIntervention|CodeIntervention|IdIntervention|RefIntervention"
+              ],
+              "fk": {
+                "NumVeh|NumVehicule": "VEHICULE",
+                "NumGarage|CodeGarage|IdGarage|NumGaragiste": "GARAGE",
+                "NumRapport|RefRapport|NumExpertise|CodeRapport|IdRapport|NumDossierExpertise|RefDossier": "RAPPORT"
+              },
+              "attributs": [
+                "DateIntervention|DateDebut|DateDebutIntervention|DateDebutOperation|Date",
+                "Objet|ObjetIntervention",
+                "Duree|DureePrevue|DureeIntervention",
+                "MontantFacture|Montant|MontantIntervention|MontantHT|MontantFactureHT"
+              ],
+              "optionnels": [
+                "Origine|OrigineIntervention|TypeIntervention|Nature|NatureIntervention"
+              ]
+            },
+            {
+              "nom": "RAPPORT",
+              "alias": [
+                "RAPPORTS",
+                "RAPPORT_EXPERTISE",
+                "RAPPORTEXPERTISE",
+                "EXPERTISE",
+                "EXPERTISES"
+              ],
+              "role": "enregistrer les rapports d'expertise des véhicules accidentés",
+              "pk": [
+                "NumRapport|RefRapport|NumExpertise|CodeRapport|IdRapport|NumDossierExpertise|RefDossier"
+              ],
+              "fk": {
+                "NumExpert|CodeExpert|IdExpert": "EXPERT"
+              },
+              "attributs": [
+                "DateRapport|Date|DateExpertise",
+                "MontantTravaux|Montant|CoutPrevu|CoutTotal|CoutTotalPrevu|MontantPrevu|CoutTravaux|MontantExpertise"
+              ],
+              "optionnels": [
+                "HorsUsage|VehiculeHorsUsage|Epave",
+                "NumVeh|NumVehicule"
+              ],
+              "interdits": [
+                "NumIntervention|CodeIntervention|IdIntervention|RefIntervention"
+              ]
+            }
+          ],
+          "partiel": "Presque : une intervention fait suite à AU PLUS un rapport (cardinalité 0,1) alors qu'un rapport prévoit exactement une intervention (1,1). La clé étrangère se place du côté (1,1) : NumIntervention dans RAPPORT, plutôt que NumRapport (souvent vide) dans INTERVENTION."
+        }
+      ],
+      "indice": "Repérez les relations « un seul » : le type d'un véhicule, la spécialité d'un garagiste, le véhicule et le garagiste d'une intervention, l'expert et l'intervention d'un rapport. Chacune se traduit par une clé étrangère dans la table du côté « un seul ». Il faut cinq nouvelles tables."
+    }
+  ]
+}

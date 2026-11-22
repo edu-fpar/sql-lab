@@ -1,0 +1,1638 @@
+{
+  "id": "dcg2026",
+  "titre": "DCG 2026 – Elassure",
+  "aujourdhui": "2026-05-15",
+  "contexte": "Elassure est une compagnie d'assurance basée à Montpellier. Chaque CONTRAT d'assurance automobile lie un CLIENT (particulier ou professionnel, avec son coefficient bonus-malus) à un VEHICULE (d'un MODELE_VEHICULE donné) et à une FORMULE, qui regroupe plusieurs GARANTIE (table INCLURE). StatutContrat vaut « En attente de signature », « En cours » ou « Résilié ». Chaque année (CONCERNER), le contrat a une prime annuelle, payée en une ou plusieurs ECHEANCE ; chaque échéance payée est reliée à son REGLEMENT (table PAYER). Les SINISTRE sont rattachés au contrat (Statut : « Déclaré », « En expertise », « Indemnisé » ou « Refusé » ; le montant d'indemnisation n'est pas renseigné tant que le sinistre n'est pas réglé).",
+  "source": "Inspiré du sujet DCG UE8 session 2026, dossier 2. Données entièrement fictives.",
+  "schemaGrid": {
+    "REGLEMENT": [
+      0,
+      0
+    ],
+    "PAYER": [
+      1,
+      0
+    ],
+    "ECHEANCE": [
+      2,
+      0
+    ],
+    "ANNEE": [
+      0,
+      1
+    ],
+    "CONCERNER": [
+      1,
+      1
+    ],
+    "SINISTRE": [
+      2,
+      1
+    ],
+    "VEHICULE": [
+      0,
+      2
+    ],
+    "CONTRAT": [
+      1,
+      2
+    ],
+    "CLIENT": [
+      2,
+      2
+    ],
+    "MODELE_VEHICULE": [
+      0,
+      3
+    ],
+    "FORMULE": [
+      1,
+      3
+    ],
+    "INCLURE": [
+      2,
+      3
+    ],
+    "GARANTIE": [
+      2,
+      4
+    ]
+  },
+  "questions": [
+    {
+      "id": "q01",
+      "theme": "Une seule table",
+      "enonce": "Afficher toutes les formules d'assurance proposées par Elassure (toutes les colonnes).",
+      "correction": [
+        "SELECT *",
+        "FROM FORMULE;"
+      ],
+      "indice": "L'étoile * permet d'afficher toutes les colonnes d'une table."
+    },
+    {
+      "id": "q02",
+      "theme": "Une seule table",
+      "enonce": "Afficher l'identifiant, le nom, le prénom et le téléphone des clients professionnels, triés par ordre alphabétique des noms.",
+      "ordered": [
+        1
+      ],
+      "correction": [
+        "SELECT IDClient, Nom, Prenom, Telephone",
+        "FROM CLIENT",
+        "WHERE TypeClient = 'Professionnel'",
+        "ORDER BY Nom;"
+      ],
+      "indice": "TypeClient vaut « Particulier » ou « Professionnel ». Le tri se fait avec ORDER BY."
+    },
+    {
+      "id": "q03",
+      "theme": "Une seule table",
+      "enonce": "Afficher l'identifiant, le nom et le prénom des clients dont le numéro de téléphone n'est pas renseigné.",
+      "correction": [
+        "SELECT IDClient, Nom, Prenom",
+        "FROM CLIENT",
+        "WHERE Telephone IS NULL;"
+      ],
+      "indice": "Une valeur absente se teste avec IS NULL (et non = NULL)."
+    },
+    {
+      "id": "q04",
+      "theme": "Une seule table",
+      "enonce": "Afficher les modèles de véhicules (nom du modèle, marque, puissance) d'une puissance fiscale d'au moins 8 CV, du plus puissant au moins puissant.",
+      "ordered": [
+        2
+      ],
+      "correction": [
+        "SELECT NomModeleV, Marque, Puissance",
+        "FROM MODELE_VEHICULE",
+        "WHERE Puissance >= 8",
+        "ORDER BY Puissance DESC;"
+      ],
+      "indice": "« Au moins 8 » se traduit par >= 8. DESC trie par ordre décroissant."
+    },
+    {
+      "id": "q05",
+      "theme": "Une seule table",
+      "enonce": "Certains contrats sont encore en cours alors que leur date de fin est déjà connue (résiliation programmée). Afficher l'identifiant du contrat, l'identifiant du client et la date de fin de ces contrats.",
+      "correction": [
+        "SELECT IDContrat, IDClient, DateFinContrat",
+        "FROM CONTRAT",
+        "WHERE StatutContrat = 'En cours'",
+        "AND DateFinContrat IS NOT NULL;"
+      ],
+      "indice": "Deux conditions reliées par AND : le statut (« En cours ») et une date de fin renseignée (IS NOT NULL)."
+    },
+    {
+      "id": "q06",
+      "theme": "Calculs et agrégats",
+      "enonce": "Combien de contrats sont actuellement en cours ?",
+      "correction": [
+        "SELECT COUNT(*)",
+        "FROM CONTRAT",
+        "WHERE StatutContrat = 'En cours';"
+      ],
+      "indice": "COUNT(*) compte les lignes qui respectent la condition du WHERE. StatutContrat peut valoir « En attente de signature », « En cours » ou « Résilié »."
+    },
+    {
+      "id": "q07",
+      "theme": "Calculs et agrégats",
+      "enonce": "Afficher le coefficient bonus-malus moyen, le plus petit et le plus grand coefficient des clients particuliers.",
+      "correction": [
+        "SELECT AVG(CoefficientBonusMalus), MIN(CoefficientBonusMalus), MAX(CoefficientBonusMalus)",
+        "FROM CLIENT",
+        "WHERE TypeClient = 'Particulier';"
+      ],
+      "indice": "Fonctions AVG (moyenne), MIN et MAX ; le WHERE s'applique avant le calcul."
+    },
+    {
+      "id": "q08",
+      "theme": "Calculs et agrégats",
+      "enonce": "Afficher, pour chaque type de sinistre, le nombre de sinistres et le montant total des indemnisations.",
+      "correction": [
+        "SELECT TypeSinistre, COUNT(*), SUM(MontantIndemnisation)",
+        "FROM SINISTRE",
+        "GROUP BY TypeSinistre;"
+      ],
+      "indice": "« Pour chaque » se traduit par GROUP BY. SUM ignore les montants non renseignés (sinistres pas encore réglés)."
+    },
+    {
+      "id": "q09",
+      "theme": "Dates",
+      "enonce": "Afficher les véhicules (immatriculation, date de mise en circulation) mis en circulation avant 2012.",
+      "correction": [
+        "SELECT Immatriculation, DateMiseCirculation",
+        "FROM VEHICULE",
+        "WHERE YEAR(DateMiseCirculation) < 2012;"
+      ],
+      "variantes": [
+        [
+          "SELECT Immatriculation, DateMiseCirculation",
+          "FROM VEHICULE",
+          "WHERE DateMiseCirculation < '01/01/2012';"
+        ]
+      ],
+      "indice": "La fonction YEAR(date) renvoie l'année. On peut aussi comparer à la date '01/01/2012'."
+    },
+    {
+      "id": "q10",
+      "theme": "Dates",
+      "enonce": "Afficher les sinistres (identifiant, date du sinistre, date de déclaration) déclarés plus de 5 jours après leur survenance.",
+      "correction": [
+        "SELECT IDSinistre, DateSinistre, DateDeclaration",
+        "FROM SINISTRE",
+        "WHERE DATEDIFF(DateDeclaration, DateSinistre) > 5;"
+      ],
+      "indice": "DATEDIFF(date_fin, date_début) renvoie le nombre de jours entre deux dates."
+    },
+    {
+      "id": "q11",
+      "theme": "Jointures",
+      "enonce": "Afficher sans doublon la liste des clients (nom, prénom et téléphone) ayant souscrit un nouveau contrat débutant en 2026.",
+      "annale": "2026",
+      "correction": [
+        "SELECT DISTINCT Nom, Prenom, Telephone",
+        "FROM CLIENT, CONTRAT",
+        "WHERE CLIENT.IDClient = CONTRAT.IDClient",
+        "AND YEAR(DateDebutContrat) = 2026;"
+      ],
+      "variantes": [
+        [
+          "SELECT DISTINCT Nom, Prenom, Telephone",
+          "FROM CLIENT",
+          "INNER JOIN CONTRAT ON CLIENT.IDClient = CONTRAT.IDClient",
+          "WHERE YEAR(DateDebutContrat) = 2026;"
+        ],
+        [
+          "SELECT DISTINCT Nom, Prenom, Telephone",
+          "FROM CLIENT, CONTRAT",
+          "WHERE CLIENT.IDClient = CONTRAT.IDClient",
+          "AND DateDebutContrat BETWEEN '01/01/2026' AND '31/12/2026';"
+        ]
+      ],
+      "indice": "Le nom est dans CLIENT, la date de début dans CONTRAT : reliez les deux tables par IDClient. Un client peut avoir souscrit plusieurs contrats en 2026 : DISTINCT évite qu'il apparaisse plusieurs fois."
+    },
+    {
+      "id": "q12",
+      "theme": "Jointures",
+      "enonce": "Afficher les véhicules assurés par le client PR3426 : immatriculation, nom du modèle, marque, libellé de la formule et date de début du contrat.",
+      "correction": [
+        "SELECT Immatriculation, NomModeleV, Marque, LibelleFormule, DateDebutContrat",
+        "FROM CONTRAT, VEHICULE, MODELE_VEHICULE, FORMULE",
+        "WHERE CONTRAT.IDVehicule = VEHICULE.IDVehicule",
+        "AND VEHICULE.IDModeleV = MODELE_VEHICULE.IDModeleV",
+        "AND CONTRAT.IDFormule = FORMULE.IDFormule",
+        "AND IDClient = 'PR3426';"
+      ],
+      "variantes": [
+        [
+          "SELECT Immatriculation, NomModeleV, Marque, LibelleFormule, DateDebutContrat",
+          "FROM CONTRAT",
+          "INNER JOIN VEHICULE ON CONTRAT.IDVehicule = VEHICULE.IDVehicule",
+          "INNER JOIN MODELE_VEHICULE ON VEHICULE.IDModeleV = MODELE_VEHICULE.IDModeleV",
+          "INNER JOIN FORMULE ON CONTRAT.IDFormule = FORMULE.IDFormule",
+          "WHERE IDClient = 'PR3426';"
+        ]
+      ],
+      "indice": "Quatre tables : le CONTRAT mène au VEHICULE (puis à son MODELE_VEHICULE) et à la FORMULE. Il faut une condition de jointure par lien (3 conditions pour 4 tables). L'identifiant du client est un texte : 'PR3426'."
+    },
+    {
+      "id": "q13",
+      "theme": "Jointures",
+      "enonce": "Afficher le nom des garanties incluses dans la formule « Tous Risques Premium ».",
+      "correction": [
+        "SELECT NomGarantie",
+        "FROM FORMULE, INCLURE, GARANTIE",
+        "WHERE FORMULE.IDFormule = INCLURE.IDFormule",
+        "AND INCLURE.IDGarantie = GARANTIE.IDGarantie",
+        "AND LibelleFormule = 'Tous Risques Premium';"
+      ],
+      "variantes": [
+        [
+          "SELECT NomGarantie",
+          "FROM FORMULE",
+          "INNER JOIN INCLURE ON FORMULE.IDFormule = INCLURE.IDFormule",
+          "INNER JOIN GARANTIE ON INCLURE.IDGarantie = GARANTIE.IDGarantie",
+          "WHERE LibelleFormule = 'Tous Risques Premium';"
+        ]
+      ],
+      "indice": "La table INCLURE fait le lien entre FORMULE et GARANTIE : elle se place au milieu de la jointure."
+    },
+    {
+      "id": "q14",
+      "theme": "Jointures",
+      "enonce": "Pour chaque sinistre de type « Vol », afficher l'identifiant du sinistre, la date du sinistre, le nom du modèle et la marque du véhicule concerné.",
+      "correction": [
+        "SELECT IDSinistre, DateSinistre, NomModeleV, Marque",
+        "FROM SINISTRE, CONTRAT, VEHICULE, MODELE_VEHICULE",
+        "WHERE SINISTRE.IDContrat = CONTRAT.IDContrat",
+        "AND CONTRAT.IDVehicule = VEHICULE.IDVehicule",
+        "AND VEHICULE.IDModeleV = MODELE_VEHICULE.IDModeleV",
+        "AND TypeSinistre = 'Vol';"
+      ],
+      "variantes": [
+        [
+          "SELECT IDSinistre, DateSinistre, NomModeleV, Marque",
+          "FROM SINISTRE",
+          "INNER JOIN CONTRAT ON SINISTRE.IDContrat = CONTRAT.IDContrat",
+          "INNER JOIN VEHICULE ON CONTRAT.IDVehicule = VEHICULE.IDVehicule",
+          "INNER JOIN MODELE_VEHICULE ON VEHICULE.IDModeleV = MODELE_VEHICULE.IDModeleV",
+          "WHERE TypeSinistre = 'Vol';"
+        ]
+      ],
+      "indice": "Le sinistre ne connaît pas directement le véhicule : SINISTRE → CONTRAT → VEHICULE → MODELE_VEHICULE (c'est la question 1 de la mission 1 du sujet, traduite en SQL)."
+    },
+    {
+      "id": "q15",
+      "theme": "Jointures et regroupements",
+      "enonce": "Afficher le montant total des indemnisations versées au client dont l'identifiant est PR3426.",
+      "annale": "2026",
+      "correction": [
+        "SELECT SUM(MontantIndemnisation)",
+        "FROM CONTRAT, SINISTRE",
+        "WHERE CONTRAT.IDContrat = SINISTRE.IDContrat",
+        "AND IDClient = 'PR3426';"
+      ],
+      "variantes": [
+        [
+          "SELECT SUM(MontantIndemnisation) AS MontantTotal",
+          "FROM CONTRAT",
+          "INNER JOIN SINISTRE ON CONTRAT.IDContrat = SINISTRE.IDContrat",
+          "WHERE IDClient = 'PR3426';"
+        ]
+      ],
+      "indice": "Le sinistre est rattaché à un contrat, et c'est le contrat qui connaît le client : jointure CONTRAT–SINISTRE, puis SUM. Inutile de passer par la table CLIENT : l'identifiant suffit."
+    },
+    {
+      "id": "q16",
+      "theme": "Jointures et regroupements",
+      "enonce": "Afficher, pour chaque formule (libellé), le nombre de contrats en cours.",
+      "correction": [
+        "SELECT LibelleFormule, COUNT(*)",
+        "FROM FORMULE, CONTRAT",
+        "WHERE FORMULE.IDFormule = CONTRAT.IDFormule",
+        "AND StatutContrat = 'En cours'",
+        "GROUP BY LibelleFormule;"
+      ],
+      "variantes": [
+        [
+          "SELECT LibelleFormule, COUNT(*)",
+          "FROM FORMULE",
+          "INNER JOIN CONTRAT ON FORMULE.IDFormule = CONTRAT.IDFormule",
+          "WHERE StatutContrat = 'En cours'",
+          "GROUP BY LibelleFormule;"
+        ]
+      ],
+      "indice": "Filtrez d'abord les contrats en cours (WHERE), puis regroupez par libellé de formule."
+    },
+    {
+      "id": "q17",
+      "theme": "Jointures et regroupements",
+      "enonce": "Afficher la liste des clients (identifiant, nom et nombre de sinistres) ayant eu plus de 2 sinistres durant l'année 2025, triée par nombre de sinistres décroissant.",
+      "annale": "2026",
+      "ordered": [
+        2
+      ],
+      "correction": [
+        "SELECT CLIENT.IDClient, Nom, COUNT(*)",
+        "FROM CLIENT, CONTRAT, SINISTRE",
+        "WHERE CLIENT.IDClient = CONTRAT.IDClient",
+        "AND CONTRAT.IDContrat = SINISTRE.IDContrat",
+        "AND YEAR(DateSinistre) = 2025",
+        "GROUP BY CLIENT.IDClient, Nom",
+        "HAVING COUNT(*) > 2",
+        "ORDER BY COUNT(*) DESC;"
+      ],
+      "variantes": [
+        [
+          "SELECT CLIENT.IDClient, Nom, COUNT(*) AS NbSinistres",
+          "FROM CLIENT",
+          "INNER JOIN CONTRAT ON CLIENT.IDClient = CONTRAT.IDClient",
+          "INNER JOIN SINISTRE ON CONTRAT.IDContrat = SINISTRE.IDContrat",
+          "WHERE YEAR(DateSinistre) = 2025",
+          "GROUP BY CLIENT.IDClient, Nom",
+          "HAVING COUNT(*) > 2",
+          "ORDER BY NbSinistres DESC;"
+        ]
+      ],
+      "indice": "CLIENT → CONTRAT → SINISTRE. L'année du sinistre se lit dans DateSinistre (pas dans DateDeclaration : un sinistre de fin décembre peut être déclaré en janvier). La condition sur le nombre se place dans HAVING. IDClient existe dans deux tables : préfixez-le."
+    },
+    {
+      "id": "q18",
+      "theme": "Jointures et regroupements",
+      "enonce": "Afficher, pour chaque marque de véhicule, le nombre de sinistres, uniquement pour les marques ayant eu au moins 10 sinistres.",
+      "correction": [
+        "SELECT Marque, COUNT(*)",
+        "FROM SINISTRE, CONTRAT, VEHICULE, MODELE_VEHICULE",
+        "WHERE SINISTRE.IDContrat = CONTRAT.IDContrat",
+        "AND CONTRAT.IDVehicule = VEHICULE.IDVehicule",
+        "AND VEHICULE.IDModeleV = MODELE_VEHICULE.IDModeleV",
+        "GROUP BY Marque",
+        "HAVING COUNT(*) >= 10;"
+      ],
+      "variantes": [
+        [
+          "SELECT Marque, COUNT(*)",
+          "FROM SINISTRE",
+          "INNER JOIN CONTRAT ON SINISTRE.IDContrat = CONTRAT.IDContrat",
+          "INNER JOIN VEHICULE ON CONTRAT.IDVehicule = VEHICULE.IDVehicule",
+          "INNER JOIN MODELE_VEHICULE ON VEHICULE.IDModeleV = MODELE_VEHICULE.IDModeleV",
+          "GROUP BY Marque",
+          "HAVING COUNT(*) >= 10;"
+        ]
+      ],
+      "indice": "Même chemin qu'à la question sur les vols, puis GROUP BY Marque. La condition « au moins 10 » porte sur un comptage : HAVING."
+    },
+    {
+      "id": "q19",
+      "theme": "Sous-requêtes",
+      "enonce": "Afficher la liste des contrats dont le statut est « En cours » (identifiant contrat, identifiant client) n'ayant pas encore reçu de règlement d'échéance pour 2026.",
+      "annale": "2026",
+      "correction": [
+        "SELECT IDContrat, IDClient",
+        "FROM CONTRAT",
+        "WHERE StatutContrat = 'En cours'",
+        "AND IDContrat NOT IN (SELECT IDContrat",
+        "                      FROM PAYER",
+        "                      WHERE Annee = 2026);"
+      ],
+      "variantes": [
+        [
+          "SELECT IDContrat, IDClient",
+          "FROM CONTRAT C",
+          "WHERE StatutContrat = 'En cours'",
+          "AND NOT EXISTS (SELECT *",
+          "                FROM PAYER P",
+          "                WHERE P.IDContrat = C.IDContrat",
+          "                AND Annee = 2026);"
+        ],
+        [
+          "SELECT C.IDContrat, C.IDClient",
+          "FROM CONTRAT C",
+          "LEFT JOIN PAYER P ON C.IDContrat = P.IDContrat AND P.Annee = 2026",
+          "WHERE C.StatutContrat = 'En cours'",
+          "AND P.IDContrat IS NULL;"
+        ]
+      ],
+      "indice": "La sous-requête liste les contrats ayant au moins une échéance payée en 2026 (table PAYER) ; on garde les contrats en cours qui n'y figurent pas (NOT IN). Attention : « DateFinContrat IS NULL » ne remplace pas le statut (contrats en attente de signature, résiliations programmées)."
+    },
+    {
+      "id": "q20",
+      "theme": "Sous-requêtes",
+      "enonce": "Afficher les garanties (identifiant, nom) qui ne sont incluses dans aucune formule.",
+      "correction": [
+        "SELECT IDGarantie, NomGarantie",
+        "FROM GARANTIE",
+        "WHERE IDGarantie NOT IN (SELECT IDGarantie",
+        "                         FROM INCLURE);"
+      ],
+      "variantes": [
+        [
+          "SELECT IDGarantie, NomGarantie",
+          "FROM GARANTIE G",
+          "WHERE NOT EXISTS (SELECT *",
+          "                  FROM INCLURE I",
+          "                  WHERE I.IDGarantie = G.IDGarantie);"
+        ]
+      ],
+      "indice": "« Dans aucune » : NOT IN (sous-requête qui liste les garanties présentes dans INCLURE)."
+    },
+    {
+      "id": "q21",
+      "theme": "Sous-requêtes",
+      "enonce": "Afficher les sinistres (identifiant, type, montant de l'indemnisation) dont l'indemnisation est supérieure à l'indemnisation moyenne.",
+      "correction": [
+        "SELECT IDSinistre, TypeSinistre, MontantIndemnisation",
+        "FROM SINISTRE",
+        "WHERE MontantIndemnisation > (SELECT AVG(MontantIndemnisation)",
+        "                              FROM SINISTRE);"
+      ],
+      "indice": "On ne peut pas écrire WHERE MontantIndemnisation > AVG(MontantIndemnisation) : la moyenne se calcule dans une sous-requête."
+    },
+    {
+      "id": "q22",
+      "theme": "Mises à jour",
+      "enonce": "Mettre à jour le coefficient bonus-malus du client PR3426 : ce coefficient doit être réduit de 5 %.",
+      "annale": "2026",
+      "type": "write",
+      "correction": [
+        "UPDATE CLIENT",
+        "SET CoefficientBonusMalus = CoefficientBonusMalus * 0.95",
+        "WHERE IDClient = 'PR3426';"
+      ],
+      "variantes": [
+        [
+          "UPDATE CLIENT",
+          "SET CoefficientBonusMalus = CoefficientBonusMalus - CoefficientBonusMalus * 5 / 100",
+          "WHERE IDClient = 'PR3426';"
+        ]
+      ],
+      "verif": "SELECT * FROM CLIENT ORDER BY IDClient",
+      "indice": "Réduire de 5 %, c'est multiplier par 0.95 (avec un point décimal en SQL). Sans WHERE, tous les clients seraient modifiés."
+    },
+    {
+      "id": "q23",
+      "theme": "Mises à jour",
+      "enonce": "Supprimer les formules dont le libellé commence par « Tranquillité », car elles viennent d'être créées par erreur. Aucun contrat ne les utilise, mais des garanties leur ont déjà été associées (table INCLURE).",
+      "annale": "2026",
+      "type": "write",
+      "correction": [
+        "DELETE FROM INCLURE",
+        "WHERE IDFormule IN (SELECT IDFormule",
+        "                    FROM FORMULE",
+        "                    WHERE LibelleFormule LIKE 'Tranquillité%');",
+        "DELETE FROM FORMULE",
+        "WHERE LibelleFormule LIKE 'Tranquillité%';"
+      ],
+      "variantes": [
+        [
+          "DELETE FROM INCLURE",
+          "WHERE IDFormule IN (7, 8);",
+          "DELETE FROM FORMULE",
+          "WHERE IDFormule IN (7, 8);"
+        ]
+      ],
+      "verif": "SELECT FORMULE.IDFormule, LibelleFormule, PrimeBase, IDGarantie FROM FORMULE LEFT JOIN INCLURE ON FORMULE.IDFormule = INCLURE.IDFormule ORDER BY FORMULE.IDFormule, IDGarantie",
+      "indice": "Deux requêtes, dans cet ordre : d'abord les lignes de INCLURE qui font référence à ces formules (sinon la suppression est refusée par l'intégrité référentielle : INCLURE.IDFormule fait référence à FORMULE.IDFormule), puis les formules. LIKE 'Tranquillité%' : le libellé commence par… ('%Tranquillité%' toucherait aussi « Pack Tranquillité Plus », utilisée par des contrats)."
+    },
+    {
+      "id": "q24",
+      "theme": "Mises à jour",
+      "enonce": "Le client du contrat n° 100003 vient de le résilier : passer le statut du contrat à « Résilié » et enregistrer la date de fin au 15/05/2026 (date du jour).",
+      "type": "write",
+      "correction": [
+        "UPDATE CONTRAT",
+        "SET StatutContrat = 'Résilié', DateFinContrat = '15/05/2026'",
+        "WHERE IDContrat = 100003;"
+      ],
+      "variantes": [
+        [
+          "UPDATE CONTRAT",
+          "SET StatutContrat = 'Résilié', DateFinContrat = NOW()",
+          "WHERE IDContrat = 100003;"
+        ]
+      ],
+      "verif": "SELECT * FROM CONTRAT ORDER BY IDContrat",
+      "indice": "Un seul UPDATE peut modifier plusieurs colonnes : SET col1 = …, col2 = … (séparées par une virgule). La date du jour s'obtient aussi avec NOW()."
+    },
+    {
+      "id": "q25",
+      "theme": "Mises à jour",
+      "enonce": "Elassure crée une nouvelle garantie n° 13 « Panne mécanique », décrite ainsi : « Réparation des pannes mécaniques et électriques ». L'ajouter.",
+      "type": "write",
+      "correction": [
+        "INSERT INTO GARANTIE",
+        "VALUES (13, 'Panne mécanique', 'Réparation des pannes mécaniques et électriques');"
+      ],
+      "variantes": [
+        [
+          "INSERT INTO GARANTIE (IDGarantie, NomGarantie, Description)",
+          "VALUES (13, 'Panne mécanique', 'Réparation des pannes mécaniques et électriques');"
+        ]
+      ],
+      "verif": "SELECT * FROM GARANTIE ORDER BY IDGarantie",
+      "indice": "INSERT INTO table VALUES (valeur1, valeur2, …) dans l'ordre des colonnes de la table : IDGarantie, NomGarantie, Description."
+    },
+    {
+      "id": "s01",
+      "theme": "Évolution du schéma",
+      "type": "schema",
+      "annale": "2026",
+      "enonce": "Elassure lance une offre de télémétrie : un boîtier est installé dans chaque véhicule dont le contrat inclut cette formule (un véhicule a au plus un boîtier). Chaque boîtier a une référence interne (ex. TBX-00087452), un numéro de série (ex. TLMX9D83F202401) et une référence de modèle (ex. OBD-TLM-V3). Pour chaque modèle de boîtier, on connaît son libellé (« Boîtier de télémétrie automobile OBD-II V3 »), son constructeur (Continental) et son type de boîtier (OBD-II). Un boîtier envoie des données uniquement lorsqu'il détecte un évènement d'un type donné : DV – démarrage véhicule, AV – arrêt complet, FB – freinage brutal, AE – accélération excessive, CH – choc, DS – dépassement d'un seuil de vitesse. Pour chaque évènement envoyé par un boîtier, on enregistre la date, l'heure, la vitesse réelle, le kilométrage, la latitude et la longitude GPS ainsi que le code du type d'évènement (un boîtier n'envoie jamais deux évènements à la même date et à la même heure). Faites évoluer le schéma ci-dessous pour répondre à ces besoins.",
+      "depart": [
+        "VEHICULE",
+        "MODELE_VEHICULE"
+      ],
+      "solution": {
+        "tables": [
+          {
+            "nom": "VEHICULE",
+            "fk": {
+              "RefBoitier|IDBoitier|RefBoitierTelemetrie|RefInterneBoitier|RefInterne|CodeBoitier|NumBoitier|IDBoitierTelemetrie": "BOITIER_TELEMETRIE"
+            }
+          },
+          {
+            "nom": "MODELE_BOITIER",
+            "alias": [
+              "MODELEBOITIER",
+              "MODELE_BOITIER_TELEMETRIE",
+              "MODELES_BOITIER",
+              "MODELE_B",
+              "MODELE"
+            ],
+            "role": "décrire les modèles de boîtier (libellé, constructeur, type)",
+            "pk": [
+              "RefModeleB|RefModeleBoitier|RefModele|IDModeleB|IDModeleBoitier|CodeModeleB|CodeModeleBoitier|RefModeleBoit"
+            ],
+            "attributs": [
+              "LibelleModele|LibelleModeleB|LibelleModeleBoitier|Libelle|LibModele",
+              "Constructeur|NomConstructeur|IDConstructeur|CodeConstructeur|NumConstructeur",
+              "TypeBoitier|Type|TypeB"
+            ]
+          },
+          {
+            "nom": "BOITIER_TELEMETRIE",
+            "alias": [
+              "BOITIER",
+              "BOITIERS",
+              "BOITIER_TELEMETRIQUE",
+              "BOITIERTELEMETRIE",
+              "BOITIER_TELEMATIQUE",
+              "BOITIER_TLM"
+            ],
+            "role": "décrire les boîtiers de télémétrie installés dans les véhicules",
+            "pk": [
+              "RefBoitier|IDBoitier|RefBoitierTelemetrie|RefInterneBoitier|RefInterne|CodeBoitier|NumBoitier|IDBoitierTelemetrie"
+            ],
+            "fk": {
+              "RefModeleB|RefModeleBoitier|RefModele|IDModeleB|IDModeleBoitier|CodeModeleB|CodeModeleBoitier|RefModeleBoit": "MODELE_BOITIER"
+            },
+            "attributs": [
+              "NumSerie|NumeroSerie|NumSerieBoitier|NoSerie|NumeroSerieBoitier"
+            ]
+          },
+          {
+            "nom": "EVENEMENT",
+            "alias": [
+              "EVENEMENTS",
+              "EVT",
+              "EVENEMENT_TELEMETRIE",
+              "DONNEE_TELEMETRIE",
+              "DONNEES_TELEMETRIE",
+              "TELEMETRIE",
+              "RELEVE",
+              "MESURE",
+              "ENREGISTREMENT"
+            ],
+            "role": "enregistrer les évènements envoyés par un boîtier (date, heure, vitesse, kilométrage, position GPS, type)",
+            "pk": [
+              "DateEvt|DateEvenement|Date|DateEv",
+              "HeureEvt|HeureEvenement|Heure|HeureEv",
+              "RefBoitier|IDBoitier|RefBoitierTelemetrie|RefInterneBoitier|RefInterne|CodeBoitier|NumBoitier|IDBoitierTelemetrie"
+            ],
+            "fk": {
+              "RefBoitier|IDBoitier|RefBoitierTelemetrie|RefInterneBoitier|RefInterne|CodeBoitier|NumBoitier|IDBoitierTelemetrie": "BOITIER_TELEMETRIE",
+              "CodeTypeEvt|CodeTypeEvenement|CodeType|IDTypeEvt|IDTypeEvenement|TypeEvt|CodeEvt|CodeTypeEv": "TYPE_EVENEMENT"
+            },
+            "attributs": [
+              "VitesseReelle|Vitesse|VitesseEvt",
+              "Kilometrage|Km|KilometrageEvt",
+              "LatitudeGPS|Latitude|LatGPS",
+              "LongitudeGPS|Longitude|LongGPS"
+            ]
+          },
+          {
+            "nom": "TYPE_EVENEMENT",
+            "alias": [
+              "TYPEEVENEMENT",
+              "TYPE_EVT",
+              "TYPEEVT",
+              "TYPES_EVENEMENT",
+              "TYPE_EV"
+            ],
+            "role": "décrire les types d'évènement (DV, AV, FB, AE, CH, DS)",
+            "pk": [
+              "CodeTypeEvt|CodeTypeEvenement|CodeType|IDTypeEvt|IDTypeEvenement|TypeEvt|CodeEvt|CodeTypeEv"
+            ],
+            "attributs": [
+              "LibelleTypeEvt|LibelleTypeEvenement|LibelleType|Libelle|LibelleEvt|LibTypeEvt"
+            ]
+          }
+        ],
+        "tablesOptionnelles": [
+          "CONSTRUCTEUR",
+          "CONSTRUCTEURS",
+          "FABRICANT",
+          "CALENDRIER",
+          "DATE",
+          "HEURE",
+          "DATE_HEURE",
+          "DATEHEURE",
+          "JOUR",
+          "DATES",
+          "HEURES",
+          "MOMENT",
+          "INSTANT"
+        ]
+      },
+      "variantes": [
+        {
+          "tables": [
+            {
+              "nom": "VEHICULE",
+              "interdits": [
+                "RefBoitier|IDBoitier|RefBoitierTelemetrie|RefInterneBoitier|RefInterne|CodeBoitier|NumBoitier|IDBoitierTelemetrie"
+              ]
+            },
+            {
+              "nom": "MODELE_BOITIER",
+              "alias": [
+                "MODELEBOITIER",
+                "MODELE_BOITIER_TELEMETRIE",
+                "MODELES_BOITIER",
+                "MODELE_B",
+                "MODELE"
+              ],
+              "role": "décrire les modèles de boîtier (libellé, constructeur, type)",
+              "pk": [
+                "RefModeleB|RefModeleBoitier|RefModele|IDModeleB|IDModeleBoitier|CodeModeleB|CodeModeleBoitier|RefModeleBoit"
+              ],
+              "attributs": [
+                "LibelleModele|LibelleModeleB|LibelleModeleBoitier|Libelle|LibModele",
+                "Constructeur|NomConstructeur|IDConstructeur|CodeConstructeur|NumConstructeur",
+                "TypeBoitier|Type|TypeB"
+              ]
+            },
+            {
+              "nom": "BOITIER_TELEMETRIE",
+              "alias": [
+                "BOITIER",
+                "BOITIERS",
+                "BOITIER_TELEMETRIQUE",
+                "BOITIERTELEMETRIE",
+                "BOITIER_TELEMATIQUE",
+                "BOITIER_TLM"
+              ],
+              "role": "décrire les boîtiers de télémétrie installés dans les véhicules",
+              "pk": [
+                "RefBoitier|IDBoitier|RefBoitierTelemetrie|RefInterneBoitier|RefInterne|CodeBoitier|NumBoitier|IDBoitierTelemetrie"
+              ],
+              "fk": {
+                "RefModeleB|RefModeleBoitier|RefModele|IDModeleB|IDModeleBoitier|CodeModeleB|CodeModeleBoitier|RefModeleBoit": "MODELE_BOITIER",
+                "IDVehicule|IdVeh|NumVehicule": "VEHICULE"
+              },
+              "attributs": [
+                "NumSerie|NumeroSerie|NumSerieBoitier|NoSerie|NumeroSerieBoitier"
+              ]
+            },
+            {
+              "nom": "EVENEMENT",
+              "alias": [
+                "EVENEMENTS",
+                "EVT",
+                "EVENEMENT_TELEMETRIE",
+                "DONNEE_TELEMETRIE",
+                "DONNEES_TELEMETRIE",
+                "TELEMETRIE",
+                "RELEVE",
+                "MESURE",
+                "ENREGISTREMENT"
+              ],
+              "role": "enregistrer les évènements envoyés par un boîtier (date, heure, vitesse, kilométrage, position GPS, type)",
+              "pk": [
+                "DateEvt|DateEvenement|Date|DateEv",
+                "HeureEvt|HeureEvenement|Heure|HeureEv",
+                "RefBoitier|IDBoitier|RefBoitierTelemetrie|RefInterneBoitier|RefInterne|CodeBoitier|NumBoitier|IDBoitierTelemetrie"
+              ],
+              "fk": {
+                "RefBoitier|IDBoitier|RefBoitierTelemetrie|RefInterneBoitier|RefInterne|CodeBoitier|NumBoitier|IDBoitierTelemetrie": "BOITIER_TELEMETRIE",
+                "CodeTypeEvt|CodeTypeEvenement|CodeType|IDTypeEvt|IDTypeEvenement|TypeEvt|CodeEvt|CodeTypeEv": "TYPE_EVENEMENT"
+              },
+              "attributs": [
+                "VitesseReelle|Vitesse|VitesseEvt",
+                "Kilometrage|Km|KilometrageEvt",
+                "LatitudeGPS|Latitude|LatGPS",
+                "LongitudeGPS|Longitude|LongGPS"
+              ]
+            },
+            {
+              "nom": "TYPE_EVENEMENT",
+              "alias": [
+                "TYPEEVENEMENT",
+                "TYPE_EVT",
+                "TYPEEVT",
+                "TYPES_EVENEMENT",
+                "TYPE_EV"
+              ],
+              "role": "décrire les types d'évènement (DV, AV, FB, AE, CH, DS)",
+              "pk": [
+                "CodeTypeEvt|CodeTypeEvenement|CodeType|IDTypeEvt|IDTypeEvenement|TypeEvt|CodeEvt|CodeTypeEv"
+              ],
+              "attributs": [
+                "LibelleTypeEvt|LibelleTypeEvenement|LibelleType|Libelle|LibelleEvt|LibTypeEvt"
+              ]
+            }
+          ],
+          "tablesOptionnelles": [
+            "CONSTRUCTEUR",
+            "CONSTRUCTEURS",
+            "FABRICANT",
+            "CALENDRIER",
+            "DATE",
+            "HEURE",
+            "DATE_HEURE",
+            "DATEHEURE",
+            "JOUR",
+            "DATES",
+            "HEURES",
+            "MOMENT",
+            "INSTANT"
+          ]
+        },
+        {
+          "tables": [
+            {
+              "nom": "VEHICULE",
+              "fk": {
+                "RefBoitier|IDBoitier|RefBoitierTelemetrie|RefInterneBoitier|RefInterne|CodeBoitier|NumBoitier|IDBoitierTelemetrie": "BOITIER_TELEMETRIE"
+              }
+            },
+            {
+              "nom": "MODELE_BOITIER",
+              "alias": [
+                "MODELEBOITIER",
+                "MODELE_BOITIER_TELEMETRIE",
+                "MODELES_BOITIER",
+                "MODELE_B",
+                "MODELE"
+              ],
+              "role": "décrire les modèles de boîtier (libellé, constructeur, type)",
+              "pk": [
+                "RefModeleB|RefModeleBoitier|RefModele|IDModeleB|IDModeleBoitier|CodeModeleB|CodeModeleBoitier|RefModeleBoit"
+              ],
+              "attributs": [
+                "LibelleModele|LibelleModeleB|LibelleModeleBoitier|Libelle|LibModele",
+                "Constructeur|NomConstructeur|IDConstructeur|CodeConstructeur|NumConstructeur",
+                "TypeBoitier|Type|TypeB"
+              ]
+            },
+            {
+              "nom": "BOITIER_TELEMETRIE",
+              "alias": [
+                "BOITIER",
+                "BOITIERS",
+                "BOITIER_TELEMETRIQUE",
+                "BOITIERTELEMETRIE",
+                "BOITIER_TELEMATIQUE",
+                "BOITIER_TLM"
+              ],
+              "role": "décrire les boîtiers de télémétrie installés dans les véhicules",
+              "pk": [
+                "RefBoitier|IDBoitier|RefBoitierTelemetrie|RefInterneBoitier|RefInterne|CodeBoitier|NumBoitier|IDBoitierTelemetrie"
+              ],
+              "fk": {
+                "RefModeleB|RefModeleBoitier|RefModele|IDModeleB|IDModeleBoitier|CodeModeleB|CodeModeleBoitier|RefModeleBoit": "MODELE_BOITIER"
+              },
+              "attributs": [
+                "NumSerie|NumeroSerie|NumSerieBoitier|NoSerie|NumeroSerieBoitier"
+              ]
+            },
+            {
+              "nom": "EVENEMENT",
+              "alias": [
+                "EVENEMENTS",
+                "EVT",
+                "EVENEMENT_TELEMETRIE",
+                "DONNEE_TELEMETRIE",
+                "DONNEES_TELEMETRIE",
+                "TELEMETRIE",
+                "RELEVE",
+                "MESURE",
+                "ENREGISTREMENT"
+              ],
+              "role": "enregistrer les évènements envoyés par un boîtier (date, heure, vitesse, kilométrage, position GPS, type)",
+              "pk": [
+                "IDEvt|IDEvenement|NumEvt|NumEvenement|IDEv|NumEv"
+              ],
+              "fk": {
+                "RefBoitier|IDBoitier|RefBoitierTelemetrie|RefInterneBoitier|RefInterne|CodeBoitier|NumBoitier|IDBoitierTelemetrie": "BOITIER_TELEMETRIE",
+                "CodeTypeEvt|CodeTypeEvenement|CodeType|IDTypeEvt|IDTypeEvenement|TypeEvt|CodeEvt|CodeTypeEv": "TYPE_EVENEMENT"
+              },
+              "attributs": [
+                "DateEvt|DateEvenement|Date|DateEv",
+                "HeureEvt|HeureEvenement|Heure|HeureEv",
+                "VitesseReelle|Vitesse|VitesseEvt",
+                "Kilometrage|Km|KilometrageEvt",
+                "LatitudeGPS|Latitude|LatGPS",
+                "LongitudeGPS|Longitude|LongGPS"
+              ]
+            },
+            {
+              "nom": "TYPE_EVENEMENT",
+              "alias": [
+                "TYPEEVENEMENT",
+                "TYPE_EVT",
+                "TYPEEVT",
+                "TYPES_EVENEMENT",
+                "TYPE_EV"
+              ],
+              "role": "décrire les types d'évènement (DV, AV, FB, AE, CH, DS)",
+              "pk": [
+                "CodeTypeEvt|CodeTypeEvenement|CodeType|IDTypeEvt|IDTypeEvenement|TypeEvt|CodeEvt|CodeTypeEv"
+              ],
+              "attributs": [
+                "LibelleTypeEvt|LibelleTypeEvenement|LibelleType|Libelle|LibelleEvt|LibTypeEvt"
+              ]
+            }
+          ],
+          "tablesOptionnelles": [
+            "CONSTRUCTEUR",
+            "CONSTRUCTEURS",
+            "FABRICANT",
+            "CALENDRIER",
+            "DATE",
+            "HEURE",
+            "DATE_HEURE",
+            "DATEHEURE",
+            "JOUR",
+            "DATES",
+            "HEURES",
+            "MOMENT",
+            "INSTANT"
+          ]
+        },
+        {
+          "tables": [
+            {
+              "nom": "VEHICULE",
+              "interdits": [
+                "RefBoitier|IDBoitier|RefBoitierTelemetrie|RefInterneBoitier|RefInterne|CodeBoitier|NumBoitier|IDBoitierTelemetrie"
+              ]
+            },
+            {
+              "nom": "MODELE_BOITIER",
+              "alias": [
+                "MODELEBOITIER",
+                "MODELE_BOITIER_TELEMETRIE",
+                "MODELES_BOITIER",
+                "MODELE_B",
+                "MODELE"
+              ],
+              "role": "décrire les modèles de boîtier (libellé, constructeur, type)",
+              "pk": [
+                "RefModeleB|RefModeleBoitier|RefModele|IDModeleB|IDModeleBoitier|CodeModeleB|CodeModeleBoitier|RefModeleBoit"
+              ],
+              "attributs": [
+                "LibelleModele|LibelleModeleB|LibelleModeleBoitier|Libelle|LibModele",
+                "Constructeur|NomConstructeur|IDConstructeur|CodeConstructeur|NumConstructeur",
+                "TypeBoitier|Type|TypeB"
+              ]
+            },
+            {
+              "nom": "BOITIER_TELEMETRIE",
+              "alias": [
+                "BOITIER",
+                "BOITIERS",
+                "BOITIER_TELEMETRIQUE",
+                "BOITIERTELEMETRIE",
+                "BOITIER_TELEMATIQUE",
+                "BOITIER_TLM"
+              ],
+              "role": "décrire les boîtiers de télémétrie installés dans les véhicules",
+              "pk": [
+                "RefBoitier|IDBoitier|RefBoitierTelemetrie|RefInterneBoitier|RefInterne|CodeBoitier|NumBoitier|IDBoitierTelemetrie"
+              ],
+              "fk": {
+                "RefModeleB|RefModeleBoitier|RefModele|IDModeleB|IDModeleBoitier|CodeModeleB|CodeModeleBoitier|RefModeleBoit": "MODELE_BOITIER",
+                "IDVehicule|IdVeh|NumVehicule": "VEHICULE"
+              },
+              "attributs": [
+                "NumSerie|NumeroSerie|NumSerieBoitier|NoSerie|NumeroSerieBoitier"
+              ]
+            },
+            {
+              "nom": "EVENEMENT",
+              "alias": [
+                "EVENEMENTS",
+                "EVT",
+                "EVENEMENT_TELEMETRIE",
+                "DONNEE_TELEMETRIE",
+                "DONNEES_TELEMETRIE",
+                "TELEMETRIE",
+                "RELEVE",
+                "MESURE",
+                "ENREGISTREMENT"
+              ],
+              "role": "enregistrer les évènements envoyés par un boîtier (date, heure, vitesse, kilométrage, position GPS, type)",
+              "pk": [
+                "IDEvt|IDEvenement|NumEvt|NumEvenement|IDEv|NumEv"
+              ],
+              "fk": {
+                "RefBoitier|IDBoitier|RefBoitierTelemetrie|RefInterneBoitier|RefInterne|CodeBoitier|NumBoitier|IDBoitierTelemetrie": "BOITIER_TELEMETRIE",
+                "CodeTypeEvt|CodeTypeEvenement|CodeType|IDTypeEvt|IDTypeEvenement|TypeEvt|CodeEvt|CodeTypeEv": "TYPE_EVENEMENT"
+              },
+              "attributs": [
+                "DateEvt|DateEvenement|Date|DateEv",
+                "HeureEvt|HeureEvenement|Heure|HeureEv",
+                "VitesseReelle|Vitesse|VitesseEvt",
+                "Kilometrage|Km|KilometrageEvt",
+                "LatitudeGPS|Latitude|LatGPS",
+                "LongitudeGPS|Longitude|LongGPS"
+              ]
+            },
+            {
+              "nom": "TYPE_EVENEMENT",
+              "alias": [
+                "TYPEEVENEMENT",
+                "TYPE_EVT",
+                "TYPEEVT",
+                "TYPES_EVENEMENT",
+                "TYPE_EV"
+              ],
+              "role": "décrire les types d'évènement (DV, AV, FB, AE, CH, DS)",
+              "pk": [
+                "CodeTypeEvt|CodeTypeEvenement|CodeType|IDTypeEvt|IDTypeEvenement|TypeEvt|CodeEvt|CodeTypeEv"
+              ],
+              "attributs": [
+                "LibelleTypeEvt|LibelleTypeEvenement|LibelleType|Libelle|LibelleEvt|LibTypeEvt"
+              ]
+            }
+          ],
+          "tablesOptionnelles": [
+            "CONSTRUCTEUR",
+            "CONSTRUCTEURS",
+            "FABRICANT",
+            "CALENDRIER",
+            "DATE",
+            "HEURE",
+            "DATE_HEURE",
+            "DATEHEURE",
+            "JOUR",
+            "DATES",
+            "HEURES",
+            "MOMENT",
+            "INSTANT"
+          ]
+        },
+        {
+          "tables": [
+            {
+              "nom": "VEHICULE",
+              "fk": {
+                "RefBoitier|IDBoitier|RefBoitierTelemetrie|RefInterneBoitier|RefInterne|CodeBoitier|NumBoitier|IDBoitierTelemetrie": "BOITIER_TELEMETRIE"
+              }
+            },
+            {
+              "nom": "BOITIER_TELEMETRIE",
+              "alias": [
+                "BOITIER",
+                "BOITIERS",
+                "BOITIER_TELEMETRIQUE",
+                "BOITIERTELEMETRIE",
+                "BOITIER_TELEMATIQUE",
+                "BOITIER_TLM"
+              ],
+              "role": "décrire les boîtiers de télémétrie installés dans les véhicules",
+              "pk": [
+                "RefBoitier|IDBoitier|RefBoitierTelemetrie|RefInterneBoitier|RefInterne|CodeBoitier|NumBoitier|IDBoitierTelemetrie"
+              ],
+              "fk": {},
+              "attributs": [
+                "NumSerie|NumeroSerie|NumSerieBoitier|NoSerie|NumeroSerieBoitier",
+                "LibelleModele|LibelleModeleB|LibelleModeleBoitier|Libelle|LibModele",
+                "Constructeur|NomConstructeur|IDConstructeur|CodeConstructeur|NumConstructeur",
+                "TypeBoitier|Type|TypeB",
+                "RefModeleB|RefModeleBoitier|RefModele|IDModeleB|IDModeleBoitier|CodeModeleB|CodeModeleBoitier|RefModeleBoit"
+              ]
+            },
+            {
+              "nom": "EVENEMENT",
+              "alias": [
+                "EVENEMENTS",
+                "EVT",
+                "EVENEMENT_TELEMETRIE",
+                "DONNEE_TELEMETRIE",
+                "DONNEES_TELEMETRIE",
+                "TELEMETRIE",
+                "RELEVE",
+                "MESURE",
+                "ENREGISTREMENT"
+              ],
+              "role": "enregistrer les évènements envoyés par un boîtier (date, heure, vitesse, kilométrage, position GPS, type)",
+              "pk": [
+                "DateEvt|DateEvenement|Date|DateEv",
+                "HeureEvt|HeureEvenement|Heure|HeureEv",
+                "RefBoitier|IDBoitier|RefBoitierTelemetrie|RefInterneBoitier|RefInterne|CodeBoitier|NumBoitier|IDBoitierTelemetrie"
+              ],
+              "fk": {
+                "RefBoitier|IDBoitier|RefBoitierTelemetrie|RefInterneBoitier|RefInterne|CodeBoitier|NumBoitier|IDBoitierTelemetrie": "BOITIER_TELEMETRIE",
+                "CodeTypeEvt|CodeTypeEvenement|CodeType|IDTypeEvt|IDTypeEvenement|TypeEvt|CodeEvt|CodeTypeEv": "TYPE_EVENEMENT"
+              },
+              "attributs": [
+                "VitesseReelle|Vitesse|VitesseEvt",
+                "Kilometrage|Km|KilometrageEvt",
+                "LatitudeGPS|Latitude|LatGPS",
+                "LongitudeGPS|Longitude|LongGPS"
+              ]
+            },
+            {
+              "nom": "TYPE_EVENEMENT",
+              "alias": [
+                "TYPEEVENEMENT",
+                "TYPE_EVT",
+                "TYPEEVT",
+                "TYPES_EVENEMENT",
+                "TYPE_EV"
+              ],
+              "role": "décrire les types d'évènement (DV, AV, FB, AE, CH, DS)",
+              "pk": [
+                "CodeTypeEvt|CodeTypeEvenement|CodeType|IDTypeEvt|IDTypeEvenement|TypeEvt|CodeEvt|CodeTypeEv"
+              ],
+              "attributs": [
+                "LibelleTypeEvt|LibelleTypeEvenement|LibelleType|Libelle|LibelleEvt|LibTypeEvt"
+              ]
+            }
+          ],
+          "tablesOptionnelles": [
+            "CONSTRUCTEUR",
+            "CONSTRUCTEURS",
+            "FABRICANT",
+            "CALENDRIER",
+            "DATE",
+            "HEURE",
+            "DATE_HEURE",
+            "DATEHEURE",
+            "JOUR",
+            "DATES",
+            "HEURES",
+            "MOMENT",
+            "INSTANT"
+          ],
+          "partiel": "Presque : les informations du modèle (libellé, constructeur, type de boîtier) dépendent de la référence de modèle, pas du boîtier lui-même. Si elles restent dans BOITIER_TELEMETRIE, elles seront répétées pour chaque boîtier du même modèle : il faut une table MODELE_BOITIER référencée par le boîtier."
+        },
+        {
+          "tables": [
+            {
+              "nom": "VEHICULE",
+              "fk": {
+                "RefBoitier|IDBoitier|RefBoitierTelemetrie|RefInterneBoitier|RefInterne|CodeBoitier|NumBoitier|IDBoitierTelemetrie": "BOITIER_TELEMETRIE"
+              }
+            },
+            {
+              "nom": "MODELE_BOITIER",
+              "alias": [
+                "MODELEBOITIER",
+                "MODELE_BOITIER_TELEMETRIE",
+                "MODELES_BOITIER",
+                "MODELE_B",
+                "MODELE"
+              ],
+              "role": "décrire les modèles de boîtier (libellé, constructeur, type)",
+              "pk": [
+                "RefModeleB|RefModeleBoitier|RefModele|IDModeleB|IDModeleBoitier|CodeModeleB|CodeModeleBoitier|RefModeleBoit"
+              ],
+              "attributs": [
+                "LibelleModele|LibelleModeleB|LibelleModeleBoitier|Libelle|LibModele",
+                "Constructeur|NomConstructeur|IDConstructeur|CodeConstructeur|NumConstructeur",
+                "TypeBoitier|Type|TypeB"
+              ]
+            },
+            {
+              "nom": "BOITIER_TELEMETRIE",
+              "alias": [
+                "BOITIER",
+                "BOITIERS",
+                "BOITIER_TELEMETRIQUE",
+                "BOITIERTELEMETRIE",
+                "BOITIER_TELEMATIQUE",
+                "BOITIER_TLM"
+              ],
+              "role": "décrire les boîtiers de télémétrie installés dans les véhicules",
+              "pk": [
+                "RefBoitier|IDBoitier|RefBoitierTelemetrie|RefInterneBoitier|RefInterne|CodeBoitier|NumBoitier|IDBoitierTelemetrie"
+              ],
+              "fk": {
+                "RefModeleB|RefModeleBoitier|RefModele|IDModeleB|IDModeleBoitier|CodeModeleB|CodeModeleBoitier|RefModeleBoit": "MODELE_BOITIER"
+              },
+              "attributs": [
+                "NumSerie|NumeroSerie|NumSerieBoitier|NoSerie|NumeroSerieBoitier"
+              ]
+            },
+            {
+              "nom": "EVENEMENT",
+              "alias": [
+                "EVENEMENTS",
+                "EVT",
+                "EVENEMENT_TELEMETRIE",
+                "DONNEE_TELEMETRIE",
+                "DONNEES_TELEMETRIE",
+                "TELEMETRIE",
+                "RELEVE",
+                "MESURE",
+                "ENREGISTREMENT"
+              ],
+              "role": "enregistrer les évènements envoyés par un boîtier (date, heure, vitesse, kilométrage, position GPS, type)",
+              "pk": [
+                "DateEvt|DateEvenement|Date|DateEv",
+                "HeureEvt|HeureEvenement|Heure|HeureEv",
+                "RefBoitier|IDBoitier|RefBoitierTelemetrie|RefInterneBoitier|RefInterne|CodeBoitier|NumBoitier|IDBoitierTelemetrie"
+              ],
+              "fk": {
+                "RefBoitier|IDBoitier|RefBoitierTelemetrie|RefInterneBoitier|RefInterne|CodeBoitier|NumBoitier|IDBoitierTelemetrie": "BOITIER_TELEMETRIE"
+              },
+              "attributs": [
+                "VitesseReelle|Vitesse|VitesseEvt",
+                "Kilometrage|Km|KilometrageEvt",
+                "LatitudeGPS|Latitude|LatGPS",
+                "LongitudeGPS|Longitude|LongGPS",
+                "CodeTypeEvt|CodeTypeEvenement|CodeType|IDTypeEvt|IDTypeEvenement|TypeEvt|CodeEvt|CodeTypeEv"
+              ]
+            }
+          ],
+          "tablesOptionnelles": [
+            "CONSTRUCTEUR",
+            "CONSTRUCTEURS",
+            "FABRICANT",
+            "CALENDRIER",
+            "DATE",
+            "HEURE",
+            "DATE_HEURE",
+            "DATEHEURE",
+            "JOUR",
+            "DATES",
+            "HEURES",
+            "MOMENT",
+            "INSTANT"
+          ],
+          "partiel": "Presque : le code du type d'évènement (DV, AV, FB…) a un libellé (« démarrage véhicule »…) qu'il faut aussi mémoriser : créez une table TYPE_EVENEMENT et faites de CodeTypeEvt une clé étrangère vers elle."
+        }
+      ],
+      "indice": "Il faut quatre nouvelles tables : les modèles de boîtier, les boîtiers, les types d'évènement et les évènements. Les informations du modèle ne dépendent pas de chaque boîtier. Un évènement est identifié par sa date, son heure et le boîtier qui l'a envoyé (clé primaire composée). Pensez aussi à relier le véhicule à son boîtier."
+    },
+    {
+      "id": "p01",
+      "type": "processus",
+      "theme": "Processus",
+      "annale": "2026",
+      "enonce": "Document 5 – Processus de déclaration d'un sinistre Habitation. « En cas de sinistre Habitation causant un dommage sur le domicile de l'assuré ou sur ses biens personnels (inondation, incendie, vol, catastrophes naturelles…), il convient de déclarer ce sinistre auprès de la société Elassure afin d'obtenir une éventuelle indemnisation. Pour ce faire, l'assuré peut déclarer directement le sinistre sur l'application où il doit alors saisir la nature du sinistre (dégât des eaux, incendie, vol, casse du mobilier…), la date du sinistre, les circonstances détaillées et les dommages apparents. Il doit aussi ajouter des pièces jointes (photos et/ou tout autre document justifiant les dommages) à la déclaration qu'il doit réaliser. La déclaration est validée dans l'application uniquement si tous les champs obligatoires sont remplis. À défaut, un message d'erreur indiquant que des champs du formulaire sont incomplets ou erronés est envoyé au client via une notification. Lorsque la déclaration est validée, le gestionnaire de sinistre reçoit une notification afin de l'avertir d'un nouveau dossier sinistre à gérer. Il consulte alors le contrat du client et vérifie la cohérence entre le sinistre déclaré et les risques couverts au contrat Habitation. Si les dommages subis ne sont pas couverts, le client reçoit une notification de refus d'indemnisation. Si les dommages sont couverts, le gestionnaire de sinistre valide la déclaration de sinistre dans l'application métier. Une notification d'accord de prise en charge du dossier est alors envoyée au client et un expert, choisi parmi la liste des partenaires agréés d'Elassure, est notifié du sinistre à expertiser. Cet expert doit se rendre au domicile de l'assuré pour évaluer les dommages et ensuite transmettre son rapport d'expertise au gestionnaire de sinistre qui peut ainsi reprendre le dossier validé et procéder au calcul de l'indemnisation à verser à l'assuré. Le client reçoit alors un courrier indiquant le montant d'indemnisation accordé. » Représentez le processus de déclaration d'un sinistre Habitation en complétant le schéma événements-résultats (annexe B, déjà commencée).",
+      "couloirs": [
+        "Assuré",
+        "Application client",
+        "Gestionnaire sinistre",
+        "Expert"
+      ],
+      "depart": {
+        "lanes": [
+          "Assuré",
+          "Application client",
+          "Gestionnaire sinistre",
+          "Expert"
+        ],
+        "nodes": [
+          {
+            "id": "n1",
+            "kind": "event",
+            "label": "E-Déclaration de sinistre à réaliser",
+            "x": 120,
+            "y": 95
+          }
+        ],
+        "arrows": []
+      },
+      "elements": [
+        {
+          "kind": "event",
+          "label": "PJ"
+        },
+        {
+          "kind": "event",
+          "label": "Message d'erreur"
+        },
+        {
+          "kind": "event",
+          "label": "Déclaration validée"
+        },
+        {
+          "kind": "event",
+          "label": "Notification nouveau dossier sinistre"
+        },
+        {
+          "kind": "event",
+          "label": "Notification de déclaration validée"
+        },
+        {
+          "kind": "event",
+          "label": "Notification refus d'indemnisation"
+        },
+        {
+          "kind": "event",
+          "label": "Déclaration sinistre validée"
+        },
+        {
+          "kind": "event",
+          "label": "Notification accord"
+        },
+        {
+          "kind": "event",
+          "label": "Notification sinistre à expertiser"
+        },
+        {
+          "kind": "event",
+          "label": "Rapport d'expertise"
+        },
+        {
+          "kind": "event",
+          "label": "Courrier indemnisation"
+        },
+        {
+          "kind": "operation",
+          "label": "Déclaration sinistre"
+        },
+        {
+          "kind": "operation",
+          "label": "Vérification sinistre et garanties"
+        },
+        {
+          "kind": "operation",
+          "label": "Calcul indemnisation"
+        }
+      ],
+      "attendus": [
+        {
+          "operation": "Déclaration sinistre",
+          "alias": [
+            "Déclaration du sinistre",
+            "Saisie de la déclaration",
+            "Déclarer le sinistre",
+            "Saisie déclaration"
+          ],
+          "synchronisation": "E-Déclaration de sinistre à réaliser ET PJ",
+          "regles": [
+            "Champs manquants",
+            "Champs complets"
+          ]
+        },
+        {
+          "operation": "Vérification sinistre et garanties",
+          "alias": [
+            "Vérification du sinistre",
+            "Vérification des garanties",
+            "Contrôle du sinistre",
+            "Vérification sinistre",
+            "Étude du dossier sinistre"
+          ],
+          "synchronisation": "Notification nouveau dossier sinistre",
+          "regles": [
+            "Dommages non couverts",
+            "Dommages couverts"
+          ]
+        },
+        {
+          "operation": "Calcul indemnisation",
+          "alias": [
+            "Calcul de l'indemnisation",
+            "Calculer l'indemnisation",
+            "Indemnisation"
+          ],
+          "synchronisation": "Déclaration sinistre validée ET Rapport d'expertise"
+        }
+      ],
+      "equivalents": {
+        "E-Déclaration de sinistre à réaliser": [
+          "Déclaration de sinistre à réaliser",
+          "Sinistre",
+          "Sinistre survenu",
+          "Sinistre à déclarer"
+        ],
+        "PJ": [
+          "Pièces jointes",
+          "Justificatifs",
+          "Photos et justificatifs",
+          "PJ ajoutées"
+        ],
+        "Notification nouveau dossier sinistre": [
+          "Nouveau dossier sinistre",
+          "Notification nouveau dossier",
+          "Dossier sinistre à gérer"
+        ],
+        "Déclaration sinistre validée": [
+          "Sinistre validé",
+          "Dossier validé",
+          "Déclaration de sinistre validée",
+          "Dossier sinistre validé"
+        ],
+        "Rapport d'expertise": [
+          "Rapport de l'expert",
+          "Rapport expert",
+          "Expertise"
+        ],
+        "Champs manquants": [
+          "Champs incomplets",
+          "Incomplet",
+          "Champs incomplets ou erronés",
+          "Formulaire incomplet"
+        ],
+        "Champs complets": [
+          "Complet",
+          "Formulaire complet",
+          "Champs remplis",
+          "Champs obligatoires remplis"
+        ],
+        "Dommages non couverts": [
+          "Non couverts",
+          "Sinistre non couvert",
+          "Non couvert"
+        ],
+        "Dommages couverts": [
+          "Couverts",
+          "Sinistre couvert",
+          "Couvert"
+        ]
+      },
+      "solution": {
+        "lanes": [
+          "Assuré",
+          "Application client",
+          "Gestionnaire sinistre",
+          "Expert"
+        ],
+        "nodes": [
+          {
+            "id": "n1",
+            "kind": "event",
+            "label": "E-Déclaration de sinistre à réaliser",
+            "x": 120,
+            "y": 95
+          },
+          {
+            "id": "n2",
+            "kind": "event",
+            "label": "PJ",
+            "x": 120,
+            "y": 225
+          },
+          {
+            "id": "n3",
+            "kind": "sync",
+            "label": "",
+            "x": 360,
+            "y": 300,
+            "cond": "A et B"
+          },
+          {
+            "id": "n4",
+            "kind": "operation",
+            "label": "Déclaration sinistre",
+            "x": 360,
+            "y": 420,
+            "actions": [
+              "Saisie des champs obligatoires",
+              "Téléversement des PJ"
+            ],
+            "rules": [
+              "Champs manquants",
+              "Champs complets"
+            ]
+          },
+          {
+            "id": "n5",
+            "kind": "event",
+            "label": "Message d'erreur",
+            "x": 120,
+            "y": 600
+          },
+          {
+            "id": "n6",
+            "kind": "event",
+            "label": "Déclaration validée",
+            "x": 360,
+            "y": 620
+          },
+          {
+            "id": "n7",
+            "kind": "event",
+            "label": "Notification nouveau dossier sinistre",
+            "x": 600,
+            "y": 600
+          },
+          {
+            "id": "n8",
+            "kind": "event",
+            "label": "Notification de déclaration validée",
+            "x": 120,
+            "y": 720
+          },
+          {
+            "id": "n9",
+            "kind": "operation",
+            "label": "Vérification sinistre et garanties",
+            "x": 600,
+            "y": 770,
+            "actions": [
+              "Consultation contrat client",
+              "Contrôle des justificatifs",
+              "Contrôle des risques couverts"
+            ],
+            "rules": [
+              "Dommages non couverts",
+              "Dommages couverts"
+            ]
+          },
+          {
+            "id": "n10",
+            "kind": "event",
+            "label": "Notification refus d'indemnisation",
+            "x": 120,
+            "y": 900
+          },
+          {
+            "id": "n12",
+            "kind": "event",
+            "label": "Déclaration sinistre validée",
+            "x": 600,
+            "y": 960
+          },
+          {
+            "id": "n13",
+            "kind": "event",
+            "label": "Notification sinistre à expertiser",
+            "x": 840,
+            "y": 940
+          },
+          {
+            "id": "n11",
+            "kind": "event",
+            "label": "Notification accord",
+            "x": 120,
+            "y": 1020
+          },
+          {
+            "id": "n14",
+            "kind": "event",
+            "label": "Rapport d'expertise",
+            "x": 840,
+            "y": 1070
+          },
+          {
+            "id": "n15",
+            "kind": "sync",
+            "label": "",
+            "x": 600,
+            "y": 1090,
+            "cond": "A et B"
+          },
+          {
+            "id": "n16",
+            "kind": "operation",
+            "label": "Calcul indemnisation",
+            "x": 600,
+            "y": 1210,
+            "actions": [
+              "Calcul de l'indemnisation",
+              "Réalisation du courrier de prise en charge"
+            ],
+            "rules": [
+              "Toujours"
+            ]
+          },
+          {
+            "id": "n17",
+            "kind": "event",
+            "label": "Courrier indemnisation",
+            "x": 120,
+            "y": 1360
+          }
+        ],
+        "arrows": [
+          {
+            "id": "a1",
+            "from": "n1",
+            "rule": null,
+            "to": "n3",
+            "letter": "A"
+          },
+          {
+            "id": "a2",
+            "from": "n2",
+            "rule": null,
+            "to": "n3",
+            "letter": "B"
+          },
+          {
+            "id": "a3",
+            "from": "n3",
+            "rule": null,
+            "to": "n4"
+          },
+          {
+            "id": "a4",
+            "from": "n4",
+            "rule": 0,
+            "to": "n5"
+          },
+          {
+            "id": "a5",
+            "from": "n4",
+            "rule": 1,
+            "to": "n6"
+          },
+          {
+            "id": "a6",
+            "from": "n4",
+            "rule": 1,
+            "to": "n7"
+          },
+          {
+            "id": "a7",
+            "from": "n4",
+            "rule": 1,
+            "to": "n8"
+          },
+          {
+            "id": "a8",
+            "from": "n7",
+            "rule": null,
+            "to": "n9"
+          },
+          {
+            "id": "a9",
+            "from": "n9",
+            "rule": 0,
+            "to": "n10"
+          },
+          {
+            "id": "a10",
+            "from": "n9",
+            "rule": 1,
+            "to": "n12"
+          },
+          {
+            "id": "a11",
+            "from": "n9",
+            "rule": 1,
+            "to": "n11"
+          },
+          {
+            "id": "a12",
+            "from": "n9",
+            "rule": 1,
+            "to": "n13"
+          },
+          {
+            "id": "a13",
+            "from": "n12",
+            "rule": null,
+            "to": "n15",
+            "letter": "A"
+          },
+          {
+            "id": "a14",
+            "from": "n14",
+            "rule": null,
+            "to": "n15",
+            "letter": "B"
+          },
+          {
+            "id": "a15",
+            "from": "n15",
+            "rule": null,
+            "to": "n16"
+          },
+          {
+            "id": "a16",
+            "from": "n16",
+            "rule": 0,
+            "to": "n17"
+          }
+        ]
+      },
+      "autoevaluation": [
+        "Quatre acteurs : l'assuré et l'expert (externes), l'application client et le gestionnaire de sinistre (internes) ; aucune opération dans les couloirs de l'assuré et de l'expert.",
+        "La déclaration du sinistre dans l'application attend la déclaration à réaliser ET les pièces jointes (synchronisation « A et B »).",
+        "La déclaration a deux règles d'émission : champs manquants (message d'erreur) / champs complets (notification au gestionnaire, déclaration validée, notification à l'assuré).",
+        "La vérification par le gestionnaire a deux cas : dommages non couverts (refus d'indemnisation) / dommages couverts (déclaration validée, accord à l'assuré, expert notifié).",
+        "Le calcul de l'indemnisation attend la déclaration de sinistre validée ET le rapport d'expertise, puis produit le courrier d'indemnisation."
+      ],
+      "indice": "Les couloirs de l'assuré et de l'expert ne contiennent que des événements : leurs actions (déplacement de l'expert, par exemple) ne sont pas des opérations du système étudié. Repérez les deux moments où une opération doit attendre deux choses à la fois, et les deux contrôles qui aboutissent à des résultats différents selon le cas (deux règles d'émission)."
+    }
+  ]
+}

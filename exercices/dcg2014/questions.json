@@ -1,0 +1,1116 @@
+{
+  "id": "dcg2014",
+  "titre": "DCG 2014 – Fédération de taekwondo",
+  "aujourdhui": "2014-05-15",
+  "contexte": "La Fédération Française de Taekwondo et Disciplines Associées (FFTDA) délègue une partie de ses missions à des ligues régionales (LIGUE_REGIONALE). Chaque CLUB est affilié à une ligue, sauf les clubs d'initiation (CodeLigue vide). Un ADHERENT, identifié par son numéro de licence, peut être inscrit dans plusieurs clubs : chaque adhésion est enregistrée dans COMPRENDRE avec sa date. Les clubs donnent leurs cours dans des salles (SALLE) selon un créneau hebdomadaire (jour et horaire, dans DISPOSER) et font appel à des instructeurs (INSTRUCTEUR, reliés aux clubs par AVOIR). Dans le sujet, les instructeurs principaux (qui ont un grade) et secondaires (qui ont un diplôme) formaient deux sous-types ; ici, ils sont regroupés dans une seule table INSTRUCTEUR : TypeInstructeur vaut « Principal » ou « Secondaire », GradeInstructeur n'est renseigné que pour les principaux et Diplome que pour les secondaires. Les grades des adhérents vont de « Ceinture blanche » à « Ceinture noire 4e Dan ».",
+  "source": "Inspiré du sujet DCG UE8 session 2014. Données entièrement fictives.",
+  "schemaGrid": {
+    "ADHERENT": [
+      0,
+      0
+    ],
+    "COMPRENDRE": [
+      1,
+      0
+    ],
+    "LIGUE_REGIONALE": [
+      2,
+      0
+    ],
+    "AVOIR": [
+      0,
+      1
+    ],
+    "CLUB": [
+      1,
+      1
+    ],
+    "DISPOSER": [
+      2,
+      1
+    ],
+    "INSTRUCTEUR": [
+      0,
+      2
+    ],
+    "SALLE": [
+      2,
+      2
+    ]
+  },
+  "questions": [
+    {
+      "id": "q01",
+      "theme": "Une seule table",
+      "enonce": "Afficher la liste des ligues régionales de la fédération (toutes les colonnes).",
+      "correction": [
+        "SELECT *",
+        "FROM LIGUE_REGIONALE;"
+      ],
+      "indice": "L'étoile * permet d'afficher toutes les colonnes d'une table."
+    },
+    {
+      "id": "q02",
+      "theme": "Une seule table",
+      "enonce": "Afficher le nom, le code postal et le président des clubs situés à Paris, triés par ordre alphabétique des noms de club.",
+      "ordered": [
+        0
+      ],
+      "correction": [
+        "SELECT NomClub, CodePostalClub, PresidentClub",
+        "FROM CLUB",
+        "WHERE VilleClub = 'Paris'",
+        "ORDER BY NomClub;"
+      ],
+      "indice": "Une condition sur un texte s'écrit entre apostrophes : VilleClub = 'Paris'. Le tri se fait avec ORDER BY."
+    },
+    {
+      "id": "q03",
+      "theme": "Une seule table",
+      "enonce": "Afficher le nom et la ville des clubs de la ligue de code 'IDF' qui n'ont pas de site internet.",
+      "correction": [
+        "SELECT NomClub, VilleClub",
+        "FROM CLUB",
+        "WHERE CodeLigue = 'IDF'",
+        "AND SiteInternetClub IS NULL;"
+      ],
+      "indice": "Une valeur absente se teste avec IS NULL (et non = NULL). Les deux conditions sont reliées par AND."
+    },
+    {
+      "id": "q04",
+      "theme": "Une seule table",
+      "enonce": "Les clubs d'initiation ne sont affiliés à aucune ligue régionale. Afficher leur nom, leur ville et leur date de création.",
+      "correction": [
+        "SELECT NomClub, VilleClub, DateCreationClub",
+        "FROM CLUB",
+        "WHERE CodeLigue IS NULL;"
+      ],
+      "indice": "Un club sans ligue a une clé étrangère CodeLigue vide : testez-la avec IS NULL."
+    },
+    {
+      "id": "q05",
+      "theme": "Calculs et agrégats",
+      "enonce": "Combien d'adhérents (licenciés) la fédération compte-t-elle au total ?",
+      "correction": [
+        "SELECT COUNT(*)",
+        "FROM ADHERENT;"
+      ],
+      "variantes": [
+        [
+          "SELECT COUNT(NumeroLicence)",
+          "FROM ADHERENT;"
+        ]
+      ],
+      "indice": "La fonction COUNT(*) compte les lignes d'une table."
+    },
+    {
+      "id": "q06",
+      "theme": "Calculs et agrégats",
+      "enonce": "Afficher, pour chaque grade, le nombre d'adhérents qui le détiennent.",
+      "correction": [
+        "SELECT GradeAdherent, COUNT(*) AS NbAdherents",
+        "FROM ADHERENT",
+        "GROUP BY GradeAdherent;"
+      ],
+      "indice": "GROUP BY regroupe les lignes ayant le même grade ; COUNT(*) compte alors les adhérents de chaque groupe."
+    },
+    {
+      "id": "q07",
+      "theme": "Calculs et agrégats",
+      "enonce": "Afficher la date de création du club le plus ancien et celle du club le plus récent de la fédération.",
+      "correction": [
+        "SELECT MIN(DateCreationClub), MAX(DateCreationClub)",
+        "FROM CLUB;"
+      ],
+      "indice": "MIN et MAX s'appliquent aussi aux dates : la plus petite date est la plus ancienne."
+    },
+    {
+      "id": "q08",
+      "theme": "Dates",
+      "annale": "2014",
+      "enonce": "Afficher la liste des clubs (nom, site internet, date de création et ville) qui ont un site hébergé sur le domaine « .fr » et qui ont été créés entre 1995 et 2000 (inclus). Les résultats seront classés par ville puis par nom.",
+      "ordered": [
+        3,
+        0
+      ],
+      "correction": [
+        "SELECT NomClub, SiteInternetClub, DateCreationClub, VilleClub",
+        "FROM CLUB",
+        "WHERE SiteInternetClub LIKE '%.fr'",
+        "AND DateCreationClub BETWEEN '01/01/1995' AND '31/12/2000'",
+        "ORDER BY VilleClub, NomClub;"
+      ],
+      "variantes": [
+        [
+          "SELECT NomClub, SiteInternetClub, DateCreationClub, VilleClub",
+          "FROM CLUB",
+          "WHERE SiteInternetClub LIKE '%.fr'",
+          "AND YEAR(DateCreationClub) BETWEEN 1995 AND 2000",
+          "ORDER BY VilleClub, NomClub;"
+        ],
+        [
+          "SELECT NomClub, SiteInternetClub, DateCreationClub, VilleClub",
+          "FROM CLUB",
+          "WHERE SiteInternetClub LIKE '%.fr'",
+          "AND DateCreationClub >= '01/01/1995' AND DateCreationClub <= '31/12/2000'",
+          "ORDER BY VilleClub, NomClub;"
+        ]
+      ],
+      "indice": "LIKE '%.fr' : le % remplace n'importe quelle suite de caractères avant « .fr ». Attention, '%fr%' accepterait aussi un site en .com contenant « fr » dans son nom. Les bornes de BETWEEN sont incluses."
+    },
+    {
+      "id": "q09",
+      "theme": "Dates",
+      "enonce": "Afficher les plus jeunes licenciés, ceux nés en 2008 (numéro de licence, nom, prénom et date de naissance), du plus âgé au plus jeune.",
+      "ordered": [
+        3
+      ],
+      "correction": [
+        "SELECT NumeroLicence, NomAdherent, PrenomAdherent, DateNaissanceAdherent",
+        "FROM ADHERENT",
+        "WHERE YEAR(DateNaissanceAdherent) = 2008",
+        "ORDER BY DateNaissanceAdherent;"
+      ],
+      "variantes": [
+        [
+          "SELECT NumeroLicence, NomAdherent, PrenomAdherent, DateNaissanceAdherent",
+          "FROM ADHERENT",
+          "WHERE DateNaissanceAdherent BETWEEN '01/01/2008' AND '31/12/2008'",
+          "ORDER BY DateNaissanceAdherent;"
+        ]
+      ],
+      "indice": "YEAR(date) donne l'année d'une date. Le plus âgé est celui dont la date de naissance est la plus ancienne : tri croissant."
+    },
+    {
+      "id": "q10",
+      "theme": "Dates",
+      "enonce": "La fédération veut proposer un programme « vétérans » aux adhérents âgés de 60 ans ou plus à la date du jour. Afficher leur numéro de licence, nom, prénom et date de naissance. On pourra utiliser le fait que DATEDIFF(d1, d2) donne le nombre de jours entre les dates d1 et d2 (d1 postérieure à d2) et compter 365 jours par an.",
+      "correction": [
+        "SELECT NumeroLicence, NomAdherent, PrenomAdherent, DateNaissanceAdherent",
+        "FROM ADHERENT",
+        "WHERE DATEDIFF(NOW(), DateNaissanceAdherent) / 365 >= 60;"
+      ],
+      "variantes": [
+        [
+          "SELECT NumeroLicence, NomAdherent, PrenomAdherent, DateNaissanceAdherent",
+          "FROM ADHERENT",
+          "WHERE DATEDIFF(NOW(), DateNaissanceAdherent) >= 60 * 365;"
+        ]
+      ],
+      "indice": "NOW() (ou CURDATE()) donne la date du jour ; DATEDIFF(NOW(), DateNaissanceAdherent) est l'âge en jours."
+    },
+    {
+      "id": "q11",
+      "theme": "Jointures",
+      "enonce": "Afficher le nom, la ville et la date de création des clubs de la ligue « Bretagne ».",
+      "correction": [
+        "SELECT NomClub, VilleClub, DateCreationClub",
+        "FROM CLUB, LIGUE_REGIONALE",
+        "WHERE CLUB.CodeLigue = LIGUE_REGIONALE.CodeLigue",
+        "AND NomLigue = 'Bretagne';"
+      ],
+      "variantes": [
+        [
+          "SELECT NomClub, VilleClub, DateCreationClub",
+          "FROM CLUB",
+          "INNER JOIN LIGUE_REGIONALE ON CLUB.CodeLigue = LIGUE_REGIONALE.CodeLigue",
+          "WHERE NomLigue = 'Bretagne';"
+        ]
+      ],
+      "indice": "Le nom de la ligue est dans LIGUE_REGIONALE, les clubs dans CLUB : reliez les deux tables par CodeLigue."
+    },
+    {
+      "id": "q12",
+      "theme": "Jointures",
+      "enonce": "Afficher le planning du samedi : nom du club, lieu de la salle et horaire du cours, trié par horaire.",
+      "ordered": [
+        2
+      ],
+      "correction": [
+        "SELECT NomClub, LieuSalle, Horaire",
+        "FROM CLUB, DISPOSER, SALLE",
+        "WHERE CLUB.CodeAffiliation = DISPOSER.CodeAffiliation",
+        "AND DISPOSER.CodeSalle = SALLE.CodeSalle",
+        "AND Jour = 'samedi'",
+        "ORDER BY Horaire;"
+      ],
+      "variantes": [
+        [
+          "SELECT NomClub, LieuSalle, Horaire",
+          "FROM CLUB",
+          "INNER JOIN DISPOSER ON CLUB.CodeAffiliation = DISPOSER.CodeAffiliation",
+          "INNER JOIN SALLE ON DISPOSER.CodeSalle = SALLE.CodeSalle",
+          "WHERE Jour = 'samedi'",
+          "ORDER BY Horaire;"
+        ]
+      ],
+      "indice": "Le jour et l'horaire sont dans DISPOSER, qui relie CLUB (par CodeAffiliation) et SALLE (par CodeSalle)."
+    },
+    {
+      "id": "q13",
+      "theme": "Jointures",
+      "enonce": "Afficher la liste des instructeurs principaux (code, nom, prénom et grade) qui interviennent dans au moins un club de la ligue « Normandie », triée par nom. Chaque instructeur ne doit apparaître qu'une fois.",
+      "ordered": [
+        1
+      ],
+      "correction": [
+        "SELECT DISTINCT INSTRUCTEUR.CodeInstructeur, NomInstructeur, PrenomInstructeur, GradeInstructeur",
+        "FROM INSTRUCTEUR, AVOIR, CLUB, LIGUE_REGIONALE",
+        "WHERE INSTRUCTEUR.CodeInstructeur = AVOIR.CodeInstructeur",
+        "AND AVOIR.CodeAffiliation = CLUB.CodeAffiliation",
+        "AND CLUB.CodeLigue = LIGUE_REGIONALE.CodeLigue",
+        "AND TypeInstructeur = 'Principal'",
+        "AND NomLigue = 'Normandie'",
+        "ORDER BY NomInstructeur;"
+      ],
+      "variantes": [
+        [
+          "SELECT DISTINCT INSTRUCTEUR.CodeInstructeur, NomInstructeur, PrenomInstructeur, GradeInstructeur",
+          "FROM INSTRUCTEUR",
+          "INNER JOIN AVOIR ON INSTRUCTEUR.CodeInstructeur = AVOIR.CodeInstructeur",
+          "INNER JOIN CLUB ON AVOIR.CodeAffiliation = CLUB.CodeAffiliation",
+          "INNER JOIN LIGUE_REGIONALE ON CLUB.CodeLigue = LIGUE_REGIONALE.CodeLigue",
+          "WHERE TypeInstructeur = 'Principal'",
+          "AND NomLigue = 'Normandie'",
+          "ORDER BY NomInstructeur;"
+        ]
+      ],
+      "indice": "Il faut aller d'INSTRUCTEUR à LIGUE_REGIONALE en passant par AVOIR puis CLUB. Un instructeur qui intervient dans deux clubs normands sortirait deux fois : pensez à DISTINCT."
+    },
+    {
+      "id": "q14",
+      "theme": "Jointures",
+      "annale": "2014",
+      "enonce": "Afficher la liste des adhérents (numéro de licence, nom, prénom et grade), triée par nom, âgés de 18 ans ou plus, ayant le grade « Ceinture noire 1er Dan » et adhérents d'un club de la ligue « Normandie ». On pourra utiliser le fait que DATEDIFF(d1, d2) donne le nombre de jours entre les dates d1 et d2 (d1 postérieure à d2). Chaque adhérent ne doit apparaître qu'une fois.",
+      "ordered": [
+        1
+      ],
+      "correction": [
+        "SELECT DISTINCT ADHERENT.NumeroLicence, NomAdherent, PrenomAdherent, GradeAdherent",
+        "FROM ADHERENT, COMPRENDRE, CLUB, LIGUE_REGIONALE",
+        "WHERE ADHERENT.NumeroLicence = COMPRENDRE.NumeroLicence",
+        "AND COMPRENDRE.CodeAffiliation = CLUB.CodeAffiliation",
+        "AND CLUB.CodeLigue = LIGUE_REGIONALE.CodeLigue",
+        "AND DATEDIFF(NOW(), DateNaissanceAdherent) / 365 >= 18",
+        "AND GradeAdherent = 'Ceinture noire 1er Dan'",
+        "AND NomLigue = 'Normandie'",
+        "ORDER BY NomAdherent;"
+      ],
+      "variantes": [
+        [
+          "SELECT DISTINCT ADHERENT.NumeroLicence, NomAdherent, PrenomAdherent, GradeAdherent",
+          "FROM ADHERENT",
+          "INNER JOIN COMPRENDRE ON ADHERENT.NumeroLicence = COMPRENDRE.NumeroLicence",
+          "INNER JOIN CLUB ON COMPRENDRE.CodeAffiliation = CLUB.CodeAffiliation",
+          "INNER JOIN LIGUE_REGIONALE ON CLUB.CodeLigue = LIGUE_REGIONALE.CodeLigue",
+          "WHERE DATEDIFF(NOW(), DateNaissanceAdherent) >= 18 * 365",
+          "AND GradeAdherent = 'Ceinture noire 1er Dan'",
+          "AND NomLigue = 'Normandie'",
+          "ORDER BY NomAdherent;"
+        ]
+      ],
+      "indice": "Quatre tables : ADHERENT → COMPRENDRE → CLUB → LIGUE_REGIONALE. L'âge en jours est DATEDIFF(NOW(), DateNaissanceAdherent). Un adhérent inscrit dans deux clubs normands sortirait deux fois sans DISTINCT."
+    },
+    {
+      "id": "q15",
+      "theme": "Jointures et regroupements",
+      "annale": "2014",
+      "enonce": "Afficher, pour chaque ligue régionale, son nom et son nombre de clubs. Seules seront affichées les ligues dont le nombre de clubs est supérieur à 15.",
+      "correction": [
+        "SELECT NomLigue AS Region, COUNT(CodeAffiliation) AS NbClubs",
+        "FROM CLUB, LIGUE_REGIONALE",
+        "WHERE CLUB.CodeLigue = LIGUE_REGIONALE.CodeLigue",
+        "GROUP BY LIGUE_REGIONALE.CodeLigue, NomLigue",
+        "HAVING COUNT(CodeAffiliation) > 15;"
+      ],
+      "variantes": [
+        [
+          "SELECT NomLigue AS Region, COUNT(*) AS NbClubs",
+          "FROM CLUB",
+          "INNER JOIN LIGUE_REGIONALE ON CLUB.CodeLigue = LIGUE_REGIONALE.CodeLigue",
+          "GROUP BY NomLigue",
+          "HAVING COUNT(*) > 15;"
+        ]
+      ],
+      "indice": "Regroupez les clubs par ligue avec GROUP BY. Une condition sur le résultat de COUNT se place dans HAVING, pas dans WHERE."
+    },
+    {
+      "id": "q16",
+      "theme": "Jointures et regroupements",
+      "annale": "2014",
+      "enonce": "Combien d'adhérents ont rejoint, en 2013, un club de la ligue « Normandie », de la ligue « Nord-Pas-de-Calais » ou de la ligue « Ile-de-France » ? Un adhérent qui a rejoint deux de ces clubs dans l'année ne doit être compté qu'une fois.",
+      "correction": [
+        "SELECT COUNT(DISTINCT NumeroLicence)",
+        "FROM COMPRENDRE, CLUB, LIGUE_REGIONALE",
+        "WHERE COMPRENDRE.CodeAffiliation = CLUB.CodeAffiliation",
+        "AND CLUB.CodeLigue = LIGUE_REGIONALE.CodeLigue",
+        "AND (NomLigue = 'Normandie'",
+        "     OR NomLigue = 'Nord-Pas-de-Calais'",
+        "     OR NomLigue = 'Ile-de-France')",
+        "AND YEAR(DateAdhesion) = 2013;"
+      ],
+      "variantes": [
+        [
+          "SELECT COUNT(DISTINCT NumeroLicence)",
+          "FROM COMPRENDRE",
+          "INNER JOIN CLUB ON COMPRENDRE.CodeAffiliation = CLUB.CodeAffiliation",
+          "INNER JOIN LIGUE_REGIONALE ON CLUB.CodeLigue = LIGUE_REGIONALE.CodeLigue",
+          "WHERE NomLigue IN ('Normandie', 'Nord-Pas-de-Calais', 'Ile-de-France')",
+          "AND DateAdhesion BETWEEN '01/01/2013' AND '31/12/2013';"
+        ]
+      ],
+      "indice": "Les OR doivent être mis entre parenthèses (ou remplacés par IN), sinon les AND sont évalués en premier et la jointure ne s'applique plus. COUNT(DISTINCT …) évite de compter deux fois le même adhérent."
+    },
+    {
+      "id": "q17",
+      "theme": "Jointures et regroupements",
+      "enonce": "Afficher, pour chaque club de la ligue « Normandie », son nom et son nombre d'adhérents, du club qui en compte le plus à celui qui en compte le moins.",
+      "ordered": [
+        1
+      ],
+      "correction": [
+        "SELECT NomClub, COUNT(*) AS NbAdherents",
+        "FROM CLUB, COMPRENDRE, LIGUE_REGIONALE",
+        "WHERE CLUB.CodeAffiliation = COMPRENDRE.CodeAffiliation",
+        "AND CLUB.CodeLigue = LIGUE_REGIONALE.CodeLigue",
+        "AND NomLigue = 'Normandie'",
+        "GROUP BY CLUB.CodeAffiliation, NomClub",
+        "ORDER BY COUNT(*) DESC;"
+      ],
+      "variantes": [
+        [
+          "SELECT NomClub, COUNT(*) AS NbAdherents",
+          "FROM CLUB",
+          "INNER JOIN COMPRENDRE ON CLUB.CodeAffiliation = COMPRENDRE.CodeAffiliation",
+          "INNER JOIN LIGUE_REGIONALE ON CLUB.CodeLigue = LIGUE_REGIONALE.CodeLigue",
+          "WHERE NomLigue = 'Normandie'",
+          "GROUP BY CLUB.CodeAffiliation, NomClub",
+          "ORDER BY NbAdherents DESC;"
+        ]
+      ],
+      "indice": "Les adhésions sont dans COMPRENDRE : regroupez-les par club (GROUP BY) et comptez-les. Le tri décroissant se fait avec ORDER BY … DESC."
+    },
+    {
+      "id": "q18",
+      "theme": "Jointures et regroupements",
+      "enonce": "Afficher les adhérents inscrits dans plusieurs clubs (numéro de licence, nom, prénom et nombre de clubs), triés par nom.",
+      "ordered": [
+        1
+      ],
+      "correction": [
+        "SELECT ADHERENT.NumeroLicence, NomAdherent, PrenomAdherent, COUNT(*) AS NbClubs",
+        "FROM ADHERENT, COMPRENDRE",
+        "WHERE ADHERENT.NumeroLicence = COMPRENDRE.NumeroLicence",
+        "GROUP BY ADHERENT.NumeroLicence, NomAdherent, PrenomAdherent",
+        "HAVING COUNT(*) > 1",
+        "ORDER BY NomAdherent;"
+      ],
+      "variantes": [
+        [
+          "SELECT ADHERENT.NumeroLicence, NomAdherent, PrenomAdherent, COUNT(*) AS NbClubs",
+          "FROM ADHERENT",
+          "INNER JOIN COMPRENDRE ON ADHERENT.NumeroLicence = COMPRENDRE.NumeroLicence",
+          "GROUP BY ADHERENT.NumeroLicence, NomAdherent, PrenomAdherent",
+          "HAVING COUNT(*) >= 2",
+          "ORDER BY NomAdherent;"
+        ]
+      ],
+      "indice": "Chaque ligne de COMPRENDRE est une adhésion à un club : regroupez par adhérent et ne gardez, avec HAVING, que ceux qui ont plus d'une adhésion."
+    },
+    {
+      "id": "q19",
+      "theme": "Jointures et regroupements",
+      "enonce": "Certaines salles sont partagées entre plusieurs clubs. Afficher le lieu de chaque salle utilisée par au moins deux clubs, avec le nombre de clubs qui l'utilisent.",
+      "correction": [
+        "SELECT LieuSalle, COUNT(*) AS NbClubs",
+        "FROM SALLE, DISPOSER",
+        "WHERE SALLE.CodeSalle = DISPOSER.CodeSalle",
+        "GROUP BY SALLE.CodeSalle, LieuSalle",
+        "HAVING COUNT(*) >= 2;"
+      ],
+      "variantes": [
+        [
+          "SELECT LieuSalle, COUNT(*) AS NbClubs",
+          "FROM SALLE",
+          "INNER JOIN DISPOSER ON SALLE.CodeSalle = DISPOSER.CodeSalle",
+          "GROUP BY SALLE.CodeSalle, LieuSalle",
+          "HAVING COUNT(*) > 1;"
+        ]
+      ],
+      "indice": "DISPOSER contient une ligne par club et par salle : regroupez par salle et filtrez le comptage avec HAVING."
+    },
+    {
+      "id": "q20",
+      "theme": "Sous-requêtes",
+      "annale": "2014",
+      "enonce": "Afficher le nom du club le plus ancien de la ligue « Ile-de-France ».",
+      "correction": [
+        "SELECT NomClub",
+        "FROM CLUB, LIGUE_REGIONALE",
+        "WHERE CLUB.CodeLigue = LIGUE_REGIONALE.CodeLigue",
+        "AND NomLigue = 'Ile-de-France'",
+        "AND DateCreationClub = (SELECT MIN(DateCreationClub)",
+        "                        FROM CLUB, LIGUE_REGIONALE",
+        "                        WHERE CLUB.CodeLigue = LIGUE_REGIONALE.CodeLigue",
+        "                        AND NomLigue = 'Ile-de-France');"
+      ],
+      "variantes": [
+        [
+          "SELECT NomClub",
+          "FROM CLUB",
+          "INNER JOIN LIGUE_REGIONALE ON CLUB.CodeLigue = LIGUE_REGIONALE.CodeLigue",
+          "WHERE NomLigue = 'Ile-de-France'",
+          "AND DateCreationClub = (SELECT MIN(DateCreationClub)",
+          "                        FROM CLUB",
+          "                        INNER JOIN LIGUE_REGIONALE ON CLUB.CodeLigue = LIGUE_REGIONALE.CodeLigue",
+          "                        WHERE NomLigue = 'Ile-de-France');"
+        ]
+      ],
+      "indice": "La sous-requête calcule la date de création la plus ancienne des clubs franciliens ; la requête principale cherche le club qui a cette date. Le filtre sur la ligue est nécessaire dans les deux : un club d'une autre ligue peut avoir été créé le même jour."
+    },
+    {
+      "id": "q21",
+      "theme": "Sous-requêtes",
+      "enonce": "Afficher le nom et la ville des clubs qui n'ont encore aucun adhérent.",
+      "correction": [
+        "SELECT NomClub, VilleClub",
+        "FROM CLUB",
+        "WHERE CodeAffiliation NOT IN (SELECT CodeAffiliation",
+        "                              FROM COMPRENDRE);"
+      ],
+      "variantes": [
+        [
+          "SELECT NomClub, VilleClub",
+          "FROM CLUB",
+          "WHERE NOT EXISTS (SELECT *",
+          "                  FROM COMPRENDRE",
+          "                  WHERE COMPRENDRE.CodeAffiliation = CLUB.CodeAffiliation);"
+        ]
+      ],
+      "indice": "La sous-requête donne les clubs ayant au moins un adhérent (présents dans COMPRENDRE) ; NOT IN garde les autres."
+    },
+    {
+      "id": "q22",
+      "theme": "Sous-requêtes",
+      "enonce": "Afficher le nom, le prénom et le type des instructeurs qui n'interviennent dans aucun club.",
+      "correction": [
+        "SELECT NomInstructeur, PrenomInstructeur, TypeInstructeur",
+        "FROM INSTRUCTEUR",
+        "WHERE CodeInstructeur NOT IN (SELECT CodeInstructeur",
+        "                              FROM AVOIR);"
+      ],
+      "variantes": [
+        [
+          "SELECT NomInstructeur, PrenomInstructeur, TypeInstructeur",
+          "FROM INSTRUCTEUR",
+          "WHERE NOT EXISTS (SELECT *",
+          "                  FROM AVOIR",
+          "                  WHERE AVOIR.CodeInstructeur = INSTRUCTEUR.CodeInstructeur);"
+        ]
+      ],
+      "indice": "Les interventions des instructeurs dans les clubs sont enregistrées dans AVOIR."
+    },
+    {
+      "id": "q23",
+      "theme": "Mises à jour",
+      "type": "write",
+      "enonce": "Franck PICARD (licence n° 100117) vient de réussir son passage de grade : enregistrer son nouveau grade « Ceinture noire 1er Dan ».",
+      "correction": [
+        "UPDATE ADHERENT",
+        "SET GradeAdherent = 'Ceinture noire 1er Dan'",
+        "WHERE NumeroLicence = 100117;"
+      ],
+      "verif": "SELECT * FROM ADHERENT ORDER BY NumeroLicence",
+      "indice": "UPDATE … SET … WHERE : sans WHERE, tous les adhérents changeraient de grade !"
+    },
+    {
+      "id": "q24",
+      "theme": "Mises à jour",
+      "type": "write",
+      "enonce": "Un nouveau club d'initiation vient d'être créé le 12/05/2014 : n° d'affiliation 1098, « Initiation Taekwondo Tours », à Tours (code postal 37000), sans site internet, présidé par Hélène MARTIN. Comme tout club d'initiation, il n'est affilié à aucune ligue. Enregistrer ce club.",
+      "correction": [
+        "INSERT INTO CLUB (CodeAffiliation, NomClub, DateCreationClub, VilleClub, CodePostalClub, SiteInternetClub, PresidentClub, CodeLigue)",
+        "VALUES (1098, 'Initiation Taekwondo Tours', '2014-05-12', 'Tours', '37000', NULL, 'Hélène MARTIN', NULL);"
+      ],
+      "variantes": [
+        [
+          "INSERT INTO CLUB",
+          "VALUES (1098, 'Initiation Taekwondo Tours', '12/05/2014', 'Tours', '37000', NULL, 'Hélène MARTIN', NULL);"
+        ]
+      ],
+      "verif": "SELECT * FROM CLUB ORDER BY CodeAffiliation",
+      "indice": "INSERT INTO table (colonnes) VALUES (valeurs) : une valeur absente s'écrit NULL, sans apostrophes. Le code postal est un texte."
+    },
+    {
+      "id": "q25",
+      "theme": "Mises à jour",
+      "type": "write",
+      "enonce": "Kevin FONTAINE (licence n° 100924) quitte le club « Arts Martiaux Coréens Rouen » (n° d'affiliation 1042) ; il reste adhérent de son autre club. Supprimer cette adhésion.",
+      "correction": [
+        "DELETE FROM COMPRENDRE",
+        "WHERE NumeroLicence = 100924",
+        "AND CodeAffiliation = 1042;"
+      ],
+      "verif": "SELECT * FROM COMPRENDRE ORDER BY CodeAffiliation, NumeroLicence",
+      "indice": "C'est l'adhésion (ligne de COMPRENDRE) qu'il faut supprimer, pas l'adhérent. La clé de COMPRENDRE est composée de deux colonnes : il faut les deux dans le WHERE."
+    },
+    {
+      "id": "s01",
+      "theme": "Évolution du schéma",
+      "type": "schema",
+      "annale": "2014",
+      "enonce": "Le schéma ci-dessous n'est qu'un extrait du modèle de la fédération. Complétez-le pour traduire le reste du modèle conceptuel : chaque ligue régionale gère un ou plusieurs comités départementaux (code, nom, adresse, code postal, ville), un comité étant rattaché à une seule ligue ; les clubs disposent de salles (code, lieu), un club pouvant utiliser plusieurs salles et une salle plusieurs clubs, avec pour chaque club et chaque salle un jour et un horaire ; un club a un ou plusieurs instructeurs (code, nom, prénom) et un instructeur peut intervenir dans plusieurs clubs ; enfin, un instructeur est soit un instructeur principal, dont on connaît le grade, soit un instructeur secondaire, dont on connaît le diplôme (DIF ou DARP), jamais les deux (spécialisation avec partition XT).",
+      "depart": [
+        "CLUB",
+        "ADHERENT",
+        "COMPRENDRE",
+        "LIGUE_REGIONALE"
+      ],
+      "solution": {
+        "tables": [
+          {
+            "nom": "COMITE_DEPARTEMENTAL",
+            "alias": [
+              "COMITE",
+              "COMITES",
+              "COMITEDEPARTEMENTAL",
+              "COMITES_DEPARTEMENTAUX",
+              "COMITE_DEP",
+              "COMITE_DEPT"
+            ],
+            "role": "décrire les comités départementaux et leur ligue",
+            "pk": [
+              "CodeComite|NumComite|IdComite|CodeComiteDepartemental"
+            ],
+            "fk": {
+              "CodeLigue": "LIGUE_REGIONALE"
+            },
+            "attributs": [
+              "NomComite|Nom",
+              "AdresseRueComite|RueComite|AdresseComite",
+              "CodePostalComite|CPComite",
+              "VilleComite|Ville"
+            ]
+          },
+          {
+            "nom": "SALLE",
+            "alias": [
+              "SALLES",
+              "DOJANG",
+              "DOJANGS"
+            ],
+            "role": "décrire les salles (dojang)",
+            "pk": [
+              "CodeSalle|NumSalle|IdSalle"
+            ],
+            "attributs": [
+              "LieuSalle|Lieu|NomSalle"
+            ]
+          },
+          {
+            "nom": "INSTRUCTEUR",
+            "alias": [
+              "INSTRUCTEURS"
+            ],
+            "role": "décrire les instructeurs (informations communes)",
+            "pk": [
+              "CodeInstructeur|NumInstructeur|IdInstructeur|NumeroInstructeur"
+            ],
+            "attributs": [
+              "NomInstructeur|Nom",
+              "PrenomInstructeur|Prenom"
+            ]
+          },
+          {
+            "nom": "INSTRUCTEUR_PRINCIPAL",
+            "alias": [
+              "PRINCIPAL",
+              "INSTRUCTEURPRINCIPAL",
+              "INSTRUCTEURS_PRINCIPAUX",
+              "MAITRE",
+              "INSTR_PRINCIPAL"
+            ],
+            "role": "les instructeurs principaux (une catégorie d'instructeur)",
+            "pk": [
+              "CodeInstructeur|NumInstructeur|IdInstructeur|NumeroInstructeur"
+            ],
+            "fk": {
+              "CodeInstructeur|NumInstructeur|IdInstructeur|NumeroInstructeur": "INSTRUCTEUR"
+            },
+            "attributs": [
+              "GradeInstructeurPrincipal|GradeInstructeur|Grade|GradePrincipal"
+            ]
+          },
+          {
+            "nom": "INSTRUCTEUR_SECONDAIRE",
+            "alias": [
+              "SECONDAIRE",
+              "INSTRUCTEURSECONDAIRE",
+              "INSTRUCTEURS_SECONDAIRES",
+              "INSTR_SECONDAIRE"
+            ],
+            "role": "les instructeurs secondaires (une catégorie d'instructeur)",
+            "pk": [
+              "CodeInstructeur|NumInstructeur|IdInstructeur|NumeroInstructeur"
+            ],
+            "fk": {
+              "CodeInstructeur|NumInstructeur|IdInstructeur|NumeroInstructeur": "INSTRUCTEUR"
+            },
+            "attributs": [
+              "Diplome|DiplomeInstructeur|DiplomeSecondaire|DiplomeInstructeurSecondaire"
+            ]
+          },
+          {
+            "nom": "AVOIR",
+            "alias": [
+              "ENCADRER",
+              "INTERVENIR",
+              "EMPLOYER",
+              "ENSEIGNER",
+              "CLUB_INSTRUCTEUR"
+            ],
+            "role": "relier les clubs et leurs instructeurs",
+            "pk": [
+              "CodeAffiliation",
+              "CodeInstructeur|NumInstructeur|IdInstructeur|NumeroInstructeur"
+            ],
+            "fk": {
+              "CodeAffiliation": "CLUB",
+              "CodeInstructeur|NumInstructeur|IdInstructeur|NumeroInstructeur": "INSTRUCTEUR"
+            }
+          },
+          {
+            "nom": "DISPOSER",
+            "alias": [
+              "UTILISER",
+              "OCCUPER",
+              "CRENEAU",
+              "CRENEAUX",
+              "CLUB_SALLE"
+            ],
+            "role": "relier les clubs et les salles, avec le jour et l'horaire",
+            "pk": [
+              "CodeAffiliation",
+              "CodeSalle|NumSalle|IdSalle"
+            ],
+            "fk": {
+              "CodeAffiliation": "CLUB",
+              "CodeSalle|NumSalle|IdSalle": "SALLE"
+            },
+            "attributs": [
+              "Jour|JourCours",
+              "Horaire|Heure|HoraireCours"
+            ]
+          }
+        ]
+      },
+      "indice": "Un lien « un à plusieurs » (ligue → comités) se traduit par une clé étrangère du côté « un seul » ; un lien « plusieurs à plusieurs » devient une table dont la clé est composée des clés des tables reliées (et qui porte ses propres informations, comme le jour et l'horaire). Pour la spécialisation, chaque sous-type devient une table dont la clé primaire est aussi une clé étrangère vers INSTRUCTEUR.",
+      "variantes": [
+        {
+          "tables": [
+            {
+              "nom": "COMITE_DEPARTEMENTAL",
+              "alias": [
+                "COMITE",
+                "COMITES",
+                "COMITEDEPARTEMENTAL",
+                "COMITES_DEPARTEMENTAUX",
+                "COMITE_DEP",
+                "COMITE_DEPT"
+              ],
+              "role": "décrire les comités départementaux et leur ligue",
+              "pk": [
+                "CodeComite|NumComite|IdComite|CodeComiteDepartemental"
+              ],
+              "fk": {
+                "CodeLigue": "LIGUE_REGIONALE"
+              },
+              "attributs": [
+                "NomComite|Nom",
+                "AdresseRueComite|RueComite|AdresseComite",
+                "CodePostalComite|CPComite",
+                "VilleComite|Ville"
+              ]
+            },
+            {
+              "nom": "SALLE",
+              "alias": [
+                "SALLES",
+                "DOJANG",
+                "DOJANGS"
+              ],
+              "role": "décrire les salles (dojang)",
+              "pk": [
+                "CodeSalle|NumSalle|IdSalle"
+              ],
+              "attributs": [
+                "LieuSalle|Lieu|NomSalle"
+              ]
+            },
+            {
+              "nom": "INSTRUCTEUR",
+              "alias": [
+                "INSTRUCTEURS"
+              ],
+              "role": "décrire les instructeurs (informations communes)",
+              "pk": [
+                "CodeInstructeur|NumInstructeur|IdInstructeur|NumeroInstructeur"
+              ],
+              "attributs": [
+                "NomInstructeur|Nom",
+                "PrenomInstructeur|Prenom",
+                "GradeInstructeurPrincipal|GradeInstructeur|Grade",
+                "Diplome|DiplomeInstructeur"
+              ],
+              "optionnels": [
+                "TypeInstructeur|Type|Categorie|CategorieInstructeur|EstPrincipal"
+              ]
+            },
+            {
+              "nom": "AVOIR",
+              "alias": [
+                "ENCADRER",
+                "INTERVENIR",
+                "EMPLOYER",
+                "ENSEIGNER",
+                "CLUB_INSTRUCTEUR"
+              ],
+              "role": "relier les clubs et leurs instructeurs",
+              "pk": [
+                "CodeAffiliation",
+                "CodeInstructeur|NumInstructeur|IdInstructeur|NumeroInstructeur"
+              ],
+              "fk": {
+                "CodeAffiliation": "CLUB",
+                "CodeInstructeur|NumInstructeur|IdInstructeur|NumeroInstructeur": "INSTRUCTEUR"
+              }
+            },
+            {
+              "nom": "DISPOSER",
+              "alias": [
+                "UTILISER",
+                "OCCUPER",
+                "CRENEAU",
+                "CRENEAUX",
+                "CLUB_SALLE"
+              ],
+              "role": "relier les clubs et les salles, avec le jour et l'horaire",
+              "pk": [
+                "CodeAffiliation",
+                "CodeSalle|NumSalle|IdSalle"
+              ],
+              "fk": {
+                "CodeAffiliation": "CLUB",
+                "CodeSalle|NumSalle|IdSalle": "SALLE"
+              },
+              "attributs": [
+                "Jour|JourCours",
+                "Horaire|Heure|HoraireCours"
+              ]
+            }
+          ],
+          "partiel": "Presque : regrouper grade et diplôme dans INSTRUCTEUR fonctionne, mais ne traduit pas la spécialisation du modèle conceptuel (un instructeur principal n'a pas de diplôme, un secondaire n'a pas de grade). Attendu : une table par catégorie (INSTRUCTEUR_PRINCIPAL, INSTRUCTEUR_SECONDAIRE), dont la clé primaire CodeInstructeur est aussi une clé étrangère vers INSTRUCTEUR."
+        }
+      ]
+    },
+    {
+      "id": "s02",
+      "theme": "Évolution du schéma",
+      "type": "schema",
+      "annale": "2014",
+      "enonce": "Le Centre régional d'accès au haut niveau (CRAHN) de Normandie organise chaque année plusieurs sessions (code, libellé : « Janvier 2013 », « Mai 2013 »…). Une session comporte plusieurs stages, numérotés 1, 2, 3… dans chaque session. Un stage a une date, une heure de début et une heure de fin ; il se déroule dans une salle, dont on veut aussi connaître la ville, il est animé par un instructeur et réunit les pratiquants d'une seule discipline (code, nom : taekwondo, hapkido…). Chaque discipline comporte des spécialités (code, libellé : SP01 Combat, SP02 Technique), une même spécialité existant dans plusieurs disciplines. Les adhérents s'inscrivent aux stages. Lors d'un stage, on enregistre pour chaque adhérent le nombre de points (de 0 à 170) obtenu dans une discipline et une spécialité. Faites évoluer le schéma ci-dessous.",
+      "depart": [
+        "CLUB",
+        "ADHERENT",
+        "COMPRENDRE",
+        "INSTRUCTEUR",
+        "SALLE"
+      ],
+      "solution": {
+        "tables": [
+          {
+            "nom": "SALLE",
+            "attributs": [
+              "VilleSalle|Ville"
+            ]
+          },
+          {
+            "nom": "SESSION",
+            "alias": [
+              "SESSIONS",
+              "SESSION_STAGE",
+              "SESSIONSTAGE"
+            ],
+            "role": "décrire les sessions de stages",
+            "pk": [
+              "CodeSession|NumSession|IdSession|NumeroSession"
+            ],
+            "attributs": [
+              "LibelleSession|Libelle|NomSession"
+            ]
+          },
+          {
+            "nom": "STAGE",
+            "alias": [
+              "STAGES"
+            ],
+            "role": "décrire les stages de chaque session (date, horaires, salle, instructeur, discipline)",
+            "pk": [
+              "CodeSession|NumSession|IdSession|NumeroSession",
+              "CodeStage|NumStage|NumeroStage|NoStage|IdStage"
+            ],
+            "fk": {
+              "CodeSession|NumSession|IdSession|NumeroSession": "SESSION",
+              "CodeInstructeur|NumInstructeur|IdInstructeur|NumeroInstructeur": "INSTRUCTEUR",
+              "CodeSalle|NumSalle|IdSalle": "SALLE",
+              "CodeDiscipline|NumDiscipline|IdDiscipline": "DISCIPLINE"
+            },
+            "attributs": [
+              "DateStage|Date",
+              "HeureDebStage|HeureDebutStage|HeureDebut|HoraireStage|Horaire|HeureDeb",
+              "HeureFinStage|HeureFin|HoraireStage|Horaire"
+            ]
+          },
+          {
+            "nom": "DISCIPLINE",
+            "alias": [
+              "DISCIPLINES"
+            ],
+            "role": "décrire les disciplines (taekwondo, hapkido…)",
+            "pk": [
+              "CodeDiscipline|NumDiscipline|IdDiscipline"
+            ],
+            "attributs": [
+              "NomDiscipline|LibelleDiscipline|Nom|Libelle"
+            ]
+          },
+          {
+            "nom": "SPECIALITE",
+            "alias": [
+              "SPECIALITES"
+            ],
+            "role": "décrire les spécialités (combat, technique)",
+            "pk": [
+              "CodeSpecialite|NumSpecialite|IdSpecialite"
+            ],
+            "attributs": [
+              "LibelleSpecialite|NomSpecialite|Libelle|Nom"
+            ]
+          },
+          {
+            "nom": "DISCIPLINE_SPECIALITE",
+            "alias": [
+              "AVOIR_SPECIALITE",
+              "POSSEDER",
+              "COMPORTER_SPECIALITE",
+              "SPECIALITE_DISCIPLINE",
+              "PROPOSER",
+              "AVOIR"
+            ],
+            "role": "indiquer les spécialités de chaque discipline",
+            "pk": [
+              "CodeDiscipline|NumDiscipline|IdDiscipline",
+              "CodeSpecialite|NumSpecialite|IdSpecialite"
+            ],
+            "fk": {
+              "CodeDiscipline|NumDiscipline|IdDiscipline": "DISCIPLINE",
+              "CodeSpecialite|NumSpecialite|IdSpecialite": "SPECIALITE"
+            }
+          },
+          {
+            "nom": "S_INSCRIRE",
+            "alias": [
+              "INSCRIRE",
+              "INSCRIPTION",
+              "INSCRIPTIONS",
+              "SINSCRIRE",
+              "PARTICIPER"
+            ],
+            "role": "enregistrer les inscriptions des adhérents aux stages",
+            "pk": [
+              "NumeroLicence|NumLicence|Licence",
+              "CodeSession|NumSession|IdSession|NumeroSession",
+              "CodeStage|NumStage|NumeroStage|NoStage|IdStage"
+            ],
+            "fk": {
+              "NumeroLicence|NumLicence|Licence": "ADHERENT",
+              "CodeStage|NumStage|NumeroStage|NoStage|IdStage": "STAGE"
+            }
+          },
+          {
+            "nom": "OBTENIR",
+            "alias": [
+              "EVALUATION",
+              "EVALUER",
+              "RESULTAT",
+              "RESULTATS",
+              "NOTE",
+              "NOTES",
+              "POINTS"
+            ],
+            "role": "enregistrer le nombre de points obtenu par un adhérent à un stage pour une discipline et une spécialité",
+            "pk": [
+              "NumeroLicence|NumLicence|Licence",
+              "CodeSession|NumSession|IdSession|NumeroSession",
+              "CodeStage|NumStage|NumeroStage|NoStage|IdStage",
+              "CodeDiscipline|NumDiscipline|IdDiscipline",
+              "CodeSpecialite|NumSpecialite|IdSpecialite"
+            ],
+            "fk": {
+              "NumeroLicence|NumLicence|Licence": "ADHERENT",
+              "CodeStage|NumStage|NumeroStage|NoStage|IdStage": "STAGE",
+              "CodeDiscipline|NumDiscipline|IdDiscipline": "DISCIPLINE",
+              "CodeSpecialite|NumSpecialite|IdSpecialite": "SPECIALITE"
+            },
+            "attributs": [
+              "NombreDePoints|NombrePoints|NbPoints|Points|NbrePoints|Note"
+            ]
+          }
+        ]
+      },
+      "indice": "Un stage est numéroté dans sa session : sa clé primaire reprend la clé de la session. Salle, instructeur et discipline sont uniques pour un stage : de simples clés étrangères dans STAGE. Les inscriptions et les points obtenus sont des relations « plusieurs à plusieurs » : chacune devient une table dont la clé est composée des clés des tables reliées.",
+      "variantes": [
+        {
+          "tables": [
+            {
+              "nom": "SALLE",
+              "attributs": [
+                "VilleSalle|Ville"
+              ]
+            },
+            {
+              "nom": "SESSION",
+              "alias": [
+                "SESSIONS",
+                "SESSION_STAGE",
+                "SESSIONSTAGE"
+              ],
+              "role": "décrire les sessions de stages",
+              "pk": [
+                "CodeSession|NumSession|IdSession|NumeroSession"
+              ],
+              "attributs": [
+                "LibelleSession|Libelle|NomSession"
+              ]
+            },
+            {
+              "nom": "STAGE",
+              "alias": [
+                "STAGES"
+              ],
+              "role": "décrire les stages de chaque session (date, horaires, salle, instructeur, discipline)",
+              "pk": [
+                "CodeSession|NumSession|IdSession|NumeroSession",
+                "CodeStage|NumStage|NumeroStage|NoStage|IdStage"
+              ],
+              "fk": {
+                "CodeSession|NumSession|IdSession|NumeroSession": "SESSION",
+                "CodeInstructeur|NumInstructeur|IdInstructeur|NumeroInstructeur": "INSTRUCTEUR",
+                "CodeSalle|NumSalle|IdSalle": "SALLE",
+                "CodeDiscipline|NumDiscipline|IdDiscipline": "DISCIPLINE"
+              },
+              "attributs": [
+                "DateStage|Date",
+                "HeureDebStage|HeureDebutStage|HeureDebut|HoraireStage|Horaire|HeureDeb",
+                "HeureFinStage|HeureFin|HoraireStage|Horaire"
+              ]
+            },
+            {
+              "nom": "DISCIPLINE",
+              "alias": [
+                "DISCIPLINES"
+              ],
+              "role": "décrire les disciplines (taekwondo, hapkido…)",
+              "pk": [
+                "CodeDiscipline|NumDiscipline|IdDiscipline"
+              ],
+              "attributs": [
+                "NomDiscipline|LibelleDiscipline|Nom|Libelle"
+              ]
+            },
+            {
+              "nom": "SPECIALITE",
+              "alias": [
+                "SPECIALITES"
+              ],
+              "role": "décrire les spécialités (combat, technique)",
+              "pk": [
+                "CodeSpecialite|NumSpecialite|IdSpecialite"
+              ],
+              "attributs": [
+                "LibelleSpecialite|NomSpecialite|Libelle|Nom"
+              ]
+            },
+            {
+              "nom": "DISCIPLINE_SPECIALITE",
+              "alias": [
+                "AVOIR_SPECIALITE",
+                "POSSEDER",
+                "COMPORTER_SPECIALITE",
+                "SPECIALITE_DISCIPLINE",
+                "PROPOSER",
+                "AVOIR"
+              ],
+              "role": "indiquer les spécialités de chaque discipline",
+              "pk": [
+                "CodeDiscipline|NumDiscipline|IdDiscipline",
+                "CodeSpecialite|NumSpecialite|IdSpecialite"
+              ],
+              "fk": {
+                "CodeDiscipline|NumDiscipline|IdDiscipline": "DISCIPLINE",
+                "CodeSpecialite|NumSpecialite|IdSpecialite": "SPECIALITE"
+              }
+            },
+            {
+              "nom": "S_INSCRIRE",
+              "alias": [
+                "INSCRIRE",
+                "INSCRIPTION",
+                "INSCRIPTIONS",
+                "SINSCRIRE",
+                "PARTICIPER"
+              ],
+              "role": "enregistrer les inscriptions des adhérents aux stages",
+              "pk": [
+                "NumeroLicence|NumLicence|Licence",
+                "CodeSession|NumSession|IdSession|NumeroSession",
+                "CodeStage|NumStage|NumeroStage|NoStage|IdStage"
+              ],
+              "fk": {
+                "NumeroLicence|NumLicence|Licence": "ADHERENT",
+                "CodeStage|NumStage|NumeroStage|NoStage|IdStage": "STAGE"
+              }
+            },
+            {
+              "nom": "OBTENIR",
+              "alias": [
+                "EVALUATION",
+                "EVALUER",
+                "RESULTAT",
+                "RESULTATS",
+                "NOTE",
+                "NOTES",
+                "POINTS"
+              ],
+              "role": "enregistrer le nombre de points obtenu par un adhérent à un stage pour une discipline et une spécialité",
+              "pk": [
+                "NumeroLicence|NumLicence|Licence",
+                "CodeSession|NumSession|IdSession|NumeroSession",
+                "CodeStage|NumStage|NumeroStage|NoStage|IdStage",
+                "CodeSpecialite|NumSpecialite|IdSpecialite"
+              ],
+              "fk": {
+                "NumeroLicence|NumLicence|Licence": "ADHERENT",
+                "CodeStage|NumStage|NumeroStage|NoStage|IdStage": "STAGE",
+                "CodeSpecialite|NumSpecialite|IdSpecialite": "SPECIALITE"
+              },
+              "attributs": [
+                "NombreDePoints|NombrePoints|NbPoints|Points|NbrePoints|Note"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

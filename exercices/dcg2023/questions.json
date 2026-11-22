@@ -1,0 +1,1186 @@
+{
+  "id": "dcg2023",
+  "titre": "DCG 2023 – Domaine de Morange",
+  "aujourdhui": "2023-05-31",
+  "contexte": "Le Domaine de Morange, à Mauves (Ardèche), produit des vins d'appellation Saint-Joseph. Ses terres sont découpées en PARCELLES plantées chacune d'un seul CEPAGE (Syrah, Marsanne, Roussanne…), photographiées chaque été (PHOTOS) et suivies par des stations météo (RELEVEMETEO). Chaque VIN correspond à une appellation et un millésime (année) ; ASSEMBLER indique les cépages qui le composent. Des CRITIQUES vinicoles notent les vins sur 20 (EVALUER). Les CLIENTS passent des COMMANDES ; PASSER donne la quantité commandée de chaque vin. Le montant HT d'une commande est la somme des prix × quantités, plus les frais de livraison.",
+  "source": "Inspiré du sujet DCG UE8 session 2023, dossier 1. Données entièrement fictives.",
+  "schemaGrid": {
+    "CEPAGE": [
+      0,
+      0
+    ],
+    "PARCELLE": [
+      0,
+      1
+    ],
+    "PHOTOS": [
+      0,
+      2
+    ],
+    "RELEVEMETEO": [
+      0,
+      3
+    ],
+    "ASSEMBLER": [
+      1,
+      0
+    ],
+    "VIN": [
+      1,
+      1
+    ],
+    "EVALUER": [
+      1,
+      2
+    ],
+    "CRITIQUE": [
+      1,
+      3
+    ],
+    "CLIENT": [
+      2,
+      0
+    ],
+    "COMMANDE": [
+      2,
+      1
+    ],
+    "PASSER": [
+      2,
+      2
+    ]
+  },
+  "questions": [
+    {
+      "id": "q01",
+      "theme": "Une seule table",
+      "enonce": "Afficher la liste des cépages connus du domaine (toutes les colonnes).",
+      "correction": [
+        "SELECT *",
+        "FROM CEPAGE;"
+      ],
+      "indice": "L'étoile * permet d'afficher toutes les colonnes d'une table."
+    },
+    {
+      "id": "q02",
+      "theme": "Une seule table",
+      "enonce": "Pour préparer la lettre d'actualité, afficher la liste des clients (nom, prénom et téléphone) qui n'ont pas d'adresse mail, triée par ordre alphabétique des noms.",
+      "annale": "2023",
+      "ordered": [
+        0
+      ],
+      "correction": [
+        "SELECT NomClient, PrenomClient, TelClient",
+        "FROM CLIENT",
+        "WHERE MailClient IS NULL",
+        "ORDER BY NomClient, PrenomClient;"
+      ],
+      "variantes": [
+        [
+          "SELECT NomClient, PrenomClient, TelClient",
+          "FROM CLIENT",
+          "WHERE MailClient IS NULL",
+          "ORDER BY NomClient;"
+        ]
+      ],
+      "indice": "Une adresse non renseignée se teste avec IS NULL (et non = NULL). Le tri se fait avec ORDER BY."
+    },
+    {
+      "id": "q03",
+      "theme": "Une seule table",
+      "enonce": "Afficher les parcelles exposées au sud (identifiant, superficie en m², nature du sol), de la plus grande à la plus petite.",
+      "ordered": [
+        1
+      ],
+      "correction": [
+        "SELECT IdParcelle, SuperficieParcelle, NatureSolParcelle",
+        "FROM PARCELLE",
+        "WHERE ExpositionParcelle = 'Sud'",
+        "ORDER BY SuperficieParcelle DESC;"
+      ],
+      "indice": "Condition sur un texte entre apostrophes ('Sud') ; DESC trie par ordre décroissant."
+    },
+    {
+      "id": "q04",
+      "theme": "Une seule table",
+      "enonce": "Afficher les vins d'appellation Saint-Joseph, quelle que soit la couleur ou la cuvée (identifiant, nom de l'appellation, millésime, prix de la bouteille).",
+      "correction": [
+        "SELECT IdVin, NomAppellationVin, Millesime, PrixBouteilleVin",
+        "FROM VIN",
+        "WHERE NomAppellationVin LIKE 'Saint-Joseph%';"
+      ],
+      "indice": "Tous les noms commencent par « Saint-Joseph » : LIKE avec % permet de rechercher un début de texte."
+    },
+    {
+      "id": "q05",
+      "theme": "Calculs et agrégats",
+      "enonce": "Afficher le prix moyen, le prix le plus bas et le prix le plus élevé d'une bouteille de vin du domaine.",
+      "correction": [
+        "SELECT AVG(PrixBouteilleVin), MIN(PrixBouteilleVin), MAX(PrixBouteilleVin)",
+        "FROM VIN;"
+      ],
+      "indice": "Fonctions AVG (moyenne), MIN et MAX."
+    },
+    {
+      "id": "q06",
+      "theme": "Calculs et agrégats",
+      "enonce": "La superficie des parcelles est enregistrée en m². Afficher la superficie totale du domaine en hectares (1 hectare = 10 000 m²).",
+      "correction": [
+        "SELECT SUM(SuperficieParcelle) / 10000",
+        "FROM PARCELLE;"
+      ],
+      "variantes": [
+        [
+          "SELECT SUM(SuperficieParcelle / 10000.0)",
+          "FROM PARCELLE;"
+        ]
+      ],
+      "indice": "SUM additionne les superficies ; on peut ensuite diviser le résultat par 10000 (ou 10000.0 pour garder les décimales)."
+    },
+    {
+      "id": "q07",
+      "theme": "Calculs et agrégats",
+      "enonce": "Afficher, pour chaque vin du millésime 2021, son identifiant, le nom de l'appellation, le nombre de bouteilles en stock et la valeur de ce stock (nombre de bouteilles × prix de la bouteille).",
+      "correction": [
+        "SELECT IdVin, NomAppellationVin, NbBouteillesVin, NbBouteillesVin * PrixBouteilleVin",
+        "FROM VIN",
+        "WHERE Millesime = 2021;"
+      ],
+      "indice": "On peut calculer dans le SELECT en multipliant deux colonnes. Le millésime est un nombre : pas d'apostrophes."
+    },
+    {
+      "id": "q08",
+      "theme": "Calculs et agrégats",
+      "enonce": "Afficher, pour chaque état de commande, le nombre de commandes correspondantes.",
+      "correction": [
+        "SELECT EtatCommande, COUNT(*)",
+        "FROM COMMANDE",
+        "GROUP BY EtatCommande;"
+      ],
+      "indice": "« Pour chaque » se traduit en SQL par GROUP BY."
+    },
+    {
+      "id": "q09",
+      "theme": "Dates",
+      "enonce": "Afficher les commandes (numéro, date, frais de livraison) passées en avril 2023.",
+      "correction": [
+        "SELECT IdCommande, DateCommande, FraisLivraisonCommande",
+        "FROM COMMANDE",
+        "WHERE MONTH(DateCommande) = 4",
+        "AND YEAR(DateCommande) = 2023;"
+      ],
+      "variantes": [
+        [
+          "SELECT IdCommande, DateCommande, FraisLivraisonCommande",
+          "FROM COMMANDE",
+          "WHERE DateCommande BETWEEN '01/04/2023' AND '30/04/2023';"
+        ]
+      ],
+      "indice": "Combinez MONTH() et YEAR(), ou utilisez BETWEEN avec deux dates."
+    },
+    {
+      "id": "q10",
+      "theme": "Dates",
+      "enonce": "Un coup de mistral a été signalé en mars 2023. Afficher les relevés météo de mars 2023 dont la vitesse du vent dépasse 50 km/h (numéro du relevé, date, parcelle, vitesse du vent).",
+      "correction": [
+        "SELECT IdReleve, DateReleve, IdParcelle, VitesseVent",
+        "FROM RELEVEMETEO",
+        "WHERE MONTH(DateReleve) = 3",
+        "AND YEAR(DateReleve) = 2023",
+        "AND VitesseVent > 50;"
+      ],
+      "variantes": [
+        [
+          "SELECT IdReleve, DateReleve, IdParcelle, VitesseVent",
+          "FROM RELEVEMETEO",
+          "WHERE DateReleve BETWEEN '01/03/2023' AND '31/03/2023'",
+          "AND VitesseVent > 50;"
+        ]
+      ],
+      "indice": "Trois conditions reliées par AND : le mois, l'année et la vitesse du vent."
+    },
+    {
+      "id": "q11",
+      "theme": "Dates",
+      "enonce": "Afficher les commandes (numéro, date) encore « En préparation » plus de 7 jours après avoir été passées (la date du jour est le 31/05/2023).",
+      "correction": [
+        "SELECT IdCommande, DateCommande",
+        "FROM COMMANDE",
+        "WHERE EtatCommande = 'En préparation'",
+        "AND DATEDIFF(NOW(), DateCommande) > 7;"
+      ],
+      "variantes": [
+        [
+          "SELECT IdCommande, DateCommande",
+          "FROM COMMANDE",
+          "WHERE EtatCommande = 'En préparation'",
+          "AND DateCommande < '24/05/2023';"
+        ]
+      ],
+      "indice": "DATEDIFF(date1, date2) donne le nombre de jours entre deux dates ; NOW() renvoie la date du jour simulée (31/05/2023)."
+    },
+    {
+      "id": "q12",
+      "theme": "Jointures",
+      "enonce": "Afficher chaque parcelle (identifiant, superficie, exposition) avec le nom du cépage qui y est planté.",
+      "correction": [
+        "SELECT IdParcelle, SuperficieParcelle, ExpositionParcelle, NomCepage",
+        "FROM PARCELLE, CEPAGE",
+        "WHERE PARCELLE.IdCepage = CEPAGE.IdCepage;"
+      ],
+      "variantes": [
+        [
+          "SELECT IdParcelle, SuperficieParcelle, ExpositionParcelle, NomCepage",
+          "FROM PARCELLE",
+          "INNER JOIN CEPAGE ON PARCELLE.IdCepage = CEPAGE.IdCepage;"
+        ]
+      ],
+      "indice": "Le nom du cépage est dans CEPAGE ; PARCELLE contient la clé étrangère IdCepage qui permet de le retrouver."
+    },
+    {
+      "id": "q13",
+      "theme": "Jointures",
+      "enonce": "Afficher le nom des cépages qui entrent dans l'assemblage du « Saint-Joseph rouge » millésime 2020.",
+      "correction": [
+        "SELECT NomCepage",
+        "FROM CEPAGE, ASSEMBLER, VIN",
+        "WHERE CEPAGE.IdCepage = ASSEMBLER.IdCepage",
+        "AND ASSEMBLER.IdVin = VIN.IdVin",
+        "AND NomAppellationVin = 'Saint-Joseph rouge'",
+        "AND Millesime = 2020;"
+      ],
+      "variantes": [
+        [
+          "SELECT NomCepage",
+          "FROM CEPAGE",
+          "INNER JOIN ASSEMBLER ON CEPAGE.IdCepage = ASSEMBLER.IdCepage",
+          "INNER JOIN VIN ON ASSEMBLER.IdVin = VIN.IdVin",
+          "WHERE NomAppellationVin = 'Saint-Joseph rouge'",
+          "AND Millesime = 2020;"
+        ]
+      ],
+      "indice": "Trois tables : CEPAGE → ASSEMBLER → VIN. ASSEMBLER fait le lien entre un vin et ses cépages."
+    },
+    {
+      "id": "q14",
+      "theme": "Jointures",
+      "enonce": "Afficher les notes reçues par les vins du millésime 2020 : nom du critique, nom de l'appellation et note, de la meilleure note à la moins bonne.",
+      "ordered": [
+        2
+      ],
+      "correction": [
+        "SELECT NomCritique, NomAppellationVin, Note",
+        "FROM CRITIQUE, EVALUER, VIN",
+        "WHERE CRITIQUE.IdCritique = EVALUER.IdCritique",
+        "AND EVALUER.IdVin = VIN.IdVin",
+        "AND Millesime = 2020",
+        "ORDER BY Note DESC;"
+      ],
+      "variantes": [
+        [
+          "SELECT NomCritique, NomAppellationVin, Note",
+          "FROM CRITIQUE",
+          "INNER JOIN EVALUER ON CRITIQUE.IdCritique = EVALUER.IdCritique",
+          "INNER JOIN VIN ON EVALUER.IdVin = VIN.IdVin",
+          "WHERE Millesime = 2020",
+          "ORDER BY Note DESC;"
+        ]
+      ],
+      "indice": "EVALUER relie un critique et un vin, et contient la note. Deux conditions de jointure, puis la condition sur le millésime."
+    },
+    {
+      "id": "q15",
+      "theme": "Jointures",
+      "enonce": "Afficher sans doublon les clients (identifiant, nom, prénom) ayant déjà commandé du Condrieu (tous millésimes confondus).",
+      "correction": [
+        "SELECT DISTINCT CLIENT.IdClient, NomClient, PrenomClient",
+        "FROM CLIENT, COMMANDE, PASSER, VIN",
+        "WHERE CLIENT.IdClient = COMMANDE.IdClient",
+        "AND COMMANDE.IdCommande = PASSER.IdCommande",
+        "AND PASSER.IdVin = VIN.IdVin",
+        "AND NomAppellationVin = 'Condrieu';"
+      ],
+      "variantes": [
+        [
+          "SELECT DISTINCT CLIENT.IdClient, NomClient, PrenomClient",
+          "FROM CLIENT",
+          "INNER JOIN COMMANDE ON CLIENT.IdClient = COMMANDE.IdClient",
+          "INNER JOIN PASSER ON COMMANDE.IdCommande = PASSER.IdCommande",
+          "INNER JOIN VIN ON PASSER.IdVin = VIN.IdVin",
+          "WHERE NomAppellationVin = 'Condrieu';"
+        ]
+      ],
+      "indice": "Quatre tables : CLIENT → COMMANDE → PASSER → VIN. Un client peut avoir commandé plusieurs fois du Condrieu : DISTINCT. IdClient existe dans deux tables, il faut préciser laquelle."
+    },
+    {
+      "id": "q16",
+      "theme": "Jointures et regroupements",
+      "enonce": "Madame Morange souhaite le tableau de suivi de ses ventes 2023 : pour chaque commande passée en 2023, afficher le numéro de la commande, sa date, la ville du client et le montant HT de la commande (somme des prix des bouteilles × quantités commandées, plus les frais de livraison). Trier le tableau par ville.",
+      "annale": "2023",
+      "ordered": [
+        2
+      ],
+      "correction": [
+        "SELECT COMMANDE.IdCommande, DateCommande, VilleClient,",
+        "       SUM(PrixBouteilleVin * QuantiteCommande) + FraisLivraisonCommande AS MontantHT",
+        "FROM CLIENT, COMMANDE, PASSER, VIN",
+        "WHERE CLIENT.IdClient = COMMANDE.IdClient",
+        "AND COMMANDE.IdCommande = PASSER.IdCommande",
+        "AND PASSER.IdVin = VIN.IdVin",
+        "AND YEAR(DateCommande) = 2023",
+        "GROUP BY COMMANDE.IdCommande, DateCommande, VilleClient, FraisLivraisonCommande",
+        "ORDER BY VilleClient;"
+      ],
+      "variantes": [
+        [
+          "SELECT COMMANDE.IdCommande, DateCommande, VilleClient,",
+          "       SUM(PrixBouteilleVin * QuantiteCommande) + FraisLivraisonCommande AS MontantHT",
+          "FROM CLIENT",
+          "INNER JOIN COMMANDE ON CLIENT.IdClient = COMMANDE.IdClient",
+          "INNER JOIN PASSER ON COMMANDE.IdCommande = PASSER.IdCommande",
+          "INNER JOIN VIN ON PASSER.IdVin = VIN.IdVin",
+          "WHERE DateCommande BETWEEN '01/01/2023' AND '31/12/2023'",
+          "GROUP BY COMMANDE.IdCommande, DateCommande, VilleClient, FraisLivraisonCommande",
+          "ORDER BY VilleClient;"
+        ]
+      ],
+      "indice": "Le prix est dans VIN, la quantité dans PASSER, les frais dans COMMANDE et la ville dans CLIENT : quatre tables. SUM(prix × quantité) se calcule pour chaque commande (GROUP BY) ; les frais de livraison, uniques par commande, s'ajoutent ensuite (et figurent dans le GROUP BY)."
+    },
+    {
+      "id": "q17",
+      "theme": "Jointures et regroupements",
+      "enonce": "Afficher, pour chaque appellation (nom), le chiffre d'affaires réalisé hors frais de livraison (somme des prix des bouteilles × quantités commandées), tous millésimes confondus.",
+      "correction": [
+        "SELECT NomAppellationVin, SUM(PrixBouteilleVin * QuantiteCommande)",
+        "FROM VIN, PASSER",
+        "WHERE VIN.IdVin = PASSER.IdVin",
+        "GROUP BY NomAppellationVin;"
+      ],
+      "variantes": [
+        [
+          "SELECT NomAppellationVin, SUM(PrixBouteilleVin * QuantiteCommande)",
+          "FROM VIN",
+          "INNER JOIN PASSER ON VIN.IdVin = PASSER.IdVin",
+          "GROUP BY NomAppellationVin;"
+        ]
+      ],
+      "indice": "Jointure VIN–PASSER, puis GROUP BY sur le nom de l'appellation et SUM du produit prix × quantité."
+    },
+    {
+      "id": "q18",
+      "theme": "Jointures et regroupements",
+      "enonce": "Pour la lettre d'actualité, afficher les vins (identifiant, nom de l'appellation, millésime) dont la note moyenne des critiques est d'au moins 16 sur 20, avec cette note moyenne, du mieux noté au moins bien noté.",
+      "ordered": [
+        3
+      ],
+      "correction": [
+        "SELECT VIN.IdVin, NomAppellationVin, Millesime, AVG(Note)",
+        "FROM VIN, EVALUER",
+        "WHERE VIN.IdVin = EVALUER.IdVin",
+        "GROUP BY VIN.IdVin, NomAppellationVin, Millesime",
+        "HAVING AVG(Note) >= 16",
+        "ORDER BY AVG(Note) DESC;"
+      ],
+      "variantes": [
+        [
+          "SELECT VIN.IdVin, NomAppellationVin, Millesime, AVG(Note) AS NoteMoyenne",
+          "FROM VIN",
+          "INNER JOIN EVALUER ON VIN.IdVin = EVALUER.IdVin",
+          "GROUP BY VIN.IdVin, NomAppellationVin, Millesime",
+          "HAVING AVG(Note) >= 16",
+          "ORDER BY NoteMoyenne DESC;"
+        ]
+      ],
+      "indice": "Une condition sur une moyenne calculée (AVG) se place dans HAVING, après le GROUP BY. « Au moins 16 » : >= 16."
+    },
+    {
+      "id": "q19",
+      "theme": "Jointures et regroupements",
+      "enonce": "Afficher les clients fidèles, c'est-à-dire ayant passé au moins 4 commandes : identifiant, nom, prénom et nombre de commandes.",
+      "correction": [
+        "SELECT CLIENT.IdClient, NomClient, PrenomClient, COUNT(*)",
+        "FROM CLIENT, COMMANDE",
+        "WHERE CLIENT.IdClient = COMMANDE.IdClient",
+        "GROUP BY CLIENT.IdClient, NomClient, PrenomClient",
+        "HAVING COUNT(*) >= 4;"
+      ],
+      "variantes": [
+        [
+          "SELECT CLIENT.IdClient, NomClient, PrenomClient, COUNT(*)",
+          "FROM CLIENT",
+          "INNER JOIN COMMANDE ON CLIENT.IdClient = COMMANDE.IdClient",
+          "GROUP BY CLIENT.IdClient, NomClient, PrenomClient",
+          "HAVING COUNT(*) >= 4;"
+        ]
+      ],
+      "indice": "Regroupez les commandes par client (GROUP BY), comptez-les (COUNT) et gardez les groupes voulus avec HAVING."
+    },
+    {
+      "id": "q20",
+      "theme": "Sous-requêtes",
+      "enonce": "Afin d'organiser des séances de dégustation, afficher la liste des vins (identifiant et nom) n'ayant fait l'objet d'aucune critique.",
+      "annale": "2023",
+      "correction": [
+        "SELECT IdVin, NomAppellationVin",
+        "FROM VIN",
+        "WHERE IdVin NOT IN (SELECT IdVin",
+        "                    FROM EVALUER);"
+      ],
+      "variantes": [
+        [
+          "SELECT IdVin, NomAppellationVin",
+          "FROM VIN",
+          "WHERE NOT EXISTS (SELECT *",
+          "                  FROM EVALUER",
+          "                  WHERE EVALUER.IdVin = VIN.IdVin);"
+        ],
+        [
+          "SELECT IdVin, NomAppellationVin",
+          "FROM VIN",
+          "EXCEPT",
+          "SELECT VIN.IdVin, NomAppellationVin",
+          "FROM VIN, EVALUER",
+          "WHERE VIN.IdVin = EVALUER.IdVin;"
+        ]
+      ],
+      "indice": "« Aucune critique » : NOT IN (sous-requête qui liste les vins présents dans EVALUER)."
+    },
+    {
+      "id": "q21",
+      "theme": "Sous-requêtes",
+      "enonce": "Afficher les clients (identifiant, nom, prénom, ville) qui n'ont encore jamais passé de commande.",
+      "correction": [
+        "SELECT IdClient, NomClient, PrenomClient, VilleClient",
+        "FROM CLIENT",
+        "WHERE IdClient NOT IN (SELECT IdClient",
+        "                       FROM COMMANDE);"
+      ],
+      "variantes": [
+        [
+          "SELECT IdClient, NomClient, PrenomClient, VilleClient",
+          "FROM CLIENT",
+          "WHERE NOT EXISTS (SELECT *",
+          "                  FROM COMMANDE",
+          "                  WHERE COMMANDE.IdClient = CLIENT.IdClient);"
+        ]
+      ],
+      "indice": "Même raisonnement que la question précédente, entre CLIENT et COMMANDE."
+    },
+    {
+      "id": "q22",
+      "theme": "Sous-requêtes",
+      "enonce": "Afficher les vins (identifiant, nom de l'appellation, millésime, prix) dont le prix de la bouteille est supérieur au prix moyen d'une bouteille du domaine.",
+      "correction": [
+        "SELECT IdVin, NomAppellationVin, Millesime, PrixBouteilleVin",
+        "FROM VIN",
+        "WHERE PrixBouteilleVin > (SELECT AVG(PrixBouteilleVin)",
+        "                          FROM VIN);"
+      ],
+      "indice": "On ne peut pas écrire WHERE PrixBouteilleVin > AVG(PrixBouteilleVin) : il faut calculer la moyenne dans une sous-requête."
+    },
+    {
+      "id": "q23",
+      "theme": "Mises à jour",
+      "type": "write",
+      "enonce": "Madame Héléna Despret (client CLI02482) signale que son nom de famille est désormais Milton. Modifier son nom.",
+      "annale": "2023",
+      "correction": [
+        "UPDATE CLIENT",
+        "SET NomClient = 'Milton'",
+        "WHERE IdClient = 'CLI02482';"
+      ],
+      "variantes": [
+        [
+          "UPDATE CLIENT",
+          "SET NomClient = 'MILTON'",
+          "WHERE IdClient = 'CLI02482';"
+        ]
+      ],
+      "verif": "SELECT * FROM CLIENT ORDER BY IdClient",
+      "indice": "UPDATE table SET colonne = valeur WHERE condition. L'identifiant client est un texte : il s'écrit entre apostrophes ('CLI02482'). Sans WHERE, tous les clients s'appelleraient Milton !"
+    },
+    {
+      "id": "q24",
+      "theme": "Mises à jour",
+      "type": "write",
+      "enonce": "Le client Nicolas Mathieu (CLI03405), qui n'a jamais passé de commande, exerce son droit d'opposition : le supprimer de la base. Essayez ensuite de supprimer de la même façon le client Victor Barbier (CLI01512) : que se passe-t-il, et pourquoi ?",
+      "annale": "2023",
+      "correction": [
+        "DELETE FROM CLIENT",
+        "WHERE IdClient = 'CLI03405';"
+      ],
+      "verif": "SELECT * FROM CLIENT ORDER BY IdClient",
+      "indice": "DELETE FROM table WHERE condition. Victor Barbier a déjà passé des commandes : COMMANDE.IdClient fait référence à CLIENT.IdClient, donc sa suppression est refusée (contrainte d'intégrité référentielle). Il faudrait d'abord supprimer ses lignes de commande (PASSER) puis ses commandes, ou prévoir une suppression en cascade… ou plutôt anonymiser le client pour conserver l'historique des ventes."
+    },
+    {
+      "id": "q25",
+      "theme": "Mises à jour",
+      "type": "write",
+      "enonce": "Lors d'une séance de dégustation, la critique n° 3 (Marion Lacroix) a goûté le Condrieu 2022 (vin n° 20) : elle lui attribue la note de 17,5 avec l'appréciation « Très prometteur, abricot et fleurs blanches ». Enregistrer cette évaluation.",
+      "correction": [
+        "INSERT INTO EVALUER",
+        "VALUES (3, 20, 17.5, 'Très prometteur, abricot et fleurs blanches');"
+      ],
+      "variantes": [
+        [
+          "INSERT INTO EVALUER (IdCritique, IdVin, Note, Appreciation)",
+          "VALUES (3, 20, 17.5, 'Très prometteur, abricot et fleurs blanches');"
+        ]
+      ],
+      "verif": "SELECT * FROM EVALUER ORDER BY IdCritique, IdVin",
+      "indice": "INSERT INTO table VALUES (…) dans l'ordre des colonnes d'EVALUER : IdCritique, IdVin, Note, Appreciation. En SQL, le séparateur décimal est le point (17.5)."
+    },
+    {
+      "id": "s01",
+      "theme": "Évolution du schéma",
+      "type": "schema",
+      "annale": "2023",
+      "enonce": "Le domaine veut suivre dans sa base les travaux réalisés sur les vignes. Chaque type de travail a une référence et un libellé (TRA-001 Travail du sol, TRAC-002 Désherbage, TRA-003 Protection de la vigne, TRA-004 Épamprage, TRA-005 Plantation des jeunes vignes, TRA-006 Taille de la vigne). Pour un travail réalisé sur une parcelle à une date donnée, on enregistre un seul type de travail, le produit utilisé et la dose appliquée. Le même travail peut être refait sur la même parcelle à des dates différentes. Un produit est identifié par son numéro AMM (Autorisation de Mise sur le Marché, 7 chiffres) ; on connaît aussi son nom, sa dose maximum d'emploi et sa date de péremption. Complétez le schéma ci-dessous (une table DATE n'est pas attendue).",
+      "depart": [
+        "PARCELLE",
+        "CEPAGE"
+      ],
+      "solution": {
+        "tables": [
+          {
+            "nom": "TYPE_TRAVAUX",
+            "alias": [
+              "TYPETRAVAUX",
+              "TYPE_TRAVAIL",
+              "TYPES_TRAVAUX",
+              "TYPE_DE_TRAVAUX"
+            ],
+            "role": "décrire les types de travaux (référence et libellé)",
+            "pk": [
+              "RefTypeTravaux|RefTravaux|RefTypeTravail|RefTravail|CodeTypeTravaux|CodeTypeTravail|CodeTravaux|IdTypeTravaux|IdTypeTravail|IdTravaux|NumTypeTravaux|RefType|CodeType|Ref"
+            ],
+            "attributs": [
+              "LibelleTypeTravaux|LibelleTravaux|LibelleTypeTravail|LibelleTravail|LibelleType|Libelle|DesignationTravaux|DesignationTypeTravaux|NomTypeTravaux|NomTravaux|Designation"
+            ]
+          },
+          {
+            "nom": "PRODUIT",
+            "alias": [
+              "PRODUITS",
+              "PRODUIT_PHYTO",
+              "PRODUIT_PHYTOSANITAIRE",
+              "PRODUITPHYTO"
+            ],
+            "role": "décrire les produits utilisés (numéro AMM, nom, dose maximum, date de péremption)",
+            "pk": [
+              "NumeroAMM|NumAMM|AMM|CodeAMM|NoAMM|NumeroAMMProduit|NumAMMProduit|IdProduit|NumProduit|CodeProduit|RefProduit"
+            ],
+            "attributs": [
+              "NomProduit|Nom|LibelleProduit|DesignationProduit",
+              "DoseMaximumProduit|DoseMaxProduit|DoseMaximum|DoseMax|DoseMaxEmploi|DoseMaximumEmploi|DoseMaxi",
+              "DatePerempProduit|DatePeremptionProduit|DatePeremption|DatePeremp|DatePer"
+            ]
+          },
+          {
+            "nom": "REALISER",
+            "alias": [
+              "REALISATION",
+              "TRAVAIL",
+              "TRAVAIL_REALISE",
+              "TRAVAUX_REALISES",
+              "EFFECTUER",
+              "INTERVENTION",
+              "INTERVENIR",
+              "TRAITER",
+              "TRAITEMENT",
+              "APPLIQUER",
+              "REALISE"
+            ],
+            "role": "enregistrer chaque travail réalisé sur une parcelle à une date (avec le produit et la dose appliquée)",
+            "pk": [
+              "RefTypeTravaux|RefTravaux|RefTypeTravail|RefTravail|CodeTypeTravaux|CodeTypeTravail|CodeTravaux|IdTypeTravaux|IdTypeTravail|IdTravaux|NumTypeTravaux|RefType|CodeType|Ref",
+              "Date|DateTravail|DateTravaux|DateRealisation|DateReal|DateIntervention|DateRealiser|DateTrav|DateJour",
+              "IdParcelle|NumParcelle|CodeParcelle"
+            ],
+            "fk": {
+              "RefTypeTravaux|RefTravaux|RefTypeTravail|RefTravail|CodeTypeTravaux|CodeTypeTravail|CodeTravaux|IdTypeTravaux|IdTypeTravail|IdTravaux|NumTypeTravaux|RefType|CodeType|Ref": "TYPE_TRAVAUX",
+              "IdParcelle|NumParcelle|CodeParcelle": "PARCELLE",
+              "NumeroAMM|NumAMM|AMM|CodeAMM|NoAMM|NumeroAMMProduit|NumAMMProduit|IdProduit|NumProduit|CodeProduit|RefProduit": "PRODUIT"
+            },
+            "attributs": [
+              "DoseAppliquee|Dose|DoseAppli|DoseUtilisee|DoseAppliqueeProduit"
+            ]
+          }
+        ],
+        "tablesOptionnelles": [
+          "DATE",
+          "DATES",
+          "CALENDRIER",
+          "JOUR",
+          "DATE_TRAVAIL"
+        ]
+      },
+      "variantes": [
+        {
+          "tables": [
+            {
+              "nom": "TYPE_TRAVAUX",
+              "alias": [
+                "TYPETRAVAUX",
+                "TYPE_TRAVAIL",
+                "TYPES_TRAVAUX",
+                "TYPE_DE_TRAVAUX"
+              ],
+              "role": "décrire les types de travaux (référence et libellé)",
+              "pk": [
+                "RefTypeTravaux|RefTravaux|RefTypeTravail|RefTravail|CodeTypeTravaux|CodeTypeTravail|CodeTravaux|IdTypeTravaux|IdTypeTravail|IdTravaux|NumTypeTravaux|RefType|CodeType|Ref"
+              ],
+              "attributs": [
+                "LibelleTypeTravaux|LibelleTravaux|LibelleTypeTravail|LibelleTravail|LibelleType|Libelle|DesignationTravaux|DesignationTypeTravaux|NomTypeTravaux|NomTravaux|Designation"
+              ]
+            },
+            {
+              "nom": "PRODUIT",
+              "alias": [
+                "PRODUITS",
+                "PRODUIT_PHYTO",
+                "PRODUIT_PHYTOSANITAIRE",
+                "PRODUITPHYTO"
+              ],
+              "role": "décrire les produits utilisés (numéro AMM, nom, dose maximum, date de péremption)",
+              "pk": [
+                "NumeroAMM|NumAMM|AMM|CodeAMM|NoAMM|NumeroAMMProduit|NumAMMProduit|IdProduit|NumProduit|CodeProduit|RefProduit"
+              ],
+              "attributs": [
+                "NomProduit|Nom|LibelleProduit|DesignationProduit",
+                "DoseMaximumProduit|DoseMaxProduit|DoseMaximum|DoseMax|DoseMaxEmploi|DoseMaximumEmploi|DoseMaxi",
+                "DatePerempProduit|DatePeremptionProduit|DatePeremption|DatePeremp|DatePer"
+              ]
+            },
+            {
+              "nom": "REALISER",
+              "alias": [
+                "REALISATION",
+                "TRAVAIL",
+                "TRAVAIL_REALISE",
+                "TRAVAUX_REALISES",
+                "EFFECTUER",
+                "INTERVENTION",
+                "INTERVENIR",
+                "TRAITER",
+                "TRAITEMENT",
+                "APPLIQUER",
+                "REALISE"
+              ],
+              "role": "enregistrer chaque travail réalisé sur une parcelle à une date (avec le produit et la dose appliquée)",
+              "pk": [
+                "IdRealisation|IdRealiser|IdTravailRealise|NumRealisation|NumRealiser|IdTravail|NumTravail|IdIntervention|NumIntervention|IdTraitement|Id"
+              ],
+              "fk": {
+                "RefTypeTravaux|RefTravaux|RefTypeTravail|RefTravail|CodeTypeTravaux|CodeTypeTravail|CodeTravaux|IdTypeTravaux|IdTypeTravail|IdTravaux|NumTypeTravaux|RefType|CodeType|Ref": "TYPE_TRAVAUX",
+                "IdParcelle|NumParcelle|CodeParcelle": "PARCELLE",
+                "NumeroAMM|NumAMM|AMM|CodeAMM|NoAMM|NumeroAMMProduit|NumAMMProduit|IdProduit|NumProduit|CodeProduit|RefProduit": "PRODUIT"
+              },
+              "attributs": [
+                "Date|DateTravail|DateTravaux|DateRealisation|DateReal|DateIntervention|DateRealiser|DateTrav|DateJour",
+                "DoseAppliquee|Dose|DoseAppli|DoseUtilisee|DoseAppliqueeProduit"
+              ]
+            }
+          ],
+          "tablesOptionnelles": [
+            "DATE",
+            "DATES",
+            "CALENDRIER",
+            "JOUR",
+            "DATE_TRAVAIL"
+          ]
+        },
+        {
+          "tables": [
+            {
+              "nom": "TYPE_TRAVAUX",
+              "alias": [
+                "TYPETRAVAUX",
+                "TYPE_TRAVAIL",
+                "TYPES_TRAVAUX",
+                "TYPE_DE_TRAVAUX"
+              ],
+              "role": "décrire les types de travaux (référence et libellé)",
+              "pk": [
+                "RefTypeTravaux|RefTravaux|RefTypeTravail|RefTravail|CodeTypeTravaux|CodeTypeTravail|CodeTravaux|IdTypeTravaux|IdTypeTravail|IdTravaux|NumTypeTravaux|RefType|CodeType|Ref"
+              ],
+              "attributs": [
+                "LibelleTypeTravaux|LibelleTravaux|LibelleTypeTravail|LibelleTravail|LibelleType|Libelle|DesignationTravaux|DesignationTypeTravaux|NomTypeTravaux|NomTravaux|Designation"
+              ]
+            },
+            {
+              "nom": "PRODUIT",
+              "alias": [
+                "PRODUITS",
+                "PRODUIT_PHYTO",
+                "PRODUIT_PHYTOSANITAIRE",
+                "PRODUITPHYTO"
+              ],
+              "role": "décrire les produits utilisés (numéro AMM, nom, dose maximum, date de péremption)",
+              "pk": [
+                "NumeroAMM|NumAMM|AMM|CodeAMM|NoAMM|NumeroAMMProduit|NumAMMProduit|IdProduit|NumProduit|CodeProduit|RefProduit"
+              ],
+              "attributs": [
+                "NomProduit|Nom|LibelleProduit|DesignationProduit",
+                "DoseMaximumProduit|DoseMaxProduit|DoseMaximum|DoseMax|DoseMaxEmploi|DoseMaximumEmploi|DoseMaxi",
+                "DatePerempProduit|DatePeremptionProduit|DatePeremption|DatePeremp|DatePer"
+              ]
+            },
+            {
+              "nom": "REALISER",
+              "alias": [
+                "REALISATION",
+                "TRAVAIL",
+                "TRAVAIL_REALISE",
+                "TRAVAUX_REALISES",
+                "EFFECTUER",
+                "INTERVENTION",
+                "INTERVENIR",
+                "TRAITER",
+                "TRAITEMENT",
+                "APPLIQUER",
+                "REALISE"
+              ],
+              "role": "enregistrer chaque travail réalisé sur une parcelle à une date (avec le produit et la dose appliquée)",
+              "pk": [
+                "RefTypeTravaux|RefTravaux|RefTypeTravail|RefTravail|CodeTypeTravaux|CodeTypeTravail|CodeTravaux|IdTypeTravaux|IdTypeTravail|IdTravaux|NumTypeTravaux|RefType|CodeType|Ref",
+                "IdParcelle|NumParcelle|CodeParcelle"
+              ],
+              "fk": {
+                "RefTypeTravaux|RefTravaux|RefTypeTravail|RefTravail|CodeTypeTravaux|CodeTypeTravail|CodeTravaux|IdTypeTravaux|IdTypeTravail|IdTravaux|NumTypeTravaux|RefType|CodeType|Ref": "TYPE_TRAVAUX",
+                "IdParcelle|NumParcelle|CodeParcelle": "PARCELLE",
+                "NumeroAMM|NumAMM|AMM|CodeAMM|NoAMM|NumeroAMMProduit|NumAMMProduit|IdProduit|NumProduit|CodeProduit|RefProduit": "PRODUIT"
+              },
+              "attributs": [
+                "Date|DateTravail|DateTravaux|DateRealisation|DateReal|DateIntervention|DateRealiser|DateTrav|DateJour",
+                "DoseAppliquee|Dose|DoseAppli|DoseUtilisee|DoseAppliqueeProduit"
+              ]
+            }
+          ],
+          "tablesOptionnelles": [
+            "DATE",
+            "DATES",
+            "CALENDRIER",
+            "JOUR",
+            "DATE_TRAVAIL"
+          ],
+          "partiel": "Presque : avec cette clé primaire, un même type de travail ne pourrait être enregistré qu'une seule fois sur une parcelle. Or le logiciel permet de refaire le même travail sur la même parcelle à des dates différentes (taille en février 2022 puis en novembre 2023) : la date doit faire partie de la clé primaire de REALISER."
+        },
+        {
+          "tables": [
+            {
+              "nom": "TYPE_TRAVAUX",
+              "alias": [
+                "TYPETRAVAUX",
+                "TYPE_TRAVAIL",
+                "TYPES_TRAVAUX",
+                "TYPE_DE_TRAVAUX"
+              ],
+              "role": "décrire les types de travaux (référence et libellé)",
+              "pk": [
+                "RefTypeTravaux|RefTravaux|RefTypeTravail|RefTravail|CodeTypeTravaux|CodeTypeTravail|CodeTravaux|IdTypeTravaux|IdTypeTravail|IdTravaux|NumTypeTravaux|RefType|CodeType|Ref"
+              ],
+              "attributs": [
+                "LibelleTypeTravaux|LibelleTravaux|LibelleTypeTravail|LibelleTravail|LibelleType|Libelle|DesignationTravaux|DesignationTypeTravaux|NomTypeTravaux|NomTravaux|Designation"
+              ]
+            },
+            {
+              "nom": "PRODUIT",
+              "alias": [
+                "PRODUITS",
+                "PRODUIT_PHYTO",
+                "PRODUIT_PHYTOSANITAIRE",
+                "PRODUITPHYTO"
+              ],
+              "role": "décrire les produits utilisés (numéro AMM, nom, dose maximum, date de péremption)",
+              "pk": [
+                "NumeroAMM|NumAMM|AMM|CodeAMM|NoAMM|NumeroAMMProduit|NumAMMProduit|IdProduit|NumProduit|CodeProduit|RefProduit"
+              ],
+              "attributs": [
+                "NomProduit|Nom|LibelleProduit|DesignationProduit",
+                "DoseMaximumProduit|DoseMaxProduit|DoseMaximum|DoseMax|DoseMaxEmploi|DoseMaximumEmploi|DoseMaxi",
+                "DatePerempProduit|DatePeremptionProduit|DatePeremption|DatePeremp|DatePer"
+              ]
+            },
+            {
+              "nom": "REALISER",
+              "alias": [
+                "REALISATION",
+                "TRAVAIL",
+                "TRAVAIL_REALISE",
+                "TRAVAUX_REALISES",
+                "EFFECTUER",
+                "INTERVENTION",
+                "INTERVENIR",
+                "TRAITER",
+                "TRAITEMENT",
+                "APPLIQUER",
+                "REALISE"
+              ],
+              "role": "enregistrer chaque travail réalisé sur une parcelle à une date (avec le produit et la dose appliquée)",
+              "pk": [
+                "RefTypeTravaux|RefTravaux|RefTypeTravail|RefTravail|CodeTypeTravaux|CodeTypeTravail|CodeTravaux|IdTypeTravaux|IdTypeTravail|IdTravaux|NumTypeTravaux|RefType|CodeType|Ref",
+                "Date|DateTravail|DateTravaux|DateRealisation|DateReal|DateIntervention|DateRealiser|DateTrav|DateJour",
+                "IdParcelle|NumParcelle|CodeParcelle",
+                "NumeroAMM|NumAMM|AMM|CodeAMM|NoAMM|NumeroAMMProduit|NumAMMProduit|IdProduit|NumProduit|CodeProduit|RefProduit"
+              ],
+              "fk": {
+                "RefTypeTravaux|RefTravaux|RefTypeTravail|RefTravail|CodeTypeTravaux|CodeTypeTravail|CodeTravaux|IdTypeTravaux|IdTypeTravail|IdTravaux|NumTypeTravaux|RefType|CodeType|Ref": "TYPE_TRAVAUX",
+                "IdParcelle|NumParcelle|CodeParcelle": "PARCELLE",
+                "NumeroAMM|NumAMM|AMM|CodeAMM|NoAMM|NumeroAMMProduit|NumAMMProduit|IdProduit|NumProduit|CodeProduit|RefProduit": "PRODUIT"
+              },
+              "attributs": [
+                "DoseAppliquee|Dose|DoseAppli|DoseUtilisee|DoseAppliqueeProduit"
+              ]
+            }
+          ],
+          "tablesOptionnelles": [
+            "DATE",
+            "DATES",
+            "CALENDRIER",
+            "JOUR",
+            "DATE_TRAVAIL"
+          ],
+          "partiel": "Presque : le numéro AMM n'a pas à faire partie de la clé primaire. Pour un travail donné (une parcelle, un type de travail, une date), un seul produit est utilisé : NumeroAMM est une simple clé étrangère vers PRODUIT."
+        }
+      ],
+      "indice": "Il faut décrire séparément les types de travaux et les produits. Pour identifier un travail réalisé, demandez-vous ce qui peut se répéter : le même type de travail peut revenir sur la même parcelle, mais pas à la même date. Le produit et la dose dépendent de ce travail précis."
+    },
+    {
+      "id": "p01",
+      "type": "processus",
+      "theme": "Processus",
+      "annale": "2023",
+      "enonce": "Document 7 – Processus de préparation des vignes du Domaine de Morange. « Au domaine de Morange, la préparation des vignes repose sur 3 acteurs : la maîtresse de chai, le viticulteur et l'œnologue du domaine. […] C'est en juillet-août que le viticulteur doit préparer les vignes. À cette fin, il prend des photographies des parcelles avec son smartphone et les transmet à la maîtresse de chai afin qu'elle les intègre dans la base de données du logiciel. Ces photos permettent d'estimer l'état de la vigne. Pour chaque parcelle, la maîtresse de chai examine les photos et les relevés météorologiques et détermine des objectifs de qualité et de rendement pour la parcelle. Après analyse de ces objectifs et des relevés météorologiques, l'œnologue du domaine détermine et saisit les consignes d'éclaircissage que devra respecter le viticulteur. L'éclaircissage est une technique qui consiste à ôter les grappes surnuméraires pour gagner en qualité du vin. Cette préparation est essentielle. À chaque parcelle éclaircie, le viticulteur renseigne l'état de la parcelle dans la base de données. Le processus de préparation se termine quand toutes les parcelles ont été éclaircies. » Complétez le schéma du processus de préparation des vignes (annexe B) : les quatre opérations sont déjà placées, ajoutez les événements et les flèches. (Dans le sujet, il fallait aussi représenter les interactions de chaque opération avec les tables de la base de données ; cette partie n'est pas traitée ici.)",
+      "couloirs": [
+        "Viticulteur",
+        "Maîtresse de chai",
+        "Œnologue"
+      ],
+      "depart": {
+        "lanes": [
+          "Viticulteur",
+          "Maîtresse de chai",
+          "Œnologue"
+        ],
+        "nodes": [
+          {
+            "id": "n2",
+            "kind": "operation",
+            "label": "Intégration des photos",
+            "x": 360,
+            "y": 200,
+            "actions": [
+              "Ajout des nouvelles photos"
+            ],
+            "rules": [
+              "Toujours"
+            ]
+          },
+          {
+            "id": "n4",
+            "kind": "operation",
+            "label": "Fixation des objectifs",
+            "x": 360,
+            "y": 470,
+            "actions": [
+              "Consultation des photos",
+              "Consultation des relevés météo",
+              "Fixation des objectifs de rendement et qualité"
+            ],
+            "rules": [
+              "Toujours"
+            ]
+          },
+          {
+            "id": "n6",
+            "kind": "operation",
+            "label": "Analyse des objectifs",
+            "x": 600,
+            "y": 750,
+            "actions": [
+              "Consultation des objectifs",
+              "Consultation des relevés météo",
+              "Définition des consignes d'éclaircissage"
+            ],
+            "rules": [
+              "Toujours"
+            ]
+          },
+          {
+            "id": "n8",
+            "kind": "operation",
+            "label": "Éclaircissage",
+            "x": 120,
+            "y": 1030,
+            "actions": [
+              "Consultation des consignes",
+              "Éclaircissage"
+            ],
+            "rules": [
+              "Toujours"
+            ]
+          }
+        ],
+        "arrows": []
+      },
+      "elements": [
+        {
+          "kind": "event",
+          "label": "Photos"
+        },
+        {
+          "kind": "event",
+          "label": "Photos intégrées"
+        },
+        {
+          "kind": "event",
+          "label": "Objectifs fixés"
+        },
+        {
+          "kind": "event",
+          "label": "Consignes d'éclaircissage"
+        },
+        {
+          "kind": "event",
+          "label": "Éclaircissage réalisé"
+        }
+      ],
+      "attendus": [
+        {
+          "operation": "Intégration des photos",
+          "alias": [
+            "Intégrer les photos",
+            "Intégration photos"
+          ],
+          "synchronisation": "Photos"
+        },
+        {
+          "operation": "Fixation des objectifs",
+          "alias": [
+            "Fixer les objectifs",
+            "Fixation objectifs"
+          ],
+          "synchronisation": "Photos intégrées",
+          "facultatifs": [
+            "Relevés météo",
+            "Relevés météo reçus",
+            "Arrivée des relevés météo"
+          ]
+        },
+        {
+          "operation": "Analyse des objectifs",
+          "alias": [
+            "Analyser les objectifs",
+            "Analyse objectifs"
+          ],
+          "synchronisation": "Objectifs fixés",
+          "facultatifs": [
+            "Relevés météo",
+            "Relevés météo reçus",
+            "Arrivée des relevés météo"
+          ]
+        },
+        {
+          "operation": "Éclaircissage",
+          "alias": [
+            "Éclaircir",
+            "Éclaircissage des parcelles"
+          ],
+          "synchronisation": "Consignes d'éclaircissage"
+        }
+      ],
+      "equivalents": {
+        "Photos": [
+          "Photographies",
+          "Photos des parcelles",
+          "Photos transmises",
+          "Envoi des photos",
+          "Photos prises"
+        ],
+        "Photos intégrées": [
+          "Photos ajoutées",
+          "Photos enregistrées",
+          "Nouvelles photos intégrées"
+        ],
+        "Objectifs fixés": [
+          "Objectifs définis",
+          "Objectifs déterminés",
+          "Objectifs de rendement et qualité fixés",
+          "Objectifs"
+        ],
+        "Consignes d'éclaircissage": [
+          "Consignes éclaircissage",
+          "Consignes",
+          "Consignes définies",
+          "Consignes saisies"
+        ],
+        "Éclaircissage réalisé": [
+          "Parcelle éclaircie",
+          "Éclaircissage effectué",
+          "État de la parcelle renseigné"
+        ]
+      },
+      "solution": {
+        "lanes": [
+          "Viticulteur",
+          "Maîtresse de chai",
+          "Œnologue"
+        ],
+        "nodes": [
+          {
+            "id": "n1",
+            "kind": "event",
+            "label": "Photos",
+            "x": 120,
+            "y": 95
+          },
+          {
+            "id": "n2",
+            "kind": "operation",
+            "label": "Intégration des photos",
+            "x": 360,
+            "y": 200,
+            "actions": [
+              "Ajout des nouvelles photos"
+            ],
+            "rules": [
+              "Toujours"
+            ]
+          },
+          {
+            "id": "n3",
+            "kind": "event",
+            "label": "Photos intégrées",
+            "x": 360,
+            "y": 335
+          },
+          {
+            "id": "n4",
+            "kind": "operation",
+            "label": "Fixation des objectifs",
+            "x": 360,
+            "y": 470,
+            "actions": [
+              "Consultation des photos",
+              "Consultation des relevés météo",
+              "Fixation des objectifs de rendement et qualité"
+            ],
+            "rules": [
+              "Toujours"
+            ]
+          },
+          {
+            "id": "n5",
+            "kind": "event",
+            "label": "Objectifs fixés",
+            "x": 360,
+            "y": 625
+          },
+          {
+            "id": "n6",
+            "kind": "operation",
+            "label": "Analyse des objectifs",
+            "x": 600,
+            "y": 750,
+            "actions": [
+              "Consultation des objectifs",
+              "Consultation des relevés météo",
+              "Définition des consignes d'éclaircissage"
+            ],
+            "rules": [
+              "Toujours"
+            ]
+          },
+          {
+            "id": "n7",
+            "kind": "event",
+            "label": "Consignes d'éclaircissage",
+            "x": 120,
+            "y": 890
+          },
+          {
+            "id": "n8",
+            "kind": "operation",
+            "label": "Éclaircissage",
+            "x": 120,
+            "y": 1030,
+            "actions": [
+              "Consultation des consignes",
+              "Éclaircissage"
+            ],
+            "rules": [
+              "Toujours"
+            ]
+          },
+          {
+            "id": "n9",
+            "kind": "event",
+            "label": "Éclaircissage réalisé",
+            "x": 120,
+            "y": 1170
+          }
+        ],
+        "arrows": [
+          {
+            "id": "a1",
+            "from": "n1",
+            "rule": null,
+            "to": "n2"
+          },
+          {
+            "id": "a2",
+            "from": "n2",
+            "rule": 0,
+            "to": "n3"
+          },
+          {
+            "id": "a3",
+            "from": "n3",
+            "rule": null,
+            "to": "n4"
+          },
+          {
+            "id": "a4",
+            "from": "n4",
+            "rule": 0,
+            "to": "n5"
+          },
+          {
+            "id": "a5",
+            "from": "n5",
+            "rule": null,
+            "to": "n6"
+          },
+          {
+            "id": "a6",
+            "from": "n6",
+            "rule": 0,
+            "to": "n7"
+          },
+          {
+            "id": "a7",
+            "from": "n7",
+            "rule": null,
+            "to": "n8"
+          },
+          {
+            "id": "a8",
+            "from": "n8",
+            "rule": 0,
+            "to": "n9"
+          }
+        ]
+      },
+      "autoevaluation": [
+        "Le processus démarre par un événement du viticulteur : les photos des parcelles transmises à la maîtresse de chai.",
+        "Chaque opération (toujours une seule règle d'émission « Toujours ») produit un événement qui déclenche l'opération suivante : pas de flèche directe entre deux opérations.",
+        "L'intégration des photos produit « photos intégrées », qui déclenche la fixation des objectifs par la maîtresse de chai.",
+        "Les objectifs fixés déclenchent l'analyse par l'œnologue, qui produit les consignes d'éclaircissage destinées au viticulteur.",
+        "Les relevés météo sont consultés dans la base de données (actions des opérations 2 et 3) : ils ne sont pas un événement déclencheur dans le corrigé.",
+        "Le processus se termine par l'événement « éclaircissage réalisé » dans le couloir du viticulteur."
+      ],
+      "indice": "Les opérations sont données : il reste à dire, pour chacune, quel événement la déclenche et quel événement elle produit. Suivez le texte acteur par acteur : ce que le viticulteur transmet, ce que la maîtresse de chai produit après chaque opération, ce que l'œnologue saisit pour le viticulteur. Les relevés météo sont déjà dans la base : ils sont consultés, ils ne déclenchent rien."
+    }
+  ]
+}

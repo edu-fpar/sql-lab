@@ -1,0 +1,785 @@
+{
+  "id": "dcg2010",
+  "titre": "DCG 2010 – IMMO-DO, syndic de copropriétés",
+  "aujourdhui": "2010-05-15",
+  "contexte": "IMMO-DO, dont le siège est à Avignon, est syndic de plusieurs copropriétés (COPROPRIETE). Des entreprises (ENTREPRISE) effectuent des travaux, appelés réalisations (REALISATION : nom, description, date, montant), dans une copropriété. Pour financer chaque réalisation, IMMO-DO adresse des appels de fonds (APPEL : date, montant) aux propriétaires (PROPRIETAIRE) de la copropriété ; une réalisation importante peut donner lieu à deux appels. Chaque paiement reçu (PAIEMENT : date, montant) est rattaché à un appel ; un appel peut être réglé en plusieurs fois, ou ne l'être que partiellement. Les données vont de 2008 au 15 mai 2010.",
+  "source": "Inspiré du sujet DCG UE8 session 2010. Données entièrement fictives.",
+  "schemaGrid": {
+    "COPROPRIETE": [0, 0],
+    "REALISATION": [1, 0],
+    "ENTREPRISE": [2, 0],
+    "PROPRIETAIRE": [0, 1],
+    "APPEL": [1, 1],
+    "PAIEMENT": [2, 1]
+  },
+  "questions": [
+    {
+      "id": "q01",
+      "theme": "Une seule table",
+      "enonce": "Afficher la liste des copropriétés gérées par IMMO-DO (toutes les colonnes).",
+      "correction": ["SELECT *", "FROM COPROPRIETE;"],
+      "indice": "L'étoile * permet d'afficher toutes les colonnes d'une table."
+    },
+    {
+      "id": "q02",
+      "theme": "Une seule table",
+      "enonce": "Afficher le numéro et le nom des entreprises dont le numéro de téléphone n'est pas connu.",
+      "correction": ["SELECT EntNum, EntNom", "FROM ENTREPRISE", "WHERE EntTel IS NULL;"],
+      "indice": "Une valeur absente se teste avec IS NULL (et non = NULL)."
+    },
+    {
+      "id": "q03",
+      "theme": "Une seule table",
+      "enonce": "Afficher les réalisations (numéro, nom, montant) d'un montant supérieur à 20 000 €, de la plus chère à la moins chère.",
+      "ordered": [2],
+      "correction": ["SELECT RealNum, RealNom, RealMontant", "FROM REALISATION", "WHERE RealMontant > 20000", "ORDER BY RealMontant DESC;"],
+      "indice": "Les nombres s'écrivent sans espace ni symbole € : 20000. DESC trie par ordre décroissant."
+    },
+    {
+      "id": "q04",
+      "theme": "Une seule table",
+      "enonce": "IMMO-DO ne peut joindre certains propriétaires ni par téléphone ni par e-mail. Afficher leur numéro, nom et prénom.",
+      "correction": ["SELECT PropNum, PropNom, PropPrenom", "FROM PROPRIETAIRE", "WHERE TelProp IS NULL", "AND EmailProp IS NULL;"],
+      "indice": "Deux conditions doivent être vraies en même temps : AND. Chacune se teste avec IS NULL."
+    },
+    {
+      "id": "q05",
+      "theme": "Calculs et agrégats",
+      "enonce": "Afficher le nombre de réalisations enregistrées et leur montant total.",
+      "correction": ["SELECT COUNT(*), SUM(RealMontant)", "FROM REALISATION;"],
+      "indice": "COUNT(*) compte les lignes, SUM(colonne) additionne les valeurs."
+    },
+    {
+      "id": "q06",
+      "theme": "Calculs et agrégats",
+      "enonce": "Afficher le montant moyen, le plus petit et le plus grand montant des appels de fonds.",
+      "correction": ["SELECT AVG(MontantAppel), MIN(MontantAppel), MAX(MontantAppel)", "FROM APPEL;"],
+      "indice": "Fonctions AVG (moyenne), MIN et MAX, appliquées à la colonne du montant de l'appel."
+    },
+    {
+      "id": "q07",
+      "theme": "Calculs et agrégats",
+      "enonce": "Afficher, pour chaque ville de résidence des propriétaires (VilleProp), le nombre de propriétaires, de la ville qui en compte le plus à celle qui en compte le moins.",
+      "ordered": [1],
+      "correction": ["SELECT VilleProp, COUNT(*)", "FROM PROPRIETAIRE", "GROUP BY VilleProp", "ORDER BY COUNT(*) DESC;"],
+      "indice": "« Pour chaque » se traduit par GROUP BY. On peut trier sur COUNT(*)."
+    },
+    {
+      "id": "q08",
+      "theme": "Dates",
+      "enonce": "Afficher les réalisations (numéro, nom, date, montant) effectuées en 2009, de la plus ancienne à la plus récente.",
+      "ordered": [2],
+      "correction": ["SELECT RealNum, RealNom, RealDate, RealMontant", "FROM REALISATION", "WHERE YEAR(RealDate) = 2009", "ORDER BY RealDate;"],
+      "variantes": [["SELECT RealNum, RealNom, RealDate, RealMontant", "FROM REALISATION", "WHERE RealDate BETWEEN '01/01/2009' AND '31/12/2009'", "ORDER BY RealDate;"]],
+      "indice": "La fonction YEAR(date) renvoie l'année. On peut aussi utiliser BETWEEN '01/01/2009' AND '31/12/2009'."
+    },
+    {
+      "id": "q09",
+      "theme": "Dates",
+      "enonce": "Afficher les paiements (numéro, numéro d'appel, date, montant) reçus en avril 2010.",
+      "correction": ["SELECT PmtNum, AppelNum, PmtDate, PmtMontant", "FROM PAIEMENT", "WHERE MONTH(PmtDate) = 4", "AND YEAR(PmtDate) = 2010;"],
+      "variantes": [["SELECT PmtNum, AppelNum, PmtDate, PmtMontant", "FROM PAIEMENT", "WHERE PmtDate BETWEEN '01/04/2010' AND '30/04/2010';"]],
+      "indice": "Combinez MONTH() et YEAR(), ou utilisez BETWEEN avec deux dates."
+    },
+    {
+      "id": "q10",
+      "theme": "Jointures",
+      "annale": "2010",
+      "enonce": "Liste des propriétaires (nom, prénom, téléphone) de la copropriété « Pelican », dont le numéro de téléphone a été renseigné, classés par ordre alphabétique (nom puis prénom).",
+      "ordered": [0, 1],
+      "correction": ["SELECT PropNom, PropPrenom, TelProp", "FROM PROPRIETAIRE, COPROPRIETE", "WHERE PROPRIETAIRE.CopNum = COPROPRIETE.CopNum", "AND CopNom = 'Pelican'", "AND TelProp IS NOT NULL", "ORDER BY PropNom, PropPrenom;"],
+      "variantes": [["SELECT PropNom, PropPrenom, TelProp", "FROM PROPRIETAIRE", "INNER JOIN COPROPRIETE ON PROPRIETAIRE.CopNum = COPROPRIETE.CopNum", "WHERE CopNom = 'Pelican'", "AND TelProp IS NOT NULL", "ORDER BY PropNom, PropPrenom;"]],
+      "indice": "Le nom de la copropriété est dans COPROPRIETE : reliez-la à PROPRIETAIRE par CopNum. « Renseigné » : IS NOT NULL. Deux propriétaires portent le même nom : triez aussi sur le prénom."
+    },
+    {
+      "id": "q11",
+      "theme": "Jointures",
+      "annale": "2010",
+      "enonce": "Liste des entreprises (noms, sans doublon) ayant effectué des réalisations dans la copropriété « Bel Air » en 2009.",
+      "correction": ["SELECT DISTINCT EntNom", "FROM ENTREPRISE, REALISATION, COPROPRIETE", "WHERE ENTREPRISE.EntNum = REALISATION.EntNum", "AND REALISATION.CopNum = COPROPRIETE.CopNum", "AND CopNom = 'Bel Air'", "AND YEAR(RealDate) = 2009;"],
+      "variantes": [
+        ["SELECT DISTINCT EntNom", "FROM ENTREPRISE", "INNER JOIN REALISATION ON ENTREPRISE.EntNum = REALISATION.EntNum", "INNER JOIN COPROPRIETE ON REALISATION.CopNum = COPROPRIETE.CopNum", "WHERE CopNom = 'Bel Air'", "AND YEAR(RealDate) = 2009;"],
+        ["SELECT DISTINCT EntNom", "FROM ENTREPRISE, REALISATION, COPROPRIETE", "WHERE ENTREPRISE.EntNum = REALISATION.EntNum", "AND REALISATION.CopNum = COPROPRIETE.CopNum", "AND CopNom = 'Bel Air'", "AND RealDate BETWEEN '01/01/2009' AND '31/12/2009';"]
+      ],
+      "indice": "Trois tables : ENTREPRISE → REALISATION → COPROPRIETE. Une même entreprise a pu intervenir plusieurs fois : DISTINCT. Attention, « Les Terrasses de Bel Air » est une autre copropriété : comparez le nom exact avec =."
+    },
+    {
+      "id": "q12",
+      "theme": "Jointures",
+      "annale": "2010",
+      "enonce": "Liste des paiements reçus (montant, date, nom de la réalisation) pour la réalisation nommée « Réfection chaufferie » et pour la réalisation nommée « Mise en place TNT ».",
+      "correction": ["SELECT PmtMontant, PmtDate, RealNom", "FROM REALISATION, APPEL, PAIEMENT", "WHERE REALISATION.RealNum = APPEL.RealNum", "AND APPEL.AppelNum = PAIEMENT.AppelNum", "AND (RealNom = 'Réfection chaufferie' OR RealNom = 'Mise en place TNT');"],
+      "variantes": [
+        ["SELECT PmtMontant, PmtDate, RealNom", "FROM REALISATION", "INNER JOIN APPEL ON REALISATION.RealNum = APPEL.RealNum", "INNER JOIN PAIEMENT ON APPEL.AppelNum = PAIEMENT.AppelNum", "WHERE RealNom IN ('Réfection chaufferie', 'Mise en place TNT');"],
+        ["SELECT PmtMontant, PmtDate, RealNom", "FROM REALISATION, APPEL, PAIEMENT", "WHERE REALISATION.RealNum = APPEL.RealNum", "AND APPEL.AppelNum = PAIEMENT.AppelNum", "AND RealNom IN ('Réfection chaufferie', 'Mise en place TNT');"]
+      ],
+      "indice": "Le paiement est relié à la réalisation en passant par l'appel. Une réalisation ne peut pas avoir deux noms à la fois : le « et » de l'énoncé se traduit par OR (ou IN). Pensez aux parenthèses autour du OR."
+    },
+    {
+      "id": "q13",
+      "theme": "Jointures",
+      "enonce": "Afficher les réalisations de l'année 2010 : nom de la réalisation, date, montant, nom de l'entreprise et nom de la copropriété.",
+      "correction": ["SELECT RealNom, RealDate, RealMontant, EntNom, CopNom", "FROM REALISATION, ENTREPRISE, COPROPRIETE", "WHERE REALISATION.EntNum = ENTREPRISE.EntNum", "AND REALISATION.CopNum = COPROPRIETE.CopNum", "AND YEAR(RealDate) = 2010;"],
+      "variantes": [["SELECT RealNom, RealDate, RealMontant, EntNom, CopNom", "FROM REALISATION", "INNER JOIN ENTREPRISE ON REALISATION.EntNum = ENTREPRISE.EntNum", "INNER JOIN COPROPRIETE ON REALISATION.CopNum = COPROPRIETE.CopNum", "WHERE YEAR(RealDate) = 2010;"]],
+      "indice": "REALISATION contient deux clés étrangères : EntNum vers ENTREPRISE et CopNum vers COPROPRIETE. Il faut donc deux conditions de jointure."
+    },
+    {
+      "id": "q14",
+      "theme": "Jointures",
+      "enonce": "Repérer les paiements tardifs : afficher le numéro de l'appel, le nom et le prénom du propriétaire, la date de l'appel, la date du paiement et le délai en jours, pour les paiements reçus plus de 60 jours après la date de l'appel.",
+      "correction": ["SELECT APPEL.AppelNum, PropNom, PropPrenom, DateAppel, PmtDate, DATEDIFF(PmtDate, DateAppel)", "FROM APPEL, PAIEMENT, PROPRIETAIRE", "WHERE APPEL.AppelNum = PAIEMENT.AppelNum", "AND APPEL.PropNum = PROPRIETAIRE.PropNum", "AND DATEDIFF(PmtDate, DateAppel) > 60;"],
+      "variantes": [["SELECT APPEL.AppelNum, PropNom, PropPrenom, DateAppel, PmtDate, DATEDIFF(PmtDate, DateAppel)", "FROM APPEL", "INNER JOIN PAIEMENT ON APPEL.AppelNum = PAIEMENT.AppelNum", "INNER JOIN PROPRIETAIRE ON APPEL.PropNum = PROPRIETAIRE.PropNum", "WHERE DATEDIFF(PmtDate, DateAppel) > 60;"]],
+      "indice": "DATEDIFF(date de fin, date de début) donne le nombre de jours entre deux dates. AppelNum existe dans APPEL et dans PAIEMENT : préfixez-le."
+    },
+    {
+      "id": "q15",
+      "theme": "Jointures et regroupements",
+      "annale": "2010",
+      "enonce": "Montant total des paiements reçus pour chaque réalisation (numéro, description, montant de la réalisation, total des paiements). Seules les réalisations ayant déjà reçu au moins un paiement doivent apparaître.",
+      "correction": ["SELECT REALISATION.RealNum, RealDescription, RealMontant, SUM(PmtMontant) AS TotalPaiements", "FROM REALISATION, APPEL, PAIEMENT", "WHERE REALISATION.RealNum = APPEL.RealNum", "AND APPEL.AppelNum = PAIEMENT.AppelNum", "GROUP BY REALISATION.RealNum, RealDescription, RealMontant;"],
+      "variantes": [["SELECT REALISATION.RealNum, RealDescription, RealMontant, SUM(PmtMontant) AS TotalPaiements", "FROM REALISATION", "INNER JOIN APPEL ON REALISATION.RealNum = APPEL.RealNum", "INNER JOIN PAIEMENT ON APPEL.AppelNum = PAIEMENT.AppelNum", "GROUP BY REALISATION.RealNum, RealDescription, RealMontant;"]],
+      "indice": "Trois tables : REALISATION → APPEL → PAIEMENT. « Pour chaque réalisation » : GROUP BY sur toutes les colonnes affichées qui ne sont pas des agrégats. La jointure élimine d'elle-même les réalisations sans paiement."
+    },
+    {
+      "id": "q16",
+      "theme": "Jointures et regroupements",
+      "enonce": "Afficher, pour chaque entreprise, son nom, le nombre de réalisations effectuées et leur montant total, de l'entreprise au montant total le plus élevé à celle au montant le plus faible.",
+      "ordered": [2],
+      "correction": ["SELECT EntNom, COUNT(*), SUM(RealMontant)", "FROM ENTREPRISE, REALISATION", "WHERE ENTREPRISE.EntNum = REALISATION.EntNum", "GROUP BY ENTREPRISE.EntNum, EntNom", "ORDER BY SUM(RealMontant) DESC;"],
+      "variantes": [["SELECT EntNom, COUNT(*), SUM(RealMontant)", "FROM ENTREPRISE", "INNER JOIN REALISATION ON ENTREPRISE.EntNum = REALISATION.EntNum", "GROUP BY ENTREPRISE.EntNum, EntNom", "ORDER BY SUM(RealMontant) DESC;"]],
+      "indice": "Regroupez par entreprise (GROUP BY) et triez sur la somme avec ORDER BY … DESC."
+    },
+    {
+      "id": "q17",
+      "theme": "Jointures et regroupements",
+      "enonce": "Certains propriétaires n'ont réglé qu'une partie de leur appel. Afficher, pour les appels dont le total des paiements reçus est inférieur au montant appelé : le numéro de l'appel, le nom et le prénom du propriétaire, le montant appelé, le total payé et le reste à payer.",
+      "correction": ["SELECT APPEL.AppelNum, PropNom, PropPrenom, MontantAppel, SUM(PmtMontant), MontantAppel - SUM(PmtMontant)", "FROM APPEL, PAIEMENT, PROPRIETAIRE", "WHERE APPEL.AppelNum = PAIEMENT.AppelNum", "AND APPEL.PropNum = PROPRIETAIRE.PropNum", "GROUP BY APPEL.AppelNum, PropNom, PropPrenom, MontantAppel", "HAVING SUM(PmtMontant) < MontantAppel;"],
+      "variantes": [["SELECT APPEL.AppelNum, PropNom, PropPrenom, MontantAppel, SUM(PmtMontant), MontantAppel - SUM(PmtMontant)", "FROM APPEL", "INNER JOIN PAIEMENT ON APPEL.AppelNum = PAIEMENT.AppelNum", "INNER JOIN PROPRIETAIRE ON APPEL.PropNum = PROPRIETAIRE.PropNum", "GROUP BY APPEL.AppelNum, PropNom, PropPrenom, MontantAppel", "HAVING SUM(PmtMontant) < MontantAppel;"]],
+      "indice": "Un appel peut avoir plusieurs paiements : regroupez par appel. Une condition qui porte sur une somme s'écrit dans HAVING, pas dans WHERE."
+    },
+    {
+      "id": "q18",
+      "theme": "Jointures et regroupements",
+      "enonce": "Afficher le nom des copropriétés dont le montant total des réalisations de l'année 2009 dépasse 50 000 €, avec ce montant total.",
+      "correction": ["SELECT CopNom, SUM(RealMontant)", "FROM COPROPRIETE, REALISATION", "WHERE COPROPRIETE.CopNum = REALISATION.CopNum", "AND YEAR(RealDate) = 2009", "GROUP BY COPROPRIETE.CopNum, CopNom", "HAVING SUM(RealMontant) > 50000;"],
+      "variantes": [["SELECT CopNom, SUM(RealMontant)", "FROM COPROPRIETE", "INNER JOIN REALISATION ON COPROPRIETE.CopNum = REALISATION.CopNum", "WHERE YEAR(RealDate) = 2009", "GROUP BY COPROPRIETE.CopNum, CopNom", "HAVING SUM(RealMontant) > 50000;"]],
+      "indice": "La condition sur l'année porte sur chaque ligne (WHERE) ; la condition sur le total porte sur le groupe (HAVING)."
+    },
+    {
+      "id": "q19",
+      "theme": "Sous-requêtes",
+      "annale": "2010",
+      "enonce": "Liste des appels (numéro, nom et prénom du propriétaire) pour lesquels aucun paiement n'a encore été reçu.",
+      "correction": ["SELECT AppelNum, PropNom, PropPrenom", "FROM APPEL, PROPRIETAIRE", "WHERE APPEL.PropNum = PROPRIETAIRE.PropNum", "AND AppelNum NOT IN (SELECT AppelNum", "                     FROM PAIEMENT);"],
+      "variantes": [
+        ["SELECT AppelNum, PropNom, PropPrenom", "FROM APPEL", "INNER JOIN PROPRIETAIRE ON APPEL.PropNum = PROPRIETAIRE.PropNum", "WHERE AppelNum NOT IN (SELECT AppelNum FROM PAIEMENT);"],
+        ["SELECT AppelNum, PropNom, PropPrenom", "FROM APPEL, PROPRIETAIRE", "WHERE APPEL.PropNum = PROPRIETAIRE.PropNum", "AND NOT EXISTS (SELECT * FROM PAIEMENT", "                WHERE PAIEMENT.AppelNum = APPEL.AppelNum);"]
+      ],
+      "indice": "Un appel sans paiement est un appel dont le numéro n'apparaît pas dans la table PAIEMENT : NOT IN (SELECT …). Un appel payé en partie a au moins un paiement : il ne fait pas partie de la liste."
+    },
+    {
+      "id": "q20",
+      "theme": "Sous-requêtes",
+      "annale": "2010",
+      "enonce": "Nom de l'entreprise ayant effectué la réalisation la plus onéreuse concernant la copropriété « Bel Air ».",
+      "correction": ["SELECT EntNom", "FROM ENTREPRISE, REALISATION, COPROPRIETE", "WHERE ENTREPRISE.EntNum = REALISATION.EntNum", "AND REALISATION.CopNum = COPROPRIETE.CopNum", "AND CopNom = 'Bel Air'", "AND RealMontant = (SELECT MAX(RealMontant)", "                   FROM REALISATION, COPROPRIETE", "                   WHERE REALISATION.CopNum = COPROPRIETE.CopNum", "                   AND CopNom = 'Bel Air');"],
+      "variantes": [["SELECT EntNom", "FROM ENTREPRISE", "INNER JOIN REALISATION ON ENTREPRISE.EntNum = REALISATION.EntNum", "INNER JOIN COPROPRIETE ON REALISATION.CopNum = COPROPRIETE.CopNum", "WHERE CopNom = 'Bel Air'", "AND RealMontant = (SELECT MAX(RealMontant)", "                   FROM REALISATION", "                   INNER JOIN COPROPRIETE ON REALISATION.CopNum = COPROPRIETE.CopNum", "                   WHERE CopNom = 'Bel Air');"]],
+      "indice": "Calculez d'abord le montant maximal des réalisations de Bel Air dans une sous-requête. La réalisation la plus chère de toutes n'est pas à Bel Air : le filtre sur la copropriété doit figurer aussi dans la sous-requête."
+    },
+    {
+      "id": "q21",
+      "theme": "Sous-requêtes",
+      "enonce": "Afficher les réalisations (numéro, nom, date, montant) pour lesquelles aucun paiement n'a encore été reçu (elles n'apparaissent pas dans la question sur le total des paiements par réalisation).",
+      "correction": ["SELECT RealNum, RealNom, RealDate, RealMontant", "FROM REALISATION", "WHERE RealNum NOT IN (SELECT APPEL.RealNum", "                      FROM APPEL, PAIEMENT", "                      WHERE APPEL.AppelNum = PAIEMENT.AppelNum);"],
+      "variantes": [["SELECT RealNum, RealNom, RealDate, RealMontant", "FROM REALISATION", "WHERE RealNum NOT IN (SELECT RealNum", "                      FROM APPEL", "                      WHERE AppelNum IN (SELECT AppelNum FROM PAIEMENT));"]],
+      "indice": "La sous-requête doit donner les numéros des réalisations qui ont reçu au moins un paiement (jointure APPEL – PAIEMENT). Une réalisation peut aussi n'avoir encore aucun appel."
+    },
+    {
+      "id": "q22",
+      "theme": "Sous-requêtes",
+      "enonce": "Afficher le numéro, le nom et la ville des copropriétés dans lesquelles aucune réalisation n'a eu lieu en 2009.",
+      "correction": ["SELECT CopNum, CopNom, CopVille", "FROM COPROPRIETE", "WHERE CopNum NOT IN (SELECT CopNum", "                     FROM REALISATION", "                     WHERE YEAR(RealDate) = 2009);"],
+      "variantes": [["SELECT CopNum, CopNom, CopVille", "FROM COPROPRIETE", "WHERE NOT EXISTS (SELECT * FROM REALISATION", "                  WHERE REALISATION.CopNum = COPROPRIETE.CopNum", "                  AND YEAR(RealDate) = 2009);"]],
+      "indice": "Cherchez d'abord les copropriétés qui ont eu une réalisation en 2009, puis gardez les autres avec NOT IN. Écrire CopNum IN … AND YEAR(RealDate) <> 2009 ne répond pas à la question."
+    },
+    {
+      "id": "q23",
+      "theme": "Mises à jour",
+      "type": "write",
+      "enonce": "M. Bernard GARCIA (propriétaire n° 1021, copropriété Pelican) a communiqué son numéro de téléphone : 06 72 41 18 09. L'enregistrer.",
+      "correction": ["UPDATE PROPRIETAIRE", "SET TelProp = '06 72 41 18 09'", "WHERE PropNum = 1021;"],
+      "verif": "SELECT * FROM PROPRIETAIRE ORDER BY PropNum",
+      "indice": "UPDATE … SET … WHERE : sans WHERE, tous les propriétaires recevraient ce numéro."
+    },
+    {
+      "id": "q24",
+      "theme": "Mises à jour",
+      "type": "write",
+      "enonce": "Aujourd'hui (15 mai 2010), IMMO-DO reçoit le paiement de l'appel n° 5344 (Mme Camille MARTIN, réparation de l'ascenseur de Bel Air) pour son montant total de 260,56 €. Enregistrer ce paiement sous le numéro 8354.",
+      "correction": ["INSERT INTO PAIEMENT", "VALUES (8354, 5344, '2010-05-15', 260.56);"],
+      "variantes": [
+        ["INSERT INTO PAIEMENT (PmtNum, AppelNum, PmtDate, PmtMontant)", "VALUES (8354, 5344, '15/05/2010', 260.56);"],
+        ["INSERT INTO PAIEMENT (PmtNum, AppelNum, PmtDate, PmtMontant)", "VALUES (8354, 5344, CURDATE(), 260.56);"]
+      ],
+      "verif": "SELECT * FROM PAIEMENT ORDER BY PmtNum",
+      "indice": "INSERT INTO table VALUES (…) dans l'ordre des colonnes : PmtNum, AppelNum, PmtDate, PmtMontant. Le montant s'écrit avec un point décimal : 260.56."
+    },
+    {
+      "id": "q25",
+      "theme": "Mises à jour",
+      "type": "write",
+      "enonce": "L'appel n° 5323 a été émis par erreur : il fait double emploi avec l'appel n° 5322 (même propriétaire, même réalisation, même montant). Il n'a reçu aucun paiement. Le supprimer.",
+      "correction": ["DELETE FROM APPEL", "WHERE AppelNum = 5323;"],
+      "verif": "SELECT * FROM APPEL ORDER BY AppelNum",
+      "indice": "DELETE FROM … WHERE. Sans WHERE, tous les appels seraient supprimés. Un appel qui a déjà reçu un paiement ne pourrait pas être supprimé : l'intégrité référentielle l'interdit (PAIEMENT.AppelNum fait référence à APPEL.AppelNum)."
+    },
+    {
+      "id": "s01",
+      "theme": "Évolution du schéma",
+      "type": "schema",
+      "annale": "2010",
+      "enonce": "IMMO-DO veut gérer dans sa base les assemblées générales (AG) d'une copropriété. Chaque AG est numérotée, et cette numérotation recommence chaque année : une AG est donc identifiée par son année et son numéro dans l'année ; on connaît sa date. Tous les propriétaires sont convoqués à chaque AG par lettre recommandée : on mémorise la date d'envoi de chaque convocation. On doit aussi savoir quels propriétaires étaient présents à chaque AG (feuille d'émargement). Un propriétaire absent peut se faire représenter par un autre propriétaire grâce à une procuration : document numéroté et daté, valable pour une seule représentation à une seule AG. Enfin, un propriétaire possède un ou plusieurs lots ; un lot est numéroté et caractérisé par sa description, son tantième et son type (garage, appartement, place de parking…), chaque type de lot ayant un code et un libellé. Faites évoluer le schéma ci-dessous (dans ce dossier, on se limite à une seule copropriété).",
+      "depart": [
+        "COPROPRIETE",
+        "PROPRIETAIRE"
+      ],
+      "solution": {
+        "tables": [
+          {
+            "nom": "TYPE_LOT",
+            "alias": [
+              "TYPELOT",
+              "TYPE_DE_LOT",
+              "TYPES_LOT",
+              "TYPESLOTS",
+              "NATURE_LOT"
+            ],
+            "role": "décrire les types de lot (garage, appartement, parking…)",
+            "pk": [
+              "CodeTypeLot|CodeType|IdTypeLot|NumTypeLot|TypeLotCode|CodeTypeDeLot"
+            ],
+            "attributs": [
+              "LibelleTypeLot|DescriptionTypeLot|LibelleType|DescTypeLot|Libelle|Description"
+            ]
+          },
+          {
+            "nom": "LOT",
+            "alias": [
+              "LOTS"
+            ],
+            "role": "décrire les lots et leur propriétaire",
+            "pk": [
+              "NumLot|NumeroLot|NoLot|LotNum|IdLot|CodeLot"
+            ],
+            "fk": {
+              "PropNum|NumProp|NumProprietaire|NumeroProprietaire": "PROPRIETAIRE",
+              "CodeTypeLot|CodeType|IdTypeLot|NumTypeLot|TypeLotCode|CodeTypeDeLot": "TYPE_LOT"
+            },
+            "attributs": [
+              "DescriptionLot|DescLot|LibelleLot|Description",
+              "TantiemeLot|Tantieme|Tantiemes|TantiemesLot|NbTantiemes"
+            ]
+          },
+          {
+            "nom": "ASSEMBLEE_GENERALE",
+            "alias": [
+              "AG",
+              "ASSEMBLEE",
+              "ASSEMBLEEGENERALE",
+              "ASSEMBLEES_GENERALES",
+              "ASSEMBLEESGENERALES",
+              "ASSEMBLEE_GEN"
+            ],
+            "role": "décrire les assemblées générales (numérotées dans l'année)",
+            "pk": [
+              "AnneeAG|Annee|AnneeAssemblee|AnAG|AGAnnee",
+              "NumAG|NumeroAG|NoAG|AGNum|NumAGAnnee|NumAssemblee|NumeroAssemblee"
+            ],
+            "attributs": [
+              "DateAG|DateAssemblee|Date"
+            ]
+          },
+          {
+            "nom": "ETRE_PRESENT",
+            "alias": [
+              "PRESENT",
+              "PRESENCE",
+              "PRESENCES",
+              "ETREPRESENT",
+              "EMARGEMENT",
+              "EMARGER",
+              "ASSISTER",
+              "PARTICIPER",
+              "PARTICIPATION"
+            ],
+            "role": "enregistrer les propriétaires présents à chaque assemblée",
+            "pk": [
+              "AnneeAG|Annee|AnneeAssemblee|AnAG|AGAnnee",
+              "NumAG|NumeroAG|NoAG|AGNum|NumAGAnnee|NumAssemblee|NumeroAssemblee",
+              "PropNum|NumProp|NumProprietaire|NumeroProprietaire"
+            ],
+            "fk": {
+              "NumAG|NumeroAG|NoAG|AGNum|NumAGAnnee|NumAssemblee|NumeroAssemblee": "ASSEMBLEE_GENERALE",
+              "PropNum|NumProp|NumProprietaire|NumeroProprietaire": "PROPRIETAIRE"
+            }
+          },
+          {
+            "nom": "ETRE_CONVOQUE",
+            "alias": [
+              "CONVOQUER",
+              "CONVOCATION",
+              "CONVOCATIONS",
+              "CONVOQUE",
+              "ETRECONVOQUE"
+            ],
+            "role": "enregistrer la date d'envoi de la convocation de chaque propriétaire à chaque assemblée",
+            "pk": [
+              "AnneeAG|Annee|AnneeAssemblee|AnAG|AGAnnee",
+              "NumAG|NumeroAG|NoAG|AGNum|NumAGAnnee|NumAssemblee|NumeroAssemblee",
+              "PropNum|NumProp|NumProprietaire|NumeroProprietaire"
+            ],
+            "fk": {
+              "NumAG|NumeroAG|NoAG|AGNum|NumAGAnnee|NumAssemblee|NumeroAssemblee": "ASSEMBLEE_GENERALE",
+              "PropNum|NumProp|NumProprietaire|NumeroProprietaire": "PROPRIETAIRE"
+            },
+            "attributs": [
+              "DateConvocation|DateEnvoiConvocation|DateEnvoi|DateConvoc|DateEnvoiConvoc"
+            ]
+          },
+          {
+            "nom": "PROCURATION",
+            "alias": [
+              "PROCURATIONS",
+              "POUVOIR",
+              "POUVOIRS"
+            ],
+            "role": "enregistrer les procurations (qui représente qui, à quelle assemblée)",
+            "pk": [
+              "NumProcuration|NumeroProcuration|NoProcuration|ProcurationNum|IdProcuration|NumProcu"
+            ],
+            "fk": {
+              "NumAG|NumeroAG|NoAG|AGNum|NumAGAnnee|NumAssemblee|NumeroAssemblee": "ASSEMBLEE_GENERALE",
+              "PropNumRepresente|NumPropRepresente|NumRepresente|PropRepresente|Represente|PropNumMandant|NumMandant|Mandant|PropNum": "PROPRIETAIRE",
+              "PropNumRepresentant|NumPropRepresentant|NumRepresentant|PropRepresentant|Representant|PropNumMandataire|NumMandataire|Mandataire": "PROPRIETAIRE"
+            },
+            "attributs": [
+              "DateProcuration|DateProcu|Date",
+              "AnneeAG|Annee|AnneeAssemblee|AnAG|AGAnnee"
+            ]
+          }
+        ],
+        "tablesOptionnelles": [
+          "ANNEE",
+          "ANNEES",
+          "ANNEE_AG",
+          "ANNEEAG"
+        ]
+      },
+      "indice": "L'AG est identifiée relativement à l'année : sa clé primaire est composée de deux attributs, que l'on retrouve dans toutes les tables qui y font référence. Une relation « plusieurs à plusieurs » (propriétaires présents, propriétaires convoqués) devient une table dont la clé est composée des clés des tables reliées. Une procuration fait intervenir deux propriétaires : il faut deux clés étrangères vers PROPRIETAIRE, avec des noms différents.",
+      "variantes": [
+        {
+          "tables": [
+            {
+              "nom": "TYPE_LOT",
+              "alias": [
+                "TYPELOT",
+                "TYPE_DE_LOT",
+                "TYPES_LOT",
+                "TYPESLOTS",
+                "NATURE_LOT"
+              ],
+              "role": "décrire les types de lot (garage, appartement, parking…)",
+              "pk": [
+                "CodeTypeLot|CodeType|IdTypeLot|NumTypeLot|TypeLotCode|CodeTypeDeLot"
+              ],
+              "attributs": [
+                "LibelleTypeLot|DescriptionTypeLot|LibelleType|DescTypeLot|Libelle|Description"
+              ]
+            },
+            {
+              "nom": "LOT",
+              "alias": [
+                "LOTS"
+              ],
+              "role": "décrire les lots et leur propriétaire",
+              "pk": [
+                "NumLot|NumeroLot|NoLot|LotNum|IdLot|CodeLot"
+              ],
+              "fk": {
+                "PropNum|NumProp|NumProprietaire|NumeroProprietaire": "PROPRIETAIRE",
+                "CodeTypeLot|CodeType|IdTypeLot|NumTypeLot|TypeLotCode|CodeTypeDeLot": "TYPE_LOT"
+              },
+              "attributs": [
+                "DescriptionLot|DescLot|LibelleLot|Description",
+                "TantiemeLot|Tantieme|Tantiemes|TantiemesLot|NbTantiemes"
+              ]
+            },
+            {
+              "nom": "ASSEMBLEE_GENERALE",
+              "alias": [
+                "AG",
+                "ASSEMBLEE",
+                "ASSEMBLEEGENERALE",
+                "ASSEMBLEES_GENERALES",
+                "ASSEMBLEESGENERALES",
+                "ASSEMBLEE_GEN"
+              ],
+              "role": "décrire les assemblées générales (numérotées dans l'année)",
+              "pk": [
+                "AnneeAG|Annee|AnneeAssemblee|AnAG|AGAnnee",
+                "NumAG|NumeroAG|NoAG|AGNum|NumAGAnnee|NumAssemblee|NumeroAssemblee"
+              ],
+              "attributs": [
+                "DateAG|DateAssemblee|Date"
+              ]
+            },
+            {
+              "nom": "ETRE_CONVOQUE",
+              "alias": [
+                "CONVOQUER",
+                "CONVOCATION",
+                "CONVOCATIONS",
+                "CONVOQUE",
+                "ETRECONVOQUE"
+              ],
+              "role": "enregistrer la convocation (date d'envoi) et la présence de chaque propriétaire à chaque assemblée",
+              "pk": [
+                "AnneeAG|Annee|AnneeAssemblee|AnAG|AGAnnee",
+                "NumAG|NumeroAG|NoAG|AGNum|NumAGAnnee|NumAssemblee|NumeroAssemblee",
+                "PropNum|NumProp|NumProprietaire|NumeroProprietaire"
+              ],
+              "fk": {
+                "NumAG|NumeroAG|NoAG|AGNum|NumAGAnnee|NumAssemblee|NumeroAssemblee": "ASSEMBLEE_GENERALE",
+                "PropNum|NumProp|NumProprietaire|NumeroProprietaire": "PROPRIETAIRE"
+              },
+              "attributs": [
+                "DateConvocation|DateEnvoiConvocation|DateEnvoi|DateConvoc|DateEnvoiConvoc",
+                "Present|EstPresent|Presence|PresentAG|Emargement|AEmarge"
+              ]
+            },
+            {
+              "nom": "PROCURATION",
+              "alias": [
+                "PROCURATIONS",
+                "POUVOIR",
+                "POUVOIRS"
+              ],
+              "role": "enregistrer les procurations (qui représente qui, à quelle assemblée)",
+              "pk": [
+                "NumProcuration|NumeroProcuration|NoProcuration|ProcurationNum|IdProcuration|NumProcu"
+              ],
+              "fk": {
+                "NumAG|NumeroAG|NoAG|AGNum|NumAGAnnee|NumAssemblee|NumeroAssemblee": "ASSEMBLEE_GENERALE",
+                "PropNumRepresente|NumPropRepresente|NumRepresente|PropRepresente|Represente|PropNumMandant|NumMandant|Mandant|PropNum": "PROPRIETAIRE",
+                "PropNumRepresentant|NumPropRepresentant|NumRepresentant|PropRepresentant|Representant|PropNumMandataire|NumMandataire|Mandataire": "PROPRIETAIRE"
+              },
+              "attributs": [
+                "DateProcuration|DateProcu|Date",
+                "AnneeAG|Annee|AnneeAssemblee|AnAG|AGAnnee"
+              ]
+            }
+          ],
+          "tablesOptionnelles": [
+            "ANNEE",
+            "ANNEES",
+            "ANNEE_AG",
+            "ANNEEAG"
+          ]
+        },
+        {
+          "tables": [
+            {
+              "nom": "LOT",
+              "alias": [
+                "LOTS"
+              ],
+              "role": "décrire les lots et leur propriétaire",
+              "pk": [
+                "NumLot|NumeroLot|NoLot|LotNum|IdLot|CodeLot"
+              ],
+              "fk": {
+                "PropNum|NumProp|NumProprietaire|NumeroProprietaire": "PROPRIETAIRE"
+              },
+              "attributs": [
+                "DescriptionLot|DescLot|LibelleLot|Description",
+                "TantiemeLot|Tantieme|Tantiemes|TantiemesLot|NbTantiemes",
+                "TypeLot|Type|NatureLot|Nature|CodeTypeLot|CodeType|IdTypeLot|NumTypeLot|TypeLotCode|CodeTypeDeLot|LibelleTypeLot|DescriptionTypeLot|LibelleType|DescTypeLot|Libelle|Description"
+              ]
+            },
+            {
+              "nom": "ASSEMBLEE_GENERALE",
+              "alias": [
+                "AG",
+                "ASSEMBLEE",
+                "ASSEMBLEEGENERALE",
+                "ASSEMBLEES_GENERALES",
+                "ASSEMBLEESGENERALES",
+                "ASSEMBLEE_GEN"
+              ],
+              "role": "décrire les assemblées générales (numérotées dans l'année)",
+              "pk": [
+                "AnneeAG|Annee|AnneeAssemblee|AnAG|AGAnnee",
+                "NumAG|NumeroAG|NoAG|AGNum|NumAGAnnee|NumAssemblee|NumeroAssemblee"
+              ],
+              "attributs": [
+                "DateAG|DateAssemblee|Date"
+              ]
+            },
+            {
+              "nom": "ETRE_PRESENT",
+              "alias": [
+                "PRESENT",
+                "PRESENCE",
+                "PRESENCES",
+                "ETREPRESENT",
+                "EMARGEMENT",
+                "EMARGER",
+                "ASSISTER",
+                "PARTICIPER",
+                "PARTICIPATION"
+              ],
+              "role": "enregistrer les propriétaires présents à chaque assemblée",
+              "pk": [
+                "AnneeAG|Annee|AnneeAssemblee|AnAG|AGAnnee",
+                "NumAG|NumeroAG|NoAG|AGNum|NumAGAnnee|NumAssemblee|NumeroAssemblee",
+                "PropNum|NumProp|NumProprietaire|NumeroProprietaire"
+              ],
+              "fk": {
+                "NumAG|NumeroAG|NoAG|AGNum|NumAGAnnee|NumAssemblee|NumeroAssemblee": "ASSEMBLEE_GENERALE",
+                "PropNum|NumProp|NumProprietaire|NumeroProprietaire": "PROPRIETAIRE"
+              }
+            },
+            {
+              "nom": "ETRE_CONVOQUE",
+              "alias": [
+                "CONVOQUER",
+                "CONVOCATION",
+                "CONVOCATIONS",
+                "CONVOQUE",
+                "ETRECONVOQUE"
+              ],
+              "role": "enregistrer la date d'envoi de la convocation de chaque propriétaire à chaque assemblée",
+              "pk": [
+                "AnneeAG|Annee|AnneeAssemblee|AnAG|AGAnnee",
+                "NumAG|NumeroAG|NoAG|AGNum|NumAGAnnee|NumAssemblee|NumeroAssemblee",
+                "PropNum|NumProp|NumProprietaire|NumeroProprietaire"
+              ],
+              "fk": {
+                "NumAG|NumeroAG|NoAG|AGNum|NumAGAnnee|NumAssemblee|NumeroAssemblee": "ASSEMBLEE_GENERALE",
+                "PropNum|NumProp|NumProprietaire|NumeroProprietaire": "PROPRIETAIRE"
+              },
+              "attributs": [
+                "DateConvocation|DateEnvoiConvocation|DateEnvoi|DateConvoc|DateEnvoiConvoc"
+              ]
+            },
+            {
+              "nom": "PROCURATION",
+              "alias": [
+                "PROCURATIONS",
+                "POUVOIR",
+                "POUVOIRS"
+              ],
+              "role": "enregistrer les procurations (qui représente qui, à quelle assemblée)",
+              "pk": [
+                "NumProcuration|NumeroProcuration|NoProcuration|ProcurationNum|IdProcuration|NumProcu"
+              ],
+              "fk": {
+                "NumAG|NumeroAG|NoAG|AGNum|NumAGAnnee|NumAssemblee|NumeroAssemblee": "ASSEMBLEE_GENERALE",
+                "PropNumRepresente|NumPropRepresente|NumRepresente|PropRepresente|Represente|PropNumMandant|NumMandant|Mandant|PropNum": "PROPRIETAIRE",
+                "PropNumRepresentant|NumPropRepresentant|NumRepresentant|PropRepresentant|Representant|PropNumMandataire|NumMandataire|Mandataire": "PROPRIETAIRE"
+              },
+              "attributs": [
+                "DateProcuration|DateProcu|Date",
+                "AnneeAG|Annee|AnneeAssemblee|AnAG|AGAnnee"
+              ]
+            }
+          ],
+          "tablesOptionnelles": [
+            "ANNEE",
+            "ANNEES",
+            "ANNEE_AG",
+            "ANNEEAG"
+          ],
+          "partiel": "Presque : le type de lot est ici un simple attribut de LOT. Or les types de lot (garage, appartement, parking…) sont une liste de référence, utilisée aussi pour savoir quels lots une proposition de vote concerne : il faut une table TYPE_LOT (code, libellé) et une clé étrangère dans LOT."
+        }
+      ]
+    },
+    {
+      "id": "s02",
+      "theme": "Évolution du schéma",
+      "type": "schema",
+      "annale": "2010",
+      "enonce": "Le déroulement d'une assemblée générale est une suite de votes. Une AG comporte des propositions, numérotées dans chaque AG (1, 2, 3… pour chaque AG) et décrites par un texte. Chaque proposition fait l'objet d'un vote d'un certain type (code et libellé : majorité absolue, majorité simple, unanimité…). Une proposition concerne un ou plusieurs types de lot (certaines portent sur les garages, d'autres sur les appartements, d'autres sur tous les types de lot…). Lorsque le vote est valide, la proposition donne lieu à une et une seule décision ; sinon, elle n'a pas de décision. Les décisions sont numérotées dans chaque AG et caractérisées par un texte (accord, refus…). Complétez le schéma ci-dessous.",
+      "depart": [
+        {
+          "nom": "ASSEMBLEE_GENERALE",
+          "colonnes": [
+            "_AnneeAG",
+            "_NumAG",
+            "DateAG"
+          ]
+        },
+        {
+          "nom": "TYPE_LOT",
+          "colonnes": [
+            "_CodeTypeLot",
+            "LibelleTypeLot"
+          ]
+        }
+      ],
+      "solution": {
+        "tables": [
+          {
+            "nom": "TYPE_VOTE",
+            "alias": [
+              "TYPEVOTE",
+              "TYPE_DE_VOTE",
+              "TYPES_VOTE",
+              "TYPESVOTES",
+              "VOTE",
+              "MODE_VOTE"
+            ],
+            "role": "décrire les types de vote (majorité absolue, majorité simple, unanimité…)",
+            "pk": [
+              "CodeTypeVote|CodeVote|IdTypeVote|NumTypeVote|TypeVoteCode"
+            ],
+            "attributs": [
+              "LibelleTypeVote|DescriptionTypeVote|LibelleVote|DescTypeVote|Libelle|Description"
+            ]
+          },
+          {
+            "nom": "PROPOSITION",
+            "alias": [
+              "PROPOSITIONS",
+              "RESOLUTION",
+              "RESOLUTIONS"
+            ],
+            "role": "décrire les propositions soumises au vote de chaque AG",
+            "pk": [
+              "AnneeAG|Annee|AnneeAssemblee|AnAG|AGAnnee",
+              "NumAG|NumeroAG|NoAG|AGNum|NumAGAnnee|NumAssemblee|NumeroAssemblee",
+              "NumProposition|NumeroProposition|NoProposition|NumProp|PropositionNum|NumPropos"
+            ],
+            "fk": {
+              "AnneeAG|Annee|AnneeAssemblee|AnAG|AGAnnee": "ASSEMBLEE_GENERALE",
+              "NumAG|NumeroAG|NoAG|AGNum|NumAGAnnee|NumAssemblee|NumeroAssemblee": "ASSEMBLEE_GENERALE",
+              "CodeTypeVote|CodeVote|IdTypeVote|NumTypeVote|TypeVoteCode": "TYPE_VOTE"
+            },
+            "attributs": [
+              "DescriptionProposition|LibelleProposition|TexteProposition|DescProposition|Description|Libelle|Texte"
+            ]
+          },
+          {
+            "nom": "DECISION",
+            "alias": [
+              "DECISIONS"
+            ],
+            "role": "enregistrer les décisions (numérotées dans chaque AG) et la proposition à laquelle chacune correspond",
+            "pk": [
+              "AnneeAG|Annee|AnneeAssemblee|AnAG|AGAnnee",
+              "NumAG|NumeroAG|NoAG|AGNum|NumAGAnnee|NumAssemblee|NumeroAssemblee",
+              "NumDecision|NumeroDecision|NoDecision|DecisionNum|NumDeci"
+            ],
+            "fk": {
+              "NumProposition|NumeroProposition|NoProposition|NumProp|PropositionNum|NumPropos": "PROPOSITION"
+            },
+            "attributs": [
+              "DescriptionDecision|TexteDecision|LibelleDecision|DescDecision|Description|Texte|Libelle"
+            ]
+          },
+          {
+            "nom": "ETRE_IMPLIQUE",
+            "alias": [
+              "IMPLIQUER",
+              "IMPLIQUE",
+              "ETREIMPLIQUE",
+              "CONCERNER",
+              "CONCERNE",
+              "PORTER_SUR",
+              "VISER",
+              "APPLIQUER"
+            ],
+            "role": "indiquer quels types de lot chaque proposition concerne",
+            "pk": [
+              "AnneeAG|Annee|AnneeAssemblee|AnAG|AGAnnee",
+              "NumAG|NumeroAG|NoAG|AGNum|NumAGAnnee|NumAssemblee|NumeroAssemblee",
+              "NumProposition|NumeroProposition|NoProposition|NumProp|PropositionNum|NumPropos",
+              "CodeTypeLot|CodeType|IdTypeLot|NumTypeLot|TypeLotCode|CodeTypeDeLot"
+            ],
+            "fk": {
+              "NumProposition|NumeroProposition|NoProposition|NumProp|PropositionNum|NumPropos": "PROPOSITION",
+              "CodeTypeLot|CodeType|IdTypeLot|NumTypeLot|TypeLotCode|CodeTypeDeLot": "TYPE_LOT"
+            }
+          }
+        ]
+      },
+      "indice": "Une proposition, comme une décision, est numérotée dans son AG : sa clé primaire reprend la clé de l'AG plus son propre numéro. Un lien « un à un au plus » (une proposition a au plus une décision, une décision correspond à une seule proposition) se traduit par une clé étrangère du côté de la décision. Entre propositions et types de lot, la relation est « plusieurs à plusieurs ».",
+      "variantes": [
+        {
+          "tables": [
+            {
+              "nom": "TYPE_VOTE",
+              "alias": [
+                "TYPEVOTE",
+                "TYPE_DE_VOTE",
+                "TYPES_VOTE",
+                "TYPESVOTES",
+                "VOTE",
+                "MODE_VOTE"
+              ],
+              "role": "décrire les types de vote (majorité absolue, majorité simple, unanimité…)",
+              "pk": [
+                "CodeTypeVote|CodeVote|IdTypeVote|NumTypeVote|TypeVoteCode"
+              ],
+              "attributs": [
+                "LibelleTypeVote|DescriptionTypeVote|LibelleVote|DescTypeVote|Libelle|Description"
+              ]
+            },
+            {
+              "nom": "PROPOSITION",
+              "alias": [
+                "PROPOSITIONS",
+                "RESOLUTION",
+                "RESOLUTIONS"
+              ],
+              "role": "décrire les propositions soumises au vote de chaque AG",
+              "pk": [
+                "AnneeAG|Annee|AnneeAssemblee|AnAG|AGAnnee",
+                "NumAG|NumeroAG|NoAG|AGNum|NumAGAnnee|NumAssemblee|NumeroAssemblee",
+                "NumProposition|NumeroProposition|NoProposition|NumProp|PropositionNum|NumPropos"
+              ],
+              "fk": {
+                "AnneeAG|Annee|AnneeAssemblee|AnAG|AGAnnee": "ASSEMBLEE_GENERALE",
+                "NumAG|NumeroAG|NoAG|AGNum|NumAGAnnee|NumAssemblee|NumeroAssemblee": "ASSEMBLEE_GENERALE",
+                "CodeTypeVote|CodeVote|IdTypeVote|NumTypeVote|TypeVoteCode": "TYPE_VOTE",
+                "CodeTypeLot|CodeType|IdTypeLot|NumTypeLot|TypeLotCode|CodeTypeDeLot": "TYPE_LOT"
+              },
+              "attributs": [
+                "DescriptionProposition|LibelleProposition|TexteProposition|DescProposition|Description|Libelle|Texte"
+              ]
+            },
+            {
+              "nom": "DECISION",
+              "alias": [
+                "DECISIONS"
+              ],
+              "role": "enregistrer les décisions (numérotées dans chaque AG) et la proposition à laquelle chacune correspond",
+              "pk": [
+                "AnneeAG|Annee|AnneeAssemblee|AnAG|AGAnnee",
+                "NumAG|NumeroAG|NoAG|AGNum|NumAGAnnee|NumAssemblee|NumeroAssemblee",
+                "NumDecision|NumeroDecision|NoDecision|DecisionNum|NumDeci"
+              ],
+              "fk": {
+                "NumProposition|NumeroProposition|NoProposition|NumProp|PropositionNum|NumPropos": "PROPOSITION"
+              },
+              "attributs": [
+                "DescriptionDecision|TexteDecision|LibelleDecision|DescDecision|Description|Texte|Libelle"
+              ]
+            }
+          ],
+          "partiel": "Presque : avec CodeTypeLot dans PROPOSITION, une proposition ne pourrait concerner qu'un seul type de lot. Or une proposition peut concerner plusieurs types de lot (voire tous) et un type de lot est concerné par plusieurs propositions : il faut une table d'association entre PROPOSITION et TYPE_LOT."
+        }
+      ]
+    }
+  ]
+}

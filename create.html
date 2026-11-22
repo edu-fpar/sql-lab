@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SQL Lab – Créer des questions</title>
+  <meta name="description" content="Espace enseignant de SQL Lab : préparer un prompt pour son IA, vérifier les questions générées, les partager par fichier ou par lien.">
+  <link rel="stylesheet" href="assets/style.css">
+  <link rel="stylesheet" href="assets/create.css">
+</head>
+<body class="creator-page">
+  <header class="topbar">
+    <div class="brand">
+      <span class="logo" aria-hidden="true">SQL</span>
+      <div>
+        <h1>SQL Lab – Espace enseignant</h1>
+        <p class="subtitle">Créer des questions complémentaires sur une base d'exercice</p>
+      </div>
+    </div>
+    <div class="top-actions">
+      <label class="ex-select">
+        <span>Base</span>
+        <select id="exercice"></select>
+      </label>
+      <a class="btn small ghost" id="backLink" href="index.html">← Entraînement</a>
+    </div>
+  </header>
+
+  <main class="creator">
+    <p class="intro-text">
+      Trois étapes : <strong>1.</strong> préparez la demande pour votre IA (ChatGPT, Claude, Mistral, Gemini…),
+      <strong>2.</strong> collez sa réponse, <strong>3.</strong> vérifiez et retouchez les questions (chaque correction
+      est exécutée sur la base), puis <strong>4.</strong> partagez-les à vos étudiants par fichier ou par lien.
+      Vous pouvez aussi écrire vos questions directement à l'étape 3. Votre travail est enregistré dans ce navigateur.
+    </p>
+
+    <input type="file" id="baseFile" accept=".zip,.sqlite,.sqlite3,.db,.sql" hidden>
+    <section class="card" id="baseCard" hidden aria-labelledby="baseTitle">
+      <h2 id="baseTitle">Ma base</h2>
+      <p class="small muted">Base personnelle conservée dans ce navigateur. Ces informations accompagnent la base quand vous la partagez (exercice complet ou SCORM).</p>
+      <p class="feedback partial small" id="baseWarn" hidden></p>
+      <div class="form-grid">
+        <label>Titre de l'exercice <input type="text" id="bTitre"></label>
+        <label>Auteur <input type="text" id="bAuteur"></label>
+        <label>Date du jour simulée <input type="date" id="bDate"></label>
+      </div>
+      <label class="block">Contexte présenté aux étudiants
+        <textarea id="bContexte" rows="3" placeholder="L'entreprise, ce que contiennent les tables, le sens des colonnes importantes…"></textarea>
+      </label>
+      <p class="small"><button type="button" class="link" id="bDelete">Supprimer cette base de ce navigateur</button></p>
+    </section>
+
+    <details class="card" id="schemaCard">
+      <summary>Schéma de la base <span class="muted small" id="schemaSummary"></span></summary>
+      <ul id="schema" class="schema-list"></ul>
+      <p class="small"><button type="button" class="link" id="dlSchema">Télécharger la description détaillée de la base (.md)</button>
+        · <a href="skill/sql-lab-questions/SKILL.md" target="_blank" rel="noopener">Lire le mode d'emploi pour l'IA (skill)</a></p>
+    </details>
+
+    <!-- ===================== 1. Prompt ===================== -->
+    <section class="card step" aria-labelledby="s1">
+      <h2 id="s1"><span class="step-n">1</span> Préparer la demande à votre IA</h2>
+      <div class="form-grid">
+        <label>Titre du pack <input type="text" id="pTitre" placeholder="Ex. Révisions jointures – TD 4"></label>
+        <label>Auteur <input type="text" id="pAuteur" placeholder="Ex. M. Dupont, BTS/DCG lycée…"></label>
+        <label>Nombre de questions <input type="number" id="pNombre" min="1" max="40" value="8"></label>
+        <label>Niveau
+          <select id="pNiveau">
+            <option value="decouverte">Découverte (très guidé)</option>
+            <option value="entrainement" selected>Entraînement (niveau TD)</option>
+            <option value="examen">Examen (style annales DCG)</option>
+          </select>
+        </label>
+      </div>
+      <fieldset class="themes">
+        <legend>Thèmes à faire travailler <span class="muted small">(aucun coché : progression au choix de l'IA)</span></legend>
+        <div id="themes"></div>
+      </fieldset>
+      <label class="block">Consignes particulières
+        <textarea id="pConsignes" rows="3" placeholder="Ex. uniquement des questions sur les offres de 2023 ; éviter les sous-requêtes ; vocabulaire très simple ; 2 questions de mise à jour à la fin…"></textarea>
+      </label>
+      <div class="checks">
+        <label><input type="checkbox" id="pInclureSkill" checked> Inclure le mode d'emploi complet dans le prompt (pour une IA qui ne peut pas ouvrir de lien)</label>
+        <label><input type="checkbox" id="pSchema"> Ajouter 1 ou 2 questions de construction / évolution du schéma (dessin de tables, clés et références)</label>
+        <label><input type="checkbox" id="pEviter" checked> Lister les questions déjà proposées dans l'exercice (pour éviter les doublons)</label>
+      </div>
+      <div class="actions">
+        <button type="button" class="btn primary" id="copyPrompt">Copier le prompt</button>
+        <span class="muted small" id="promptInfo"></span>
+      </div>
+      <details class="prompt-preview">
+        <summary>Voir le prompt</summary>
+        <textarea id="promptText" readonly rows="14"></textarea>
+      </details>
+    </section>
+
+    <!-- ===================== 2. Import ===================== -->
+    <section class="card step" aria-labelledby="s2">
+      <h2 id="s2"><span class="step-n">2</span> Importer la réponse de l'IA</h2>
+      <label class="block">Collez ici la réponse complète (le bloc JSON suffit, le texte autour est ignoré)
+        <textarea id="pasteBox" rows="6" class="mono" placeholder='```json&#10;{ "format": "sql-lab-questions/1", "questions": [ … ] }&#10;```'></textarea>
+      </label>
+      <div class="actions">
+        <button type="button" class="btn primary" id="loadPaste">Charger ces questions</button>
+        <label class="btn">Ouvrir un fichier JSON…<input type="file" id="openFile" accept=".json,application/json,text/plain" hidden></label>
+        <button type="button" class="btn ghost" id="newPack">Commencer un pack vide</button>
+      </div>
+      <p class="feedback ko" id="importMsg" hidden></p>
+    </section>
+
+    <!-- ===================== 3. Édition ===================== -->
+    <section class="card step" aria-labelledby="s3">
+      <h2 id="s3"><span class="step-n">3</span> Vérifier et retravailler</h2>
+      <div class="form-grid">
+        <label>Titre du pack <input type="text" id="mTitre"></label>
+        <label>Auteur <input type="text" id="mAuteur"></label>
+      </div>
+      <label class="block">Description <span class="muted small">(facultatif)</span>
+        <input type="text" id="mDescription" placeholder="Objectif du pack, consignes pour les étudiants…">
+      </label>
+      <div class="summary-bar">
+        <span id="summary" class="small"></span>
+        <span class="spacer"></span>
+        <button type="button" class="btn small" id="checkAll">Tout vérifier</button>
+        <button type="button" class="btn small" id="addQuestion">+ Ajouter une question</button>
+        <button type="button" class="btn small" id="addSchemaQuestion">+ Question de schéma</button>
+        <button type="button" class="btn small" id="addProcessQuestion">+ Question de processus</button>
+      </div>
+      <div id="cards"></div>
+      <p class="muted small empty-pack" id="emptyPack">Aucune question pour l'instant : importez la réponse de l'IA (étape 2) ou ajoutez une question.</p>
+    </section>
+
+    <!-- ===================== 4. Partage ===================== -->
+    <section class="card step" aria-labelledby="s4">
+      <h2 id="s4"><span class="step-n">4</span> Partager avec les étudiants</h2>
+      <p class="feedback partial small" id="shareWarn" hidden></p>
+      <div class="share-grid">
+        <div class="share-box">
+          <h3>Exercice complet (.zip)</h3>
+          <p class="small">La base, son contexte et les questions dans un seul fichier. L'étudiant l'importe avec « Importer un fichier » ; un autre enseignant peut le charger ici.</p>
+          <label class="small check-line"><input type="checkbox" id="inclBase" checked> Inclure les questions déjà présentes dans l'exercice</label>
+          <button type="button" class="btn primary" id="dlExercise">Télécharger l'exercice</button>
+        </div>
+        <div class="share-box">
+          <h3>Paquet SCORM (Moodle…)</h3>
+          <p class="small">L'application complète, verrouillée sur cet exercice (base + questions cochées ci-contre), à déposer dans Moodle comme « Paquetage SCORM ». Score transmis : % de questions réussies ; l'étudiant reprend où il en était.</p>
+          <label class="small">Seuil de réussite (facultatif, en %)
+            <input type="number" id="scormSeuil" min="1" max="100" placeholder="ex. 80"></label>
+          <button type="button" class="btn primary" id="dlScorm">Télécharger le paquet SCORM</button>
+        </div>
+        <div class="share-box">
+          <h3>Fichier</h3>
+          <p class="small">À déposer sur Moodle, à envoyer par mail… L'étudiant l'importe avec « Importer un fichier » dans SQL Lab.</p>
+          <button type="button" class="btn primary" id="download">Télécharger le JSON</button>
+        </div>
+        <div class="share-box">
+          <h3>Lien sans serveur</h3>
+          <p class="small">Les questions sont contenues dans le lien lui-même (compressées). Rien n'est hébergé ni envoyé à un serveur.</p>
+          <div class="actions">
+            <button type="button" class="btn primary" id="copyLink">Copier le lien</button>
+            <a class="btn" id="openLink" href="#" target="_blank" rel="noopener">Tester</a>
+          </div>
+          <p class="muted small" id="linkInfo"></p>
+        </div>
+        <div class="share-box">
+          <h3>Lien vers un fichier hébergé</h3>
+          <p class="small">Si vous déposez le JSON en ligne (GitHub, Gist « raw », votre site…) : les étudiants verront toujours la dernière version.</p>
+          <input type="url" id="hostedUrl" placeholder="https://…/mes-questions.json">
+          <div class="actions">
+            <button type="button" class="btn" id="copyHosted">Copier le lien</button>
+          </div>
+          <p class="muted small">Le site doit autoriser la lecture depuis une autre page (en-tête CORS) : c'est le cas de GitHub et des Gists, rarement de Moodle.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <dialog id="schemaDialog" class="diagram-dialog" aria-labelledby="schemaDialogTitle">
+    <div class="dlg-head">
+      <div>
+        <h2 id="schemaDialogTitle">Solution</h2>
+        <p class="muted small">Dessinez le schéma attendu à partir du départ : nouvelles tables, clés primaires, références, attributs à retirer.</p>
+      </div>
+      <span class="spacer"></span>
+      <button class="btn small" id="schemaDlgCancel" type="button">Annuler</button>
+      <button class="btn small primary" id="schemaDlgSave" type="button">Enregistrer la solution</button>
+    </div>
+    <div class="dlg-body"><div id="schemaDlgEditor" class="schema-editor"></div></div>
+  </dialog>
+
+  <dialog id="processDialog" class="diagram-dialog" aria-labelledby="processDialogTitle">
+    <div class="dlg-head">
+      <div>
+        <h2 id="processDialogTitle">Corrigé</h2>
+        <p class="muted small">Dessinez le schéma événements-résultats : acteurs, événements, opérations et leurs règles d'émission, synchronisations.</p>
+      </div>
+      <span class="spacer"></span>
+      <button class="btn small" id="processDlgCancel" type="button">Annuler</button>
+      <button class="btn small primary" id="processDlgSave" type="button">Enregistrer</button>
+    </div>
+    <div class="dlg-body"><div id="processDlgEditor" class="process-editor"></div></div>
+  </dialog>
+
+  <div id="toast" class="toast" role="status" hidden></div>
+  <div id="loading" class="loading">Chargement de la base…</div>
+
+  <script src="lib/sql.js/sql-wasm.js"></script>
+  <script src="lib/fflate/fflate.js"></script>
+  <script src="assets/compat.js"></script>
+  <script src="assets/compare.js"></script>
+  <script src="assets/engine.js"></script>
+  <script src="assets/packs.js"></script>
+  <script src="assets/library.js"></script>
+  <script src="assets/scormbuild.js"></script>
+  <script src="assets/diagram.js"></script>
+  <script src="assets/schemacheck.js"></script>
+  <script src="assets/schema-editor.js"></script>
+  <script src="assets/processcheck.js"></script>
+  <script src="assets/process-editor.js"></script>
+  <script src="assets/create.js"></script>
+</body>
+</html>

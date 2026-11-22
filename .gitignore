@@ -1,0 +1,28 @@
+# Dépendances (sql.js pour les tests : npm install)
+node_modules/
+
+# Réglages locaux de Claude Code / de l'éditeur
+.claude/
+.vscode/
+*.sqbpro
+
+# Sujets et corrigés d'origine : non publiés sur GitHub Pages
+annales/
+*.doc
+*.docx
+
+# Fichiers temporaires Office et système
+~$*
+Thumbs.db
+desktop.ini
+.DS_Store
+
+# Python
+__pycache__/
+
+# Paquets SCORM générés
+dist/
+
+# Fiches d'annales (énoncés quasi verbatim) et générateurs de données : non publiés
+docs/annales/
+tools/gen_*.py

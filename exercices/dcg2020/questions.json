@@ -1,0 +1,1531 @@
+{
+  "id": "dcg2020",
+  "titre": "DCG 2020 – Port de Mériadeck, escales",
+  "aujourdhui": "2020-06-05",
+  "contexte": "Le Grand Port Maritime de Mériadeck (GPMM), port de commerce de la façade atlantique, enregistre les escales des navires dans son PGI portuaire. Chaque Navire est identifié par son numéro OMI (immatriculation internationale à 7 chiffres) ; sa longueur, sa largeur et son tirant d'eau maximal sont en mètres. Il bat le pavillon d'un pays (Pays : le pavillon est le nom du pays d'immatriculation) et appartient à un type (TypeNavire : pétrolier, méthanier, porte-conteneurs…). Dans le sujet, le libellé du type figurait dans Navire, qui n'était donc pas en 3e forme normale : il est ici placé dans sa propre table, comme le propose le corrigé. Une Escale est prise en charge par un agent consignataire (AgentConsignataire) ; son identifiant est formé de la date de début (AAAAMMJJ) suivie d'un numéro d'ordre à trois chiffres : 20200524007 est la 7e escale débutée le 24 mai 2020. La date de fin n'est pas renseignée tant que le navire est encore à quai. Les tirants d'eau à l'arrivée et au départ sont en mètres. La composition de la cargaison (CompositionCargaison) indique, pour chaque escale, les marchandises chargées (code d'opération 'C') ou déchargées ('D') pour chaque client, avec le tonnage en tonnes. Les quais et emplacements du sujet ont été retirés, ainsi que les adresses détaillées.",
+  "source": "Inspiré du sujet DCG UE8 session 2020. Données entièrement fictives.",
+  "schemaGrid": {
+    "Pays": [
+      0,
+      0
+    ],
+    "Navire": [
+      1,
+      0
+    ],
+    "TypeNavire": [
+      2,
+      0
+    ],
+    "AgentConsignataire": [
+      0,
+      1
+    ],
+    "Escale": [
+      1,
+      1
+    ],
+    "Operation": [
+      2,
+      1
+    ],
+    "Client": [
+      0,
+      2
+    ],
+    "CompositionCargaison": [
+      1,
+      2
+    ],
+    "Marchandise": [
+      2,
+      2
+    ]
+  },
+  "questions": [
+    {
+      "id": "q01",
+      "theme": "Une seule table",
+      "enonce": "Afficher l'identifiant, la raison sociale et le téléphone des agents consignataires dont l'adresse mail n'est pas renseignée.",
+      "correction": [
+        "SELECT idAgent, raisonSocialeAgent, telAgent",
+        "FROM AgentConsignataire",
+        "WHERE mailAgent IS NULL;"
+      ],
+      "indice": "Une valeur absente se teste avec IS NULL (et non = NULL)."
+    },
+    {
+      "id": "q02",
+      "theme": "Une seule table",
+      "enonce": "Afficher le nom et la longueur des navires de plus de 300 mètres, du plus long au plus court.",
+      "ordered": [
+        1
+      ],
+      "correction": [
+        "SELECT nomNavire, longueur",
+        "FROM Navire",
+        "WHERE longueur > 300",
+        "ORDER BY longueur DESC;"
+      ],
+      "indice": "La longueur est un nombre (en mètres) : pas d'apostrophes. DESC donne un tri décroissant."
+    },
+    {
+      "id": "q03",
+      "theme": "Une seule table",
+      "enonce": "Afficher l'identifiant et la raison sociale des clients dont la raison sociale contient le mot « Céréales ».",
+      "correction": [
+        "SELECT idClient, raisonSocialeClient",
+        "FROM Client",
+        "WHERE raisonSocialeClient LIKE '%Céréales%';"
+      ],
+      "indice": "LIKE avec le joker % (n'importe quelle suite de caractères) avant et après le mot : le mot peut être au début, au milieu ou à la fin."
+    },
+    {
+      "id": "q04",
+      "theme": "Calculs et agrégats",
+      "enonce": "Combien de navires sont enregistrés dans la base, et quelle est leur longueur moyenne ?",
+      "correction": [
+        "SELECT COUNT(*) AS nbNavires, AVG(longueur) AS longueurMoyenne",
+        "FROM Navire;"
+      ],
+      "variantes": [
+        [
+          "SELECT COUNT(numOMI), AVG(longueur)",
+          "FROM Navire;"
+        ]
+      ],
+      "indice": "COUNT(*) compte les lignes, AVG calcule une moyenne : les deux fonctions peuvent figurer dans le même SELECT."
+    },
+    {
+      "id": "q05",
+      "theme": "Calculs et agrégats",
+      "enonce": "Afficher, pour chaque agent consignataire ayant pris en charge au moins une escale, son identifiant et le nombre d'escales qu'il a prises en charge.",
+      "correction": [
+        "SELECT idAgent, COUNT(*) AS nbEscales",
+        "FROM Escale",
+        "GROUP BY idAgent;"
+      ],
+      "variantes": [
+        [
+          "SELECT idAgent, COUNT(idEscale)",
+          "FROM Escale",
+          "GROUP BY idAgent;"
+        ]
+      ],
+      "indice": "L'identifiant de l'agent figure dans Escale : inutile d'aller chercher une autre table. GROUP BY forme un groupe par agent, COUNT(*) compte les escales du groupe."
+    },
+    {
+      "id": "q06",
+      "theme": "Dates",
+      "enonce": "Afficher l'identifiant, le numéro OMI du navire, la date de début et la date de fin des escales qui ont débuté en mai 2020.",
+      "correction": [
+        "SELECT idEscale, numOMI, dateDebut, dateFin",
+        "FROM Escale",
+        "WHERE MONTH(dateDebut) = 5",
+        "AND YEAR(dateDebut) = 2020;"
+      ],
+      "variantes": [
+        [
+          "SELECT idEscale, numOMI, dateDebut, dateFin",
+          "FROM Escale",
+          "WHERE dateDebut BETWEEN '01/05/2020' AND '31/05/2020';"
+        ]
+      ],
+      "indice": "MONTH() et YEAR() extraient le mois et l'année d'une date. Ne pas oublier l'année : il y a aussi des escales en mai 2019."
+    },
+    {
+      "id": "q07",
+      "theme": "Dates",
+      "enonce": "Combien d'escales ont débuté en 2019 ?",
+      "correction": [
+        "SELECT COUNT(*)",
+        "FROM Escale",
+        "WHERE YEAR(dateDebut) = 2019;"
+      ],
+      "variantes": [
+        [
+          "SELECT COUNT(*)",
+          "FROM Escale",
+          "WHERE dateDebut BETWEEN '01/01/2019' AND '31/12/2019';"
+        ]
+      ],
+      "indice": "C'est la date de début qui compte : une escale commencée fin décembre 2018 et terminée en janvier 2019 ne doit pas être comptée."
+    },
+    {
+      "id": "q08",
+      "theme": "Dates",
+      "enonce": "Afficher l'identifiant, la date de début, la date de fin et la durée en jours (date de fin moins date de début) des escales débutées en 2020 qui ont duré au moins 5 jours.",
+      "correction": [
+        "SELECT idEscale, dateDebut, dateFin, DATEDIFF(dateFin, dateDebut) AS duree",
+        "FROM Escale",
+        "WHERE YEAR(dateDebut) = 2020",
+        "AND DATEDIFF(dateFin, dateDebut) >= 5;"
+      ],
+      "variantes": [
+        [
+          "SELECT idEscale, dateDebut, dateFin, DATEDIFF(dateFin, dateDebut)",
+          "FROM Escale",
+          "WHERE dateDebut BETWEEN '01/01/2020' AND '31/12/2020'",
+          "AND DATEDIFF(dateFin, dateDebut) >= 5;"
+        ]
+      ],
+      "indice": "DATEDIFF(fin, début) donne le nombre de jours entre deux dates. Une escale encore en cours (date de fin vide) donne une durée vide : elle est écartée automatiquement."
+    },
+    {
+      "id": "q09",
+      "theme": "Jointures",
+      "annale": "2020",
+      "enonce": "Afficher le pavillon du navire immatriculé 9776418.",
+      "correction": [
+        "SELECT pavillon",
+        "FROM Navire N, Pays P",
+        "WHERE N.idPays = P.idPays",
+        "AND numOMI = 9776418;"
+      ],
+      "variantes": [
+        [
+          "SELECT pavillon",
+          "FROM Navire N",
+          "INNER JOIN Pays P ON N.idPays = P.idPays",
+          "WHERE numOMI = 9776418;"
+        ]
+      ],
+      "indice": "Le pavillon est dans la table Pays ; Navire contient la clé étrangère idPays qui permet de relier les deux tables. Le numéro OMI est un nombre."
+    },
+    {
+      "id": "q10",
+      "theme": "Jointures",
+      "annale": "2020",
+      "enonce": "Afficher le nombre d'opérations de l'escale n° 20200524007 dont le libellé est « Déchargement » (chaque ligne de la composition de la cargaison compte pour une opération).",
+      "correction": [
+        "SELECT COUNT(*)",
+        "FROM Operation O, CompositionCargaison C",
+        "WHERE O.idOperation = C.idOperation",
+        "AND idEscale = 20200524007",
+        "AND libelleOperation = 'Déchargement';"
+      ],
+      "variantes": [
+        [
+          "SELECT COUNT(*)",
+          "FROM Operation O",
+          "INNER JOIN CompositionCargaison C ON O.idOperation = C.idOperation",
+          "WHERE idEscale = 20200524007",
+          "AND libelleOperation = 'Déchargement';"
+        ],
+        [
+          "SELECT COUNT(*)",
+          "FROM CompositionCargaison",
+          "WHERE idEscale = 20200524007",
+          "AND idOperation = 'D';"
+        ]
+      ],
+      "indice": "Le libellé « Déchargement » est dans Operation, les lignes de cargaison dans CompositionCargaison : reliez-les par idOperation. Une chaîne s'écrit entre apostrophes, avec l'accent."
+    },
+    {
+      "id": "q11",
+      "theme": "Jointures",
+      "enonce": "Afficher l'identifiant de l'escale, le nom du navire et la date de début des escales prises en charge en 2020 par l'agent consignataire « WORMS MTTM ».",
+      "correction": [
+        "SELECT idEscale, nomNavire, dateDebut",
+        "FROM Escale E, Navire N, AgentConsignataire A",
+        "WHERE E.numOMI = N.numOMI",
+        "AND E.idAgent = A.idAgent",
+        "AND raisonSocialeAgent = 'WORMS MTTM'",
+        "AND YEAR(dateDebut) = 2020;"
+      ],
+      "variantes": [
+        [
+          "SELECT idEscale, nomNavire, dateDebut",
+          "FROM Escale E",
+          "INNER JOIN Navire N ON E.numOMI = N.numOMI",
+          "INNER JOIN AgentConsignataire A ON E.idAgent = A.idAgent",
+          "WHERE raisonSocialeAgent = 'WORMS MTTM'",
+          "AND YEAR(dateDebut) = 2020;"
+        ],
+        [
+          "SELECT idEscale, nomNavire, dateDebut",
+          "FROM Escale E, Navire N",
+          "WHERE E.numOMI = N.numOMI",
+          "AND E.idAgent = 'WORMS'",
+          "AND dateDebut BETWEEN '01/01/2020' AND '31/12/2020';"
+        ]
+      ],
+      "indice": "Trois tables : Escale est au centre, reliée à Navire par numOMI et à AgentConsignataire par idAgent. La condition porte sur la raison sociale, pas sur l'identifiant."
+    },
+    {
+      "id": "q12",
+      "theme": "Jointures",
+      "enonce": "Afficher le détail de la cargaison de l'escale n° 20200524007 : libellé de l'opération, libellé de la marchandise, raison sociale du client et tonnage.",
+      "correction": [
+        "SELECT libelleOperation, libelleMarchandise, raisonSocialeClient, tonnageMarchandise",
+        "FROM CompositionCargaison C, Operation O, Marchandise M, Client CL",
+        "WHERE C.idOperation = O.idOperation",
+        "AND C.idMarchandise = M.idMarchandise",
+        "AND C.idClient = CL.idClient",
+        "AND idEscale = 20200524007;"
+      ],
+      "variantes": [
+        [
+          "SELECT libelleOperation, libelleMarchandise, raisonSocialeClient, tonnageMarchandise",
+          "FROM CompositionCargaison C",
+          "INNER JOIN Operation O ON C.idOperation = O.idOperation",
+          "INNER JOIN Marchandise M ON C.idMarchandise = M.idMarchandise",
+          "INNER JOIN Client CL ON C.idClient = CL.idClient",
+          "WHERE idEscale = 20200524007;"
+        ]
+      ],
+      "indice": "CompositionCargaison contient trois clés étrangères (idOperation, idMarchandise, idClient) : il faut une condition de jointure pour chacune des trois autres tables."
+    },
+    {
+      "id": "q13",
+      "theme": "Jointures",
+      "enonce": "Afficher le nom et le type (libellé) des navires battant pavillon « France ».",
+      "correction": [
+        "SELECT nomNavire, libelleTypeNavire",
+        "FROM Navire N, Pays P, TypeNavire T",
+        "WHERE N.idPays = P.idPays",
+        "AND N.idTypeNavire = T.idTypeNavire",
+        "AND pavillon = 'France';"
+      ],
+      "variantes": [
+        [
+          "SELECT nomNavire, libelleTypeNavire",
+          "FROM Navire N",
+          "INNER JOIN Pays P ON N.idPays = P.idPays",
+          "INNER JOIN TypeNavire T ON N.idTypeNavire = T.idTypeNavire",
+          "WHERE pavillon = 'France';"
+        ],
+        [
+          "SELECT nomNavire, libelleTypeNavire",
+          "FROM Navire N, TypeNavire T",
+          "WHERE N.idTypeNavire = T.idTypeNavire",
+          "AND idPays = 'FRA';"
+        ]
+      ],
+      "indice": "Navire possède deux clés étrangères : idPays (vers Pays, qui contient le pavillon) et idTypeNavire (vers TypeNavire, qui contient le libellé du type)."
+    },
+    {
+      "id": "q14",
+      "theme": "Jointures et regroupements",
+      "enonce": "Afficher, pour chaque pavillon, le nombre d'escales ayant débuté en 2019, du pavillon le plus représenté au moins représenté.",
+      "ordered": [
+        1
+      ],
+      "correction": [
+        "SELECT pavillon, COUNT(*) AS nbEscales",
+        "FROM Escale E, Navire N, Pays P",
+        "WHERE E.numOMI = N.numOMI",
+        "AND N.idPays = P.idPays",
+        "AND YEAR(dateDebut) = 2019",
+        "GROUP BY pavillon",
+        "ORDER BY nbEscales DESC;"
+      ],
+      "variantes": [
+        [
+          "SELECT pavillon, COUNT(*)",
+          "FROM Escale E",
+          "INNER JOIN Navire N ON E.numOMI = N.numOMI",
+          "INNER JOIN Pays P ON N.idPays = P.idPays",
+          "WHERE dateDebut BETWEEN '01/01/2019' AND '31/12/2019'",
+          "GROUP BY pavillon",
+          "ORDER BY COUNT(*) DESC;"
+        ]
+      ],
+      "indice": "Il faut passer par Navire pour aller de Escale à Pays. Regroupez par pavillon, comptez, puis triez sur le nombre d'escales (ORDER BY COUNT(*) DESC)."
+    },
+    {
+      "id": "q15",
+      "theme": "Jointures et regroupements",
+      "enonce": "Afficher, pour chaque marchandise et chaque type d'opération (chargement ou déchargement), le libellé de la marchandise, le libellé de l'opération et le tonnage total.",
+      "correction": [
+        "SELECT libelleMarchandise, libelleOperation, SUM(tonnageMarchandise) AS tonnageTotal",
+        "FROM CompositionCargaison C, Marchandise M, Operation O",
+        "WHERE C.idMarchandise = M.idMarchandise",
+        "AND C.idOperation = O.idOperation",
+        "GROUP BY libelleMarchandise, libelleOperation;"
+      ],
+      "variantes": [
+        [
+          "SELECT libelleMarchandise, libelleOperation, SUM(tonnageMarchandise)",
+          "FROM CompositionCargaison C",
+          "INNER JOIN Marchandise M ON C.idMarchandise = M.idMarchandise",
+          "INNER JOIN Operation O ON C.idOperation = O.idOperation",
+          "GROUP BY libelleMarchandise, libelleOperation;"
+        ]
+      ],
+      "indice": "On peut regrouper sur deux colonnes à la fois : GROUP BY libelleMarchandise, libelleOperation forme un groupe par couple (marchandise, opération)."
+    },
+    {
+      "id": "q16",
+      "theme": "Jointures et regroupements",
+      "annale": "2020",
+      "enonce": "Afficher la liste des clients (identifiant, raison sociale, tonnage total) pour lesquels des opérations ont été réalisées pour un tonnage total supérieur à 1000 tonnes (chargements et déchargements confondus).",
+      "correction": [
+        "SELECT CL.idClient, raisonSocialeClient, SUM(tonnageMarchandise) AS tonnageTotal",
+        "FROM Client CL, CompositionCargaison CO",
+        "WHERE CO.idClient = CL.idClient",
+        "GROUP BY CL.idClient, raisonSocialeClient",
+        "HAVING SUM(tonnageMarchandise) > 1000;"
+      ],
+      "variantes": [
+        [
+          "SELECT CL.idClient, raisonSocialeClient, SUM(tonnageMarchandise)",
+          "FROM Client CL",
+          "INNER JOIN CompositionCargaison CO ON CO.idClient = CL.idClient",
+          "GROUP BY CL.idClient, raisonSocialeClient",
+          "HAVING SUM(tonnageMarchandise) > 1000;"
+        ]
+      ],
+      "indice": "La condition porte sur une somme : elle se place dans HAVING, après le GROUP BY (et non dans le WHERE). « Supérieur à » : un client à 1000 tonnes tout juste n'est pas retenu."
+    },
+    {
+      "id": "q17",
+      "theme": "Jointures et regroupements",
+      "enonce": "Afficher le numéro OMI, le nom et le nombre d'escales des navires ayant fait au moins trois escales débutées en 2019.",
+      "correction": [
+        "SELECT N.numOMI, nomNavire, COUNT(*) AS nbEscales",
+        "FROM Navire N, Escale E",
+        "WHERE N.numOMI = E.numOMI",
+        "AND YEAR(dateDebut) = 2019",
+        "GROUP BY N.numOMI, nomNavire",
+        "HAVING COUNT(*) >= 3;"
+      ],
+      "variantes": [
+        [
+          "SELECT N.numOMI, nomNavire, COUNT(*)",
+          "FROM Navire N",
+          "INNER JOIN Escale E ON N.numOMI = E.numOMI",
+          "WHERE dateDebut BETWEEN '01/01/2019' AND '31/12/2019'",
+          "GROUP BY N.numOMI, nomNavire",
+          "HAVING COUNT(*) >= 3;"
+        ]
+      ],
+      "indice": "La condition sur l'année porte sur chaque escale (WHERE), la condition « au moins trois » porte sur le nombre d'escales du groupe (HAVING). numOMI existe dans les deux tables : préfixez-le."
+    },
+    {
+      "id": "q18",
+      "theme": "Jointures et regroupements",
+      "enonce": "Afficher, pour chaque agent consignataire, sa raison sociale et la durée moyenne (en jours) des escales terminées qu'il a prises en charge.",
+      "correction": [
+        "SELECT raisonSocialeAgent, AVG(DATEDIFF(dateFin, dateDebut)) AS dureeMoyenne",
+        "FROM AgentConsignataire A, Escale E",
+        "WHERE A.idAgent = E.idAgent",
+        "AND dateFin IS NOT NULL",
+        "GROUP BY A.idAgent, raisonSocialeAgent;"
+      ],
+      "variantes": [
+        [
+          "SELECT raisonSocialeAgent, AVG(DATEDIFF(dateFin, dateDebut))",
+          "FROM AgentConsignataire A",
+          "INNER JOIN Escale E ON A.idAgent = E.idAgent",
+          "WHERE dateFin IS NOT NULL",
+          "GROUP BY raisonSocialeAgent;"
+        ],
+        [
+          "SELECT raisonSocialeAgent, AVG(DATEDIFF(dateFin, dateDebut))",
+          "FROM AgentConsignataire A, Escale E",
+          "WHERE A.idAgent = E.idAgent",
+          "GROUP BY raisonSocialeAgent;"
+        ]
+      ],
+      "indice": "DATEDIFF(dateFin, dateDebut) donne la durée d'une escale ; AVG en fait la moyenne pour chaque agent. Une escale terminée a une date de fin renseignée."
+    },
+    {
+      "id": "q19",
+      "theme": "Sous-requêtes",
+      "annale": "2020",
+      "enonce": "Afficher la liste des agents consignataires (numéro, raison sociale) n'ayant encore jamais pris en charge d'escale.",
+      "correction": [
+        "SELECT idAgent, raisonSocialeAgent",
+        "FROM AgentConsignataire",
+        "WHERE idAgent NOT IN (SELECT idAgent",
+        "                      FROM Escale);"
+      ],
+      "variantes": [
+        [
+          "SELECT idAgent, raisonSocialeAgent",
+          "FROM AgentConsignataire A",
+          "WHERE NOT EXISTS (SELECT *",
+          "                  FROM Escale E",
+          "                  WHERE E.idAgent = A.idAgent);"
+        ],
+        [
+          "SELECT A.idAgent, raisonSocialeAgent",
+          "FROM AgentConsignataire A",
+          "LEFT JOIN Escale E ON A.idAgent = E.idAgent",
+          "WHERE E.idEscale IS NULL;"
+        ]
+      ],
+      "indice": "Cherchez les agents dont l'identifiant n'apparaît pas (NOT IN) dans la liste des agents de la table Escale. Une jointure ne peut pas trouver ce qui n'existe pas."
+    },
+    {
+      "id": "q20",
+      "theme": "Sous-requêtes",
+      "annale": "2020",
+      "enonce": "Afficher la liste des navires (numéro OMI, nom) de plus grande longueur que le navire « ST EXUPÉRY » et qui ont fait escale en 2019 (date de début). Chaque navire ne doit apparaître qu'une fois.",
+      "correction": [
+        "SELECT DISTINCT N.numOMI, nomNavire",
+        "FROM Navire N, Escale E",
+        "WHERE N.numOMI = E.numOMI",
+        "AND YEAR(dateDebut) = 2019",
+        "AND longueur > (SELECT longueur",
+        "                FROM Navire",
+        "                WHERE nomNavire = 'ST EXUPÉRY');"
+      ],
+      "variantes": [
+        [
+          "SELECT DISTINCT N.numOMI, nomNavire",
+          "FROM Navire N",
+          "INNER JOIN Escale E ON N.numOMI = E.numOMI",
+          "WHERE dateDebut BETWEEN '01/01/2019' AND '31/12/2019'",
+          "AND longueur > (SELECT longueur",
+          "                FROM Navire",
+          "                WHERE nomNavire = 'ST EXUPÉRY');"
+        ],
+        [
+          "SELECT numOMI, nomNavire",
+          "FROM Navire",
+          "WHERE longueur > (SELECT longueur",
+          "                  FROM Navire",
+          "                  WHERE numOMI = 9525114)",
+          "AND numOMI IN (SELECT numOMI",
+          "               FROM Escale",
+          "               WHERE YEAR(dateDebut) = 2019);"
+        ]
+      ],
+      "indice": "La longueur du ST EXUPÉRY s'obtient par une sous-requête (écrivez son nom exactement, avec l'accent). numOMI est dans Navire et dans Escale : préfixez-le. Un navire venu deux fois en 2019 ne doit apparaître qu'une fois (DISTINCT)."
+    },
+    {
+      "id": "q21",
+      "theme": "Sous-requêtes",
+      "enonce": "Afficher l'identifiant et la raison sociale des clients pour lesquels des marchandises ont été à la fois chargées et déchargées (au moins une opération de chaque sorte).",
+      "correction": [
+        "SELECT idClient, raisonSocialeClient",
+        "FROM Client",
+        "WHERE idClient IN (SELECT idClient",
+        "                   FROM CompositionCargaison",
+        "                   WHERE idOperation = 'C')",
+        "AND idClient IN (SELECT idClient",
+        "                 FROM CompositionCargaison",
+        "                 WHERE idOperation = 'D');"
+      ],
+      "variantes": [
+        [
+          "SELECT CL.idClient, raisonSocialeClient",
+          "FROM Client CL, CompositionCargaison C",
+          "WHERE CL.idClient = C.idClient",
+          "GROUP BY CL.idClient, raisonSocialeClient",
+          "HAVING COUNT(DISTINCT idOperation) = 2;"
+        ]
+      ],
+      "indice": "Une même ligne de cargaison ne peut pas être à la fois un chargement et un déchargement : la condition « idOperation = 'C' AND idOperation = 'D' » ne donne rien. Utilisez deux sous-requêtes avec IN."
+    },
+    {
+      "id": "q22",
+      "theme": "Sous-requêtes",
+      "enonce": "Certaines escales n'ont donné lieu à aucune opération de chargement ni de déchargement (escales techniques : avitaillement, réparation…). Afficher l'identifiant de ces escales, le nom du navire et la date de début.",
+      "correction": [
+        "SELECT idEscale, nomNavire, dateDebut",
+        "FROM Escale E, Navire N",
+        "WHERE E.numOMI = N.numOMI",
+        "AND idEscale NOT IN (SELECT idEscale",
+        "                     FROM CompositionCargaison);"
+      ],
+      "variantes": [
+        [
+          "SELECT idEscale, nomNavire, dateDebut",
+          "FROM Escale E",
+          "INNER JOIN Navire N ON E.numOMI = N.numOMI",
+          "WHERE NOT EXISTS (SELECT *",
+          "                  FROM CompositionCargaison C",
+          "                  WHERE C.idEscale = E.idEscale);"
+        ]
+      ],
+      "indice": "Une escale sans opération n'a aucune ligne dans CompositionCargaison : NOT IN sur la liste des escales de cette table. La jointure avec Navire sert seulement à obtenir le nom."
+    },
+    {
+      "id": "q23",
+      "theme": "Mises à jour",
+      "type": "write",
+      "enonce": "Un nouvel agent consignataire s'installe sur le port : MARITIME SERVICES ATLANTIQUE, identifiant « MSA », à Bassens, mail ops@msa-atlantique.fr, téléphone 05 56 43 27 90. L'enregistrer.",
+      "correction": [
+        "INSERT INTO AgentConsignataire",
+        "VALUES ('MSA', 'MARITIME SERVICES ATLANTIQUE', 'Bassens', 'ops@msa-atlantique.fr', '05 56 43 27 90');"
+      ],
+      "variantes": [
+        [
+          "INSERT INTO AgentConsignataire (idAgent, raisonSocialeAgent, adrVilleAgent, mailAgent, telAgent)",
+          "VALUES ('MSA', 'MARITIME SERVICES ATLANTIQUE', 'Bassens', 'ops@msa-atlantique.fr', '05 56 43 27 90');"
+        ]
+      ],
+      "verif": "SELECT * FROM AgentConsignataire ORDER BY idAgent",
+      "indice": "INSERT INTO … VALUES (…) : les valeurs dans l'ordre des colonnes de la table (identifiant, raison sociale, ville, mail, téléphone), textes entre apostrophes. Le téléphone est un texte."
+    },
+    {
+      "id": "q24",
+      "theme": "Mises à jour",
+      "type": "write",
+      "enonce": "Le navire FURUHOLMEN quitte le port aujourd'hui, 5 juin 2020, avec un tirant d'eau de 7,2 mètres. Mettre à jour son escale en cours (n° 20200602001).",
+      "correction": [
+        "UPDATE Escale",
+        "SET dateFin = '2020-06-05', tirantdEauDepart = 7.2",
+        "WHERE idEscale = 20200602001;"
+      ],
+      "variantes": [
+        [
+          "UPDATE Escale",
+          "SET dateFin = CURDATE(), tirantdEauDepart = 7.2",
+          "WHERE idEscale = 20200602001;"
+        ]
+      ],
+      "verif": "SELECT * FROM Escale ORDER BY idEscale",
+      "indice": "UPDATE … SET colonne1 = …, colonne2 = … WHERE … : sans WHERE, toutes les escales seraient modifiées. Les décimales s'écrivent avec un point (7.2)."
+    },
+    {
+      "id": "q25",
+      "theme": "Mises à jour",
+      "type": "write",
+      "enonce": "Le port fait le ménage dans son fichier : supprimer les agents consignataires qui n'ont jamais pris en charge d'escale. (Essayez aussi de supprimer l'agent « SOGEBRAS » : pourquoi la base refuse-t-elle ?)",
+      "correction": [
+        "DELETE FROM AgentConsignataire",
+        "WHERE idAgent NOT IN (SELECT idAgent",
+        "                      FROM Escale);"
+      ],
+      "variantes": [
+        [
+          "DELETE FROM AgentConsignataire",
+          "WHERE idAgent IN ('ALKA', 'OCEA', 'FMER');"
+        ],
+        [
+          "DELETE FROM AgentConsignataire",
+          "WHERE NOT EXISTS (SELECT *",
+          "                  FROM Escale",
+          "                  WHERE Escale.idAgent = AgentConsignataire.idAgent);"
+        ]
+      ],
+      "verif": "SELECT * FROM AgentConsignataire ORDER BY idAgent",
+      "indice": "Reprenez la sous-requête de la question sur les agents sans escale. Un agent qui a des escales ne peut pas être supprimé : son identifiant figure dans Escale.idAgent, clé étrangère qui référence AgentConsignataire ; l'intégrité référentielle interdit de laisser des escales sans agent."
+    },
+    {
+      "id": "s01",
+      "type": "schema",
+      "theme": "Évolution du schéma",
+      "annale": "2020",
+      "enonce": "Le port veut enrichir la base pour gérer les intervenants et leur offre de prestations. Un intervenant est une entreprise du port identifiée par un numéro (54 – Cie Gironde, 68 – CMA CGM Royan, 14 – Pilotes de la Gironde…) ; on enregistre sa raison sociale, son adresse mail, son téléphone et son site web. Chaque prestation (manutention, stockage, pilotage, remorquage, collecte des déchets maritimes…) est identifiée par un code et a un libellé. Un intervenant peut offrir plusieurs prestations et une même prestation est offerte par plusieurs intervenants : dans l'annuaire du port, CMA CGM – Royan figure à la fois en « Manutention » et en « Stockage ». Pour chaque escale, l'agent consignataire sélectionne les prestations nécessaires ; pour chacune, il retient l'intervenant qui la réalisera (une prestation est effectuée par un intervenant unique lors d'une escale) et note la date et l'heure prévues. Complétez le schéma à partir des tables AgentConsignataire et Escale.",
+      "depart": [
+        "AgentConsignataire",
+        "Escale"
+      ],
+      "solution": {
+        "tables": [
+          {
+            "nom": "Intervenant",
+            "alias": [
+              "INTERVENANTS",
+              "PRESTATAIRE",
+              "PRESTATAIRES",
+              "ENTREPRISE",
+              "ENTREPRISES",
+              "ENTREPRISE_INTERVENANTE"
+            ],
+            "role": "décrire les entreprises qui interviennent sur le port (coordonnées)",
+            "pk": [
+              "idIntervenant|numIntervenant|codeIntervenant|noIntervenant|idInterv|numInterv|codeInterv"
+            ],
+            "attributs": [
+              "raisonSocialeIntervenant|raisonSociale|raisonSocialeInterv|nomIntervenant|nomEntreprise|nom",
+              "mailIntervenant|mailInterv|emailIntervenant|adrMailIntervenant|mail|email",
+              "telIntervenant|telInterv|telephoneIntervenant|tel|telephone",
+              "siteWebIntervenant|siteWebInterv|siteInternetIntervenant|siteIntervenant|urlIntervenant|siteWeb|siteInternet"
+            ],
+            "optionnels": [
+              "adrRueIntervenant|adresseIntervenant|rueIntervenant",
+              "cpIntervenant|codePostalIntervenant",
+              "adrVilleIntervenant|villeIntervenant"
+            ]
+          },
+          {
+            "nom": "Prestation",
+            "alias": [
+              "PRESTATIONS",
+              "TYPEPRESTATION",
+              "TYPE_PRESTATION",
+              "TYPESPRESTATION",
+              "TYPES_PRESTATIONS"
+            ],
+            "role": "lister les types de prestations proposées sur le port (pilotage, remorquage…)",
+            "pk": [
+              "idPrestation|idTypePrestation|codePrestation|numPrestation|codeTypePrestation|numTypePrestation|idPresta|codePresta"
+            ],
+            "attributs": [
+              "libellePrestation|libelleTypePrestation|libellePresta|nomPrestation|designationPrestation|libelle"
+            ]
+          },
+          {
+            "nom": "Offrir",
+            "alias": [
+              "OFFRE",
+              "OFFRES",
+              "PROPOSER",
+              "ANNUAIRE",
+              "OFFRIR_PRESTATION",
+              "PROPOSITION"
+            ],
+            "role": "indiquer quelles prestations chaque intervenant propose",
+            "pk": [
+              "idIntervenant|numIntervenant|codeIntervenant|noIntervenant|idInterv|numInterv|codeInterv",
+              "idPrestation|idTypePrestation|codePrestation|numPrestation|codeTypePrestation|numTypePrestation|idPresta|codePresta"
+            ],
+            "fk": {
+              "idIntervenant|numIntervenant|codeIntervenant|noIntervenant|idInterv|numInterv|codeInterv": "Intervenant",
+              "idPrestation|idTypePrestation|codePrestation|numPrestation|codeTypePrestation|numTypePrestation|idPresta|codePresta": "Prestation"
+            }
+          },
+          {
+            "nom": "Commander",
+            "alias": [
+              "COMMANDE",
+              "COMMANDES",
+              "RESERVER",
+              "RESERVATION",
+              "CHOISIR",
+              "SELECTIONNER",
+              "DEMANDER",
+              "PRESTATION_ESCALE",
+              "PREVOIR",
+              "PLANIFIER"
+            ],
+            "role": "enregistrer les prestations retenues pour chaque escale (intervenant choisi, date et heure prévues)",
+            "pk": [
+              "idPrestation|idTypePrestation|codePrestation|numPrestation|codeTypePrestation|numTypePrestation|idPresta|codePresta",
+              "idEscale|numEscale"
+            ],
+            "fk": {
+              "idPrestation|idTypePrestation|codePrestation|numPrestation|codeTypePrestation|numTypePrestation|idPresta|codePresta": "Prestation",
+              "idEscale|numEscale": "Escale",
+              "idIntervenant|numIntervenant|codeIntervenant|noIntervenant|idInterv|numInterv|codeInterv": "Intervenant"
+            },
+            "attributs": [
+              "datePrevue|datePrevueIntervention|dateIntervention|datePrestation|dateCommande|date",
+              "heurePrevue|heurePrevueIntervention|heureIntervention|heurePrestation|heure"
+            ]
+          }
+        ]
+      },
+      "variantes": [
+        {
+          "tables": [
+            {
+              "nom": "Intervenant",
+              "alias": [
+                "INTERVENANTS",
+                "PRESTATAIRE",
+                "PRESTATAIRES",
+                "ENTREPRISE",
+                "ENTREPRISES",
+                "ENTREPRISE_INTERVENANTE"
+              ],
+              "role": "décrire les entreprises qui interviennent sur le port (coordonnées)",
+              "pk": [
+                "idIntervenant|numIntervenant|codeIntervenant|noIntervenant|idInterv|numInterv|codeInterv"
+              ],
+              "attributs": [
+                "raisonSocialeIntervenant|raisonSociale|raisonSocialeInterv|nomIntervenant|nomEntreprise|nom",
+                "mailIntervenant|mailInterv|emailIntervenant|adrMailIntervenant|mail|email",
+                "telIntervenant|telInterv|telephoneIntervenant|tel|telephone",
+                "siteWebIntervenant|siteWebInterv|siteInternetIntervenant|siteIntervenant|urlIntervenant|siteWeb|siteInternet"
+              ],
+              "optionnels": [
+                "adrRueIntervenant|adresseIntervenant|rueIntervenant",
+                "cpIntervenant|codePostalIntervenant",
+                "adrVilleIntervenant|villeIntervenant"
+              ]
+            },
+            {
+              "nom": "Prestation",
+              "alias": [
+                "PRESTATIONS",
+                "TYPEPRESTATION",
+                "TYPE_PRESTATION",
+                "TYPESPRESTATION",
+                "TYPES_PRESTATIONS"
+              ],
+              "role": "lister les types de prestations proposées sur le port (pilotage, remorquage…)",
+              "pk": [
+                "idPrestation|idTypePrestation|codePrestation|numPrestation|codeTypePrestation|numTypePrestation|idPresta|codePresta"
+              ],
+              "attributs": [
+                "libellePrestation|libelleTypePrestation|libellePresta|nomPrestation|designationPrestation|libelle"
+              ]
+            },
+            {
+              "nom": "Offrir",
+              "alias": [
+                "OFFRE",
+                "OFFRES",
+                "PROPOSER",
+                "ANNUAIRE",
+                "OFFRIR_PRESTATION",
+                "PROPOSITION"
+              ],
+              "role": "indiquer quelles prestations chaque intervenant propose",
+              "pk": [
+                "idIntervenant|numIntervenant|codeIntervenant|noIntervenant|idInterv|numInterv|codeInterv",
+                "idPrestation|idTypePrestation|codePrestation|numPrestation|codeTypePrestation|numTypePrestation|idPresta|codePresta"
+              ],
+              "fk": {
+                "idIntervenant|numIntervenant|codeIntervenant|noIntervenant|idInterv|numInterv|codeInterv": "Intervenant",
+                "idPrestation|idTypePrestation|codePrestation|numPrestation|codeTypePrestation|numTypePrestation|idPresta|codePresta": "Prestation"
+              }
+            },
+            {
+              "nom": "Commander",
+              "alias": [
+                "COMMANDE",
+                "COMMANDES",
+                "RESERVER",
+                "RESERVATION",
+                "CHOISIR",
+                "SELECTIONNER",
+                "DEMANDER",
+                "PRESTATION_ESCALE",
+                "PREVOIR",
+                "PLANIFIER"
+              ],
+              "role": "enregistrer les prestations retenues pour chaque escale (intervenant choisi, date et heure prévues)",
+              "pk": [
+                "idPrestation|idTypePrestation|codePrestation|numPrestation|codeTypePrestation|numTypePrestation|idPresta|codePresta",
+                "idEscale|numEscale"
+              ],
+              "fk": {
+                "idPrestation|idTypePrestation|codePrestation|numPrestation|codeTypePrestation|numTypePrestation|idPresta|codePresta": "Offrir",
+                "idEscale|numEscale": "Escale",
+                "idIntervenant|numIntervenant|codeIntervenant|noIntervenant|idInterv|numInterv|codeInterv": "Offrir"
+              },
+              "attributs": [
+                "datePrevue|datePrevueIntervention|dateIntervention|datePrestation|dateCommande|date",
+                "heurePrevue|heurePrevueIntervention|heureIntervention|heurePrestation|heure"
+              ]
+            }
+          ]
+        },
+        {
+          "tables": [
+            {
+              "nom": "Intervenant",
+              "alias": [
+                "INTERVENANTS",
+                "PRESTATAIRE",
+                "PRESTATAIRES",
+                "ENTREPRISE",
+                "ENTREPRISES",
+                "ENTREPRISE_INTERVENANTE"
+              ],
+              "role": "décrire les entreprises qui interviennent sur le port (coordonnées)",
+              "pk": [
+                "idIntervenant|numIntervenant|codeIntervenant|noIntervenant|idInterv|numInterv|codeInterv"
+              ],
+              "attributs": [
+                "raisonSocialeIntervenant|raisonSociale|raisonSocialeInterv|nomIntervenant|nomEntreprise|nom",
+                "mailIntervenant|mailInterv|emailIntervenant|adrMailIntervenant|mail|email",
+                "telIntervenant|telInterv|telephoneIntervenant|tel|telephone",
+                "siteWebIntervenant|siteWebInterv|siteInternetIntervenant|siteIntervenant|urlIntervenant|siteWeb|siteInternet"
+              ],
+              "optionnels": [
+                "adrRueIntervenant|adresseIntervenant|rueIntervenant",
+                "cpIntervenant|codePostalIntervenant",
+                "adrVilleIntervenant|villeIntervenant"
+              ]
+            },
+            {
+              "nom": "Prestation",
+              "alias": [
+                "PRESTATIONS",
+                "TYPEPRESTATION",
+                "TYPE_PRESTATION",
+                "TYPESPRESTATION",
+                "TYPES_PRESTATIONS"
+              ],
+              "role": "lister les types de prestations proposées sur le port (pilotage, remorquage…)",
+              "pk": [
+                "idPrestation|idTypePrestation|codePrestation|numPrestation|codeTypePrestation|numTypePrestation|idPresta|codePresta"
+              ],
+              "attributs": [
+                "libellePrestation|libelleTypePrestation|libellePresta|nomPrestation|designationPrestation|libelle"
+              ]
+            },
+            {
+              "nom": "Offrir",
+              "alias": [
+                "OFFRE",
+                "OFFRES",
+                "PROPOSER",
+                "ANNUAIRE",
+                "OFFRIR_PRESTATION",
+                "PROPOSITION"
+              ],
+              "role": "indiquer quelles prestations chaque intervenant propose",
+              "pk": [
+                "idIntervenant|numIntervenant|codeIntervenant|noIntervenant|idInterv|numInterv|codeInterv",
+                "idPrestation|idTypePrestation|codePrestation|numPrestation|codeTypePrestation|numTypePrestation|idPresta|codePresta"
+              ],
+              "fk": {
+                "idIntervenant|numIntervenant|codeIntervenant|noIntervenant|idInterv|numInterv|codeInterv": "Intervenant",
+                "idPrestation|idTypePrestation|codePrestation|numPrestation|codeTypePrestation|numTypePrestation|idPresta|codePresta": "Prestation"
+              }
+            },
+            {
+              "nom": "Commander",
+              "alias": [
+                "COMMANDE",
+                "COMMANDES",
+                "RESERVER",
+                "RESERVATION",
+                "CHOISIR",
+                "SELECTIONNER",
+                "DEMANDER",
+                "PRESTATION_ESCALE",
+                "PREVOIR",
+                "PLANIFIER"
+              ],
+              "role": "enregistrer les prestations retenues pour chaque escale (intervenant choisi, date et heure prévues)",
+              "pk": [
+                "idPrestation|idTypePrestation|codePrestation|numPrestation|codeTypePrestation|numTypePrestation|idPresta|codePresta",
+                "idEscale|numEscale",
+                "idIntervenant|numIntervenant|codeIntervenant|noIntervenant|idInterv|numInterv|codeInterv"
+              ],
+              "fk": {
+                "idPrestation|idTypePrestation|codePrestation|numPrestation|codeTypePrestation|numTypePrestation|idPresta|codePresta": "Prestation",
+                "idEscale|numEscale": "Escale",
+                "idIntervenant|numIntervenant|codeIntervenant|noIntervenant|idInterv|numInterv|codeInterv": "Intervenant"
+              },
+              "attributs": [
+                "datePrevue|datePrevueIntervention|dateIntervention|datePrestation|dateCommande|date",
+                "heurePrevue|heurePrevueIntervention|heureIntervention|heurePrestation|heure"
+              ]
+            }
+          ],
+          "partiel": "Presque : une prestation est effectuée par un intervenant unique lors d'une escale. Avec idIntervenant dans la clé primaire de la table des commandes, deux intervenants pourraient être retenus pour la même prestation de la même escale : la clé doit se limiter au couple (prestation, escale), l'intervenant étant une simple clé étrangère."
+        },
+        {
+          "tables": [
+            {
+              "nom": "Intervenant",
+              "alias": [
+                "INTERVENANTS",
+                "PRESTATAIRE",
+                "PRESTATAIRES",
+                "ENTREPRISE",
+                "ENTREPRISES",
+                "ENTREPRISE_INTERVENANTE"
+              ],
+              "role": "décrire les entreprises qui interviennent sur le port (coordonnées)",
+              "pk": [
+                "idIntervenant|numIntervenant|codeIntervenant|noIntervenant|idInterv|numInterv|codeInterv"
+              ],
+              "attributs": [
+                "raisonSocialeIntervenant|raisonSociale|raisonSocialeInterv|nomIntervenant|nomEntreprise|nom",
+                "mailIntervenant|mailInterv|emailIntervenant|adrMailIntervenant|mail|email",
+                "telIntervenant|telInterv|telephoneIntervenant|tel|telephone",
+                "siteWebIntervenant|siteWebInterv|siteInternetIntervenant|siteIntervenant|urlIntervenant|siteWeb|siteInternet"
+              ],
+              "optionnels": [
+                "adrRueIntervenant|adresseIntervenant|rueIntervenant",
+                "cpIntervenant|codePostalIntervenant",
+                "adrVilleIntervenant|villeIntervenant"
+              ]
+            },
+            {
+              "nom": "Prestation",
+              "alias": [
+                "PRESTATIONS",
+                "TYPEPRESTATION",
+                "TYPE_PRESTATION",
+                "TYPESPRESTATION",
+                "TYPES_PRESTATIONS"
+              ],
+              "role": "lister les types de prestations proposées sur le port (pilotage, remorquage…)",
+              "pk": [
+                "idPrestation|idTypePrestation|codePrestation|numPrestation|codeTypePrestation|numTypePrestation|idPresta|codePresta"
+              ],
+              "attributs": [
+                "libellePrestation|libelleTypePrestation|libellePresta|nomPrestation|designationPrestation|libelle"
+              ]
+            },
+            {
+              "nom": "Offrir",
+              "alias": [
+                "OFFRE",
+                "OFFRES",
+                "PROPOSER",
+                "ANNUAIRE",
+                "OFFRIR_PRESTATION",
+                "PROPOSITION"
+              ],
+              "role": "indiquer quelles prestations chaque intervenant propose",
+              "pk": [
+                "idIntervenant|numIntervenant|codeIntervenant|noIntervenant|idInterv|numInterv|codeInterv",
+                "idPrestation|idTypePrestation|codePrestation|numPrestation|codeTypePrestation|numTypePrestation|idPresta|codePresta"
+              ],
+              "fk": {
+                "idIntervenant|numIntervenant|codeIntervenant|noIntervenant|idInterv|numInterv|codeInterv": "Intervenant",
+                "idPrestation|idTypePrestation|codePrestation|numPrestation|codeTypePrestation|numTypePrestation|idPresta|codePresta": "Prestation"
+              }
+            },
+            {
+              "nom": "Commander",
+              "alias": [
+                "COMMANDE",
+                "COMMANDES",
+                "RESERVER",
+                "RESERVATION",
+                "CHOISIR",
+                "SELECTIONNER",
+                "DEMANDER",
+                "PRESTATION_ESCALE",
+                "PREVOIR",
+                "PLANIFIER"
+              ],
+              "role": "enregistrer les prestations retenues pour chaque escale (intervenant choisi, date et heure prévues)",
+              "pk": [
+                "idPrestation|idTypePrestation|codePrestation|numPrestation|codeTypePrestation|numTypePrestation|idPresta|codePresta",
+                "idEscale|numEscale",
+                "idIntervenant|numIntervenant|codeIntervenant|noIntervenant|idInterv|numInterv|codeInterv"
+              ],
+              "fk": {
+                "idPrestation|idTypePrestation|codePrestation|numPrestation|codeTypePrestation|numTypePrestation|idPresta|codePresta": "Offrir",
+                "idEscale|numEscale": "Escale",
+                "idIntervenant|numIntervenant|codeIntervenant|noIntervenant|idInterv|numInterv|codeInterv": "Offrir"
+              },
+              "attributs": [
+                "datePrevue|datePrevueIntervention|dateIntervention|datePrestation|dateCommande|date",
+                "heurePrevue|heurePrevueIntervention|heureIntervention|heurePrestation|heure"
+              ]
+            }
+          ],
+          "partiel": "Presque : une prestation est effectuée par un intervenant unique lors d'une escale. Avec idIntervenant dans la clé primaire de la table des commandes, deux intervenants pourraient être retenus pour la même prestation de la même escale : la clé doit se limiter au couple (prestation, escale), l'intervenant étant une simple clé étrangère."
+        },
+        {
+          "tables": [
+            {
+              "nom": "Intervenant",
+              "alias": [
+                "INTERVENANTS",
+                "PRESTATAIRE",
+                "PRESTATAIRES",
+                "ENTREPRISE",
+                "ENTREPRISES",
+                "ENTREPRISE_INTERVENANTE"
+              ],
+              "role": "décrire les entreprises qui interviennent sur le port (coordonnées)",
+              "pk": [
+                "idIntervenant|numIntervenant|codeIntervenant|noIntervenant|idInterv|numInterv|codeInterv"
+              ],
+              "attributs": [
+                "raisonSocialeIntervenant|raisonSociale|raisonSocialeInterv|nomIntervenant|nomEntreprise|nom",
+                "mailIntervenant|mailInterv|emailIntervenant|adrMailIntervenant|mail|email",
+                "telIntervenant|telInterv|telephoneIntervenant|tel|telephone",
+                "siteWebIntervenant|siteWebInterv|siteInternetIntervenant|siteIntervenant|urlIntervenant|siteWeb|siteInternet"
+              ],
+              "optionnels": [
+                "adrRueIntervenant|adresseIntervenant|rueIntervenant",
+                "cpIntervenant|codePostalIntervenant",
+                "adrVilleIntervenant|villeIntervenant"
+              ]
+            },
+            {
+              "nom": "Prestation",
+              "alias": [
+                "PRESTATIONS",
+                "TYPEPRESTATION",
+                "TYPE_PRESTATION",
+                "TYPESPRESTATION",
+                "TYPES_PRESTATIONS"
+              ],
+              "role": "lister les types de prestations proposées sur le port (pilotage, remorquage…)",
+              "pk": [
+                "idPrestation|idTypePrestation|codePrestation|numPrestation|codeTypePrestation|numTypePrestation|idPresta|codePresta"
+              ],
+              "attributs": [
+                "libellePrestation|libelleTypePrestation|libellePresta|nomPrestation|designationPrestation|libelle"
+              ]
+            },
+            {
+              "nom": "Commander",
+              "alias": [
+                "COMMANDE",
+                "COMMANDES",
+                "RESERVER",
+                "RESERVATION",
+                "CHOISIR",
+                "SELECTIONNER",
+                "DEMANDER",
+                "PRESTATION_ESCALE",
+                "PREVOIR",
+                "PLANIFIER"
+              ],
+              "role": "enregistrer les prestations retenues pour chaque escale (intervenant choisi, date et heure prévues)",
+              "pk": [
+                "idPrestation|idTypePrestation|codePrestation|numPrestation|codeTypePrestation|numTypePrestation|idPresta|codePresta",
+                "idEscale|numEscale"
+              ],
+              "fk": {
+                "idPrestation|idTypePrestation|codePrestation|numPrestation|codeTypePrestation|numTypePrestation|idPresta|codePresta": "Prestation",
+                "idEscale|numEscale": "Escale",
+                "idIntervenant|numIntervenant|codeIntervenant|noIntervenant|idInterv|numInterv|codeInterv": "Intervenant"
+              },
+              "attributs": [
+                "datePrevue|datePrevueIntervention|dateIntervention|datePrestation|dateCommande|date",
+                "heurePrevue|heurePrevueIntervention|heureIntervention|heurePrestation|heure"
+              ]
+            }
+          ],
+          "partiel": "Presque : les commandes sont bien enregistrées, mais il manque l'offre de prestations des intervenants (l'annuaire du port) : un intervenant propose plusieurs prestations et une prestation est proposée par plusieurs intervenants, ce qui demande une table d'association."
+        }
+      ],
+      "indice": "Il faut deux tables « objets » (les intervenants, les prestations) et deux tables d'association : l'une pour l'offre des intervenants (plusieurs à plusieurs), l'autre pour les prestations commandées lors d'une escale. Pour cette dernière, demandez-vous ce qui identifie une commande : pour une escale et une prestation données, combien d'intervenants peut-on retenir ?"
+    },
+    {
+      "id": "p01",
+      "type": "processus",
+      "theme": "Processus",
+      "annale": "2020",
+      "enonce": "Dossier 1 – Gestion des emplacements au port. Avant son arrivée au port de Mériadeck, le commandant d'un navire doit contacter l'agent consignataire qui le représente afin d'obtenir une place sur un quai. Le document 1 donne le schéma événements-résultats du processus de demande de place à quai (PAQ) : un événement synchronisé « Date et heure prévues ET Marchandises et prestations nécessaires » (venant du navire) déclenche l'opération « 1 – Contacter intervenants » de l'agent consignataire (choisir les intervenants et leur demander leurs disponibilités), suivie de « 2 – Établir demande de place à quai », « 3 – Traiter demande » (capitainerie) et « 4 – Réceptionner autorisation ». Extrait de la description : « En partant du port d'origine, le commandant d'un navire contacte l'agent consignataire agissant pour son compte au prochain port d'arrivée. Il lui communique la date et l'heure prévue de son arrivée, la liste des marchandises qu'il transporte et l'ensemble des prestations nécessaires lors de l'escale (pilotage, remorquage, manutention, stockage…). L'agent consignataire contacte les intervenants externes avec lesquels il travaille afin d'obtenir leurs disponibilités pour réaliser les prestations réclamées par le commandant du navire. […] Préalablement à ces deux étapes, si l'agent consignataire constate que le navire fait escale au port pour la première fois, il réalise une demande d'accréditation du nouveau navire auprès de la capitainerie du port. Celle-ci doit étudier les caractéristiques du bateau et vérifier qu'il est en conformité avec la réglementation maritime avant d'autoriser ou non sa venue au port. Un avis d'accréditation est alors transmis à l'agent consignataire. Si l'accréditation est accordée, l'agent consignataire peut contacter les intervenants. Dans le cas contraire, le refus d'accréditation devra être mentionné au commandant du navire. Dans tous les cas, le dossier pour l'escale est mis à jour. » Identifiez la partie du processus qui n'est pas représentée sur le schéma du document 1, puis représentez-la (annexe A) : de la réception de la date et heure prévues et des marchandises et prestations nécessaires jusqu'au déclenchement de l'opération « Contacter intervenants ».",
+      "couloirs": [
+        "Navire",
+        "Agent consignataire",
+        "Capitainerie",
+        "Intervenant(s)"
+      ],
+      "elements": [
+        {
+          "kind": "event",
+          "label": "Date et heure prévues"
+        },
+        {
+          "kind": "event",
+          "label": "Marchandises et prestations nécessaires"
+        },
+        {
+          "kind": "event",
+          "label": "Demande d'accréditation"
+        },
+        {
+          "kind": "event",
+          "label": "PAQ à traiter 1"
+        },
+        {
+          "kind": "event",
+          "label": "PAQ en attente"
+        },
+        {
+          "kind": "event",
+          "label": "Avis d'accréditation"
+        },
+        {
+          "kind": "event",
+          "label": "Refus d'accréditation"
+        },
+        {
+          "kind": "event",
+          "label": "PAQ à traiter 2"
+        },
+        {
+          "kind": "event",
+          "label": "Demande de disponibilité"
+        },
+        {
+          "kind": "operation",
+          "label": "Vérification bateau"
+        },
+        {
+          "kind": "operation",
+          "label": "Étude demande d'accréditation"
+        },
+        {
+          "kind": "operation",
+          "label": "Étude avis d'accréditation"
+        },
+        {
+          "kind": "operation",
+          "label": "Contacter intervenants"
+        }
+      ],
+      "attendus": [
+        {
+          "operation": "Vérification bateau",
+          "alias": [
+            "Vérification navire",
+            "Vérification du navire",
+            "Vérification du bateau",
+            "Contrôle navire",
+            "Vérifier bateau"
+          ],
+          "synchronisation": "« Date et heure prévues » ET « Marchandises et prestations nécessaires »",
+          "regles": [
+            "Bateau connu",
+            "Nouveau"
+          ]
+        },
+        {
+          "operation": "Étude avis d'accréditation",
+          "alias": [
+            "Étude avis accréditation",
+            "Réception avis",
+            "Réception avis accréditation",
+            "Traitement avis",
+            "Mise à jour dossier",
+            "Traitement avis accréditation"
+          ],
+          "synchronisation": "PAQ en attente ET Avis d'accréditation",
+          "regles": [
+            "Navire refusé",
+            "Navire accepté"
+          ]
+        },
+        {
+          "operation": "Contacter intervenants",
+          "alias": [
+            "Contacter les intervenants",
+            "1 - Contacter intervenants",
+            "Contact intervenants"
+          ],
+          "synchronisation": "PAQ à traiter 1 OU PAQ à traiter 2"
+        }
+      ],
+      "equivalents": {
+        "Date et heure prévues": [
+          "Date et heure prévue",
+          "Date et heure d'arrivée prévues",
+          "Date prévue"
+        ],
+        "Marchandises et prestations nécessaires": [
+          "Marchandises et prestations",
+          "Prestations nécessaires",
+          "Liste des marchandises et prestations"
+        ],
+        "PAQ à traiter 1": [
+          "Navire connu",
+          "Bateau connu",
+          "PAQ à traiter (navire connu)",
+          "Demande à traiter"
+        ],
+        "PAQ à traiter 2": [
+          "Navire accepté",
+          "Accréditation accordée",
+          "Navire accrédité",
+          "PAQ à traiter (navire accrédité)"
+        ],
+        "PAQ en attente": [
+          "Demande en attente",
+          "Dossier en attente",
+          "PAQ suspendue"
+        ],
+        "Avis d'accréditation": [
+          "Avis accréditation",
+          "Réponse accréditation",
+          "Avis de la capitainerie",
+          "Décision accréditation"
+        ],
+        "Bateau connu": [
+          "Navire connu",
+          "Déjà connu",
+          "Connu",
+          "Navire déjà venu"
+        ],
+        "Nouveau": [
+          "Nouveau navire",
+          "Nouveau bateau",
+          "Inconnu",
+          "Navire inconnu",
+          "Première escale",
+          "Première fois"
+        ],
+        "Navire refusé": [
+          "Refusé",
+          "Accréditation refusée",
+          "Avis défavorable",
+          "Refus"
+        ],
+        "Navire accepté": [
+          "Accepté",
+          "Accréditation accordée",
+          "Avis favorable",
+          "Accord"
+        ]
+      },
+      "solution": {
+        "lanes": [
+          "Navire",
+          "Agent consignataire",
+          "Capitainerie",
+          "Intervenant(s)"
+        ],
+        "nodes": [
+          {
+            "id": "n1",
+            "kind": "event",
+            "label": "Date et heure prévues",
+            "x": 160,
+            "y": 95
+          },
+          {
+            "id": "n2",
+            "kind": "event",
+            "label": "Marchandises et prestations nécessaires",
+            "x": 120,
+            "y": 195
+          },
+          {
+            "id": "n3",
+            "kind": "sync",
+            "label": "",
+            "x": 360,
+            "y": 260,
+            "cond": "A et B"
+          },
+          {
+            "id": "n4",
+            "kind": "operation",
+            "label": "Vérification bateau",
+            "x": 360,
+            "y": 370,
+            "actions": [
+              "Vérification si le bateau est déjà connu",
+              "Demande éventuelle d'accréditation"
+            ],
+            "rules": [
+              "Bateau connu",
+              "Nouveau"
+            ]
+          },
+          {
+            "id": "n5",
+            "kind": "event",
+            "label": "Demande d'accréditation",
+            "x": 600,
+            "y": 480
+          },
+          {
+            "id": "n6",
+            "kind": "event",
+            "label": "PAQ à traiter 1",
+            "x": 305,
+            "y": 520
+          },
+          {
+            "id": "n7",
+            "kind": "operation",
+            "label": "Étude demande d'accréditation",
+            "x": 600,
+            "y": 625,
+            "actions": [
+              "Étude des caractéristiques du navire",
+              "Vérification de la conformité à la réglementation maritime"
+            ],
+            "rules": [
+              "Toujours"
+            ]
+          },
+          {
+            "id": "n8",
+            "kind": "event",
+            "label": "PAQ en attente",
+            "x": 405,
+            "y": 620
+          },
+          {
+            "id": "n9",
+            "kind": "event",
+            "label": "Avis d'accréditation",
+            "x": 435,
+            "y": 760
+          },
+          {
+            "id": "n10",
+            "kind": "sync",
+            "label": "",
+            "x": 390,
+            "y": 850,
+            "cond": "A et B"
+          },
+          {
+            "id": "n11",
+            "kind": "operation",
+            "label": "Étude avis d'accréditation",
+            "x": 390,
+            "y": 960,
+            "actions": [
+              "Mise à jour du dossier de l'escale"
+            ],
+            "rules": [
+              "Navire refusé",
+              "Navire accepté"
+            ]
+          },
+          {
+            "id": "n12",
+            "kind": "event",
+            "label": "Refus d'accréditation",
+            "x": 120,
+            "y": 1080
+          },
+          {
+            "id": "n13",
+            "kind": "event",
+            "label": "PAQ à traiter 2",
+            "x": 420,
+            "y": 1080
+          },
+          {
+            "id": "n14",
+            "kind": "sync",
+            "label": "",
+            "x": 340,
+            "y": 1180,
+            "cond": "A ou B"
+          },
+          {
+            "id": "n15",
+            "kind": "operation",
+            "label": "Contacter intervenants",
+            "x": 360,
+            "y": 1300,
+            "actions": [
+              "Choix des intervenants en fonction des interventions",
+              "Demande de leurs disponibilités pour la date prévue"
+            ],
+            "rules": [
+              "Toujours"
+            ]
+          },
+          {
+            "id": "n16",
+            "kind": "event",
+            "label": "Demande de disponibilité",
+            "x": 840,
+            "y": 1420
+          }
+        ],
+        "arrows": [
+          {
+            "id": "a1",
+            "from": "n1",
+            "rule": null,
+            "to": "n3",
+            "letter": "A"
+          },
+          {
+            "id": "a2",
+            "from": "n2",
+            "rule": null,
+            "to": "n3",
+            "letter": "B"
+          },
+          {
+            "id": "a3",
+            "from": "n3",
+            "rule": null,
+            "to": "n4"
+          },
+          {
+            "id": "a4",
+            "from": "n4",
+            "rule": 0,
+            "to": "n6"
+          },
+          {
+            "id": "a5",
+            "from": "n4",
+            "rule": 1,
+            "to": "n5"
+          },
+          {
+            "id": "a6",
+            "from": "n4",
+            "rule": 1,
+            "to": "n8"
+          },
+          {
+            "id": "a7",
+            "from": "n5",
+            "rule": null,
+            "to": "n7"
+          },
+          {
+            "id": "a8",
+            "from": "n7",
+            "rule": 0,
+            "to": "n9"
+          },
+          {
+            "id": "a9",
+            "from": "n8",
+            "rule": null,
+            "to": "n10",
+            "letter": "A"
+          },
+          {
+            "id": "a10",
+            "from": "n9",
+            "rule": null,
+            "to": "n10",
+            "letter": "B"
+          },
+          {
+            "id": "a11",
+            "from": "n10",
+            "rule": null,
+            "to": "n11"
+          },
+          {
+            "id": "a12",
+            "from": "n11",
+            "rule": 0,
+            "to": "n12"
+          },
+          {
+            "id": "a13",
+            "from": "n11",
+            "rule": 1,
+            "to": "n13"
+          },
+          {
+            "id": "a14",
+            "from": "n6",
+            "rule": null,
+            "to": "n14",
+            "letter": "A"
+          },
+          {
+            "id": "a15",
+            "from": "n13",
+            "rule": null,
+            "to": "n14",
+            "letter": "B"
+          },
+          {
+            "id": "a16",
+            "from": "n14",
+            "rule": null,
+            "to": "n15"
+          },
+          {
+            "id": "a17",
+            "from": "n15",
+            "rule": 0,
+            "to": "n16"
+          }
+        ]
+      },
+      "autoevaluation": [
+        "La partie manquante est la demande d'accréditation d'un nouveau navire, placée en amont de l'opération « Contacter intervenants ».",
+        "Seuls l'agent consignataire et la capitainerie réalisent des opérations ; le navire et les intervenants sont des acteurs externes.",
+        "La vérification du bateau a deux règles d'émission : bateau connu / nouveau navire (demande d'accréditation envoyée à la capitainerie).",
+        "L'étude de l'avis d'accréditation attend la demande en attente ET l'avis de la capitainerie ; elle a deux règles : navire refusé (refus transmis au navire) / navire accepté.",
+        "L'opération « Contacter intervenants » se déclenche si le bateau est connu OU s'il vient d'être accrédité : synchronisation « A ou B »."
+      ],
+      "indice": "Commencez par les deux événements venant du navire, puis demandez-vous ce que l'agent doit vérifier avant de contacter les intervenants. Le cas « nouveau navire » fait intervenir la capitainerie et produit un avis qui peut être favorable ou non. Enfin, « Contacter intervenants » peut être atteinte par deux chemins différents : la condition de sa synchronisation n'est pas un « et »."
+    }
+  ]
+}

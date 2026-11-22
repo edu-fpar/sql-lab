@@ -1,0 +1,1663 @@
+{
+  "id": "dcg2008",
+  "titre": "DCG 2008 – COMPTA-CONSEIL, cabinet d'expertise comptable",
+  "aujourdhui": "2008-05-15",
+  "contexte": "COMPTA-CONSEIL est un cabinet d'expertise comptable d'une soixantaine de salariés (PERSONNEL). Chaque salarié occupe un POSTE, qui fixe sa qualification et son taux horaire (en euros). Le personnel est organisé en 8 groupes (GROUPE, nommés « Groupe 1 » à « Groupe 8 ») ; GROUPE et PERSONNEL sont reliés de deux façons : PERSONNEL.GrpCode indique le groupe dont le salarié est membre (vide pour le directeur, la secrétaire de direction et la juriste, qui n'appartiennent à aucun groupe), et GROUPE.PersNum indique le chef du groupe, un expert-comptable membre de ce groupe. Les compétences de chaque salarié sont enregistrées dans CARACTERISER, avec une date de fin de validité (DateFin, vide si la compétence est reconnue sans limite). Chaque MISSION (révision comptable, paie, audit…) requiert une COMPETENCE.",
+  "source": "Inspiré du sujet DCG UE8 session 2008, dossier 3. Données entièrement fictives.",
+  "schemaGrid": {
+    "POSTE": [
+      0,
+      0
+    ],
+    "PERSONNEL": [
+      1,
+      0
+    ],
+    "GROUPE": [
+      2,
+      0
+    ],
+    "CARACTERISER": [
+      0,
+      1
+    ],
+    "COMPETENCE": [
+      1,
+      1
+    ],
+    "MISSION": [
+      2,
+      1
+    ]
+  },
+  "questions": [
+    {
+      "id": "q01",
+      "theme": "Une seule table",
+      "enonce": "Afficher les postes (code, qualification et taux horaire) dont le taux horaire est d'au moins 40 €, du taux le plus élevé au plus faible.",
+      "ordered": [
+        2
+      ],
+      "correction": [
+        "SELECT PstCode, PstQualification, PstTauxHoraire",
+        "FROM POSTE",
+        "WHERE PstTauxHoraire >= 40",
+        "ORDER BY PstTauxHoraire DESC;"
+      ],
+      "indice": "« Au moins » se traduit par >=. DESC trie par ordre décroissant."
+    },
+    {
+      "id": "q02",
+      "theme": "Une seule table",
+      "enonce": "Certains membres du personnel ne sont affectés à aucun groupe (le directeur, la secrétaire de direction…). Afficher leur numéro, leur nom, leur prénom et le code de leur poste.",
+      "correction": [
+        "SELECT PersNum, PersNom, PersPrenom, PstCode",
+        "FROM PERSONNEL",
+        "WHERE GrpCode IS NULL;"
+      ],
+      "indice": "Un salarié sans groupe a un GrpCode vide (NULL). On ne compare pas à NULL avec = : on écrit IS NULL."
+    },
+    {
+      "id": "q03",
+      "theme": "Dates",
+      "annale": "2008",
+      "enonce": "Quelle est la liste des personnels classés par ordre chronologique (nom, prénom, date d'embauche) recrutés entre le 1er mai 2007 et le 1er mai 2008 ? Les deux dates sont incluses.",
+      "ordered": [
+        2
+      ],
+      "correction": [
+        "SELECT PersNom, PersPrenom, PersDateEmbauche",
+        "FROM PERSONNEL",
+        "WHERE PersDateEmbauche BETWEEN '01/05/2007' AND '01/05/2008'",
+        "ORDER BY PersDateEmbauche;"
+      ],
+      "variantes": [
+        [
+          "SELECT PersNom, PersPrenom, PersDateEmbauche",
+          "FROM PERSONNEL",
+          "WHERE PersDateEmbauche >= '01/05/2007'",
+          "AND PersDateEmbauche <= '01/05/2008'",
+          "ORDER BY PersDateEmbauche ASC;"
+        ]
+      ],
+      "indice": "BETWEEN … AND … inclut les deux bornes. Le tri chronologique se fait sur la date d'embauche (ordre croissant, ASC facultatif)."
+    },
+    {
+      "id": "q04",
+      "theme": "Dates",
+      "enonce": "Afficher le nom, le prénom et la date d'embauche des salariés recrutés au cours de l'année 2006.",
+      "correction": [
+        "SELECT PersNom, PersPrenom, PersDateEmbauche",
+        "FROM PERSONNEL",
+        "WHERE YEAR(PersDateEmbauche) = 2006;"
+      ],
+      "variantes": [
+        [
+          "SELECT PersNom, PersPrenom, PersDateEmbauche",
+          "FROM PERSONNEL",
+          "WHERE PersDateEmbauche BETWEEN '01/01/2006' AND '31/12/2006';"
+        ]
+      ],
+      "indice": "La fonction YEAR() extrait l'année d'une date. On peut aussi écrire BETWEEN '01/01/2006' AND '31/12/2006'."
+    },
+    {
+      "id": "q05",
+      "theme": "Calculs et agrégats",
+      "enonce": "Afficher le nombre de membres du personnel du cabinet, la date d'embauche la plus ancienne et la date d'embauche la plus récente.",
+      "correction": [
+        "SELECT COUNT(*), MIN(PersDateEmbauche), MAX(PersDateEmbauche)",
+        "FROM PERSONNEL;"
+      ],
+      "indice": "COUNT compte les lignes ; MIN et MAX fonctionnent aussi sur des dates."
+    },
+    {
+      "id": "q06",
+      "theme": "Calculs et agrégats",
+      "enonce": "Afficher, pour chaque groupe (code du groupe), le nombre de salariés qui le composent. Les salariés qui n'appartiennent à aucun groupe ne doivent pas apparaître.",
+      "correction": [
+        "SELECT GrpCode, COUNT(*) AS NbSalaries",
+        "FROM PERSONNEL",
+        "WHERE GrpCode IS NOT NULL",
+        "GROUP BY GrpCode;"
+      ],
+      "indice": "GROUP BY GrpCode forme un groupe par code. Sans condition, les salariés sans groupe formeraient un groupe « vide » (NULL) : écartez-les avec IS NOT NULL."
+    },
+    {
+      "id": "q07",
+      "theme": "Jointures",
+      "enonce": "Afficher le nom, le prénom, la qualification et le taux horaire des membres du « Groupe 2 » (GrpNom), triés par nom.",
+      "ordered": [
+        0
+      ],
+      "correction": [
+        "SELECT PersNom, PersPrenom, PstQualification, PstTauxHoraire",
+        "FROM PERSONNEL, POSTE, GROUPE",
+        "WHERE PERSONNEL.PstCode = POSTE.PstCode",
+        "AND PERSONNEL.GrpCode = GROUPE.GrpCode",
+        "AND GrpNom = 'Groupe 2'",
+        "ORDER BY PersNom;"
+      ],
+      "variantes": [
+        [
+          "SELECT PersNom, PersPrenom, PstQualification, PstTauxHoraire",
+          "FROM PERSONNEL",
+          "INNER JOIN POSTE ON PERSONNEL.PstCode = POSTE.PstCode",
+          "INNER JOIN GROUPE ON PERSONNEL.GrpCode = GROUPE.GrpCode",
+          "WHERE GrpNom = 'Groupe 2'",
+          "ORDER BY PersNom;"
+        ]
+      ],
+      "indice": "Trois tables : PERSONNEL, POSTE (qualification et taux) et GROUPE (nom du groupe). L'appartenance à un groupe se lit dans PERSONNEL.GrpCode."
+    },
+    {
+      "id": "q08",
+      "theme": "Jointures",
+      "enonce": "Afficher, pour chaque groupe, son nom ainsi que le nom et le prénom de son chef de groupe. Le chef d'un groupe est le salarié dont le numéro figure dans GROUPE.PersNum (association « Diriger »).",
+      "correction": [
+        "SELECT GrpNom, PersNom, PersPrenom",
+        "FROM GROUPE, PERSONNEL",
+        "WHERE GROUPE.PersNum = PERSONNEL.PersNum;"
+      ],
+      "variantes": [
+        [
+          "SELECT GrpNom, PersNom, PersPrenom",
+          "FROM GROUPE",
+          "INNER JOIN PERSONNEL ON GROUPE.PersNum = PERSONNEL.PersNum;"
+        ]
+      ],
+      "indice": "GROUPE et PERSONNEL sont reliés de deux façons : PERSONNEL.GrpCode (le groupe dont on est membre) et GROUPE.PersNum (le chef). Ici, c'est la seconde : on ne veut qu'une personne par groupe."
+    },
+    {
+      "id": "q09",
+      "theme": "Jointures",
+      "annale": "2008",
+      "enonce": "Quelle est la liste des personnes (nom, prénom, nombre d'années d'ancienneté) qui composent le groupe « Groupe 4 », classée par ordre décroissant d'ancienneté ? L'ancienneté est calculée comme la différence entre l'année en cours et l'année d'embauche.",
+      "ordered": [
+        2
+      ],
+      "correction": [
+        "SELECT PersNom, PersPrenom, YEAR(NOW()) - YEAR(PersDateEmbauche) AS Anciennete",
+        "FROM PERSONNEL, GROUPE",
+        "WHERE PERSONNEL.GrpCode = GROUPE.GrpCode",
+        "AND GrpNom = 'Groupe 4'",
+        "ORDER BY PersDateEmbauche;"
+      ],
+      "variantes": [
+        [
+          "SELECT PersNom, PersPrenom, YEAR(NOW()) - YEAR(PersDateEmbauche) AS Anciennete",
+          "FROM PERSONNEL",
+          "INNER JOIN GROUPE ON PERSONNEL.GrpCode = GROUPE.GrpCode",
+          "WHERE GrpNom = 'Groupe 4'",
+          "ORDER BY Anciennete DESC;"
+        ]
+      ],
+      "indice": "« Composer le groupe » : la jointure se fait par PERSONNEL.GrpCode = GROUPE.GrpCode (et non par GROUPE.PersNum, qui ne donne que le chef). L'année en cours s'obtient avec YEAR(NOW()). Les plus anciens sont ceux embauchés le plus tôt : tri par date d'embauche croissante, ou par ancienneté décroissante."
+    },
+    {
+      "id": "q10",
+      "theme": "Jointures",
+      "enonce": "Afficher, pour chaque mission, sa nature et le titre de la compétence qu'elle requiert, triées par nature de mission.",
+      "ordered": [
+        0
+      ],
+      "correction": [
+        "SELECT MisNature, CompTitre",
+        "FROM MISSION, COMPETENCE",
+        "WHERE MISSION.CompCode = COMPETENCE.CompCode",
+        "ORDER BY MisNature;"
+      ],
+      "variantes": [
+        [
+          "SELECT MisNature, CompTitre",
+          "FROM MISSION",
+          "INNER JOIN COMPETENCE ON MISSION.CompCode = COMPETENCE.CompCode",
+          "ORDER BY MisNature;"
+        ]
+      ],
+      "indice": "Chaque mission requiert une compétence : MISSION.CompCode fait référence à COMPETENCE."
+    },
+    {
+      "id": "q11",
+      "theme": "Jointures",
+      "annale": "2008",
+      "enonce": "Quelles sont les personnes (nom, prénom) du groupe « Groupe 4 » compétentes pour effectuer une mission de « Révision comptable » (MisNature) ?",
+      "correction": [
+        "SELECT PersNom, PersPrenom",
+        "FROM MISSION, CARACTERISER, PERSONNEL, GROUPE",
+        "WHERE MISSION.CompCode = CARACTERISER.CompCode",
+        "AND CARACTERISER.PersNum = PERSONNEL.PersNum",
+        "AND PERSONNEL.GrpCode = GROUPE.GrpCode",
+        "AND GrpNom = 'Groupe 4'",
+        "AND MisNature = 'Révision comptable';"
+      ],
+      "variantes": [
+        [
+          "SELECT PersNom, PersPrenom",
+          "FROM MISSION",
+          "INNER JOIN CARACTERISER ON MISSION.CompCode = CARACTERISER.CompCode",
+          "INNER JOIN PERSONNEL ON CARACTERISER.PersNum = PERSONNEL.PersNum",
+          "INNER JOIN GROUPE ON PERSONNEL.GrpCode = GROUPE.GrpCode",
+          "WHERE GrpNom = 'Groupe 4'",
+          "AND MisNature = 'Révision comptable';"
+        ]
+      ],
+      "indice": "Le chemin : MISSION (nature) → compétence requise (CompCode) → CARACTERISER (qui possède cette compétence) → PERSONNEL → GROUPE (nom du groupe). Quatre tables, donc trois conditions de jointure."
+    },
+    {
+      "id": "q12",
+      "theme": "Jointures",
+      "enonce": "La date de fin (DateFin) d'une compétence est la date jusqu'à laquelle elle est reconnue au salarié ; une date de fin vide signifie « sans limite ». Afficher le nom et le prénom des salariés dont une compétence a expiré (date de fin antérieure à la date du jour), avec le titre de la compétence et sa date de fin.",
+      "correction": [
+        "SELECT PersNom, PersPrenom, CompTitre, DateFin",
+        "FROM PERSONNEL, CARACTERISER, COMPETENCE",
+        "WHERE PERSONNEL.PersNum = CARACTERISER.PersNum",
+        "AND CARACTERISER.CompCode = COMPETENCE.CompCode",
+        "AND DateFin < CURDATE();"
+      ],
+      "variantes": [
+        [
+          "SELECT PersNom, PersPrenom, CompTitre, DateFin",
+          "FROM PERSONNEL",
+          "INNER JOIN CARACTERISER ON PERSONNEL.PersNum = CARACTERISER.PersNum",
+          "INNER JOIN COMPETENCE ON CARACTERISER.CompCode = COMPETENCE.CompCode",
+          "WHERE DateFin < NOW();"
+        ]
+      ],
+      "indice": "La date du jour s'obtient avec CURDATE() ou NOW(). Les dates de fin vides (NULL) ne sont ni avant ni après aujourd'hui : elles sont écartées automatiquement par la comparaison."
+    },
+    {
+      "id": "q13",
+      "theme": "Jointures et regroupements",
+      "annale": "2008",
+      "enonce": "Quel est l'effectif des salariés pour chaque qualification ?",
+      "correction": [
+        "SELECT PstQualification, COUNT(*) AS Effectif",
+        "FROM PERSONNEL, POSTE",
+        "WHERE PERSONNEL.PstCode = POSTE.PstCode",
+        "GROUP BY PstQualification;"
+      ],
+      "variantes": [
+        [
+          "SELECT PstQualification, COUNT(PERSONNEL.PersNum) AS Effectif",
+          "FROM PERSONNEL",
+          "INNER JOIN POSTE ON PERSONNEL.PstCode = POSTE.PstCode",
+          "GROUP BY PstQualification;"
+        ]
+      ],
+      "indice": "La qualification est dans POSTE, les salariés dans PERSONNEL : joignez-les par PstCode, regroupez par qualification et comptez."
+    },
+    {
+      "id": "q14",
+      "theme": "Jointures et regroupements",
+      "enonce": "Afficher, pour chaque groupe (nom du groupe), le taux horaire moyen de ses membres, du groupe le plus cher au moins cher.",
+      "ordered": [
+        1
+      ],
+      "correction": [
+        "SELECT GrpNom, AVG(PstTauxHoraire) AS TauxMoyen",
+        "FROM GROUPE, PERSONNEL, POSTE",
+        "WHERE GROUPE.GrpCode = PERSONNEL.GrpCode",
+        "AND PERSONNEL.PstCode = POSTE.PstCode",
+        "GROUP BY GROUPE.GrpCode, GrpNom",
+        "ORDER BY AVG(PstTauxHoraire) DESC;"
+      ],
+      "variantes": [
+        [
+          "SELECT GrpNom, AVG(PstTauxHoraire) AS TauxMoyen",
+          "FROM GROUPE",
+          "INNER JOIN PERSONNEL ON GROUPE.GrpCode = PERSONNEL.GrpCode",
+          "INNER JOIN POSTE ON PERSONNEL.PstCode = POSTE.PstCode",
+          "GROUP BY GROUPE.GrpCode, GrpNom",
+          "ORDER BY TauxMoyen DESC;"
+        ]
+      ],
+      "indice": "Le taux horaire d'un salarié est celui de son poste (POSTE). Les membres d'un groupe sont reliés par PERSONNEL.GrpCode. AVG calcule la moyenne de chaque groupe."
+    },
+    {
+      "id": "q15",
+      "theme": "Jointures et regroupements",
+      "enonce": "Quels sont les salariés (numéro, nom, prénom) qui possèdent au moins 4 compétences (dates de fin comprises) ? Afficher aussi leur nombre de compétences.",
+      "correction": [
+        "SELECT PERSONNEL.PersNum, PersNom, PersPrenom, COUNT(*) AS NbCompetences",
+        "FROM PERSONNEL, CARACTERISER",
+        "WHERE PERSONNEL.PersNum = CARACTERISER.PersNum",
+        "GROUP BY PERSONNEL.PersNum, PersNom, PersPrenom",
+        "HAVING COUNT(*) >= 4;"
+      ],
+      "variantes": [
+        [
+          "SELECT PERSONNEL.PersNum, PersNom, PersPrenom, COUNT(CompCode) AS NbCompetences",
+          "FROM PERSONNEL",
+          "INNER JOIN CARACTERISER ON PERSONNEL.PersNum = CARACTERISER.PersNum",
+          "GROUP BY PERSONNEL.PersNum, PersNom, PersPrenom",
+          "HAVING COUNT(CompCode) >= 4;"
+        ]
+      ],
+      "indice": "Chaque ligne de CARACTERISER est une compétence d'un salarié : comptez-les par salarié. Une condition sur un COUNT se place dans HAVING. PersNum existe dans les deux tables : préfixez-le."
+    },
+    {
+      "id": "q16",
+      "theme": "Jointures et regroupements",
+      "enonce": "Certaines compétences très pointues ne sont possédées que par un seul membre du personnel. Afficher leur code et leur titre (on compte toutes les lignes de CARACTERISER, quelle que soit la date de fin).",
+      "correction": [
+        "SELECT COMPETENCE.CompCode, CompTitre",
+        "FROM COMPETENCE, CARACTERISER",
+        "WHERE COMPETENCE.CompCode = CARACTERISER.CompCode",
+        "GROUP BY COMPETENCE.CompCode, CompTitre",
+        "HAVING COUNT(*) = 1;"
+      ],
+      "variantes": [
+        [
+          "SELECT COMPETENCE.CompCode, CompTitre",
+          "FROM COMPETENCE",
+          "INNER JOIN CARACTERISER ON COMPETENCE.CompCode = CARACTERISER.CompCode",
+          "GROUP BY COMPETENCE.CompCode, CompTitre",
+          "HAVING COUNT(*) = 1;"
+        ]
+      ],
+      "indice": "Regroupez les lignes de CARACTERISER par compétence et gardez les groupes d'une seule ligne (HAVING)."
+    },
+    {
+      "id": "q17",
+      "theme": "Sous-requêtes",
+      "annale": "2008",
+      "enonce": "Quelle est la liste des compétences (code et titre) qui ne sont actuellement assurées par aucun membre du personnel ? Une compétence est actuellement assurée par un salarié si sa date de fin est vide ou n'est pas encore dépassée (postérieure ou égale à la date du jour).",
+      "correction": [
+        "SELECT CompCode, CompTitre",
+        "FROM COMPETENCE",
+        "WHERE CompCode NOT IN (SELECT CompCode",
+        "                       FROM CARACTERISER",
+        "                       WHERE DateFin IS NULL",
+        "                       OR DateFin >= CURDATE());"
+      ],
+      "variantes": [
+        [
+          "SELECT CompCode, CompTitre",
+          "FROM COMPETENCE",
+          "WHERE NOT EXISTS (SELECT *",
+          "                  FROM CARACTERISER",
+          "                  WHERE CARACTERISER.CompCode = COMPETENCE.CompCode",
+          "                  AND (DateFin IS NULL OR DateFin >= NOW()));"
+        ]
+      ],
+      "indice": "La sous-requête donne les compétences actuellement assurées (date de fin vide ou non dépassée) ; NOT IN garde les autres. Attention : sans tenir compte de la date de fin, la « Fiscalité internationale », dont les deux titulaires ont une compétence expirée, serait oubliée."
+    },
+    {
+      "id": "q18",
+      "theme": "Sous-requêtes",
+      "enonce": "Quelles sont les missions (code et nature) qu'aucun membre du « Groupe 4 » n'est compétent pour effectuer (on ne tient pas compte des dates de fin) ?",
+      "correction": [
+        "SELECT MisCode, MisNature",
+        "FROM MISSION",
+        "WHERE CompCode NOT IN (SELECT CompCode",
+        "                       FROM CARACTERISER, PERSONNEL, GROUPE",
+        "                       WHERE CARACTERISER.PersNum = PERSONNEL.PersNum",
+        "                       AND PERSONNEL.GrpCode = GROUPE.GrpCode",
+        "                       AND GrpNom = 'Groupe 4');"
+      ],
+      "variantes": [
+        [
+          "SELECT MisCode, MisNature",
+          "FROM MISSION",
+          "WHERE CompCode NOT IN (SELECT CompCode",
+          "                       FROM CARACTERISER",
+          "                       INNER JOIN PERSONNEL ON CARACTERISER.PersNum = PERSONNEL.PersNum",
+          "                       INNER JOIN GROUPE ON PERSONNEL.GrpCode = GROUPE.GrpCode",
+          "                       WHERE GrpNom = 'Groupe 4');"
+        ]
+      ],
+      "indice": "La sous-requête donne les compétences possédées par au moins un membre du Groupe 4 ; une mission est hors de portée du groupe si la compétence qu'elle requiert n'est pas dans cette liste."
+    },
+    {
+      "id": "q19",
+      "theme": "Sous-requêtes",
+      "enonce": "Quel est le salarié (nom, prénom, date d'embauche) recruté le plus récemment ?",
+      "correction": [
+        "SELECT PersNom, PersPrenom, PersDateEmbauche",
+        "FROM PERSONNEL",
+        "WHERE PersDateEmbauche = (SELECT MAX(PersDateEmbauche)",
+        "                          FROM PERSONNEL);"
+      ],
+      "indice": "On ne peut pas écrire WHERE PersDateEmbauche = MAX(…) : calculez la date maximale dans une sous-requête."
+    },
+    {
+      "id": "q20",
+      "theme": "Auto-jointure",
+      "enonce": "Quels salariés ont été embauchés avant le chef du groupe dont ils sont membres ? Afficher le nom, le prénom et la date d'embauche du salarié, puis le nom et la date d'embauche de son chef de groupe.",
+      "correction": [
+        "SELECT S.PersNom, S.PersPrenom, S.PersDateEmbauche, C.PersNom, C.PersDateEmbauche",
+        "FROM PERSONNEL S, GROUPE G, PERSONNEL C",
+        "WHERE S.GrpCode = G.GrpCode",
+        "AND G.PersNum = C.PersNum",
+        "AND S.PersDateEmbauche < C.PersDateEmbauche;"
+      ],
+      "variantes": [
+        [
+          "SELECT S.PersNom, S.PersPrenom, S.PersDateEmbauche, C.PersNom, C.PersDateEmbauche",
+          "FROM PERSONNEL S",
+          "INNER JOIN GROUPE G ON S.GrpCode = G.GrpCode",
+          "INNER JOIN PERSONNEL C ON G.PersNum = C.PersNum",
+          "WHERE S.PersDateEmbauche < C.PersDateEmbauche;"
+        ]
+      ],
+      "indice": "PERSONNEL est utilisée deux fois, avec deux alias : S pour le salarié, C pour le chef. GROUPE fait le lien : le salarié y est rattaché par GrpCode (Composer), le chef par PersNum (Diriger)."
+    },
+    {
+      "id": "q21",
+      "theme": "Mises à jour",
+      "type": "write",
+      "enonce": "Les taux horaires des collaborateurs de niveau A et de niveau B (postes CA et CB) augmentent de 5 %. Écrire la requête correspondante.",
+      "correction": [
+        "UPDATE POSTE",
+        "SET PstTauxHoraire = PstTauxHoraire * 1.05",
+        "WHERE PstCode IN ('CA', 'CB');"
+      ],
+      "variantes": [
+        [
+          "UPDATE POSTE",
+          "SET PstTauxHoraire = PstTauxHoraire + PstTauxHoraire * 5 / 100",
+          "WHERE PstCode = 'CA' OR PstCode = 'CB';"
+        ]
+      ],
+      "verif": "SELECT * FROM POSTE ORDER BY PstCode",
+      "indice": "UPDATE … SET … WHERE. Augmenter de 5 %, c'est multiplier par 1,05 (écrit 1.05 en SQL)."
+    },
+    {
+      "id": "q22",
+      "theme": "Mises à jour",
+      "type": "write",
+      "enonce": "Camille FAURE (salariée n° 42) vient d'obtenir la compétence « Consolidation des comptes » (code C07), sans limite de validité. L'enregistrer.",
+      "correction": [
+        "INSERT INTO CARACTERISER",
+        "VALUES (42, 'C07', NULL);"
+      ],
+      "variantes": [
+        [
+          "INSERT INTO CARACTERISER (PersNum, CompCode, DateFin)",
+          "VALUES (42, 'C07', NULL);"
+        ],
+        [
+          "INSERT INTO CARACTERISER (PersNum, CompCode)",
+          "VALUES (42, 'C07');"
+        ]
+      ],
+      "verif": "SELECT * FROM CARACTERISER ORDER BY PersNum, CompCode",
+      "indice": "La compétence d'un salarié est une ligne de CARACTERISER (PersNum, CompCode, DateFin). « Sans limite » : la date de fin est NULL (sans apostrophes)."
+    },
+    {
+      "id": "q23",
+      "theme": "Mises à jour",
+      "type": "write",
+      "enonce": "Philippe BOYER (n° 56) cède la direction du « Groupe 8 » (code G8) à Éric LEROY (n° 57), réviseur et membre du même groupe. Enregistrer ce changement de chef de groupe.",
+      "correction": [
+        "UPDATE GROUPE",
+        "SET PersNum = 57",
+        "WHERE GrpCode = 'G8';"
+      ],
+      "variantes": [
+        [
+          "UPDATE GROUPE",
+          "SET PersNum = 57",
+          "WHERE PersNum = 56;"
+        ]
+      ],
+      "verif": "SELECT * FROM GROUPE ORDER BY GrpCode",
+      "indice": "Le chef d'un groupe est enregistré dans GROUPE.PersNum (association « Diriger ») : c'est cette colonne qu'il faut modifier, pas le groupe du salarié dans PERSONNEL."
+    },
+    {
+      "id": "q24",
+      "theme": "Mises à jour",
+      "type": "write",
+      "enonce": "Lucie FAVRE (n° 31), secrétaire du Groupe 4, quitte le cabinet. Essayez d'abord : DELETE FROM PERSONNEL WHERE PersNum = 31. La suppression est refusée : pourquoi ? Écrivez ensuite un script qui supprime d'abord ses compétences, puis la salariée. Chaque exécution repart de la base d'origine : les deux requêtes doivent figurer dans votre script, séparées par un point-virgule.",
+      "correction": [
+        "DELETE FROM CARACTERISER",
+        "WHERE PersNum = 31;",
+        "DELETE FROM PERSONNEL",
+        "WHERE PersNum = 31;"
+      ],
+      "verif": "SELECT * FROM PERSONNEL ORDER BY PersNum",
+      "indice": "CARACTERISER.PersNum est une clé étrangère qui fait référence à PERSONNEL : tant que la salariée a des compétences enregistrées, l'intégrité référentielle interdit de la supprimer. On supprime donc d'abord les lignes qui la référencent. (Supprimer un chef de groupe serait aussi refusé tant qu'il figure dans GROUPE.PersNum.)"
+    },
+    {
+      "id": "s01",
+      "type": "schema",
+      "theme": "Évolution du schéma",
+      "annale": "2008",
+      "enonce": "Le cabinet veut gérer ses clients et leurs dossiers. Règles de gestion : chaque client est identifié par un numéro (CltNum) et décrit par son nom (CltNom) et son adresse (CltAdresse) ; chaque client appartient à une seule catégorie (SARL, SNC, EURL…), identifiée par un code (CatCode) et décrite par un intitulé (CatIntitule) ; chaque client est affecté à un groupe du cabinet ; un dossier, identifié par un code (DosCode), ne concerne qu'un seul client ; chaque dossier est classé dans une nature (dossier social, fiscal, comptable…), identifiée par un code (NatCode) et décrite par un intitulé (NatIntitule). Complétez le schéma à partir de la table GROUPE.",
+      "depart": [
+        "GROUPE"
+      ],
+      "solution": {
+        "tables": [
+          {
+            "nom": "CATEGORIE",
+            "alias": [
+              "CATEGORIE_CLIENT",
+              "CATEGORIES",
+              "CATEGORIECLIENT",
+              "CAT_CLIENT"
+            ],
+            "role": "classer les clients par catégorie (SARL, SNC, EURL…)",
+            "pk": [
+              "CatCode|CodeCat|CodeCategorie|NumCat"
+            ],
+            "attributs": [
+              "CatIntitule|CatLibelle|IntituleCat|LibelleCat|CatIntitulé"
+            ]
+          },
+          {
+            "nom": "CLIENT",
+            "alias": [
+              "CLIENTS"
+            ],
+            "role": "décrire les clients du cabinet",
+            "pk": [
+              "CltNum|NumClt|NumClient|CodeClient|CltCode"
+            ],
+            "fk": {
+              "CatCode|CodeCat|CodeCategorie|NumCat": "CATEGORIE",
+              "GrpCode|CodeGrp|CodeGroupe": "GROUPE"
+            },
+            "attributs": [
+              "CltNom|NomClt|NomClient",
+              "CltAdresse|AdresseClt|AdresseClient|CltAdr"
+            ]
+          },
+          {
+            "nom": "NATURE",
+            "alias": [
+              "NATURE_DOSSIER",
+              "NATURES",
+              "NATUREDOSSIER",
+              "TYPE_DOSSIER"
+            ],
+            "role": "classer les dossiers par nature (social, fiscal, comptable…)",
+            "pk": [
+              "NatCode|CodeNat|CodeNature|NumNat"
+            ],
+            "attributs": [
+              "NatIntitule|NatLibelle|IntituleNat|LibelleNat|NatIntitulé"
+            ]
+          },
+          {
+            "nom": "DOSSIER",
+            "alias": [
+              "DOSSIERS"
+            ],
+            "role": "enregistrer les dossiers des clients",
+            "pk": [
+              "DosCode|CodeDos|CodeDossier|NumDossier|DosNum"
+            ],
+            "fk": {
+              "CltNum|NumClt|NumClient|CodeClient|CltCode": "CLIENT",
+              "NatCode|CodeNat|CodeNature|NumNat": "NATURE"
+            },
+            "optionnels": [
+              "DosLibelle|DosIntitule|LibelleDossier|IntituleDossier"
+            ]
+          }
+        ]
+      },
+      "variantes": [
+        {
+          "tables": [
+            {
+              "nom": "CATEGORIE",
+              "alias": [
+                "CATEGORIE_CLIENT",
+                "CATEGORIES",
+                "CATEGORIECLIENT",
+                "CAT_CLIENT"
+              ],
+              "role": "classer les clients par catégorie (SARL, SNC, EURL…)",
+              "pk": [
+                "CatCode|CodeCat|CodeCategorie|NumCat"
+              ],
+              "attributs": [
+                "CatIntitule|CatLibelle|IntituleCat|LibelleCat|CatIntitulé"
+              ]
+            },
+            {
+              "nom": "CLIENT",
+              "alias": [
+                "CLIENTS"
+              ],
+              "role": "décrire les clients du cabinet",
+              "pk": [
+                "CltNum|NumClt|NumClient|CodeClient|CltCode"
+              ],
+              "fk": {
+                "CatCode|CodeCat|CodeCategorie|NumCat": "CATEGORIE"
+              },
+              "attributs": [
+                "CltNom|NomClt|NomClient",
+                "CltAdresse|AdresseClt|AdresseClient|CltAdr"
+              ],
+              "interdits": [
+                "GrpCode|CodeGrp|CodeGroupe"
+              ]
+            },
+            {
+              "nom": "NATURE",
+              "alias": [
+                "NATURE_DOSSIER",
+                "NATURES",
+                "NATUREDOSSIER",
+                "TYPE_DOSSIER"
+              ],
+              "role": "classer les dossiers par nature (social, fiscal, comptable…)",
+              "pk": [
+                "NatCode|CodeNat|CodeNature|NumNat"
+              ],
+              "attributs": [
+                "NatIntitule|NatLibelle|IntituleNat|LibelleNat|NatIntitulé"
+              ]
+            },
+            {
+              "nom": "DOSSIER",
+              "alias": [
+                "DOSSIERS"
+              ],
+              "role": "enregistrer les dossiers des clients",
+              "pk": [
+                "DosCode|CodeDos|CodeDossier|NumDossier|DosNum"
+              ],
+              "fk": {
+                "CltNum|NumClt|NumClient|CodeClient|CltCode": "CLIENT",
+                "NatCode|CodeNat|CodeNature|NumNat": "NATURE",
+                "GrpCode|CodeGrp|CodeGroupe": "GROUPE"
+              },
+              "optionnels": [
+                "DosLibelle|DosIntitule|LibelleDossier|IntituleDossier"
+              ]
+            }
+          ],
+          "partiel": "Presque : la règle dit que c'est le client qui est affecté à un groupe (tous ses dossiers sont alors suivis par ce groupe). La référence au groupe doit donc figurer dans CLIENT, pas dans DOSSIER."
+        }
+      ],
+      "indice": "Quatre nouvelles tables : les catégories, les clients, les natures de dossier et les dossiers. « Un seul » dans une règle de gestion se traduit par une clé étrangère du côté de celui qui n'en a qu'un : un client a une seule catégorie et un seul groupe, un dossier a un seul client et une seule nature."
+    },
+    {
+      "id": "s02",
+      "type": "schema",
+      "theme": "Évolution du schéma",
+      "annale": "2008",
+      "enonce": "Le cabinet veut suivre les missions réalisées sur les dossiers. Règles de gestion : un planning des missions est tenu à jour ; il indique, pour chaque mission (type de mission du catalogue MISSION) prévue sur un dossier, la date d'échéance à ne pas dépasser (DateEcheance) et la personne à qui cette mission est confiée (une seule personne par mission d'un dossier). Lorsqu'une mission dure plus d'une journée, le salarié saisit chaque jour, pour la mission du dossier concerné, le nombre d'heures effectuées (NbHeures) et un commentaire sur l'avancement (« Début », « En cours » ou « Fin »). Complétez le schéma ci-dessous.",
+      "depart": [
+        {
+          "nom": "DOSSIER",
+          "colonnes": [
+            "_DosCode",
+            "#CltNum>CLIENT",
+            "#NatCode>NATURE"
+          ]
+        },
+        "PERSONNEL",
+        "MISSION"
+      ],
+      "solution": {
+        "tables": [
+          {
+            "nom": "PLANNING",
+            "alias": [
+              "PLANIFIER",
+              "PLANIFICATION",
+              "ECHEANCIER",
+              "PLANNINGS"
+            ],
+            "role": "enregistrer le planning des missions (date d'échéance et personne chargée de la mission)",
+            "pk": [
+              "MisCode|CodeMis|CodeMission|NumMission",
+              "DosCode|CodeDos|CodeDossier|NumDossier|DosNum"
+            ],
+            "fk": {
+              "MisCode|CodeMis|CodeMission|NumMission": "MISSION",
+              "DosCode|CodeDos|CodeDossier|NumDossier|DosNum": "DOSSIER",
+              "PersNum|NumPers|NumPersonnel": "PERSONNEL"
+            },
+            "attributs": [
+              "DateEcheance|DateEch|Echeance|DateEchéance"
+            ]
+          },
+          {
+            "nom": "TACHES",
+            "alias": [
+              "TACHE",
+              "TACHES",
+              "SAISIE",
+              "SAISIR",
+              "TEMPS",
+              "TEMPS_PASSE",
+              "RELEVE_HEURES",
+              "RELEVE",
+              "TRAVAILLER",
+              "HEURES"
+            ],
+            "role": "enregistrer les heures effectuées chaque jour sur une mission d'un dossier (nombre d'heures et commentaire)",
+            "pk": [
+              "MisCode|CodeMis|CodeMission|NumMission",
+              "DosCode|CodeDos|CodeDossier|NumDossier|DosNum",
+              "DateJour|Jour|DateTache|DateSaisie|Date"
+            ],
+            "fk": {
+              "MisCode|CodeMis|CodeMission|NumMission": "PLANNING",
+              "DosCode|CodeDos|CodeDossier|NumDossier|DosNum": "PLANNING"
+            },
+            "attributs": [
+              "NbHeures|NbHeure|NombreHeures|NbH|Heures",
+              "Commentaire|Commentaires|Avancement|Etat|EtatAvancement"
+            ]
+          }
+        ],
+        "tablesOptionnelles": [
+          "DATE",
+          "DATES",
+          "JOUR",
+          "JOURS",
+          "CALENDRIER"
+        ]
+      },
+      "variantes": [
+        {
+          "tables": [
+            {
+              "nom": "PLANNING",
+              "alias": [
+                "PLANIFIER",
+                "PLANIFICATION",
+                "ECHEANCIER",
+                "PLANNINGS"
+              ],
+              "role": "enregistrer le planning des missions (date d'échéance et personne chargée de la mission)",
+              "pk": [
+                "MisCode|CodeMis|CodeMission|NumMission",
+                "DosCode|CodeDos|CodeDossier|NumDossier|DosNum"
+              ],
+              "fk": {
+                "MisCode|CodeMis|CodeMission|NumMission": "MISSION",
+                "DosCode|CodeDos|CodeDossier|NumDossier|DosNum": "DOSSIER",
+                "PersNum|NumPers|NumPersonnel": "PERSONNEL"
+              },
+              "attributs": [
+                "DateEcheance|DateEch|Echeance|DateEchéance"
+              ]
+            },
+            {
+              "nom": "TACHES",
+              "alias": [
+                "TACHE",
+                "TACHES",
+                "SAISIE",
+                "SAISIR",
+                "TEMPS",
+                "TEMPS_PASSE",
+                "RELEVE_HEURES",
+                "RELEVE",
+                "TRAVAILLER",
+                "HEURES"
+              ],
+              "role": "enregistrer les heures effectuées chaque jour sur une mission d'un dossier (nombre d'heures et commentaire)",
+              "pk": [
+                "MisCode|CodeMis|CodeMission|NumMission",
+                "DosCode|CodeDos|CodeDossier|NumDossier|DosNum",
+                "DateJour|Jour|DateTache|DateSaisie|Date"
+              ],
+              "fk": {
+                "MisCode|CodeMis|CodeMission|NumMission": "MISSION",
+                "DosCode|CodeDos|CodeDossier|NumDossier|DosNum": "DOSSIER"
+              },
+              "attributs": [
+                "NbHeures|NbHeure|NombreHeures|NbH|Heures",
+                "Commentaire|Commentaires|Avancement|Etat|EtatAvancement"
+              ]
+            }
+          ],
+          "tablesOptionnelles": [
+            "DATE",
+            "DATES",
+            "JOUR",
+            "JOURS",
+            "CALENDRIER"
+          ]
+        },
+        {
+          "tables": [
+            {
+              "nom": "PLANNING",
+              "alias": [
+                "PLANIFIER",
+                "PLANIFICATION",
+                "ECHEANCIER",
+                "PLANNINGS"
+              ],
+              "role": "enregistrer le planning des missions (date d'échéance et personne chargée de la mission)",
+              "pk": [
+                "MisCode|CodeMis|CodeMission|NumMission",
+                "DosCode|CodeDos|CodeDossier|NumDossier|DosNum"
+              ],
+              "fk": {
+                "MisCode|CodeMis|CodeMission|NumMission": "MISSION",
+                "DosCode|CodeDos|CodeDossier|NumDossier|DosNum": "DOSSIER",
+                "PersNum|NumPers|NumPersonnel": "PERSONNEL"
+              },
+              "attributs": [
+                "DateEcheance|DateEch|Echeance|DateEchéance"
+              ]
+            },
+            {
+              "nom": "TACHES",
+              "alias": [
+                "TACHE",
+                "TACHES",
+                "SAISIE",
+                "SAISIR",
+                "TEMPS",
+                "TEMPS_PASSE",
+                "RELEVE_HEURES",
+                "RELEVE",
+                "TRAVAILLER",
+                "HEURES"
+              ],
+              "role": "enregistrer les heures effectuées chaque jour sur une mission d'un dossier (nombre d'heures et commentaire)",
+              "pk": [
+                "PersNum|NumPers|NumPersonnel",
+                "MisCode|CodeMis|CodeMission|NumMission",
+                "DosCode|CodeDos|CodeDossier|NumDossier|DosNum",
+                "DateJour|Jour|DateTache|DateSaisie|Date"
+              ],
+              "fk": {
+                "PersNum|NumPers|NumPersonnel": "PERSONNEL",
+                "MisCode|CodeMis|CodeMission|NumMission": "MISSION",
+                "DosCode|CodeDos|CodeDossier|NumDossier|DosNum": "DOSSIER"
+              },
+              "attributs": [
+                "NbHeures|NbHeure|NombreHeures|NbH|Heures",
+                "Commentaire|Commentaires|Avancement|Etat|EtatAvancement"
+              ]
+            }
+          ],
+          "tablesOptionnelles": [
+            "DATE",
+            "DATES",
+            "JOUR",
+            "JOURS",
+            "CALENDRIER"
+          ]
+        },
+        {
+          "tables": [
+            {
+              "nom": "PLANNING",
+              "alias": [
+                "PLANIFIER",
+                "PLANIFICATION",
+                "ECHEANCIER",
+                "PLANNINGS"
+              ],
+              "role": "enregistrer le planning des missions (date d'échéance et personne chargée de la mission)",
+              "pk": [
+                "MisCode|CodeMis|CodeMission|NumMission",
+                "DosCode|CodeDos|CodeDossier|NumDossier|DosNum"
+              ],
+              "fk": {
+                "MisCode|CodeMis|CodeMission|NumMission": "MISSION",
+                "DosCode|CodeDos|CodeDossier|NumDossier|DosNum": "DOSSIER",
+                "PersNum|NumPers|NumPersonnel": "PERSONNEL"
+              },
+              "attributs": [
+                "DateEcheance|DateEch|Echeance|DateEchéance"
+              ]
+            },
+            {
+              "nom": "TACHES",
+              "alias": [
+                "TACHE",
+                "TACHES",
+                "SAISIE",
+                "SAISIR",
+                "TEMPS",
+                "TEMPS_PASSE",
+                "RELEVE_HEURES",
+                "RELEVE",
+                "TRAVAILLER",
+                "HEURES"
+              ],
+              "role": "enregistrer les heures effectuées chaque jour sur une mission d'un dossier (nombre d'heures et commentaire)",
+              "pk": [
+                "PersNum|NumPers|NumPersonnel",
+                "MisCode|CodeMis|CodeMission|NumMission",
+                "DosCode|CodeDos|CodeDossier|NumDossier|DosNum",
+                "DateJour|Jour|DateTache|DateSaisie|Date"
+              ],
+              "fk": {
+                "PersNum|NumPers|NumPersonnel": "PERSONNEL",
+                "MisCode|CodeMis|CodeMission|NumMission": "PLANNING",
+                "DosCode|CodeDos|CodeDossier|NumDossier|DosNum": "PLANNING"
+              },
+              "attributs": [
+                "NbHeures|NbHeure|NombreHeures|NbH|Heures",
+                "Commentaire|Commentaires|Avancement|Etat|EtatAvancement"
+              ]
+            }
+          ],
+          "tablesOptionnelles": [
+            "DATE",
+            "DATES",
+            "JOUR",
+            "JOURS",
+            "CALENDRIER"
+          ]
+        },
+        {
+          "tables": [
+            {
+              "nom": "PLANNING",
+              "alias": [
+                "PLANIFIER",
+                "PLANIFICATION",
+                "ECHEANCIER",
+                "PLANNINGS"
+              ],
+              "role": "enregistrer le planning des missions (date d'échéance et personne chargée de la mission)",
+              "pk": [
+                "MisCode|CodeMis|CodeMission|NumMission",
+                "DosCode|CodeDos|CodeDossier|NumDossier|DosNum",
+                "PersNum|NumPers|NumPersonnel"
+              ],
+              "fk": {
+                "MisCode|CodeMis|CodeMission|NumMission": "MISSION",
+                "DosCode|CodeDos|CodeDossier|NumDossier|DosNum": "DOSSIER",
+                "PersNum|NumPers|NumPersonnel": "PERSONNEL"
+              },
+              "attributs": [
+                "DateEcheance|DateEch|Echeance|DateEchéance"
+              ]
+            },
+            {
+              "nom": "TACHES",
+              "alias": [
+                "TACHE",
+                "TACHES",
+                "SAISIE",
+                "SAISIR",
+                "TEMPS",
+                "TEMPS_PASSE",
+                "RELEVE_HEURES",
+                "RELEVE",
+                "TRAVAILLER",
+                "HEURES"
+              ],
+              "role": "enregistrer les heures effectuées chaque jour sur une mission d'un dossier (nombre d'heures et commentaire)",
+              "pk": [
+                "MisCode|CodeMis|CodeMission|NumMission",
+                "DosCode|CodeDos|CodeDossier|NumDossier|DosNum",
+                "DateJour|Jour|DateTache|DateSaisie|Date"
+              ],
+              "fk": {
+                "MisCode|CodeMis|CodeMission|NumMission": "PLANNING",
+                "DosCode|CodeDos|CodeDossier|NumDossier|DosNum": "PLANNING"
+              },
+              "attributs": [
+                "NbHeures|NbHeure|NombreHeures|NbH|Heures",
+                "Commentaire|Commentaires|Avancement|Etat|EtatAvancement"
+              ]
+            }
+          ],
+          "tablesOptionnelles": [
+            "DATE",
+            "DATES",
+            "JOUR",
+            "JOURS",
+            "CALENDRIER"
+          ],
+          "partiel": "Presque : une mission d'un dossier est confiée à une seule personne (association « Confier » 1,1 dans le corrigé). Le numéro du salarié est donc une simple clé étrangère dans la table du planning, il ne fait pas partie de sa clé primaire."
+        },
+        {
+          "tables": [
+            {
+              "nom": "PLANNING",
+              "alias": [
+                "PLANIFIER",
+                "PLANIFICATION",
+                "ECHEANCIER",
+                "PLANNINGS"
+              ],
+              "role": "enregistrer le planning des missions (date d'échéance et personne chargée de la mission)",
+              "pk": [
+                "MisCode|CodeMis|CodeMission|NumMission",
+                "DosCode|CodeDos|CodeDossier|NumDossier|DosNum",
+                "PersNum|NumPers|NumPersonnel"
+              ],
+              "fk": {
+                "MisCode|CodeMis|CodeMission|NumMission": "MISSION",
+                "DosCode|CodeDos|CodeDossier|NumDossier|DosNum": "DOSSIER",
+                "PersNum|NumPers|NumPersonnel": "PERSONNEL"
+              },
+              "attributs": [
+                "DateEcheance|DateEch|Echeance|DateEchéance"
+              ]
+            },
+            {
+              "nom": "TACHES",
+              "alias": [
+                "TACHE",
+                "TACHES",
+                "SAISIE",
+                "SAISIR",
+                "TEMPS",
+                "TEMPS_PASSE",
+                "RELEVE_HEURES",
+                "RELEVE",
+                "TRAVAILLER",
+                "HEURES"
+              ],
+              "role": "enregistrer les heures effectuées chaque jour sur une mission d'un dossier (nombre d'heures et commentaire)",
+              "pk": [
+                "MisCode|CodeMis|CodeMission|NumMission",
+                "DosCode|CodeDos|CodeDossier|NumDossier|DosNum",
+                "DateJour|Jour|DateTache|DateSaisie|Date"
+              ],
+              "fk": {
+                "MisCode|CodeMis|CodeMission|NumMission": "MISSION",
+                "DosCode|CodeDos|CodeDossier|NumDossier|DosNum": "DOSSIER"
+              },
+              "attributs": [
+                "NbHeures|NbHeure|NombreHeures|NbH|Heures",
+                "Commentaire|Commentaires|Avancement|Etat|EtatAvancement"
+              ]
+            }
+          ],
+          "tablesOptionnelles": [
+            "DATE",
+            "DATES",
+            "JOUR",
+            "JOURS",
+            "CALENDRIER"
+          ],
+          "partiel": "Presque : une mission d'un dossier est confiée à une seule personne (association « Confier » 1,1 dans le corrigé). Le numéro du salarié est donc une simple clé étrangère dans la table du planning, il ne fait pas partie de sa clé primaire."
+        },
+        {
+          "tables": [
+            {
+              "nom": "PLANNING",
+              "alias": [
+                "PLANIFIER",
+                "PLANIFICATION",
+                "ECHEANCIER",
+                "PLANNINGS"
+              ],
+              "role": "enregistrer le planning des missions (date d'échéance et personne chargée de la mission)",
+              "pk": [
+                "MisCode|CodeMis|CodeMission|NumMission",
+                "DosCode|CodeDos|CodeDossier|NumDossier|DosNum"
+              ],
+              "fk": {
+                "MisCode|CodeMis|CodeMission|NumMission": "MISSION",
+                "DosCode|CodeDos|CodeDossier|NumDossier|DosNum": "DOSSIER",
+                "PersNum|NumPers|NumPersonnel": "PERSONNEL"
+              },
+              "attributs": [
+                "DateEcheance|DateEch|Echeance|DateEchéance"
+              ]
+            },
+            {
+              "nom": "TACHES",
+              "alias": [
+                "TACHE",
+                "TACHES",
+                "SAISIE",
+                "SAISIR",
+                "TEMPS",
+                "TEMPS_PASSE",
+                "RELEVE_HEURES",
+                "RELEVE",
+                "TRAVAILLER",
+                "HEURES"
+              ],
+              "role": "enregistrer les heures effectuées chaque jour sur une mission d'un dossier (nombre d'heures et commentaire)",
+              "pk": [
+                "MisCode|CodeMis|CodeMission|NumMission",
+                "DosCode|CodeDos|CodeDossier|NumDossier|DosNum"
+              ],
+              "fk": {
+                "MisCode|CodeMis|CodeMission|NumMission": "PLANNING",
+                "DosCode|CodeDos|CodeDossier|NumDossier|DosNum": "PLANNING"
+              },
+              "attributs": [
+                "NbHeures|NbHeure|NombreHeures|NbH|Heures",
+                "Commentaire|Commentaires|Avancement|Etat|EtatAvancement",
+                "DateJour|Jour|DateTache|DateSaisie|Date"
+              ]
+            }
+          ],
+          "tablesOptionnelles": [
+            "DATE",
+            "DATES",
+            "JOUR",
+            "JOURS",
+            "CALENDRIER"
+          ],
+          "partiel": "Presque : le salarié saisit ses heures chaque jour, plusieurs jours de suite pour la même mission du même dossier. Avec une clé sans la date, on ne pourrait enregistrer qu'une seule saisie par mission et par dossier : la date du jour doit faire partie de la clé primaire."
+        },
+        {
+          "tables": [
+            {
+              "nom": "PLANNING",
+              "alias": [
+                "PLANIFIER",
+                "PLANIFICATION",
+                "ECHEANCIER",
+                "PLANNINGS"
+              ],
+              "role": "enregistrer le planning des missions (date d'échéance et personne chargée de la mission)",
+              "pk": [
+                "MisCode|CodeMis|CodeMission|NumMission",
+                "DosCode|CodeDos|CodeDossier|NumDossier|DosNum"
+              ],
+              "fk": {
+                "MisCode|CodeMis|CodeMission|NumMission": "MISSION",
+                "DosCode|CodeDos|CodeDossier|NumDossier|DosNum": "DOSSIER",
+                "PersNum|NumPers|NumPersonnel": "PERSONNEL"
+              },
+              "attributs": [
+                "DateEcheance|DateEch|Echeance|DateEchéance"
+              ]
+            },
+            {
+              "nom": "TACHES",
+              "alias": [
+                "TACHE",
+                "TACHES",
+                "SAISIE",
+                "SAISIR",
+                "TEMPS",
+                "TEMPS_PASSE",
+                "RELEVE_HEURES",
+                "RELEVE",
+                "TRAVAILLER",
+                "HEURES"
+              ],
+              "role": "enregistrer les heures effectuées chaque jour sur une mission d'un dossier (nombre d'heures et commentaire)",
+              "pk": [
+                "MisCode|CodeMis|CodeMission|NumMission",
+                "DosCode|CodeDos|CodeDossier|NumDossier|DosNum"
+              ],
+              "fk": {
+                "MisCode|CodeMis|CodeMission|NumMission": "MISSION",
+                "DosCode|CodeDos|CodeDossier|NumDossier|DosNum": "DOSSIER"
+              },
+              "attributs": [
+                "NbHeures|NbHeure|NombreHeures|NbH|Heures",
+                "Commentaire|Commentaires|Avancement|Etat|EtatAvancement",
+                "DateJour|Jour|DateTache|DateSaisie|Date"
+              ]
+            }
+          ],
+          "tablesOptionnelles": [
+            "DATE",
+            "DATES",
+            "JOUR",
+            "JOURS",
+            "CALENDRIER"
+          ],
+          "partiel": "Presque : le salarié saisit ses heures chaque jour, plusieurs jours de suite pour la même mission du même dossier. Avec une clé sans la date, on ne pourrait enregistrer qu'une seule saisie par mission et par dossier : la date du jour doit faire partie de la clé primaire."
+        }
+      ],
+      "indice": "Deux nouvelles tables. Le planning relie une mission et un dossier (relation « plusieurs à plusieurs ») et porte la date d'échéance ; la personne chargée est unique pour une mission d'un dossier. La saisie des heures concerne une mission planifiée d'un dossier, un jour donné : qu'est-ce qui distingue deux saisies successives ?"
+    },
+    {
+      "id": "p01",
+      "type": "processus",
+      "theme": "Processus",
+      "annale": "2008",
+      "enonce": "Pour COMPTA-CONSEIL, la démarche commerciale est réalisée par le Directeur du Cabinet. Interview du directeur (annexe 7) :\n– Pourriez-vous me décrire comment vous procédez pour démarcher vos clients ? « Je me base sur mes contacts personnels et ceux de mes chefs de groupe qu'ils m'envoient par messagerie. Tous les jours, je consulte la liste de ces contacts et j'essaie de les joindre. »\n– Est-ce vous qui faites l'analyse des besoins du client ? « Deux cas se présentent. S'il s'agit d'un ancien client, je lui propose le type de mission qu'on a déjà réalisé pour lui dans le passé. »\n– Et pour les nouveaux clients ? « J'envoie un chef de groupe rencontrer le prospect pour analyser ses besoins. »\n– Est-ce que ce chef de groupe devient responsable du client ? « Oui, après analyse des besoins, le chef de groupe doit me donner les disponibilités et les compétences de son équipe pour réaliser les nouvelles missions pour ce client. »\n– Est-ce que cela vous permet de vous engager sur une date d'échéance pour une mission ? « Tout à fait ! »\nÀ partir de cette interview, modélisez le processus de démarche commerciale du cabinet COMPTA-CONSEIL (schéma événements-résultats en couloirs : Client, Directeur, Chef de groupe).",
+      "couloirs": [
+        "Client",
+        "Directeur",
+        "Chef de groupe"
+      ],
+      "elements": [
+        {
+          "kind": "event",
+          "label": "Contact personnel"
+        },
+        {
+          "kind": "operation",
+          "label": "Envoi contacts clients"
+        },
+        {
+          "kind": "event",
+          "label": "Tous les jours"
+        },
+        {
+          "kind": "event",
+          "label": "Contact"
+        },
+        {
+          "kind": "operation",
+          "label": "Contact client"
+        },
+        {
+          "kind": "event",
+          "label": "Appel"
+        },
+        {
+          "kind": "operation",
+          "label": "Répond"
+        },
+        {
+          "kind": "event",
+          "label": "Fin"
+        },
+        {
+          "kind": "event",
+          "label": "Réponse"
+        },
+        {
+          "kind": "operation",
+          "label": "Ancien client"
+        },
+        {
+          "kind": "event",
+          "label": "Proposition"
+        },
+        {
+          "kind": "event",
+          "label": "Coordonnées client"
+        },
+        {
+          "kind": "operation",
+          "label": "Analyse besoin"
+        },
+        {
+          "kind": "event",
+          "label": "Analyse"
+        },
+        {
+          "kind": "operation",
+          "label": "Validation affectation"
+        },
+        {
+          "kind": "event",
+          "label": "Proposition"
+        },
+        {
+          "kind": "event",
+          "label": "Affectation date fin"
+        }
+      ],
+      "attendus": [
+        {
+          "operation": "Contact client",
+          "alias": [
+            "Consulte contact",
+            "Consultation contacts",
+            "Consultation des contacts",
+            "Appel client",
+            "Démarchage",
+            "Joindre client"
+          ],
+          "synchronisation": "Tous les jours ET Contact"
+        },
+        {
+          "operation": "Répond",
+          "alias": [
+            "Réponse client",
+            "Réponse du client",
+            "Répondre"
+          ],
+          "regles": [
+            "Oui",
+            "Non"
+          ]
+        },
+        {
+          "operation": "Ancien client",
+          "alias": [
+            "Vérification client",
+            "Vérification ancien client",
+            "Type de client",
+            "Analyse réponse",
+            "Traitement réponse"
+          ],
+          "regles": [
+            "Ancien client",
+            "Nouveau client"
+          ]
+        }
+      ],
+      "equivalents": {
+        "Tous les jours": [
+          "Chaque jour",
+          "Quotidien",
+          "Tous les matins"
+        ],
+        "Contact": [
+          "Contacts",
+          "Liste des contacts",
+          "Contacts clients",
+          "Contacts reçus",
+          "Liste de contacts"
+        ],
+        "Oui": [
+          "Intéressé",
+          "Accepte",
+          "Accord",
+          "Réponse positive",
+          "Accepté"
+        ],
+        "Non": [
+          "Refus",
+          "Refuse",
+          "Réponse négative",
+          "Pas intéressé",
+          "Refusé"
+        ],
+        "Ancien client": [
+          "Oui",
+          "Client existant",
+          "Déjà client",
+          "Client connu"
+        ],
+        "Nouveau client": [
+          "Non",
+          "Prospect",
+          "Nouveau",
+          "Client inconnu"
+        ]
+      },
+      "solution": {
+        "lanes": [
+          "Client",
+          "Directeur",
+          "Chef de groupe"
+        ],
+        "nodes": [
+          {
+            "id": "n1",
+            "kind": "event",
+            "label": "Contact personnel",
+            "x": 600,
+            "y": 95
+          },
+          {
+            "id": "n2",
+            "kind": "operation",
+            "label": "Envoi contacts clients",
+            "x": 600,
+            "y": 205,
+            "actions": [
+              "Envoi de ses contacts au directeur par messagerie"
+            ],
+            "rules": [
+              "Toujours"
+            ]
+          },
+          {
+            "id": "n3",
+            "kind": "event",
+            "label": "Tous les jours",
+            "x": 300,
+            "y": 205
+          },
+          {
+            "id": "n4",
+            "kind": "event",
+            "label": "Contact",
+            "x": 410,
+            "y": 330
+          },
+          {
+            "id": "n5",
+            "kind": "sync",
+            "label": "",
+            "x": 340,
+            "y": 425,
+            "cond": "A et B"
+          },
+          {
+            "id": "n6",
+            "kind": "operation",
+            "label": "Contact client",
+            "x": 360,
+            "y": 535,
+            "actions": [
+              "Consultation de la liste des contacts",
+              "Appel du client"
+            ],
+            "rules": [
+              "Toujours"
+            ]
+          },
+          {
+            "id": "n7",
+            "kind": "event",
+            "label": "Appel",
+            "x": 120,
+            "y": 665
+          },
+          {
+            "id": "n8",
+            "kind": "operation",
+            "label": "Répond",
+            "x": 120,
+            "y": 785,
+            "actions": [
+              "Réponse du client à la proposition de rendez-vous"
+            ],
+            "rules": [
+              "Oui",
+              "Non"
+            ]
+          },
+          {
+            "id": "n9",
+            "kind": "event",
+            "label": "Fin",
+            "x": 60,
+            "y": 925
+          },
+          {
+            "id": "n10",
+            "kind": "event",
+            "label": "Réponse",
+            "x": 360,
+            "y": 925
+          },
+          {
+            "id": "n11",
+            "kind": "operation",
+            "label": "Ancien client",
+            "x": 360,
+            "y": 1050,
+            "actions": [
+              "Vérification : client déjà connu du cabinet ?"
+            ],
+            "rules": [
+              "Ancien client",
+              "Nouveau client"
+            ]
+          },
+          {
+            "id": "n12",
+            "kind": "event",
+            "label": "Proposition",
+            "x": 120,
+            "y": 1190
+          },
+          {
+            "id": "n13",
+            "kind": "event",
+            "label": "Coordonnées client",
+            "x": 600,
+            "y": 1190
+          },
+          {
+            "id": "n14",
+            "kind": "operation",
+            "label": "Analyse besoin",
+            "x": 600,
+            "y": 1315,
+            "actions": [
+              "Rencontre du prospect",
+              "Analyse de ses besoins",
+              "Disponibilités et compétences de l'équipe"
+            ],
+            "rules": [
+              "Toujours"
+            ]
+          },
+          {
+            "id": "n15",
+            "kind": "event",
+            "label": "Analyse",
+            "x": 360,
+            "y": 1450
+          },
+          {
+            "id": "n16",
+            "kind": "operation",
+            "label": "Validation affectation",
+            "x": 360,
+            "y": 1570,
+            "actions": [
+              "Affectation de la mission",
+              "Engagement sur une date d'échéance"
+            ],
+            "rules": [
+              "Toujours"
+            ]
+          },
+          {
+            "id": "n17",
+            "kind": "event",
+            "label": "Proposition",
+            "x": 120,
+            "y": 1710
+          },
+          {
+            "id": "n18",
+            "kind": "event",
+            "label": "Affectation date fin",
+            "x": 600,
+            "y": 1710
+          }
+        ],
+        "arrows": [
+          {
+            "id": "a1",
+            "from": "n1",
+            "rule": null,
+            "to": "n2"
+          },
+          {
+            "id": "a2",
+            "from": "n2",
+            "rule": 0,
+            "to": "n4"
+          },
+          {
+            "id": "a3",
+            "from": "n3",
+            "rule": null,
+            "to": "n5",
+            "letter": "A"
+          },
+          {
+            "id": "a4",
+            "from": "n4",
+            "rule": null,
+            "to": "n5",
+            "letter": "B"
+          },
+          {
+            "id": "a5",
+            "from": "n5",
+            "rule": null,
+            "to": "n6"
+          },
+          {
+            "id": "a6",
+            "from": "n6",
+            "rule": 0,
+            "to": "n7"
+          },
+          {
+            "id": "a7",
+            "from": "n7",
+            "rule": null,
+            "to": "n8"
+          },
+          {
+            "id": "a8",
+            "from": "n8",
+            "rule": 1,
+            "to": "n9"
+          },
+          {
+            "id": "a9",
+            "from": "n8",
+            "rule": 0,
+            "to": "n10"
+          },
+          {
+            "id": "a10",
+            "from": "n10",
+            "rule": null,
+            "to": "n11"
+          },
+          {
+            "id": "a11",
+            "from": "n11",
+            "rule": 0,
+            "to": "n12"
+          },
+          {
+            "id": "a12",
+            "from": "n11",
+            "rule": 1,
+            "to": "n13"
+          },
+          {
+            "id": "a13",
+            "from": "n13",
+            "rule": null,
+            "to": "n14"
+          },
+          {
+            "id": "a14",
+            "from": "n14",
+            "rule": 0,
+            "to": "n15"
+          },
+          {
+            "id": "a15",
+            "from": "n15",
+            "rule": null,
+            "to": "n16"
+          },
+          {
+            "id": "a16",
+            "from": "n16",
+            "rule": 0,
+            "to": "n17"
+          },
+          {
+            "id": "a17",
+            "from": "n16",
+            "rule": 0,
+            "to": "n18"
+          }
+        ]
+      },
+      "autoevaluation": [
+        "Trois couloirs : le client, le directeur (qui pilote la démarche) et le chef de groupe (qui envoie ses contacts et analyse les besoins des nouveaux clients).",
+        "La consultation des contacts par le directeur attend à la fois l'événement temporel « tous les jours » ET les contacts : c'est une synchronisation.",
+        "La réponse du client a deux règles d'émission : oui (le processus continue) / non (fin).",
+        "Le test « ancien client ? » a deux règles : l'ancien client reçoit directement une proposition, le nouveau client est confié à un chef de groupe.",
+        "Après l'analyse des besoins, le directeur valide l'affectation : il envoie la proposition au client et communique l'affectation avec sa date de fin au chef de groupe."
+      ],
+      "indice": "Repérez les trois acteurs, puis l'événement temporel de l'interview (« tous les jours ») : avec les contacts envoyés, il déclenche le travail du directeur, ce qui demande une synchronisation. Deux opérations aboutissent à des cas différents : la réponse du client, puis la distinction ancien / nouveau client (règles d'émission)."
+    }
+  ]
+}

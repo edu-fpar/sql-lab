@@ -1,0 +1,1042 @@
+{
+  "id": "dcg2012",
+  "titre": "DCG 2012 – RENOV'PLUS, rénovation",
+  "aujourdhui": "2012-06-04",
+  "contexte": "La SAS RENOV'PLUS rénove maisons, appartements et immeubles anciens pour des particuliers et des entreprises (CLIENT) et coordonne ses chantiers. Chaque CHANTIER est réalisé pour un client et encadré par un salarié (MatriculeEncadrant, qui fait référence à SALARIE ; colonne Matricule dans le sujet). Un chantier comporte des tâches numérotées T001, T002… dans chaque chantier : une TACHE est identifiée par le couple (NumChantier, NumTache) et appartient à une CATEGORIE_TACHE (plomberie, électricité…). DureePrevue est en jours ; les dates de début et de fin réelles restent vides tant que la tâche n'a pas commencé ou n'est pas terminée. AFFECTER enregistre l'affectation prévue d'un salarié à une tâche (Duree, en heures) et EFFECTUER les heures réellement effectuées, jour par jour (DateTravail, NombreHeures) : dans le sujet, la date était notée #Date alors qu'il n'existe aucune table DATE ; ici, DateTravail fait partie de la clé primaire mais n'est pas une clé étrangère. Un salarié sorti de l'entreprise a une DateSortie. Dans le sujet, les clients particuliers et entreprises formaient deux sous-types ; ici, TypeClient vaut « Particulier » ou « Entreprise », NomCli est le nom du particulier ou la raison sociale de l'entreprise, PrenomCli n'est renseigné que pour les particuliers et NumSiret que pour les entreprises. La table des maîtres d'ouvrage n'a pas été reprise. ARCHIVE_SALARIE a les mêmes colonnes que SALARIE et contient déjà d'anciens salariés.",
+  "source": "Inspiré du sujet DCG UE8 session 2012. Données entièrement fictives.",
+  "schemaGrid": {
+    "CLIENT": [
+      0,
+      0
+    ],
+    "CHANTIER": [
+      1,
+      0
+    ],
+    "AFFECTER": [
+      2,
+      0
+    ],
+    "CATEGORIE_TACHE": [
+      0,
+      1
+    ],
+    "TACHE": [
+      1,
+      1
+    ],
+    "SALARIE": [
+      2,
+      1
+    ],
+    "EFFECTUER": [
+      1,
+      2
+    ],
+    "ARCHIVE_SALARIE": [
+      2,
+      2
+    ]
+  },
+  "questions": [
+    {
+      "id": "q01",
+      "theme": "Une seule table",
+      "enonce": "Afficher la liste des catégories de tâches (toutes les colonnes).",
+      "correction": [
+        "SELECT *",
+        "FROM CATEGORIE_TACHE;"
+      ],
+      "indice": "L'étoile * permet d'afficher toutes les colonnes d'une table."
+    },
+    {
+      "id": "q02",
+      "theme": "Une seule table",
+      "enonce": "Afficher les compagnons professionnels (qualification « Compagnon professionnel ») encore présents dans l'entreprise : matricule, nom et prénom, triés par nom.",
+      "ordered": [
+        1
+      ],
+      "correction": [
+        "SELECT Matricule, Nom, Prenom",
+        "FROM SALARIE",
+        "WHERE Qualification = 'Compagnon professionnel'",
+        "AND DateSortie IS NULL",
+        "ORDER BY Nom;"
+      ],
+      "indice": "Un salarié encore présent n'a pas de date de sortie : DateSortie IS NULL. Les deux conditions sont reliées par AND."
+    },
+    {
+      "id": "q03",
+      "theme": "Une seule table",
+      "enonce": "Afficher les tâches qui n'ont pas encore commencé : numéro de chantier, numéro de tâche, description et date de début prévue.",
+      "correction": [
+        "SELECT NumChantier, NumTache, Description, DateDebutPrevue",
+        "FROM TACHE",
+        "WHERE DateDebutReelle IS NULL;"
+      ],
+      "indice": "Tant qu'une tâche n'a pas débuté, sa date de début réelle n'est pas renseignée."
+    },
+    {
+      "id": "q04",
+      "theme": "Une seule table",
+      "enonce": "Afficher les clients qui sont des entreprises : numéro, raison sociale (NomCli), numéro SIRET et ville.",
+      "correction": [
+        "SELECT NumCli, NomCli, NumSiret, VilleCli",
+        "FROM CLIENT",
+        "WHERE TypeClient = 'Entreprise';"
+      ],
+      "variantes": [
+        [
+          "SELECT NumCli, NomCli, NumSiret, VilleCli",
+          "FROM CLIENT",
+          "WHERE NumSiret IS NOT NULL;"
+        ]
+      ],
+      "indice": "Particuliers et entreprises sont dans la même table CLIENT : c'est la colonne TypeClient qui les distingue."
+    },
+    {
+      "id": "q05",
+      "theme": "Calculs et agrégats",
+      "enonce": "Combien de salariés sont actuellement présents dans l'entreprise ?",
+      "correction": [
+        "SELECT COUNT(*)",
+        "FROM SALARIE",
+        "WHERE DateSortie IS NULL;"
+      ],
+      "variantes": [
+        [
+          "SELECT COUNT(Matricule)",
+          "FROM SALARIE",
+          "WHERE DateSortie IS NULL;"
+        ]
+      ],
+      "indice": "Comptez (COUNT) les salariés sans date de sortie."
+    },
+    {
+      "id": "q06",
+      "theme": "Calculs et agrégats",
+      "enonce": "Afficher, pour chaque qualification, le nombre de salariés présents qui l'ont.",
+      "correction": [
+        "SELECT Qualification, COUNT(*) AS NbSalaries",
+        "FROM SALARIE",
+        "WHERE DateSortie IS NULL",
+        "GROUP BY Qualification;"
+      ],
+      "indice": "Le WHERE écarte d'abord les salariés sortis ; GROUP BY regroupe ensuite les lignes de même qualification."
+    },
+    {
+      "id": "q07",
+      "theme": "Dates",
+      "enonce": "Afficher les salariés entrés dans l'entreprise en 2011 : matricule, nom, prénom et date d'entrée, du plus ancien au plus récent.",
+      "ordered": [
+        3
+      ],
+      "correction": [
+        "SELECT Matricule, Nom, Prenom, DateEntree",
+        "FROM SALARIE",
+        "WHERE YEAR(DateEntree) = 2011",
+        "ORDER BY DateEntree;"
+      ],
+      "variantes": [
+        [
+          "SELECT Matricule, Nom, Prenom, DateEntree",
+          "FROM SALARIE",
+          "WHERE DateEntree BETWEEN '01/01/2011' AND '31/12/2011'",
+          "ORDER BY DateEntree;"
+        ]
+      ],
+      "indice": "YEAR(date) donne l'année d'une date ; le plus ancien a la plus petite date d'entrée."
+    },
+    {
+      "id": "q08",
+      "theme": "Dates",
+      "enonce": "Quel est le nombre total d'heures effectuées par l'ensemble des salariés en mars 2012 ?",
+      "correction": [
+        "SELECT SUM(NombreHeures)",
+        "FROM EFFECTUER",
+        "WHERE MONTH(DateTravail) = 3",
+        "AND YEAR(DateTravail) = 2012;"
+      ],
+      "variantes": [
+        [
+          "SELECT SUM(NombreHeures)",
+          "FROM EFFECTUER",
+          "WHERE DateTravail BETWEEN '01/03/2012' AND '31/03/2012';"
+        ]
+      ],
+      "indice": "Les heures réellement effectuées sont enregistrées jour par jour dans EFFECTUER. Pensez à préciser le mois ET l'année."
+    },
+    {
+      "id": "q09",
+      "theme": "Dates",
+      "enonce": "Afficher les tâches terminées dont la durée réelle a dépassé la durée prévue : numéro de chantier, numéro de tâche, durée prévue et durée réelle en jours (du jour de début au jour de fin réels, les deux comptant).",
+      "correction": [
+        "SELECT NumChantier, NumTache, DureePrevue, DATEDIFF(DateFinReelle, DateDebutReelle) + 1 AS DureeReelle",
+        "FROM TACHE",
+        "WHERE DateFinReelle IS NOT NULL",
+        "AND DATEDIFF(DateFinReelle, DateDebutReelle) + 1 > DureePrevue;"
+      ],
+      "variantes": [
+        [
+          "SELECT NumChantier, NumTache, DureePrevue, DATEDIFF(DateFinReelle, DateDebutReelle) + 1",
+          "FROM TACHE",
+          "WHERE DATEDIFF(DateFinReelle, DateDebutReelle) + 1 > DureePrevue;"
+        ]
+      ],
+      "indice": "DATEDIFF(fin, début) donne le nombre de jours entre deux dates ; ajoutez 1 pour compter le premier et le dernier jour. Une tâche non terminée n'a pas de date de fin réelle."
+    },
+    {
+      "id": "q10",
+      "theme": "Jointures",
+      "enonce": "Afficher les chantiers réalisés pour des entreprises : numéro de chantier, ville du chantier et raison sociale du client.",
+      "correction": [
+        "SELECT NumChantier, VilleChantier, NomCli",
+        "FROM CHANTIER, CLIENT",
+        "WHERE CHANTIER.NumCli = CLIENT.NumCli",
+        "AND TypeClient = 'Entreprise';"
+      ],
+      "variantes": [
+        [
+          "SELECT NumChantier, VilleChantier, NomCli",
+          "FROM CHANTIER",
+          "INNER JOIN CLIENT ON CHANTIER.NumCli = CLIENT.NumCli",
+          "WHERE TypeClient = 'Entreprise';"
+        ]
+      ],
+      "indice": "Le type de client est dans CLIENT, le chantier dans CHANTIER : reliez-les par NumCli."
+    },
+    {
+      "id": "q11",
+      "theme": "Jointures",
+      "enonce": "Afficher chaque chantier (numéro, ville) avec le nom et le prénom du salarié qui l'encadre, triés par numéro de chantier.",
+      "ordered": [
+        0
+      ],
+      "correction": [
+        "SELECT NumChantier, VilleChantier, Nom, Prenom",
+        "FROM CHANTIER, SALARIE",
+        "WHERE CHANTIER.MatriculeEncadrant = SALARIE.Matricule",
+        "ORDER BY NumChantier;"
+      ],
+      "variantes": [
+        [
+          "SELECT NumChantier, VilleChantier, Nom, Prenom",
+          "FROM CHANTIER",
+          "INNER JOIN SALARIE ON CHANTIER.MatriculeEncadrant = SALARIE.Matricule",
+          "ORDER BY NumChantier;"
+        ]
+      ],
+      "indice": "Dans CHANTIER, MatriculeEncadrant est une clé étrangère qui fait référence au Matricule de SALARIE."
+    },
+    {
+      "id": "q12",
+      "theme": "Jointures",
+      "enonce": "Afficher les tâches du chantier C120301 : numéro de tâche, description, désignation de la catégorie et date de début prévue, triées par numéro de tâche.",
+      "ordered": [
+        0
+      ],
+      "correction": [
+        "SELECT NumTache, Description, Designation, DateDebutPrevue",
+        "FROM TACHE, CATEGORIE_TACHE",
+        "WHERE TACHE.NumCategorie = CATEGORIE_TACHE.NumCategorie",
+        "AND NumChantier = 'C120301'",
+        "ORDER BY NumTache;"
+      ],
+      "variantes": [
+        [
+          "SELECT NumTache, Description, Designation, DateDebutPrevue",
+          "FROM TACHE",
+          "INNER JOIN CATEGORIE_TACHE ON TACHE.NumCategorie = CATEGORIE_TACHE.NumCategorie",
+          "WHERE NumChantier = 'C120301'",
+          "ORDER BY NumTache;"
+        ]
+      ],
+      "indice": "La désignation (plomberie, électricité…) est dans CATEGORIE_TACHE ; la description, propre à chaque tâche, est dans TACHE."
+    },
+    {
+      "id": "q13",
+      "theme": "Jointures",
+      "annale": "2012",
+      "enonce": "Liste des salariés (prénom, nom) affectés à des travaux de plomberie, triée par ordre alphabétique (nom puis prénom). On s'intéresse aux affectations prévues (AFFECTER), et non aux heures effectuées.",
+      "ordered": [
+        1,
+        0
+      ],
+      "correction": [
+        "SELECT DISTINCT Prenom, Nom",
+        "FROM SALARIE, AFFECTER, TACHE, CATEGORIE_TACHE",
+        "WHERE SALARIE.Matricule = AFFECTER.Matricule",
+        "AND AFFECTER.NumChantier = TACHE.NumChantier",
+        "AND AFFECTER.NumTache = TACHE.NumTache",
+        "AND TACHE.NumCategorie = CATEGORIE_TACHE.NumCategorie",
+        "AND Designation = 'plomberie'",
+        "ORDER BY Nom, Prenom;"
+      ],
+      "variantes": [
+        [
+          "SELECT DISTINCT Prenom, Nom",
+          "FROM SALARIE",
+          "INNER JOIN AFFECTER ON SALARIE.Matricule = AFFECTER.Matricule",
+          "INNER JOIN TACHE ON AFFECTER.NumChantier = TACHE.NumChantier AND AFFECTER.NumTache = TACHE.NumTache",
+          "INNER JOIN CATEGORIE_TACHE ON TACHE.NumCategorie = CATEGORIE_TACHE.NumCategorie",
+          "WHERE Designation = 'plomberie'",
+          "ORDER BY Nom, Prenom;"
+        ]
+      ],
+      "indice": "Une tâche est identifiée par le couple (NumChantier, NumTache) : la jointure AFFECTER – TACHE porte sur ces DEUX colonnes. Un plombier est affecté à plusieurs tâches de plomberie : DISTINCT évite les doublons."
+    },
+    {
+      "id": "q14",
+      "theme": "Jointures",
+      "annale": "2012",
+      "enonce": "Nous sommes le 04/06/2012. Liste des tâches (numéro de chantier, numéro de tâche, désignation de la catégorie et date de début prévue) dont la date de début prévue est passée et qui n'ont pas encore débuté.",
+      "correction": [
+        "SELECT NumChantier, NumTache, Designation, DateDebutPrevue",
+        "FROM TACHE, CATEGORIE_TACHE",
+        "WHERE TACHE.NumCategorie = CATEGORIE_TACHE.NumCategorie",
+        "AND DateDebutPrevue < NOW()",
+        "AND DateDebutReelle IS NULL;"
+      ],
+      "variantes": [
+        [
+          "SELECT NumChantier, NumTache, Designation, DateDebutPrevue",
+          "FROM TACHE",
+          "INNER JOIN CATEGORIE_TACHE ON TACHE.NumCategorie = CATEGORIE_TACHE.NumCategorie",
+          "WHERE DateDebutPrevue < '04/06/2012'",
+          "AND DateDebutReelle IS NULL;"
+        ],
+        [
+          "SELECT NumChantier, NumTache, Designation, DateDebutPrevue",
+          "FROM TACHE, CATEGORIE_TACHE",
+          "WHERE TACHE.NumCategorie = CATEGORIE_TACHE.NumCategorie",
+          "AND DateDebutPrevue < CURDATE()",
+          "AND DateDebutReelle IS NULL;"
+        ]
+      ],
+      "indice": "NOW() (ou CURDATE()) donne la date du jour. « Pas encore débuté » : la date de début réelle est vide (IS NULL, pas = NULL). Une tâche prévue aujourd'hui n'est pas encore en retard."
+    },
+    {
+      "id": "q15",
+      "theme": "Jointures et regroupements",
+      "annale": "2012",
+      "enonce": "Liste des salariés (prénom, nom, nombre d'heures effectuées dans le mois) qui ont effectué plus de 152 heures au cours du mois d'avril 2012, triée par nombre d'heures décroissant puis par ordre alphabétique (nom puis prénom).",
+      "ordered": [
+        2,
+        1,
+        0
+      ],
+      "correction": [
+        "SELECT Prenom, Nom, SUM(NombreHeures) AS TotalHeures",
+        "FROM SALARIE, EFFECTUER",
+        "WHERE SALARIE.Matricule = EFFECTUER.Matricule",
+        "AND DateTravail BETWEEN '01/04/2012' AND '30/04/2012'",
+        "GROUP BY SALARIE.Matricule, Prenom, Nom",
+        "HAVING SUM(NombreHeures) > 152",
+        "ORDER BY SUM(NombreHeures) DESC, Nom ASC, Prenom ASC;"
+      ],
+      "variantes": [
+        [
+          "SELECT Prenom, Nom, SUM(NombreHeures)",
+          "FROM SALARIE",
+          "INNER JOIN EFFECTUER ON SALARIE.Matricule = EFFECTUER.Matricule",
+          "WHERE MONTH(DateTravail) = 4 AND YEAR(DateTravail) = 2012",
+          "GROUP BY SALARIE.Matricule, Prenom, Nom",
+          "HAVING SUM(NombreHeures) > 152",
+          "ORDER BY 3 DESC, Nom, Prenom;"
+        ]
+      ],
+      "indice": "Filtrez avril 2012 dans le WHERE, regroupez par salarié, puis gardez les totaux > 152 avec HAVING. Regroupez par Matricule : deux salariés différents peuvent porter le même nom et le même prénom, leurs heures ne doivent pas être additionnées."
+    },
+    {
+      "id": "q16",
+      "theme": "Jointures et regroupements",
+      "enonce": "Afficher, pour chaque chantier, son numéro, sa ville et le nombre total d'heures effectuées, du chantier le plus consommateur d'heures au moins consommateur.",
+      "ordered": [
+        2
+      ],
+      "correction": [
+        "SELECT CHANTIER.NumChantier, VilleChantier, SUM(NombreHeures) AS TotalHeures",
+        "FROM CHANTIER, EFFECTUER",
+        "WHERE CHANTIER.NumChantier = EFFECTUER.NumChantier",
+        "GROUP BY CHANTIER.NumChantier, VilleChantier",
+        "ORDER BY SUM(NombreHeures) DESC;"
+      ],
+      "variantes": [
+        [
+          "SELECT CHANTIER.NumChantier, VilleChantier, SUM(NombreHeures)",
+          "FROM CHANTIER",
+          "INNER JOIN EFFECTUER ON CHANTIER.NumChantier = EFFECTUER.NumChantier",
+          "GROUP BY CHANTIER.NumChantier, VilleChantier",
+          "ORDER BY 3 DESC;"
+        ]
+      ],
+      "indice": "EFFECTUER contient le numéro de chantier : une jointure directe avec CHANTIER suffit, puis GROUP BY par chantier."
+    },
+    {
+      "id": "q17",
+      "theme": "Jointures et regroupements",
+      "enonce": "Comparer le prévu et le réalisé sur la tâche T003 du chantier C120301 : pour chaque salarié affecté à cette tâche qui y a effectué des heures, afficher son matricule, son nom, la durée prévue de son affectation (en heures) et le total des heures qu'il y a effectuées.",
+      "correction": [
+        "SELECT SALARIE.Matricule, Nom, Duree, SUM(NombreHeures) AS HeuresEffectuees",
+        "FROM SALARIE, AFFECTER, EFFECTUER",
+        "WHERE SALARIE.Matricule = AFFECTER.Matricule",
+        "AND AFFECTER.Matricule = EFFECTUER.Matricule",
+        "AND AFFECTER.NumChantier = EFFECTUER.NumChantier",
+        "AND AFFECTER.NumTache = EFFECTUER.NumTache",
+        "AND AFFECTER.NumChantier = 'C120301'",
+        "AND AFFECTER.NumTache = 'T003'",
+        "GROUP BY SALARIE.Matricule, Nom, Duree;"
+      ],
+      "variantes": [
+        [
+          "SELECT SALARIE.Matricule, Nom, Duree, SUM(NombreHeures)",
+          "FROM SALARIE",
+          "INNER JOIN AFFECTER ON SALARIE.Matricule = AFFECTER.Matricule",
+          "INNER JOIN EFFECTUER ON AFFECTER.Matricule = EFFECTUER.Matricule AND AFFECTER.NumChantier = EFFECTUER.NumChantier AND AFFECTER.NumTache = EFFECTUER.NumTache",
+          "WHERE AFFECTER.NumChantier = 'C120301' AND AFFECTER.NumTache = 'T003'",
+          "GROUP BY SALARIE.Matricule, Nom, Duree;"
+        ]
+      ],
+      "indice": "AFFECTER (prévu) et EFFECTUER (réalisé) se relient sur trois colonnes : le salarié ET la tâche (chantier + numéro). EFFECTUER a une ligne par jour : il faut faire la somme des heures, par salarié."
+    },
+    {
+      "id": "q18",
+      "theme": "Jointures et regroupements",
+      "enonce": "Afficher, pour chaque chantier (numéro), le nombre de salariés différents qui y ont effectué des heures.",
+      "correction": [
+        "SELECT NumChantier, COUNT(DISTINCT Matricule) AS NbSalaries",
+        "FROM EFFECTUER",
+        "GROUP BY NumChantier;"
+      ],
+      "indice": "Un même salarié a une ligne par jour travaillé dans EFFECTUER : COUNT(DISTINCT Matricule) ne le compte qu'une fois par chantier."
+    },
+    {
+      "id": "q19",
+      "theme": "Sous-requêtes",
+      "annale": "2012",
+      "enonce": "Liste des salariés (prénom, nom) qui n'ont jamais encadré de chantier.",
+      "correction": [
+        "SELECT Prenom, Nom",
+        "FROM SALARIE",
+        "WHERE Matricule NOT IN (SELECT MatriculeEncadrant",
+        "                        FROM CHANTIER);"
+      ],
+      "variantes": [
+        [
+          "SELECT Prenom, Nom",
+          "FROM SALARIE S",
+          "WHERE NOT EXISTS (SELECT *",
+          "                  FROM CHANTIER C",
+          "                  WHERE C.MatriculeEncadrant = S.Matricule);"
+        ]
+      ],
+      "indice": "L'encadrant d'un chantier est désigné par CHANTIER.MatriculeEncadrant : cherchez les salariés dont le matricule n'y figure jamais."
+    },
+    {
+      "id": "q20",
+      "theme": "Sous-requêtes",
+      "annale": "2012",
+      "enonce": "Pour obtenir la liste des tâches les plus longues, la requête suivante a été écrite : SELECT NumChantier, NumTache, MAX(DureePrevue) FROM TACHE GROUP BY NumChantier, NumTache. Le résultat obtenu est erroné : exécutez-la et expliquez pourquoi. Écrivez ensuite la requête correcte : les tâches (numéro de chantier, numéro de tâche, description) dont la durée prévue est la plus longue, avec cette durée.",
+      "correction": [
+        "SELECT NumChantier, NumTache, Description, DureePrevue",
+        "FROM TACHE",
+        "WHERE DureePrevue = (SELECT MAX(DureePrevue)",
+        "                     FROM TACHE);"
+      ],
+      "indice": "Le GROUP BY porte sur la clé primaire de TACHE : chaque groupe ne contient qu'une tâche, et MAX renvoie simplement la durée de chaque tâche. Il faut calculer la durée maximale de toutes les tâches dans une sous-requête, puis chercher la (ou les) tâche(s) qui ont cette durée."
+    },
+    {
+      "id": "q21",
+      "theme": "Sous-requêtes",
+      "enonce": "Afficher les salariés présents (matricule, nom, prénom) qui n'ont effectué aucune heure en mai 2012.",
+      "correction": [
+        "SELECT Matricule, Nom, Prenom",
+        "FROM SALARIE",
+        "WHERE DateSortie IS NULL",
+        "AND Matricule NOT IN (SELECT Matricule",
+        "                     FROM EFFECTUER",
+        "                     WHERE DateTravail BETWEEN '01/05/2012' AND '31/05/2012');"
+      ],
+      "variantes": [
+        [
+          "SELECT Matricule, Nom, Prenom",
+          "FROM SALARIE S",
+          "WHERE DateSortie IS NULL",
+          "AND NOT EXISTS (SELECT *",
+          "                FROM EFFECTUER E",
+          "                WHERE E.Matricule = S.Matricule",
+          "                AND MONTH(DateTravail) = 5 AND YEAR(DateTravail) = 2012);"
+        ]
+      ],
+      "indice": "La sous-requête donne les matricules des salariés qui ont travaillé en mai 2012 ; gardez les salariés présents dont le matricule n'y figure pas."
+    },
+    {
+      "id": "q22",
+      "theme": "Sous-requêtes",
+      "enonce": "Certains salariés sont venus en renfort sur des tâches auxquelles ils n'étaient pas affectés. Afficher sans doublon le matricule, le nom du salarié et la tâche concernée (numéro de chantier, numéro de tâche) pour les heures effectuées sans affectation correspondante.",
+      "correction": [
+        "SELECT DISTINCT E.Matricule, Nom, E.NumChantier, E.NumTache",
+        "FROM EFFECTUER E, SALARIE S",
+        "WHERE E.Matricule = S.Matricule",
+        "AND NOT EXISTS (SELECT *",
+        "                FROM AFFECTER A",
+        "                WHERE A.Matricule = E.Matricule",
+        "                AND A.NumChantier = E.NumChantier",
+        "                AND A.NumTache = E.NumTache);"
+      ],
+      "variantes": [
+        [
+          "SELECT DISTINCT E.Matricule, Nom, E.NumChantier, E.NumTache",
+          "FROM EFFECTUER E",
+          "INNER JOIN SALARIE S ON E.Matricule = S.Matricule",
+          "LEFT JOIN AFFECTER A ON A.Matricule = E.Matricule AND A.NumChantier = E.NumChantier AND A.NumTache = E.NumTache",
+          "WHERE A.Matricule IS NULL;"
+        ]
+      ],
+      "indice": "Pour chaque ligne de EFFECTUER, cherchez dans AFFECTER une ligne avec le même salarié, le même chantier ET la même tâche : NOT EXISTS garde celles qui n'en ont pas."
+    },
+    {
+      "id": "q23",
+      "theme": "Mises à jour",
+      "type": "write",
+      "annale": "2012",
+      "enonce": "Écrire la requête qui recopie dans la table ARCHIVE_SALARIE (qui contient les mêmes champs que la table SALARIE) les salariés qui ont quitté l'entreprise.",
+      "correction": [
+        "INSERT INTO ARCHIVE_SALARIE",
+        "SELECT *",
+        "FROM SALARIE",
+        "WHERE DateSortie IS NOT NULL;"
+      ],
+      "variantes": [
+        [
+          "INSERT INTO ARCHIVE_SALARIE (Matricule, Nom, Prenom, Qualification, Niveau, DateEntree, DateSortie)",
+          "SELECT Matricule, Nom, Prenom, Qualification, Niveau, DateEntree, DateSortie",
+          "FROM SALARIE",
+          "WHERE DateSortie IS NOT NULL;"
+        ],
+        [
+          "INSERT INTO ARCHIVE_SALARIE",
+          "SELECT *",
+          "FROM SALARIE",
+          "WHERE DateSortie <= NOW();"
+        ]
+      ],
+      "verif": "SELECT * FROM ARCHIVE_SALARIE ORDER BY Matricule",
+      "indice": "INSERT INTO … SELECT … ajoute d'un coup toutes les lignes renvoyées par le SELECT (pas de VALUES). Les deux tables ont les mêmes colonnes dans le même ordre, d'où SELECT *. Un salarié qui a quitté l'entreprise a une date de sortie. Ici, n'entourez pas le SELECT de parenthèses : SQLite le refuse."
+    },
+    {
+      "id": "q24",
+      "theme": "Mises à jour",
+      "type": "write",
+      "annale": "2012",
+      "enonce": "Les salariés sortis ont été archivés (question précédente). Écrire la requête qui supprime de la table SALARIE les salariés qui ont quitté l'entreprise, et l'exécuter : le SGBD la refuse (« impossible de supprimer… »). Expliquer pourquoi. Écrire ensuite la requête qui supprime seulement les salariés sortis qui ne sont référencés dans aucune autre table (ni affectation, ni heures effectuées, ni encadrement de chantier).",
+      "correction": [
+        "DELETE FROM SALARIE",
+        "WHERE DateSortie IS NOT NULL",
+        "AND Matricule NOT IN (SELECT Matricule FROM AFFECTER)",
+        "AND Matricule NOT IN (SELECT Matricule FROM EFFECTUER)",
+        "AND Matricule NOT IN (SELECT MatriculeEncadrant FROM CHANTIER);"
+      ],
+      "variantes": [
+        [
+          "DELETE FROM SALARIE",
+          "WHERE DateSortie IS NOT NULL",
+          "AND NOT EXISTS (SELECT * FROM AFFECTER A WHERE A.Matricule = SALARIE.Matricule)",
+          "AND NOT EXISTS (SELECT * FROM EFFECTUER E WHERE E.Matricule = SALARIE.Matricule)",
+          "AND NOT EXISTS (SELECT * FROM CHANTIER C WHERE C.MatriculeEncadrant = SALARIE.Matricule);"
+        ]
+      ],
+      "verif": "SELECT * FROM SALARIE ORDER BY Matricule",
+      "indice": "Matricule est clé étrangère dans AFFECTER et EFFECTUER, et MatriculeEncadrant dans CHANTIER : l'intégrité référentielle interdit de supprimer un salarié encore référencé, et la requête entière est alors annulée. Il faudrait d'abord supprimer (ou modifier) les lignes liées. Pour ne supprimer que les salariés sans lignes liées, ajoutez une condition NOT IN (ou NOT EXISTS) par table qui les référence."
+    },
+    {
+      "id": "q25",
+      "theme": "Mises à jour",
+      "type": "write",
+      "enonce": "Les travaux de la tâche T003 du chantier C120502 ont commencé aujourd'hui (04/06/2012). Enregistrer la date de début réelle de cette tâche.",
+      "correction": [
+        "UPDATE TACHE",
+        "SET DateDebutReelle = NOW()",
+        "WHERE NumChantier = 'C120502'",
+        "AND NumTache = 'T003';"
+      ],
+      "variantes": [
+        [
+          "UPDATE TACHE",
+          "SET DateDebutReelle = '04/06/2012'",
+          "WHERE NumChantier = 'C120502'",
+          "AND NumTache = 'T003';"
+        ]
+      ],
+      "verif": "SELECT * FROM TACHE ORDER BY NumChantier, NumTache",
+      "indice": "Une tâche est identifiée par le couple (NumChantier, NumTache) : le numéro T003 existe dans presque tous les chantiers, il faut les deux conditions dans le WHERE."
+    },
+    {
+      "id": "s01",
+      "type": "schema",
+      "theme": "Évolution du schéma",
+      "annale": "2012",
+      "enonce": "RENOV'PLUS veut gérer les compétences requises sur ses chantiers. Chaque catégorie de tâches (électricité, plomberie, peinture intérieure…) nécessite un certain nombre de compétences, définies par un code et un libellé ; une même compétence peut être nécessaire à plusieurs catégories. Certains salariés, selon leur niveau de qualification, sont spécialisés dans une compétence (une seule au plus). Par ailleurs, pour favoriser la polyvalence, tout salarié doit maîtriser au moins une compétence, et le plus souvent plusieurs. Complétez le schéma ci-dessous.",
+      "depart": [
+        "SALARIE",
+        "CATEGORIE_TACHE"
+      ],
+      "solution": {
+        "tables": [
+          {
+            "nom": "COMPETENCE",
+            "alias": [
+              "COMPETENCES"
+            ],
+            "role": "décrire les compétences (code et libellé)",
+            "pk": [
+              "CodeCompetence|NumCompetence|CodeComp|NumComp|IdCompetence|NumeroCompetence"
+            ],
+            "attributs": [
+              "LibelleCompetence|Libelle|LibelleComp|NomCompetence|IntituleCompetence|DesignationCompetence"
+            ]
+          },
+          {
+            "nom": "NECESSITER",
+            "alias": [
+              "NECESSITE",
+              "REQUERIR",
+              "EXIGER",
+              "CATEGORIE_COMPETENCE",
+              "COMPETENCE_CATEGORIE",
+              "DEMANDER",
+              "COMPETENCE_REQUISE",
+              "COMPETENCES_REQUISES"
+            ],
+            "role": "indiquer les compétences nécessaires à chaque catégorie de tâches",
+            "pk": [
+              "NumCategorie",
+              "CodeCompetence|NumCompetence|CodeComp|NumComp|IdCompetence|NumeroCompetence"
+            ],
+            "fk": {
+              "NumCategorie": "CATEGORIE_TACHE",
+              "CodeCompetence|NumCompetence|CodeComp|NumComp|IdCompetence|NumeroCompetence": "COMPETENCE"
+            }
+          },
+          {
+            "nom": "MAITRISER",
+            "alias": [
+              "MAITRISE",
+              "POSSEDER",
+              "SALARIE_COMPETENCE",
+              "COMPETENCE_SALARIE",
+              "DETENIR",
+              "COMPETENCES_SALARIE"
+            ],
+            "role": "indiquer les compétences maîtrisées par chaque salarié",
+            "pk": [
+              "Matricule",
+              "CodeCompetence|NumCompetence|CodeComp|NumComp|IdCompetence|NumeroCompetence"
+            ],
+            "fk": {
+              "Matricule": "SALARIE",
+              "CodeCompetence|NumCompetence|CodeComp|NumComp|IdCompetence|NumeroCompetence": "COMPETENCE"
+            }
+          },
+          {
+            "nom": "SALARIE",
+            "fk": {
+              "CodeCompetenceSpecialite|CodeSpecialite|NumCompetenceSpecialite|NumSpecialite|CodeCompetenceSpe|CompetenceSpecialite|Specialite|CodeCompSpe|NumCompSpe|CodeCompetence|NumCompetence": "COMPETENCE"
+            }
+          }
+        ]
+      },
+      "variantes": [
+        {
+          "tables": [
+            {
+              "nom": "COMPETENCE",
+              "alias": [
+                "COMPETENCES"
+              ],
+              "role": "décrire les compétences (code et libellé)",
+              "pk": [
+                "CodeCompetence|NumCompetence|CodeComp|NumComp|IdCompetence|NumeroCompetence"
+              ],
+              "attributs": [
+                "LibelleCompetence|Libelle|LibelleComp|NomCompetence|IntituleCompetence|DesignationCompetence"
+              ]
+            },
+            {
+              "nom": "NECESSITER",
+              "alias": [
+                "NECESSITE",
+                "REQUERIR",
+                "EXIGER",
+                "CATEGORIE_COMPETENCE",
+                "COMPETENCE_CATEGORIE",
+                "DEMANDER",
+                "COMPETENCE_REQUISE",
+                "COMPETENCES_REQUISES"
+              ],
+              "role": "indiquer les compétences nécessaires à chaque catégorie de tâches",
+              "pk": [
+                "NumCategorie",
+                "CodeCompetence|NumCompetence|CodeComp|NumComp|IdCompetence|NumeroCompetence"
+              ],
+              "fk": {
+                "NumCategorie": "CATEGORIE_TACHE",
+                "CodeCompetence|NumCompetence|CodeComp|NumComp|IdCompetence|NumeroCompetence": "COMPETENCE"
+              }
+            },
+            {
+              "nom": "MAITRISER",
+              "alias": [
+                "MAITRISE",
+                "POSSEDER",
+                "SALARIE_COMPETENCE",
+                "COMPETENCE_SALARIE",
+                "DETENIR",
+                "COMPETENCES_SALARIE"
+              ],
+              "role": "indiquer les compétences maîtrisées par chaque salarié",
+              "pk": [
+                "Matricule",
+                "CodeCompetence|NumCompetence|CodeComp|NumComp|IdCompetence|NumeroCompetence"
+              ],
+              "fk": {
+                "Matricule": "SALARIE",
+                "CodeCompetence|NumCompetence|CodeComp|NumComp|IdCompetence|NumeroCompetence": "COMPETENCE"
+              }
+            }
+          ],
+          "partiel": "Presque : il manque la spécialité. Un salarié est spécialisé dans une compétence au plus : c'est une clé étrangère vers COMPETENCE dans SALARIE (vide pour les salariés non spécialisés), en plus de la table des compétences maîtrisées."
+        }
+      ],
+      "indice": "Il faut une table des compétences et deux relations « plusieurs à plusieurs » (catégorie – compétence, salarié – compétence maîtrisée), chacune devenant une table dont la clé primaire associe les deux clés. La spécialité, elle, est unique pour un salarié."
+    },
+    {
+      "id": "s02",
+      "type": "schema",
+      "theme": "Évolution du schéma",
+      "annale": "2012",
+      "enonce": "Pour maintenir à niveau les compétences de ses salariés, RENOV'PLUS les envoie en stage de formation. Un stage est identifié par un code ; on enregistre sa date et sa durée, et chaque stage porte sur une seule compétence. Un stage est organisé soit en interne, et il est alors animé par un salarié de RENOV'PLUS, soit en externe : on enregistre alors le lieu et le nom de l'intervenant. Qu'il soit interne ou externe, on veut connaître les salariés inscrits à chaque stage, puis ceux qui l'ont réellement suivi (pour suivre un stage, il faut y avoir été inscrit). Complétez le schéma ci-dessous, qui reprend la table COMPETENCE de la question précédente.",
+      "depart": [
+        "SALARIE",
+        {
+          "nom": "COMPETENCE",
+          "colonnes": [
+            "_CodeCompetence",
+            "LibelleCompetence"
+          ]
+        }
+      ],
+      "solution": {
+        "tables": [
+          {
+            "nom": "STAGE",
+            "alias": [
+              "STAGES",
+              "STAGE_FORMATION"
+            ],
+            "role": "décrire les stages (date, durée, compétence)",
+            "pk": [
+              "CodeStage|NumStage|IdStage|CodeSt|NumeroStage"
+            ],
+            "fk": {
+              "CodeCompetence|NumCompetence|CodeComp|NumComp|IdCompetence|NumeroCompetence": "COMPETENCE"
+            },
+            "attributs": [
+              "DateStage|Date|DateDebut|DateDebutStage",
+              "DureeStage|Duree|NbJours|NbHeures|DureeHeures|DureeJours"
+            ],
+            "optionnels": [
+              "TypeStage|Type|Interne|EstInterne|Organisation|ModeOrganisation|Externe"
+            ]
+          },
+          {
+            "nom": "STAGE_INTERNE",
+            "alias": [
+              "INTERNE",
+              "STAGES_INTERNES",
+              "STAGEINTERNE"
+            ],
+            "role": "enregistrer les stages organisés en interne et le salarié qui les anime",
+            "pk": [
+              "CodeStage|NumStage|IdStage|CodeSt|NumeroStage"
+            ],
+            "fk": {
+              "CodeStage|NumStage|IdStage|CodeSt|NumeroStage": "STAGE",
+              "MatriculeAnimateur|MatriculeFormateur|MatAnimateur|Animateur|MatriculeSalarie|MatriculeAnim|MatriculeIntervenant|MatriculeInterne|Matricule": "SALARIE"
+            }
+          },
+          {
+            "nom": "STAGE_EXTERNE",
+            "alias": [
+              "EXTERNE",
+              "STAGES_EXTERNES",
+              "STAGEEXTERNE"
+            ],
+            "role": "enregistrer les stages organisés en externe (lieu, intervenant)",
+            "pk": [
+              "CodeStage|NumStage|IdStage|CodeSt|NumeroStage"
+            ],
+            "fk": {
+              "CodeStage|NumStage|IdStage|CodeSt|NumeroStage": "STAGE"
+            },
+            "attributs": [
+              "Lieu|LieuStage",
+              "Intervenant|NomIntervenant|IntervenantExterne|NomIntervenantExterne"
+            ]
+          },
+          {
+            "nom": "INSCRIRE",
+            "alias": [
+              "INSCRIPTION",
+              "INSCRIPTIONS",
+              "S_INSCRIRE",
+              "SINSCRIRE",
+              "ETRE_INSCRIT",
+              "INSCRIT"
+            ],
+            "role": "enregistrer les inscriptions des salariés aux stages",
+            "pk": [
+              "Matricule|MatriculeSalarie",
+              "CodeStage|NumStage|IdStage|CodeSt|NumeroStage"
+            ],
+            "fk": {
+              "Matricule|MatriculeSalarie": "SALARIE",
+              "CodeStage|NumStage|IdStage|CodeSt|NumeroStage": "STAGE"
+            }
+          },
+          {
+            "nom": "ASSISTER",
+            "alias": [
+              "SUIVRE",
+              "PARTICIPER",
+              "PARTICIPATION",
+              "PARTICIPATIONS",
+              "PRESENCE",
+              "SUIVI",
+              "ASSISTER_STAGE",
+              "SUIVRE_STAGE",
+              "ASSISTE"
+            ],
+            "role": "enregistrer les salariés qui ont réellement suivi chaque stage",
+            "pk": [
+              "Matricule|MatriculeSalarie",
+              "CodeStage|NumStage|IdStage|CodeSt|NumeroStage"
+            ],
+            "fk": {
+              "Matricule|MatriculeSalarie": "SALARIE",
+              "CodeStage|NumStage|IdStage|CodeSt|NumeroStage": "STAGE"
+            }
+          }
+        ]
+      },
+      "variantes": [
+        {
+          "tables": [
+            {
+              "nom": "STAGE",
+              "alias": [
+                "STAGES",
+                "STAGE_FORMATION"
+              ],
+              "role": "décrire les stages (date, durée, compétence)",
+              "pk": [
+                "CodeStage|NumStage|IdStage|CodeSt|NumeroStage"
+              ],
+              "fk": {
+                "CodeCompetence|NumCompetence|CodeComp|NumComp|IdCompetence|NumeroCompetence": "COMPETENCE",
+                "MatriculeAnimateur|MatriculeFormateur|MatAnimateur|Animateur|MatriculeSalarie|MatriculeAnim|MatriculeIntervenant|MatriculeInterne|Matricule": "SALARIE"
+              },
+              "attributs": [
+                "DateStage|Date|DateDebut|DateDebutStage",
+                "DureeStage|Duree|NbJours|NbHeures|DureeHeures|DureeJours",
+                "Lieu|LieuStage",
+                "Intervenant|NomIntervenant|IntervenantExterne|NomIntervenantExterne"
+              ],
+              "optionnels": [
+                "TypeStage|Type|Interne|EstInterne|Organisation|ModeOrganisation|Externe"
+              ]
+            },
+            {
+              "nom": "INSCRIRE",
+              "alias": [
+                "INSCRIPTION",
+                "INSCRIPTIONS",
+                "S_INSCRIRE",
+                "SINSCRIRE",
+                "ETRE_INSCRIT",
+                "INSCRIT"
+              ],
+              "role": "enregistrer les inscriptions des salariés aux stages",
+              "pk": [
+                "Matricule|MatriculeSalarie",
+                "CodeStage|NumStage|IdStage|CodeSt|NumeroStage"
+              ],
+              "fk": {
+                "Matricule|MatriculeSalarie": "SALARIE",
+                "CodeStage|NumStage|IdStage|CodeSt|NumeroStage": "STAGE"
+              }
+            },
+            {
+              "nom": "ASSISTER",
+              "alias": [
+                "SUIVRE",
+                "PARTICIPER",
+                "PARTICIPATION",
+                "PARTICIPATIONS",
+                "PRESENCE",
+                "SUIVI",
+                "ASSISTER_STAGE",
+                "SUIVRE_STAGE",
+                "ASSISTE"
+              ],
+              "role": "enregistrer les salariés qui ont réellement suivi chaque stage",
+              "pk": [
+                "Matricule|MatriculeSalarie",
+                "CodeStage|NumStage|IdStage|CodeSt|NumeroStage"
+              ],
+              "fk": {
+                "Matricule|MatriculeSalarie": "SALARIE",
+                "CodeStage|NumStage|IdStage|CodeSt|NumeroStage": "STAGE"
+              }
+            }
+          ]
+        },
+        {
+          "tables": [
+            {
+              "nom": "STAGE",
+              "alias": [
+                "STAGES",
+                "STAGE_FORMATION"
+              ],
+              "role": "décrire les stages (date, durée, compétence)",
+              "pk": [
+                "CodeStage|NumStage|IdStage|CodeSt|NumeroStage"
+              ],
+              "fk": {
+                "CodeCompetence|NumCompetence|CodeComp|NumComp|IdCompetence|NumeroCompetence": "COMPETENCE"
+              },
+              "attributs": [
+                "DateStage|Date|DateDebut|DateDebutStage",
+                "DureeStage|Duree|NbJours|NbHeures|DureeHeures|DureeJours"
+              ],
+              "optionnels": [
+                "TypeStage|Type|Interne|EstInterne|Organisation|ModeOrganisation|Externe"
+              ]
+            },
+            {
+              "nom": "STAGE_INTERNE",
+              "alias": [
+                "INTERNE",
+                "STAGES_INTERNES",
+                "STAGEINTERNE"
+              ],
+              "role": "enregistrer les stages organisés en interne et le salarié qui les anime",
+              "pk": [
+                "CodeStage|NumStage|IdStage|CodeSt|NumeroStage"
+              ],
+              "fk": {
+                "CodeStage|NumStage|IdStage|CodeSt|NumeroStage": "STAGE",
+                "MatriculeAnimateur|MatriculeFormateur|MatAnimateur|Animateur|MatriculeSalarie|MatriculeAnim|MatriculeIntervenant|MatriculeInterne|Matricule": "SALARIE"
+              }
+            },
+            {
+              "nom": "STAGE_EXTERNE",
+              "alias": [
+                "EXTERNE",
+                "STAGES_EXTERNES",
+                "STAGEEXTERNE"
+              ],
+              "role": "enregistrer les stages organisés en externe (lieu, intervenant)",
+              "pk": [
+                "CodeStage|NumStage|IdStage|CodeSt|NumeroStage"
+              ],
+              "fk": {
+                "CodeStage|NumStage|IdStage|CodeSt|NumeroStage": "STAGE"
+              },
+              "attributs": [
+                "Lieu|LieuStage",
+                "Intervenant|NomIntervenant|IntervenantExterne|NomIntervenantExterne"
+              ]
+            },
+            {
+              "nom": "INSCRIRE",
+              "alias": [
+                "INSCRIPTION",
+                "INSCRIPTIONS",
+                "S_INSCRIRE",
+                "SINSCRIRE",
+                "ETRE_INSCRIT",
+                "INSCRIT"
+              ],
+              "role": "enregistrer les inscriptions des salariés aux stages",
+              "pk": [
+                "Matricule|MatriculeSalarie",
+                "CodeStage|NumStage|IdStage|CodeSt|NumeroStage"
+              ],
+              "fk": {
+                "Matricule|MatriculeSalarie": "SALARIE",
+                "CodeStage|NumStage|IdStage|CodeSt|NumeroStage": "STAGE"
+              },
+              "attributs": [
+                "Present|Suivi|Assiste|Presence|AParticipe|StageSuivi|Participation|AssisteStage|AsuiviStage|Suivre"
+              ]
+            }
+          ]
+        },
+        {
+          "tables": [
+            {
+              "nom": "STAGE",
+              "alias": [
+                "STAGES",
+                "STAGE_FORMATION"
+              ],
+              "role": "décrire les stages (date, durée, compétence)",
+              "pk": [
+                "CodeStage|NumStage|IdStage|CodeSt|NumeroStage"
+              ],
+              "fk": {
+                "CodeCompetence|NumCompetence|CodeComp|NumComp|IdCompetence|NumeroCompetence": "COMPETENCE",
+                "MatriculeAnimateur|MatriculeFormateur|MatAnimateur|Animateur|MatriculeSalarie|MatriculeAnim|MatriculeIntervenant|MatriculeInterne|Matricule": "SALARIE"
+              },
+              "attributs": [
+                "DateStage|Date|DateDebut|DateDebutStage",
+                "DureeStage|Duree|NbJours|NbHeures|DureeHeures|DureeJours",
+                "Lieu|LieuStage",
+                "Intervenant|NomIntervenant|IntervenantExterne|NomIntervenantExterne"
+              ],
+              "optionnels": [
+                "TypeStage|Type|Interne|EstInterne|Organisation|ModeOrganisation|Externe"
+              ]
+            },
+            {
+              "nom": "INSCRIRE",
+              "alias": [
+                "INSCRIPTION",
+                "INSCRIPTIONS",
+                "S_INSCRIRE",
+                "SINSCRIRE",
+                "ETRE_INSCRIT",
+                "INSCRIT"
+              ],
+              "role": "enregistrer les inscriptions des salariés aux stages",
+              "pk": [
+                "Matricule|MatriculeSalarie",
+                "CodeStage|NumStage|IdStage|CodeSt|NumeroStage"
+              ],
+              "fk": {
+                "Matricule|MatriculeSalarie": "SALARIE",
+                "CodeStage|NumStage|IdStage|CodeSt|NumeroStage": "STAGE"
+              },
+              "attributs": [
+                "Present|Suivi|Assiste|Presence|AParticipe|StageSuivi|Participation|AssisteStage|AsuiviStage|Suivre"
+              ]
+            }
+          ]
+        }
+      ],
+      "indice": "Les stages internes et externes ont des informations communes (code, date, durée, compétence) et des informations propres (l'animateur pour l'un, le lieu et l'intervenant pour l'autre) : pensez à une table STAGE complétée par une table par type de stage, dont la clé primaire est aussi une clé étrangère vers STAGE (une seule table STAGE avec des colonnes facultatives est aussi acceptée). Inscriptions et participations sont des relations « plusieurs à plusieurs » entre salariés et stages."
+    }
+  ]
+}

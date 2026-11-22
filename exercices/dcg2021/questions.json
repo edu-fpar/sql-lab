@@ -1,0 +1,1292 @@
+{
+  "id": "dcg2021",
+  "titre": "DCG 2021 – eRecycle",
+  "aujourdhui": "2020-12-15",
+  "contexte": "eRecycle, entreprise de la région dijonnaise, collecte et recycle les déchets de bureau de ses clients (entreprises, cabinets, établissements). Un client (CLIENT) souscrit un ou plusieurs ABONNEMENT, chacun d'un TYPE_ABONNEMENT (« Recycle Papier », « Total Recycle »…, avec un tarif annuel tarifAbo) et avec une fréquence de collecte (frequenceCollecte). La table CONCERNER indique quels TYPE_DECHETS chaque type d'abonnement couvre (contientDonnees = 'O' si les déchets peuvent contenir des données). Chaque COLLECTE d'un abonnement est numérotée par idCollecte (1re, 2e… collecte de cet abonnement) : une collecte est donc identifiée par le couple idCollecte + idAbo. Pour chaque collecte, DETAIL_COLLECTE enregistre le poids collecté (en kg) de chaque type de déchets. Les collectes vont de 2018 à décembre 2020.",
+  "source": "Inspiré du sujet DCG UE8 session 2021, dossier 1. Données entièrement fictives.",
+  "schemaGrid": {
+    "CLIENT": [
+      0,
+      0
+    ],
+    "ABONNEMENT": [
+      1,
+      0
+    ],
+    "TYPE_ABONNEMENT": [
+      2,
+      0
+    ],
+    "COLLECTE": [
+      1,
+      1
+    ],
+    "CONCERNER": [
+      2,
+      1
+    ],
+    "DETAIL_COLLECTE": [
+      1,
+      2
+    ],
+    "TYPE_DECHETS": [
+      2,
+      2
+    ]
+  },
+  "questions": [
+    {
+      "id": "q01",
+      "theme": "Une seule table",
+      "enonce": "Afficher la liste des types de déchets traités par eRecycle (toutes les colonnes).",
+      "correction": [
+        "SELECT *",
+        "FROM TYPE_DECHETS;"
+      ],
+      "indice": "L'étoile * permet d'afficher toutes les colonnes d'une table."
+    },
+    {
+      "id": "q02",
+      "theme": "Une seule table",
+      "enonce": "Afficher le libellé des types de déchets susceptibles de contenir des données (contientDonnees = 'O'), qui nécessitent un recyclage sécurisé.",
+      "correction": [
+        "SELECT libelleTypeDechets",
+        "FROM TYPE_DECHETS",
+        "WHERE contientDonnees = 'O';"
+      ],
+      "indice": "Une condition sur un texte s'écrit entre apostrophes : contientDonnees = 'O'."
+    },
+    {
+      "id": "q03",
+      "theme": "Une seule table",
+      "enonce": "Afficher le nom et le téléphone des clients qui n'ont pas d'adresse courriel, triés par ordre alphabétique des noms.",
+      "ordered": [
+        0
+      ],
+      "correction": [
+        "SELECT nomCli, telCli",
+        "FROM CLIENT",
+        "WHERE courrielCli IS NULL",
+        "ORDER BY nomCli;"
+      ],
+      "indice": "Une valeur absente se teste avec IS NULL (et non = NULL). Le tri se fait avec ORDER BY."
+    },
+    {
+      "id": "q04",
+      "theme": "Une seule table",
+      "enonce": "Afficher la liste des villes où eRecycle a des clients, chaque ville n'apparaissant qu'une seule fois, par ordre alphabétique.",
+      "ordered": [
+        0
+      ],
+      "correction": [
+        "SELECT DISTINCT villeCli",
+        "FROM CLIENT",
+        "ORDER BY villeCli;"
+      ],
+      "indice": "Plusieurs clients habitent la même ville : DISTINCT supprime les doublons."
+    },
+    {
+      "id": "q05",
+      "theme": "Calculs et agrégats",
+      "enonce": "Le tarif d'un abonnement (tarifAbo) est annuel. Afficher pour chaque type d'abonnement son libellé, son tarif annuel et son équivalent mensuel (tarif divisé par 12).",
+      "correction": [
+        "SELECT libelleTypeAbo, tarifAbo, tarifAbo / 12 AS tarifMensuel",
+        "FROM TYPE_ABONNEMENT;"
+      ],
+      "indice": "On peut faire un calcul directement dans le SELECT et lui donner un nom avec AS."
+    },
+    {
+      "id": "q06",
+      "theme": "Calculs et agrégats",
+      "enonce": "Afficher le nombre de clients par ville, de la ville qui compte le plus de clients à celle qui en compte le moins.",
+      "ordered": [
+        1
+      ],
+      "correction": [
+        "SELECT villeCli, COUNT(*) AS nbClients",
+        "FROM CLIENT",
+        "GROUP BY villeCli",
+        "ORDER BY COUNT(*) DESC;"
+      ],
+      "indice": "GROUP BY villeCli forme un groupe par ville ; COUNT(*) compte les lignes de chaque groupe. DESC trie par ordre décroissant."
+    },
+    {
+      "id": "q07",
+      "theme": "Calculs et agrégats",
+      "enonce": "Pour les matériels informatiques (type de déchets n° 3), afficher le nombre de pesées enregistrées, le poids total, le poids moyen et le poids maximal collectés (en kg).",
+      "correction": [
+        "SELECT COUNT(*), SUM(poidsCollecte), AVG(poidsCollecte), MAX(poidsCollecte)",
+        "FROM DETAIL_COLLECTE",
+        "WHERE idTypeDechets = 3;"
+      ],
+      "indice": "Chaque ligne de DETAIL_COLLECTE est la pesée d'un type de déchets lors d'une collecte. Utilisez COUNT, SUM, AVG et MAX."
+    },
+    {
+      "id": "q08",
+      "theme": "Dates",
+      "enonce": "Afficher les collectes réalisées en mars 2020 (date, numéro d'abonnement, numéro de collecte), triées par date.",
+      "ordered": [
+        0
+      ],
+      "correction": [
+        "SELECT dateCollecte, idAbo, idCollecte",
+        "FROM COLLECTE",
+        "WHERE YEAR(dateCollecte) = 2020",
+        "AND MONTH(dateCollecte) = 3",
+        "ORDER BY dateCollecte;"
+      ],
+      "variantes": [
+        [
+          "SELECT dateCollecte, idAbo, idCollecte",
+          "FROM COLLECTE",
+          "WHERE dateCollecte BETWEEN '01/03/2020' AND '31/03/2020'",
+          "ORDER BY dateCollecte;"
+        ]
+      ],
+      "indice": "YEAR() et MONTH() extraient l'année et le mois d'une date. On peut aussi utiliser BETWEEN avec deux dates."
+    },
+    {
+      "id": "q09",
+      "theme": "Dates",
+      "enonce": "Combien de collectes eRecycle a-t-elle réalisées en 2019 ?",
+      "correction": [
+        "SELECT COUNT(*)",
+        "FROM COLLECTE",
+        "WHERE YEAR(dateCollecte) = 2019;"
+      ],
+      "variantes": [
+        [
+          "SELECT COUNT(*)",
+          "FROM COLLECTE",
+          "WHERE dateCollecte BETWEEN '01/01/2019' AND '31/12/2019';"
+        ]
+      ],
+      "indice": "COUNT(*) compte les lignes qui respectent la condition ; YEAR() donne l'année d'une date."
+    },
+    {
+      "id": "q10",
+      "theme": "Dates",
+      "enonce": "Afficher les collectes réalisées au cours des 30 derniers jours (date, numéro d'abonnement, numéro de collecte), de la plus récente à la plus ancienne. Utiliser la date du jour.",
+      "ordered": [
+        0
+      ],
+      "correction": [
+        "SELECT dateCollecte, idAbo, idCollecte",
+        "FROM COLLECTE",
+        "WHERE DATEDIFF(NOW(), dateCollecte) <= 30",
+        "ORDER BY dateCollecte DESC;"
+      ],
+      "variantes": [
+        [
+          "SELECT dateCollecte, idAbo, idCollecte",
+          "FROM COLLECTE",
+          "WHERE dateCollecte >= '15/11/2020'",
+          "ORDER BY dateCollecte DESC;"
+        ]
+      ],
+      "indice": "NOW() (ou CURDATE()) donne la date du jour ; DATEDIFF(date1, date2) donne le nombre de jours entre les deux dates."
+    },
+    {
+      "id": "q11",
+      "theme": "Jointures",
+      "annale": "2021",
+      "enonce": "Afficher les clients habitant à Dijon par type d'abonnement : libellé du type d'abonnement, nom, rue et ville du client. La liste sera triée sur le libellé de l'abonnement puis par ordre alphabétique des noms.",
+      "ordered": [
+        0,
+        1
+      ],
+      "correction": [
+        "SELECT libelleTypeAbo, nomCli, rueCli, villeCli",
+        "FROM CLIENT, ABONNEMENT, TYPE_ABONNEMENT",
+        "WHERE CLIENT.idCli = ABONNEMENT.idCli",
+        "AND ABONNEMENT.idTypeAbo = TYPE_ABONNEMENT.idTypeAbo",
+        "AND villeCli = 'Dijon'",
+        "ORDER BY libelleTypeAbo, nomCli;"
+      ],
+      "variantes": [
+        [
+          "SELECT libelleTypeAbo, nomCli, rueCli, villeCli",
+          "FROM CLIENT",
+          "INNER JOIN ABONNEMENT ON CLIENT.idCli = ABONNEMENT.idCli",
+          "INNER JOIN TYPE_ABONNEMENT ON ABONNEMENT.idTypeAbo = TYPE_ABONNEMENT.idTypeAbo",
+          "WHERE villeCli = 'Dijon'",
+          "ORDER BY libelleTypeAbo, nomCli;"
+        ]
+      ],
+      "indice": "Le libellé est dans TYPE_ABONNEMENT, la ville dans CLIENT : passez par ABONNEMENT qui contient les deux clés étrangères idCli et idTypeAbo. ORDER BY accepte plusieurs colonnes."
+    },
+    {
+      "id": "q12",
+      "theme": "Jointures",
+      "enonce": "Afficher le libellé des types de déchets couverts par l'abonnement « Recycle Data ».",
+      "correction": [
+        "SELECT libelleTypeDechets",
+        "FROM TYPE_DECHETS, CONCERNER, TYPE_ABONNEMENT",
+        "WHERE TYPE_DECHETS.idTypeDechets = CONCERNER.idTypeDechets",
+        "AND CONCERNER.idTypeAbo = TYPE_ABONNEMENT.idTypeAbo",
+        "AND libelleTypeAbo = 'Recycle Data';"
+      ],
+      "variantes": [
+        [
+          "SELECT libelleTypeDechets",
+          "FROM TYPE_DECHETS",
+          "INNER JOIN CONCERNER ON TYPE_DECHETS.idTypeDechets = CONCERNER.idTypeDechets",
+          "INNER JOIN TYPE_ABONNEMENT ON CONCERNER.idTypeAbo = TYPE_ABONNEMENT.idTypeAbo",
+          "WHERE libelleTypeAbo = 'Recycle Data';"
+        ]
+      ],
+      "indice": "La table CONCERNER fait le lien entre un type d'abonnement et les types de déchets qu'il couvre."
+    },
+    {
+      "id": "q13",
+      "theme": "Jointures",
+      "enonce": "Afficher le nom et le téléphone des clients ayant souscrit au moins un abonnement « Total Recycle », chaque client n'apparaissant qu'une fois, triés par nom.",
+      "ordered": [
+        0
+      ],
+      "correction": [
+        "SELECT DISTINCT nomCli, telCli",
+        "FROM CLIENT, ABONNEMENT, TYPE_ABONNEMENT",
+        "WHERE CLIENT.idCli = ABONNEMENT.idCli",
+        "AND ABONNEMENT.idTypeAbo = TYPE_ABONNEMENT.idTypeAbo",
+        "AND libelleTypeAbo = 'Total Recycle'",
+        "ORDER BY nomCli;"
+      ],
+      "variantes": [
+        [
+          "SELECT DISTINCT nomCli, telCli",
+          "FROM CLIENT",
+          "INNER JOIN ABONNEMENT ON CLIENT.idCli = ABONNEMENT.idCli",
+          "INNER JOIN TYPE_ABONNEMENT ON ABONNEMENT.idTypeAbo = TYPE_ABONNEMENT.idTypeAbo",
+          "WHERE libelleTypeAbo = 'Total Recycle'",
+          "ORDER BY nomCli;"
+        ]
+      ],
+      "indice": "Certains clients ont renouvelé leur abonnement « Total Recycle » et en possèdent deux : DISTINCT évite qu'ils apparaissent deux fois."
+    },
+    {
+      "id": "q14",
+      "theme": "Jointures",
+      "annale": "2021",
+      "enonce": "Quel est le plus gros poids de papiers et cartons collecté en une seule collecte ? Utiliser le libellé du type de déchets « Papiers et cartons ».",
+      "correction": [
+        "SELECT MAX(poidsCollecte)",
+        "FROM DETAIL_COLLECTE, TYPE_DECHETS",
+        "WHERE DETAIL_COLLECTE.idTypeDechets = TYPE_DECHETS.idTypeDechets",
+        "AND libelleTypeDechets = 'Papiers et cartons';"
+      ],
+      "variantes": [
+        [
+          "SELECT MAX(poidsCollecte)",
+          "FROM DETAIL_COLLECTE",
+          "INNER JOIN TYPE_DECHETS ON DETAIL_COLLECTE.idTypeDechets = TYPE_DECHETS.idTypeDechets",
+          "WHERE libelleTypeDechets = 'Papiers et cartons';"
+        ],
+        [
+          "SELECT MAX(poidsCollecte)",
+          "FROM DETAIL_COLLECTE",
+          "WHERE idTypeDechets = 1;"
+        ]
+      ],
+      "indice": "Le poids est dans DETAIL_COLLECTE, le libellé dans TYPE_DECHETS. La fonction MAX donne la plus grande valeur."
+    },
+    {
+      "id": "q15",
+      "theme": "Jointures",
+      "enonce": "Afficher le détail de la collecte n° 7 de l'abonnement n° 42 : date de la collecte, libellé de chaque type de déchets collecté et poids collecté.",
+      "correction": [
+        "SELECT dateCollecte, libelleTypeDechets, poidsCollecte",
+        "FROM COLLECTE, DETAIL_COLLECTE, TYPE_DECHETS",
+        "WHERE COLLECTE.idCollecte = DETAIL_COLLECTE.idCollecte",
+        "AND COLLECTE.idAbo = DETAIL_COLLECTE.idAbo",
+        "AND DETAIL_COLLECTE.idTypeDechets = TYPE_DECHETS.idTypeDechets",
+        "AND COLLECTE.idAbo = 42",
+        "AND COLLECTE.idCollecte = 7;"
+      ],
+      "variantes": [
+        [
+          "SELECT dateCollecte, libelleTypeDechets, poidsCollecte",
+          "FROM COLLECTE",
+          "INNER JOIN DETAIL_COLLECTE ON COLLECTE.idCollecte = DETAIL_COLLECTE.idCollecte",
+          "AND COLLECTE.idAbo = DETAIL_COLLECTE.idAbo",
+          "INNER JOIN TYPE_DECHETS ON DETAIL_COLLECTE.idTypeDechets = TYPE_DECHETS.idTypeDechets",
+          "WHERE COLLECTE.idAbo = 42",
+          "AND COLLECTE.idCollecte = 7;"
+        ]
+      ],
+      "indice": "idCollecte est un numéro relatif à l'abonnement (1re, 2e, 3e collecte de cet abonnement…) : une collecte est identifiée par le couple (idCollecte, idAbo), et la jointure entre COLLECTE et DETAIL_COLLECTE doit porter sur ces deux colonnes."
+    },
+    {
+      "id": "q16",
+      "theme": "Jointures et regroupements",
+      "annale": "2021",
+      "enonce": "Obtenir le poids total collecté par client en 2019 (nom du client et poids total en kg). Attention : deux clients différents portent le même nom.",
+      "correction": [
+        "SELECT nomCli, SUM(poidsCollecte) AS poidsTotal",
+        "FROM DETAIL_COLLECTE, COLLECTE, ABONNEMENT, CLIENT",
+        "WHERE DETAIL_COLLECTE.idCollecte = COLLECTE.idCollecte",
+        "AND DETAIL_COLLECTE.idAbo = COLLECTE.idAbo",
+        "AND COLLECTE.idAbo = ABONNEMENT.idAbo",
+        "AND ABONNEMENT.idCli = CLIENT.idCli",
+        "AND YEAR(dateCollecte) = 2019",
+        "GROUP BY CLIENT.idCli, nomCli;"
+      ],
+      "variantes": [
+        [
+          "SELECT nomCli, SUM(poidsCollecte) AS poidsTotal",
+          "FROM DETAIL_COLLECTE",
+          "INNER JOIN COLLECTE ON DETAIL_COLLECTE.idCollecte = COLLECTE.idCollecte",
+          "AND DETAIL_COLLECTE.idAbo = COLLECTE.idAbo",
+          "INNER JOIN ABONNEMENT ON COLLECTE.idAbo = ABONNEMENT.idAbo",
+          "INNER JOIN CLIENT ON ABONNEMENT.idCli = CLIENT.idCli",
+          "WHERE dateCollecte BETWEEN '01/01/2019' AND '31/12/2019'",
+          "GROUP BY CLIENT.idCli, nomCli;"
+        ]
+      ],
+      "indice": "Il faut remonter de DETAIL_COLLECTE (poids) à CLIENT (nom) en passant par COLLECTE (date) et ABONNEMENT. Regroupez par identifiant du client et pas seulement par nom : les deux « Pharmacie du Centre » (Dijon et Beaune) seraient sinon additionnées."
+    },
+    {
+      "id": "q17",
+      "theme": "Jointures et regroupements",
+      "enonce": "Afficher le nombre d'abonnements souscrits pour chaque type d'abonnement (libellé et nombre).",
+      "correction": [
+        "SELECT libelleTypeAbo, COUNT(*) AS nbAbonnements",
+        "FROM ABONNEMENT, TYPE_ABONNEMENT",
+        "WHERE ABONNEMENT.idTypeAbo = TYPE_ABONNEMENT.idTypeAbo",
+        "GROUP BY TYPE_ABONNEMENT.idTypeAbo, libelleTypeAbo;"
+      ],
+      "variantes": [
+        [
+          "SELECT libelleTypeAbo, COUNT(*) AS nbAbonnements",
+          "FROM ABONNEMENT",
+          "INNER JOIN TYPE_ABONNEMENT ON ABONNEMENT.idTypeAbo = TYPE_ABONNEMENT.idTypeAbo",
+          "GROUP BY TYPE_ABONNEMENT.idTypeAbo, libelleTypeAbo;"
+        ]
+      ],
+      "indice": "Joignez ABONNEMENT et TYPE_ABONNEMENT, puis regroupez par type d'abonnement avant de compter."
+    },
+    {
+      "id": "q18",
+      "theme": "Jointures et regroupements",
+      "enonce": "Afficher le poids total collecté en 2020 pour chaque type de déchets (libellé et poids total), du type le plus lourd au plus léger.",
+      "ordered": [
+        1
+      ],
+      "correction": [
+        "SELECT libelleTypeDechets, SUM(poidsCollecte) AS poidsTotal",
+        "FROM TYPE_DECHETS, DETAIL_COLLECTE, COLLECTE",
+        "WHERE TYPE_DECHETS.idTypeDechets = DETAIL_COLLECTE.idTypeDechets",
+        "AND DETAIL_COLLECTE.idCollecte = COLLECTE.idCollecte",
+        "AND DETAIL_COLLECTE.idAbo = COLLECTE.idAbo",
+        "AND YEAR(dateCollecte) = 2020",
+        "GROUP BY TYPE_DECHETS.idTypeDechets, libelleTypeDechets",
+        "ORDER BY SUM(poidsCollecte) DESC;"
+      ],
+      "variantes": [
+        [
+          "SELECT libelleTypeDechets, SUM(poidsCollecte) AS poidsTotal",
+          "FROM TYPE_DECHETS",
+          "INNER JOIN DETAIL_COLLECTE ON TYPE_DECHETS.idTypeDechets = DETAIL_COLLECTE.idTypeDechets",
+          "INNER JOIN COLLECTE ON DETAIL_COLLECTE.idCollecte = COLLECTE.idCollecte",
+          "AND DETAIL_COLLECTE.idAbo = COLLECTE.idAbo",
+          "WHERE YEAR(dateCollecte) = 2020",
+          "GROUP BY TYPE_DECHETS.idTypeDechets, libelleTypeDechets",
+          "ORDER BY SUM(poidsCollecte) DESC;"
+        ]
+      ],
+      "indice": "La date est dans COLLECTE, le poids dans DETAIL_COLLECTE et le libellé dans TYPE_DECHETS. On peut trier sur un agrégat : ORDER BY SUM(…) DESC."
+    },
+    {
+      "id": "q19",
+      "theme": "Jointures et regroupements",
+      "enonce": "Afficher les clients ayant bénéficié d'au moins 12 collectes depuis le début (nom du client et nombre de collectes), du plus grand nombre de collectes au plus petit.",
+      "ordered": [
+        1
+      ],
+      "correction": [
+        "SELECT nomCli, COUNT(*) AS nbCollectes",
+        "FROM CLIENT, ABONNEMENT, COLLECTE",
+        "WHERE CLIENT.idCli = ABONNEMENT.idCli",
+        "AND ABONNEMENT.idAbo = COLLECTE.idAbo",
+        "GROUP BY CLIENT.idCli, nomCli",
+        "HAVING COUNT(*) >= 12",
+        "ORDER BY COUNT(*) DESC;"
+      ],
+      "variantes": [
+        [
+          "SELECT nomCli, COUNT(*) AS nbCollectes",
+          "FROM CLIENT",
+          "INNER JOIN ABONNEMENT ON CLIENT.idCli = ABONNEMENT.idCli",
+          "INNER JOIN COLLECTE ON ABONNEMENT.idAbo = COLLECTE.idAbo",
+          "GROUP BY CLIENT.idCli, nomCli",
+          "HAVING COUNT(*) >= 12",
+          "ORDER BY COUNT(*) DESC;"
+        ]
+      ],
+      "indice": "Une condition sur le résultat d'un COUNT se place dans HAVING (après GROUP BY), pas dans WHERE."
+    },
+    {
+      "id": "q20",
+      "theme": "Sous-requêtes",
+      "enonce": "Afficher l'identifiant, le nom et la ville des clients qui n'ont aucun abonnement.",
+      "correction": [
+        "SELECT idCli, nomCli, villeCli",
+        "FROM CLIENT",
+        "WHERE idCli NOT IN (SELECT idCli",
+        "                    FROM ABONNEMENT);"
+      ],
+      "variantes": [
+        [
+          "SELECT idCli, nomCli, villeCli",
+          "FROM CLIENT",
+          "WHERE NOT EXISTS (SELECT *",
+          "                  FROM ABONNEMENT",
+          "                  WHERE ABONNEMENT.idCli = CLIENT.idCli);"
+        ]
+      ],
+      "indice": "La sous-requête donne la liste des clients ayant un abonnement ; NOT IN garde les autres."
+    },
+    {
+      "id": "q21",
+      "theme": "Sous-requêtes",
+      "annale": "2021",
+      "enonce": "Quels sont les clients (nom et ville) qui n'ont jamais été collectés ? Un client sans abonnement n'a, bien sûr, jamais été collecté.",
+      "correction": [
+        "SELECT nomCli, villeCli",
+        "FROM CLIENT",
+        "WHERE idCli NOT IN (SELECT idCli",
+        "                    FROM ABONNEMENT, COLLECTE",
+        "                    WHERE ABONNEMENT.idAbo = COLLECTE.idAbo);"
+      ],
+      "variantes": [
+        [
+          "SELECT nomCli, villeCli",
+          "FROM CLIENT",
+          "WHERE NOT EXISTS (SELECT *",
+          "                  FROM ABONNEMENT, COLLECTE",
+          "                  WHERE ABONNEMENT.idAbo = COLLECTE.idAbo",
+          "                  AND ABONNEMENT.idCli = CLIENT.idCli);"
+        ],
+        [
+          "SELECT nomCli, villeCli",
+          "FROM CLIENT",
+          "WHERE idCli NOT IN (SELECT idCli",
+          "                    FROM ABONNEMENT",
+          "                    INNER JOIN COLLECTE ON ABONNEMENT.idAbo = COLLECTE.idAbo);"
+        ]
+      ],
+      "indice": "La sous-requête doit donner les clients déjà collectés : COLLECTE ne contient pas idCli, il faut la joindre à ABONNEMENT. NOT IN garde les autres clients, y compris ceux sans abonnement."
+    },
+    {
+      "id": "q22",
+      "theme": "Sous-requêtes",
+      "enonce": "Retrouver la collecte record de papiers et cartons (type de déchets n° 1) : afficher la date de la collecte, le nom du client et le poids collecté.",
+      "correction": [
+        "SELECT dateCollecte, nomCli, poidsCollecte",
+        "FROM DETAIL_COLLECTE, COLLECTE, ABONNEMENT, CLIENT",
+        "WHERE DETAIL_COLLECTE.idCollecte = COLLECTE.idCollecte",
+        "AND DETAIL_COLLECTE.idAbo = COLLECTE.idAbo",
+        "AND COLLECTE.idAbo = ABONNEMENT.idAbo",
+        "AND ABONNEMENT.idCli = CLIENT.idCli",
+        "AND idTypeDechets = 1",
+        "AND poidsCollecte = (SELECT MAX(poidsCollecte)",
+        "                     FROM DETAIL_COLLECTE",
+        "                     WHERE idTypeDechets = 1);"
+      ],
+      "variantes": [
+        [
+          "SELECT dateCollecte, nomCli, poidsCollecte",
+          "FROM DETAIL_COLLECTE",
+          "INNER JOIN COLLECTE ON DETAIL_COLLECTE.idCollecte = COLLECTE.idCollecte",
+          "AND DETAIL_COLLECTE.idAbo = COLLECTE.idAbo",
+          "INNER JOIN ABONNEMENT ON COLLECTE.idAbo = ABONNEMENT.idAbo",
+          "INNER JOIN CLIENT ON ABONNEMENT.idCli = CLIENT.idCli",
+          "WHERE idTypeDechets = 1",
+          "AND poidsCollecte = (SELECT MAX(poidsCollecte)",
+          "                     FROM DETAIL_COLLECTE",
+          "                     WHERE idTypeDechets = 1);"
+        ]
+      ],
+      "indice": "On ne peut pas écrire WHERE poidsCollecte = MAX(poidsCollecte) : calculez le maximum dans une sous-requête, puis comparez-le au poids de chaque pesée."
+    },
+    {
+      "id": "q23",
+      "theme": "Mises à jour",
+      "type": "write",
+      "enonce": "eRecycle lance un nouveau type d'abonnement : « Recycle Lumière », au tarif annuel de 90 €, qui portera l'identifiant 5. L'ajouter.",
+      "correction": [
+        "INSERT INTO TYPE_ABONNEMENT",
+        "VALUES (5, 'Recycle Lumière', 90);"
+      ],
+      "variantes": [
+        [
+          "INSERT INTO TYPE_ABONNEMENT (idTypeAbo, libelleTypeAbo, tarifAbo)",
+          "VALUES (5, 'Recycle Lumière', 90);"
+        ]
+      ],
+      "verif": "SELECT * FROM TYPE_ABONNEMENT ORDER BY idTypeAbo",
+      "indice": "INSERT INTO table VALUES (valeur1, valeur2, …) dans l'ordre des colonnes de la table."
+    },
+    {
+      "id": "q24",
+      "theme": "Mises à jour",
+      "type": "write",
+      "enonce": "Au 1er janvier, tous les tarifs d'abonnement augmentent de 4 %. Mettre à jour les tarifs.",
+      "correction": [
+        "UPDATE TYPE_ABONNEMENT",
+        "SET tarifAbo = tarifAbo * 1.04;"
+      ],
+      "variantes": [
+        [
+          "UPDATE TYPE_ABONNEMENT",
+          "SET tarifAbo = tarifAbo + tarifAbo * 4 / 100;"
+        ]
+      ],
+      "verif": "SELECT * FROM TYPE_ABONNEMENT ORDER BY idTypeAbo",
+      "indice": "UPDATE … SET colonne = nouvelle valeur. Ici, tous les types sont concernés : pas de WHERE. Augmenter de 4 %, c'est multiplier par 1,04 (écrit 1.04 en SQL)."
+    },
+    {
+      "id": "q25",
+      "theme": "Mises à jour",
+      "type": "write",
+      "annale": "2021",
+      "enonce": "Supprimer le client n° 231 (Électricité Générale Moreau), qui n'a aucun abonnement. Essayez ensuite de supprimer le client n° 212 : que se passe-t-il, et pourquoi ?",
+      "correction": [
+        "DELETE FROM CLIENT",
+        "WHERE idCli = 231;"
+      ],
+      "verif": "SELECT * FROM CLIENT ORDER BY idCli",
+      "indice": "Le client 212 possède des abonnements (expirés) : sa suppression est refusée par l'intégrité référentielle, car ABONNEMENT.idCli fait référence à CLIENT.idCli. Il faudrait d'abord supprimer les lignes de DETAIL_COLLECTE, puis de COLLECTE, puis d'ABONNEMENT qui le concernent (ou utiliser une suppression en cascade)."
+    },
+    {
+      "id": "s01",
+      "theme": "Évolution du schéma",
+      "type": "schema",
+      "annale": "2021",
+      "enonce": "Avec les nouvelles offres de recyclage total, de nombreux clients souhaitent être collectés sur leurs différents sites : le lieu de collecte n'est donc pas toujours celui du siège social du client (adresse que l'on souhaite évidemment conserver). M. Marquet veut modifier le modèle pour qu'une collecte pour un client se fasse sur un lieu de prélèvement, qu'un client possède un ou plusieurs lieux de prélèvement et qu'un lieu de prélèvement ne fasse référence qu'à un seul client. Dictionnaire des nouvelles données : idLieu (entier, identifiant du lieu, numéro auto-incrémenté), adresseLieu (numéro et nom de rue), cpLieu (code postal du lieu), villeLieu (ville du lieu). Faites évoluer le schéma ci-dessous.",
+      "depart": [
+        "CLIENT",
+        "ABONNEMENT",
+        "COLLECTE"
+      ],
+      "solution": {
+        "tables": [
+          {
+            "nom": "CLIENT",
+            "pk": [
+              "idCli"
+            ],
+            "attributs": [
+              "rueCli",
+              "villeCli"
+            ],
+            "interdits": [
+              "idLieu|numLieu|codeLieu|idLieuPrelevement|idLieuCollecte"
+            ]
+          },
+          {
+            "nom": "ABONNEMENT",
+            "pk": [
+              "idAbo"
+            ],
+            "interdits": [
+              "idCli"
+            ]
+          },
+          {
+            "nom": "COLLECTE",
+            "pk": [
+              "idCollecte",
+              "idAbo"
+            ],
+            "fk": {
+              "idAbo": "ABONNEMENT",
+              "idLieu|numLieu|codeLieu|idLieuPrelevement|idLieuCollecte": "LIEU"
+            }
+          },
+          {
+            "nom": "LIEU",
+            "alias": [
+              "LIEUX",
+              "LIEU_PRELEVEMENT",
+              "LIEU_COLLECTE",
+              "SITE",
+              "LIEUPRELEVEMENT"
+            ],
+            "role": "les lieux de prélèvement des clients",
+            "pk": [
+              "idLieu|numLieu|codeLieu|idLieuPrelevement|idLieuCollecte"
+            ],
+            "fk": {
+              "idCli": "CLIENT"
+            },
+            "attributs": [
+              "adresseLieu|rueLieu|adrLieu",
+              "cpLieu|codePostalLieu",
+              "villeLieu"
+            ],
+            "optionnels": [
+              "typeLieu|estSiege|siegeSocial|siege|natureLieu|idTypeLieu|codeTypeLieu|libelleTypeLieu",
+              "nomLieu|libelleLieu"
+            ]
+          }
+        ]
+      },
+      "variantes": [
+        {
+          "tables": [
+            {
+              "nom": "CLIENT",
+              "pk": [
+                "idCli"
+              ],
+              "interdits": [
+                "rueCli",
+                "villeCli",
+                "idLieu|numLieu|codeLieu|idLieuPrelevement|idLieuCollecte"
+              ]
+            },
+            {
+              "nom": "ABONNEMENT",
+              "pk": [
+                "idAbo"
+              ],
+              "interdits": [
+                "idCli"
+              ]
+            },
+            {
+              "nom": "COLLECTE",
+              "pk": [
+                "idCollecte",
+                "idAbo"
+              ],
+              "fk": {
+                "idAbo": "ABONNEMENT",
+                "idLieu|numLieu|codeLieu|idLieuPrelevement|idLieuCollecte": "LIEU"
+              }
+            },
+            {
+              "nom": "LIEU",
+              "alias": [
+                "LIEUX",
+                "LIEU_PRELEVEMENT",
+                "LIEU_COLLECTE",
+                "SITE",
+                "LIEUPRELEVEMENT"
+              ],
+              "role": "les lieux de prélèvement des clients",
+              "pk": [
+                "idLieu|numLieu|codeLieu|idLieuPrelevement|idLieuCollecte"
+              ],
+              "fk": {
+                "idCli": "CLIENT"
+              },
+              "attributs": [
+                "adresseLieu|rueLieu|adrLieu",
+                "cpLieu|codePostalLieu",
+                "villeLieu",
+                "typeLieu|estSiege|siegeSocial|siege|natureLieu|idTypeLieu|codeTypeLieu|libelleTypeLieu"
+              ],
+              "optionnels": [
+                "nomLieu|libelleLieu"
+              ]
+            }
+          ],
+          "tablesOptionnelles": [
+            "TYPE_LIEU",
+            "TYPELIEU",
+            "TYPES_LIEU",
+            "TYPE_LIEUX"
+          ]
+        },
+        {
+          "tables": [
+            {
+              "nom": "CLIENT",
+              "pk": [
+                "idCli"
+              ],
+              "attributs": [
+                "rueCli",
+                "villeCli"
+              ],
+              "interdits": [
+                "idLieu|numLieu|codeLieu|idLieuPrelevement|idLieuCollecte"
+              ]
+            },
+            {
+              "nom": "ABONNEMENT",
+              "pk": [
+                "idAbo"
+              ],
+              "fk": {
+                "idLieu|numLieu|codeLieu|idLieuPrelevement|idLieuCollecte": "LIEU"
+              },
+              "interdits": [
+                "idCli"
+              ]
+            },
+            {
+              "nom": "COLLECTE",
+              "pk": [
+                "idCollecte",
+                "idAbo"
+              ],
+              "fk": {
+                "idAbo": "ABONNEMENT"
+              },
+              "interdits": [
+                "idLieu|numLieu|codeLieu|idLieuPrelevement|idLieuCollecte"
+              ]
+            },
+            {
+              "nom": "LIEU",
+              "alias": [
+                "LIEUX",
+                "LIEU_PRELEVEMENT",
+                "LIEU_COLLECTE",
+                "SITE",
+                "LIEUPRELEVEMENT"
+              ],
+              "role": "les lieux de prélèvement des clients",
+              "pk": [
+                "idLieu|numLieu|codeLieu|idLieuPrelevement|idLieuCollecte"
+              ],
+              "fk": {
+                "idCli": "CLIENT"
+              },
+              "attributs": [
+                "adresseLieu|rueLieu|adrLieu",
+                "cpLieu|codePostalLieu",
+                "villeLieu"
+              ],
+              "optionnels": [
+                "typeLieu|estSiege|siegeSocial|siege|natureLieu|idTypeLieu|codeTypeLieu|libelleTypeLieu",
+                "nomLieu|libelleLieu"
+              ]
+            }
+          ]
+        },
+        {
+          "tables": [
+            {
+              "nom": "CLIENT",
+              "pk": [
+                "idCli"
+              ],
+              "attributs": [
+                "rueCli",
+                "villeCli"
+              ],
+              "interdits": [
+                "idLieu|numLieu|codeLieu|idLieuPrelevement|idLieuCollecte"
+              ]
+            },
+            {
+              "nom": "ABONNEMENT",
+              "pk": [
+                "idAbo"
+              ],
+              "fk": {
+                "idCli": "CLIENT"
+              }
+            },
+            {
+              "nom": "COLLECTE",
+              "pk": [
+                "idCollecte",
+                "idAbo"
+              ],
+              "fk": {
+                "idAbo": "ABONNEMENT",
+                "idLieu|numLieu|codeLieu|idLieuPrelevement|idLieuCollecte": "LIEU"
+              }
+            },
+            {
+              "nom": "LIEU",
+              "alias": [
+                "LIEUX",
+                "LIEU_PRELEVEMENT",
+                "LIEU_COLLECTE",
+                "SITE",
+                "LIEUPRELEVEMENT"
+              ],
+              "role": "les lieux de prélèvement des clients",
+              "pk": [
+                "idLieu|numLieu|codeLieu|idLieuPrelevement|idLieuCollecte"
+              ],
+              "fk": {
+                "idCli": "CLIENT"
+              },
+              "attributs": [
+                "adresseLieu|rueLieu|adrLieu",
+                "cpLieu|codePostalLieu",
+                "villeLieu"
+              ],
+              "optionnels": [
+                "typeLieu|estSiege|siegeSocial|siege|natureLieu|idTypeLieu|codeTypeLieu|libelleTypeLieu",
+                "nomLieu|libelleLieu"
+              ]
+            }
+          ],
+          "partiel": "Presque : le lieu de prélèvement appartient à un seul client, donc le client d'un abonnement se retrouve déjà en passant par LIEU. Garder idCli dans ABONNEMENT crée une redondance (et un risque d'incohérence : un abonnement d'un client collecté sur le lieu d'un autre client). Le corrigé retire idCli d'ABONNEMENT."
+        },
+        {
+          "tables": [
+            {
+              "nom": "CLIENT",
+              "pk": [
+                "idCli"
+              ],
+              "attributs": [
+                "rueCli",
+                "villeCli"
+              ],
+              "interdits": [
+                "idLieu|numLieu|codeLieu|idLieuPrelevement|idLieuCollecte"
+              ]
+            },
+            {
+              "nom": "ABONNEMENT",
+              "pk": [
+                "idAbo"
+              ],
+              "fk": {
+                "idLieu|numLieu|codeLieu|idLieuPrelevement|idLieuCollecte": "LIEU",
+                "idCli": "CLIENT"
+              }
+            },
+            {
+              "nom": "COLLECTE",
+              "pk": [
+                "idCollecte",
+                "idAbo"
+              ],
+              "fk": {
+                "idAbo": "ABONNEMENT"
+              },
+              "interdits": [
+                "idLieu|numLieu|codeLieu|idLieuPrelevement|idLieuCollecte"
+              ]
+            },
+            {
+              "nom": "LIEU",
+              "alias": [
+                "LIEUX",
+                "LIEU_PRELEVEMENT",
+                "LIEU_COLLECTE",
+                "SITE",
+                "LIEUPRELEVEMENT"
+              ],
+              "role": "les lieux de prélèvement des clients",
+              "pk": [
+                "idLieu|numLieu|codeLieu|idLieuPrelevement|idLieuCollecte"
+              ],
+              "fk": {
+                "idCli": "CLIENT"
+              },
+              "attributs": [
+                "adresseLieu|rueLieu|adrLieu",
+                "cpLieu|codePostalLieu",
+                "villeLieu"
+              ],
+              "optionnels": [
+                "typeLieu|estSiege|siegeSocial|siege|natureLieu|idTypeLieu|codeTypeLieu|libelleTypeLieu",
+                "nomLieu|libelleLieu"
+              ]
+            }
+          ],
+          "partiel": "Presque : le lieu de prélèvement appartient à un seul client, donc le client d'un abonnement se retrouve déjà en passant par LIEU. Garder idCli dans ABONNEMENT crée une redondance (et un risque d'incohérence : un abonnement d'un client collecté sur le lieu d'un autre client). Le corrigé retire idCli d'ABONNEMENT."
+        }
+      ],
+      "indice": "Créez une table pour les lieux de prélèvement : un lieu appartient à un seul client (où placer la clé étrangère ?). Reliez ensuite les collectes (ou les abonnements) à un lieu. Une fois le lieu connu, le client l'est aussi : regardez si idCli est encore utile dans ABONNEMENT."
+    },
+    {
+      "id": "p01",
+      "type": "processus",
+      "theme": "Processus",
+      "annale": "2021",
+      "enonce": "Dossier 2 – La gestion de la base de données clients. Monsieur MARQUET a imaginé un nouveau processus de gestion des comptes clients : les données saisies par les clients sur l'Extranet seront vérifiées a posteriori par les commerciaux avant d'être intégrées dans la base de données, et le SI reposera sur deux bases de données (la base Extranet, hébergée chez le prestataire InfoServices, et la base Entreprise, stockée dans les locaux d'eRecycle), synchronisées par l'échange de fichiers XML. Extrait du document 6 : « Quand le client se déconnecte de l'extranet, les éventuelles modifications sont stockées dans un fichier XML Extranet, qui est automatiquement envoyé à la société eRecycle. Quand un commercial se connecte et qu'un fichier XML Extranet est arrivé, il opère une vérification des données saisies par le client (il s'assure que le client n'a pas commis d'erreurs, que les dates des collectes sont réalisables etc.). Au terme de cette vérification deux cas se présentent : soit les informations saisies par le client sont correctes, on peut alors faire l'opération de modification de la base Entreprise ; soit il y a un problème et le commercial rappelle le client. Quand le commercial rappelle le client, il lui explique quels sont les problèmes qu'il a constatés et peut lui proposer une aide sur les fonctionnalités de l'extranet. Cette opération se termine toujours avec un ensemble de données cohérentes, corrigées par le commercial, qui peut alors faire l'opération de modification de la base Entreprise existante. Cette opération génère un fichier XML Entreprise, qui est envoyé sur le site où se trouve l'extranet, de manière à modifier la base Extranet. Toutes les heures, un automate situé sur le site de l'extranet vérifie si des fichiers XML Entreprise ont été reçus. Si c'est le cas, le module analyse le fichier XML en provenance de l'entreprise et exécute les requêtes pour modifier la base de données du site Extranet. » Représentez le schéma événements-résultats modélisant le nouveau processus à partir de la réception du fichier XML en provenance de la base Extranet.",
+      "elements": [
+        {
+          "kind": "event",
+          "label": "Fichier XML reçu"
+        },
+        {
+          "kind": "event",
+          "label": "Données à insérer"
+        },
+        {
+          "kind": "event",
+          "label": "Questions au client"
+        },
+        {
+          "kind": "event",
+          "label": "Réponses"
+        },
+        {
+          "kind": "event",
+          "label": "Données corrigées"
+        },
+        {
+          "kind": "event",
+          "label": "Fichier XML généré"
+        },
+        {
+          "kind": "event",
+          "label": "Base de données Entreprise modifiée"
+        },
+        {
+          "kind": "event",
+          "label": "Toutes les heures"
+        },
+        {
+          "kind": "event",
+          "label": "Base Extranet modifiée"
+        },
+        {
+          "kind": "operation",
+          "label": "Vérification"
+        },
+        {
+          "kind": "operation",
+          "label": "Correction données"
+        },
+        {
+          "kind": "operation",
+          "label": "Modification de la base Entreprise"
+        },
+        {
+          "kind": "operation",
+          "label": "Modification base Extranet"
+        }
+      ],
+      "attendus": [
+        {
+          "operation": "Modification de la base Entreprise",
+          "alias": [
+            "Modification base Entreprise",
+            "Mise à jour base Entreprise",
+            "Mise à jour de la base Entreprise",
+            "Modification de la base de données Entreprise",
+            "Intégration des données",
+            "Enregistrement des modifications"
+          ],
+          "synchronisation": "Données à insérer OU Données corrigées"
+        },
+        {
+          "operation": "Modification base Extranet",
+          "alias": [
+            "Modification de la base Extranet",
+            "Mise à jour base Extranet",
+            "Mise à jour de la base Extranet",
+            "Modification de la base de données Extranet",
+            "Traitement du fichier XML",
+            "Traitement fichier XML Entreprise"
+          ],
+          "synchronisation": "Fichier XML généré ET Toutes les heures",
+          "manque": "Il manque l'opération de mise à jour de la base Extranet : toutes les heures, l'automate d'InfoServices traite le fichier XML Entreprise reçu."
+        },
+        {
+          "operation": "Vérification",
+          "alias": [
+            "Vérification des données",
+            "Contrôle des données",
+            "Vérification données client",
+            "Contrôle"
+          ],
+          "regles": [
+            "Ok",
+            "Problème"
+          ]
+        }
+      ],
+      "equivalents": {
+        "Données à insérer": [
+          "Données correctes",
+          "Données validées",
+          "Données vérifiées",
+          "Données à intégrer"
+        ],
+        "Données corrigées": [
+          "Données cohérentes",
+          "Données rectifiées",
+          "Corrections effectuées",
+          "Données correctes après correction"
+        ],
+        "Fichier XML généré": [
+          "Fichier XML Entreprise",
+          "Fichier XML Entreprise reçu",
+          "Fichier XML envoyé",
+          "XML Entreprise",
+          "Fichier XML Entreprise envoyé"
+        ],
+        "Toutes les heures": [
+          "Chaque heure",
+          "Heure",
+          "Top horaire",
+          "Fin d'heure",
+          "Toutes les heures écoulées"
+        ],
+        "Ok": [
+          "Données correctes",
+          "Correct",
+          "Informations correctes",
+          "Pas d'erreur",
+          "Sans erreur",
+          "Pas de problème"
+        ],
+        "Problème": [
+          "Erreur",
+          "Données incorrectes",
+          "Incorrect",
+          "Anomalie",
+          "Problème constaté",
+          "Erreurs"
+        ]
+      },
+      "solution": {
+        "lanes": [
+          "InfoServices (Extranet)",
+          "Commercial",
+          "Client"
+        ],
+        "nodes": [
+          {
+            "id": "n1",
+            "kind": "event",
+            "label": "Fichier XML reçu",
+            "x": 120,
+            "y": 95
+          },
+          {
+            "id": "n2",
+            "kind": "operation",
+            "label": "Vérification",
+            "x": 360,
+            "y": 215,
+            "actions": [
+              "Vérification des données saisies par le client"
+            ],
+            "rules": [
+              "Ok",
+              "Problème"
+            ]
+          },
+          {
+            "id": "n3",
+            "kind": "event",
+            "label": "Données à insérer",
+            "x": 310,
+            "y": 355
+          },
+          {
+            "id": "n4",
+            "kind": "event",
+            "label": "Questions au client",
+            "x": 600,
+            "y": 345
+          },
+          {
+            "id": "n5",
+            "kind": "event",
+            "label": "Réponses",
+            "x": 600,
+            "y": 455
+          },
+          {
+            "id": "n6",
+            "kind": "operation",
+            "label": "Correction données",
+            "x": 400,
+            "y": 490,
+            "actions": [
+              "Modification des données posant problème"
+            ],
+            "rules": [
+              "Toujours"
+            ]
+          },
+          {
+            "id": "n7",
+            "kind": "event",
+            "label": "Données corrigées",
+            "x": 400,
+            "y": 625
+          },
+          {
+            "id": "n8",
+            "kind": "sync",
+            "label": "",
+            "x": 360,
+            "y": 720,
+            "cond": "A ou B"
+          },
+          {
+            "id": "n9",
+            "kind": "operation",
+            "label": "Modification de la base Entreprise",
+            "x": 360,
+            "y": 845,
+            "actions": [
+              "Exécution des requêtes",
+              "Génération du fichier XML"
+            ],
+            "rules": [
+              "Toujours"
+            ]
+          },
+          {
+            "id": "n10",
+            "kind": "event",
+            "label": "Fichier XML généré",
+            "x": 120,
+            "y": 990
+          },
+          {
+            "id": "n11",
+            "kind": "event",
+            "label": "Base de données Entreprise modifiée",
+            "x": 390,
+            "y": 1000
+          },
+          {
+            "id": "n12",
+            "kind": "event",
+            "label": "Toutes les heures",
+            "x": 120,
+            "y": 1095
+          },
+          {
+            "id": "n13",
+            "kind": "sync",
+            "label": "",
+            "x": 120,
+            "y": 1185,
+            "cond": "A et B"
+          },
+          {
+            "id": "n14",
+            "kind": "operation",
+            "label": "Modification base Extranet",
+            "x": 120,
+            "y": 1305,
+            "actions": [
+              "Analyse du fichier XML Entreprise",
+              "Exécution des requêtes de mise à jour de la base Extranet"
+            ],
+            "rules": [
+              "Toujours"
+            ]
+          },
+          {
+            "id": "n15",
+            "kind": "event",
+            "label": "Base Extranet modifiée",
+            "x": 120,
+            "y": 1450
+          }
+        ],
+        "arrows": [
+          {
+            "id": "a1",
+            "from": "n1",
+            "rule": null,
+            "to": "n2"
+          },
+          {
+            "id": "a2",
+            "from": "n2",
+            "rule": 0,
+            "to": "n3"
+          },
+          {
+            "id": "a3",
+            "from": "n2",
+            "rule": 1,
+            "to": "n4"
+          },
+          {
+            "id": "a4",
+            "from": "n5",
+            "rule": null,
+            "to": "n6"
+          },
+          {
+            "id": "a5",
+            "from": "n6",
+            "rule": 0,
+            "to": "n7"
+          },
+          {
+            "id": "a6",
+            "from": "n3",
+            "rule": null,
+            "to": "n8",
+            "letter": "A"
+          },
+          {
+            "id": "a7",
+            "from": "n7",
+            "rule": null,
+            "to": "n8",
+            "letter": "B"
+          },
+          {
+            "id": "a8",
+            "from": "n8",
+            "rule": null,
+            "to": "n9"
+          },
+          {
+            "id": "a9",
+            "from": "n9",
+            "rule": 0,
+            "to": "n10"
+          },
+          {
+            "id": "a10",
+            "from": "n9",
+            "rule": 0,
+            "to": "n11"
+          },
+          {
+            "id": "a11",
+            "from": "n10",
+            "rule": null,
+            "to": "n13",
+            "letter": "A"
+          },
+          {
+            "id": "a12",
+            "from": "n12",
+            "rule": null,
+            "to": "n13",
+            "letter": "B"
+          },
+          {
+            "id": "a13",
+            "from": "n13",
+            "rule": null,
+            "to": "n14"
+          },
+          {
+            "id": "a14",
+            "from": "n14",
+            "rule": 0,
+            "to": "n15"
+          }
+        ]
+      },
+      "autoevaluation": [
+        "Le schéma comporte trois acteurs : InfoServices (Extranet), le commercial et le client.",
+        "L'opération de vérification, réalisée par le commercial, a deux règles d'émission : données correctes (ok) / problème ; le problème entraîne le rappel du client (questions au client).",
+        "La correction des données par le commercial est déclenchée par les réponses du client et produit les données corrigées.",
+        "La modification de la base Entreprise se déclenche avec les données à insérer OU les données corrigées, et produit le fichier XML Entreprise ainsi que la base Entreprise modifiée.",
+        "La mise à jour de la base Extranet attend le fichier XML Entreprise ET le passage de l'automate toutes les heures (événement temporel)."
+      ],
+      "indice": "Partez de l'événement « Fichier XML reçu » et suivez le scénario : qui vérifie, quels sont les deux cas possibles (deux règles d'émission) ? Les deux chemins aboutissent à la même opération : quelle condition faut-il pour la déclencher (« et » ou « ou ») ? Enfin, n'oubliez pas l'automate de l'Extranet, qui ne travaille qu'à intervalle régulier : un événement temporel entre en jeu."
+    }
+  ]
+}

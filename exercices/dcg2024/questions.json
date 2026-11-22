@@ -1,0 +1,1069 @@
+{
+  "id": "dcg2024",
+  "titre": "DCG 2024 – Crédit'Partner",
+  "aujourdhui": "2024-06-15",
+  "contexte": "Crédit'Partner est une société de crédit à la consommation. Lorsqu'un client se présente en agence, un chargé de clientèle ouvre un DOSSIER (objet et montant à financer). Il propose ensuite une ou plusieurs OFFRES de prêt (produit, montant, durée en mois, taux d'intérêt), que le client accepte ou refuse (AcceptationClient : « En cours d'examen », « Accepté » ou « Refusé »). Les PIECEJOINTE du dossier sont vérifiées (ConformitePJ : O/N). Un dossier est clos lorsque DateCloture est renseignée. Chaque chargé de clientèle peut avoir un supérieur hiérarchique, lui-même chargé de clientèle.",
+  "source": "Inspiré du sujet DCG UE8 session 2024, dossier 3. Données entièrement fictives.",
+  "schemaGrid": {
+    "CLIENT": [
+      0,
+      0
+    ],
+    "DOSSIER": [
+      1,
+      0
+    ],
+    "PIECEJOINTE": [
+      2,
+      0
+    ],
+    "CHARGECLIENTELE": [
+      0,
+      1
+    ],
+    "OFFRE": [
+      1,
+      1
+    ],
+    "PRODUIT": [
+      2,
+      1
+    ]
+  },
+  "questions": [
+    {
+      "id": "q01",
+      "theme": "Une seule table",
+      "enonce": "Afficher la liste des produits proposés par Crédit'Partner (toutes les colonnes).",
+      "correction": [
+        "SELECT *",
+        "FROM PRODUIT;"
+      ],
+      "indice": "L'étoile * permet d'afficher toutes les colonnes d'une table."
+    },
+    {
+      "id": "q02",
+      "theme": "Une seule table",
+      "enonce": "Afficher le nom, le prénom et le téléphone des clients habitant à Dijon, triés par ordre alphabétique des noms.",
+      "ordered": [
+        0
+      ],
+      "correction": [
+        "SELECT NomCli, PrenomCli, TelCli",
+        "FROM CLIENT",
+        "WHERE VilleCli = 'Dijon'",
+        "ORDER BY NomCli;"
+      ],
+      "indice": "Une condition sur un texte s'écrit entre apostrophes : VilleCli = 'Dijon'. Le tri se fait avec ORDER BY."
+    },
+    {
+      "id": "q03",
+      "theme": "Une seule table",
+      "enonce": "Afficher la liste des clients (nom, prénom et téléphone) qui n'ont pas d'adresse mail, triée par ordre alphabétique des noms.",
+      "ordered": [
+        0
+      ],
+      "annale": "2023",
+      "correction": [
+        "SELECT NomCli, PrenomCli, TelCli",
+        "FROM CLIENT",
+        "WHERE MailCli IS NULL",
+        "ORDER BY NomCli;"
+      ],
+      "indice": "Une valeur absente se teste avec IS NULL (et non = NULL)."
+    },
+    {
+      "id": "q04",
+      "theme": "Une seule table",
+      "enonce": "Afficher les offres (numéro, montant, taux) dont le taux d'intérêt est supérieur à 7 %, de la plus chère à la moins chère (taux décroissant).",
+      "ordered": [
+        2
+      ],
+      "correction": [
+        "SELECT IdOffre, MontantOffre, TauxInteret",
+        "FROM OFFRE",
+        "WHERE TauxInteret > 7",
+        "ORDER BY TauxInteret DESC;"
+      ],
+      "indice": "Le taux est stocké en pourcentage (7 pour 7 %). DESC trie par ordre décroissant."
+    },
+    {
+      "id": "q05",
+      "theme": "Une seule table",
+      "enonce": "Afficher les dossiers (numéro, objet, montant à financer) dont l'objet est un achat de véhicule (neuf ou d'occasion).",
+      "correction": [
+        "SELECT IdDoss, ObjetAFinancer, MontantAFinancer",
+        "FROM DOSSIER",
+        "WHERE ObjetAFinancer LIKE 'Achat véhicule%';"
+      ],
+      "variantes": [
+        [
+          "SELECT IdDoss, ObjetAFinancer, MontantAFinancer",
+          "FROM DOSSIER",
+          "WHERE ObjetAFinancer = 'Achat véhicule neuf'",
+          "   OR ObjetAFinancer = 'Achat véhicule d''occasion';"
+        ]
+      ],
+      "indice": "LIKE avec % permet de rechercher un début de texte : LIKE 'Achat véhicule%'."
+    },
+    {
+      "id": "q06",
+      "theme": "Calculs et agrégats",
+      "enonce": "Combien de dossiers ne sont pas encore clos ?",
+      "correction": [
+        "SELECT COUNT(*)",
+        "FROM DOSSIER",
+        "WHERE DateCloture IS NULL;"
+      ],
+      "indice": "Un dossier non clos n'a pas de date de clôture. COUNT(*) compte les lignes."
+    },
+    {
+      "id": "q07",
+      "theme": "Calculs et agrégats",
+      "enonce": "Afficher le montant moyen à financer, le plus petit et le plus grand montant à financer des dossiers.",
+      "correction": [
+        "SELECT AVG(MontantAFinancer), MIN(MontantAFinancer), MAX(MontantAFinancer)",
+        "FROM DOSSIER;"
+      ],
+      "indice": "Fonctions AVG (moyenne), MIN et MAX."
+    },
+    {
+      "id": "q08",
+      "theme": "Calculs et agrégats",
+      "enonce": "Afficher, pour chaque statut d'acceptation (AcceptationClient), le nombre d'offres correspondantes.",
+      "correction": [
+        "SELECT AcceptationClient, COUNT(*)",
+        "FROM OFFRE",
+        "GROUP BY AcceptationClient;"
+      ],
+      "indice": "« Pour chaque » se traduit en SQL par GROUP BY."
+    },
+    {
+      "id": "q09",
+      "theme": "Dates",
+      "enonce": "Afficher les dossiers (numéro, date de création, montant à financer) créés en 2023.",
+      "correction": [
+        "SELECT IdDoss, DateCreation, MontantAFinancer",
+        "FROM DOSSIER",
+        "WHERE YEAR(DateCreation) = 2023;"
+      ],
+      "variantes": [
+        [
+          "SELECT IdDoss, DateCreation, MontantAFinancer",
+          "FROM DOSSIER",
+          "WHERE DateCreation BETWEEN '01/01/2023' AND '31/12/2023';"
+        ]
+      ],
+      "indice": "La fonction YEAR(date) renvoie l'année. On peut aussi utiliser BETWEEN '01/01/2023' AND '31/12/2023'."
+    },
+    {
+      "id": "q10",
+      "theme": "Dates",
+      "enonce": "Afficher les offres (numéro, date d'émission, taux) émises en mars 2024.",
+      "correction": [
+        "SELECT IdOffre, DateEmissionOffre, TauxInteret",
+        "FROM OFFRE",
+        "WHERE MONTH(DateEmissionOffre) = 3",
+        "AND YEAR(DateEmissionOffre) = 2024;"
+      ],
+      "variantes": [
+        [
+          "SELECT IdOffre, DateEmissionOffre, TauxInteret",
+          "FROM OFFRE",
+          "WHERE DateEmissionOffre BETWEEN '01/03/2024' AND '31/03/2024';"
+        ]
+      ],
+      "indice": "Combinez MONTH() et YEAR(), ou utilisez BETWEEN avec deux dates."
+    },
+    {
+      "id": "q11",
+      "theme": "Dates",
+      "enonce": "Afficher le nombre de dossiers créés par année (année, nombre de dossiers).",
+      "correction": [
+        "SELECT YEAR(DateCreation), COUNT(*)",
+        "FROM DOSSIER",
+        "GROUP BY YEAR(DateCreation);"
+      ],
+      "indice": "On peut regrouper sur le résultat d'une fonction : GROUP BY YEAR(DateCreation)."
+    },
+    {
+      "id": "q12",
+      "theme": "Jointures",
+      "enonce": "Afficher les dossiers non clos (numéro, date de création) avec le nom et le prénom du client.",
+      "correction": [
+        "SELECT IdDoss, DateCreation, NomCli, PrenomCli",
+        "FROM DOSSIER, CLIENT",
+        "WHERE DOSSIER.IdCli = CLIENT.IdCli",
+        "AND DateCloture IS NULL;"
+      ],
+      "variantes": [
+        [
+          "SELECT IdDoss, DateCreation, NomCli, PrenomCli",
+          "FROM DOSSIER",
+          "INNER JOIN CLIENT ON DOSSIER.IdCli = CLIENT.IdCli",
+          "WHERE DateCloture IS NULL;"
+        ]
+      ],
+      "indice": "Les informations sont dans deux tables : DOSSIER contient IdCli (clé étrangère) qui permet de retrouver le client. Jointure dans le WHERE (DOSSIER.IdCli = CLIENT.IdCli) ou avec INNER JOIN … ON."
+    },
+    {
+      "id": "q13",
+      "theme": "Jointures",
+      "enonce": "Afficher les offres du dossier n° 2257 : numéro de l'offre, désignation du produit, montant, durée, taux et décision du client.",
+      "correction": [
+        "SELECT IdOffre, DesignationProd, MontantOffre, DureePret, TauxInteret, AcceptationClient",
+        "FROM OFFRE, PRODUIT",
+        "WHERE OFFRE.IdProd = PRODUIT.IdProd",
+        "AND IdDoss = 2257;"
+      ],
+      "variantes": [
+        [
+          "SELECT IdOffre, DesignationProd, MontantOffre, DureePret, TauxInteret, AcceptationClient",
+          "FROM OFFRE",
+          "INNER JOIN PRODUIT ON OFFRE.IdProd = PRODUIT.IdProd",
+          "WHERE IdDoss = 2257;"
+        ]
+      ],
+      "indice": "La désignation du produit est dans PRODUIT : il faut relier OFFRE et PRODUIT par IdProd."
+    },
+    {
+      "id": "q14",
+      "theme": "Jointures",
+      "enonce": "Fournir la liste sans doublon des clients (numéro, nom, prénom, mail) ayant déjà refusé une offre.",
+      "annale": "2024",
+      "correction": [
+        "SELECT DISTINCT CLIENT.IdCli, NomCli, PrenomCli, MailCli",
+        "FROM CLIENT, DOSSIER, OFFRE",
+        "WHERE CLIENT.IdCli = DOSSIER.IdCli",
+        "AND DOSSIER.IdDoss = OFFRE.IdDoss",
+        "AND AcceptationClient = 'Refusé';"
+      ],
+      "variantes": [
+        [
+          "SELECT DISTINCT CLIENT.IdCli, NomCli, PrenomCli, MailCli",
+          "FROM CLIENT",
+          "INNER JOIN DOSSIER ON CLIENT.IdCli = DOSSIER.IdCli",
+          "INNER JOIN OFFRE ON DOSSIER.IdDoss = OFFRE.IdDoss",
+          "WHERE AcceptationClient = 'Refusé';"
+        ]
+      ],
+      "indice": "Trois tables : CLIENT → DOSSIER → OFFRE. « Sans doublon » : DISTINCT. IdCli existe dans deux tables, il faut préciser laquelle (CLIENT.IdCli)."
+    },
+    {
+      "id": "q15",
+      "theme": "Jointures",
+      "enonce": "Afficher les pièces jointes non conformes (désignation, date de réception) avec le numéro du dossier et le nom du chargé de clientèle responsable du dossier.",
+      "correction": [
+        "SELECT DesignationPJ, DateReceptionPJ, DOSSIER.IdDoss, NomChargeClientele",
+        "FROM PIECEJOINTE, DOSSIER, CHARGECLIENTELE",
+        "WHERE PIECEJOINTE.IdDoss = DOSSIER.IdDoss",
+        "AND DOSSIER.IdChargeClientele = CHARGECLIENTELE.IdChargeClientele",
+        "AND ConformitePJ = 'N';"
+      ],
+      "variantes": [
+        [
+          "SELECT DesignationPJ, DateReceptionPJ, DOSSIER.IdDoss, NomChargeClientele",
+          "FROM PIECEJOINTE",
+          "INNER JOIN DOSSIER ON PIECEJOINTE.IdDoss = DOSSIER.IdDoss",
+          "INNER JOIN CHARGECLIENTELE ON DOSSIER.IdChargeClientele = CHARGECLIENTELE.IdChargeClientele",
+          "WHERE ConformitePJ = 'N';"
+        ]
+      ],
+      "indice": "La pièce jointe mène au dossier, et le dossier mène au chargé de clientèle : deux conditions de jointure."
+    },
+    {
+      "id": "q16",
+      "theme": "Jointures et regroupements",
+      "enonce": "Afficher, pour chaque produit (désignation), le nombre d'offres émises.",
+      "correction": [
+        "SELECT DesignationProd, COUNT(*)",
+        "FROM OFFRE, PRODUIT",
+        "WHERE OFFRE.IdProd = PRODUIT.IdProd",
+        "GROUP BY DesignationProd;"
+      ],
+      "variantes": [
+        [
+          "SELECT DesignationProd, COUNT(*)",
+          "FROM OFFRE",
+          "INNER JOIN PRODUIT ON OFFRE.IdProd = PRODUIT.IdProd",
+          "GROUP BY DesignationProd;"
+        ]
+      ],
+      "indice": "Jointure OFFRE–PRODUIT puis GROUP BY sur la désignation."
+    },
+    {
+      "id": "q17",
+      "theme": "Jointures et regroupements",
+      "enonce": "Afficher, pour chaque dossier (identifiant), le chargé de clientèle (nom) et le nombre d'offres, uniquement pour les dossiers ayant reçu plus de 3 offres. Le résultat sera trié par ordre décroissant du nombre d'offres.",
+      "annale": "2024",
+      "ordered": [
+        2
+      ],
+      "correction": [
+        "SELECT DOSSIER.IdDoss, NomChargeClientele, COUNT(*)",
+        "FROM OFFRE, DOSSIER, CHARGECLIENTELE",
+        "WHERE DOSSIER.IdDoss = OFFRE.IdDoss",
+        "AND DOSSIER.IdChargeClientele = CHARGECLIENTELE.IdChargeClientele",
+        "GROUP BY DOSSIER.IdDoss, NomChargeClientele",
+        "HAVING COUNT(*) > 3",
+        "ORDER BY COUNT(*) DESC;"
+      ],
+      "variantes": [
+        [
+          "SELECT DOSSIER.IdDoss, NomChargeClientele, COUNT(*) AS NbOffres",
+          "FROM DOSSIER",
+          "INNER JOIN OFFRE ON DOSSIER.IdDoss = OFFRE.IdDoss",
+          "INNER JOIN CHARGECLIENTELE ON DOSSIER.IdChargeClientele = CHARGECLIENTELE.IdChargeClientele",
+          "GROUP BY DOSSIER.IdDoss, NomChargeClientele",
+          "HAVING COUNT(*) > 3",
+          "ORDER BY NbOffres DESC;"
+        ]
+      ],
+      "indice": "Une condition sur un nombre calculé (COUNT) se place dans HAVING, après le GROUP BY. « Plus de 3 » signifie > 3."
+    },
+    {
+      "id": "q18",
+      "theme": "Jointures et regroupements",
+      "enonce": "Afficher, pour chaque chargé de clientèle (nom), le montant total des offres acceptées par ses clients.",
+      "correction": [
+        "SELECT NomChargeClientele, SUM(MontantOffre)",
+        "FROM CHARGECLIENTELE, DOSSIER, OFFRE",
+        "WHERE CHARGECLIENTELE.IdChargeClientele = DOSSIER.IdChargeClientele",
+        "AND DOSSIER.IdDoss = OFFRE.IdDoss",
+        "AND AcceptationClient = 'Accepté'",
+        "GROUP BY NomChargeClientele;"
+      ],
+      "indice": "Filtrez d'abord les offres acceptées (WHERE), puis regroupez par chargé et additionnez avec SUM."
+    },
+    {
+      "id": "q19",
+      "theme": "Sous-requêtes",
+      "enonce": "Donner la liste des dossiers non clos (numéro, date de création) n'ayant jamais fait l'objet d'une offre.",
+      "annale": "2024",
+      "correction": [
+        "SELECT IdDoss, DateCreation",
+        "FROM DOSSIER",
+        "WHERE DateCloture IS NULL",
+        "AND IdDoss NOT IN (SELECT IdDoss",
+        "                  FROM OFFRE);"
+      ],
+      "variantes": [
+        [
+          "SELECT IdDoss, DateCreation",
+          "FROM DOSSIER D",
+          "WHERE DateCloture IS NULL",
+          "AND NOT EXISTS (SELECT *",
+          "                FROM OFFRE O",
+          "                WHERE O.IdDoss = D.IdDoss);"
+        ]
+      ],
+      "indice": "« N'ayant jamais » : NOT IN (sous-requête qui liste les dossiers ayant au moins une offre)."
+    },
+    {
+      "id": "q20",
+      "theme": "Sous-requêtes",
+      "enonce": "Afficher les clients (numéro, nom, prénom, ville) qui n'ont encore jamais ouvert de dossier.",
+      "correction": [
+        "SELECT IdCli, NomCli, PrenomCli, VilleCli",
+        "FROM CLIENT",
+        "WHERE IdCli NOT IN (SELECT IdCli",
+        "                    FROM DOSSIER);"
+      ],
+      "indice": "Même raisonnement que la question précédente, entre CLIENT et DOSSIER."
+    },
+    {
+      "id": "q21",
+      "theme": "Sous-requêtes",
+      "enonce": "Afficher les offres (numéro, taux) dont le taux d'intérêt est supérieur au taux moyen de toutes les offres.",
+      "correction": [
+        "SELECT IdOffre, TauxInteret",
+        "FROM OFFRE",
+        "WHERE TauxInteret > (SELECT AVG(TauxInteret)",
+        "                     FROM OFFRE);"
+      ],
+      "indice": "On ne peut pas écrire WHERE TauxInteret > AVG(TauxInteret) : il faut calculer la moyenne dans une sous-requête."
+    },
+    {
+      "id": "q22",
+      "theme": "Dates",
+      "enonce": "Lister sans doublon les clients (nom, prénom) ayant refusé une offre émise il y a moins d'un an (la date du jour est le 15/06/2024).",
+      "correction": [
+        "SELECT DISTINCT NomCli, PrenomCli",
+        "FROM CLIENT, DOSSIER, OFFRE",
+        "WHERE CLIENT.IdCli = DOSSIER.IdCli",
+        "AND DOSSIER.IdDoss = OFFRE.IdDoss",
+        "AND AcceptationClient = 'Refusé'",
+        "AND DateEmissionOffre > '15/06/2023';"
+      ],
+      "variantes": [
+        [
+          "SELECT DISTINCT NomCli, PrenomCli",
+          "FROM CLIENT, DOSSIER, OFFRE",
+          "WHERE CLIENT.IdCli = DOSSIER.IdCli",
+          "AND DOSSIER.IdDoss = OFFRE.IdDoss",
+          "AND AcceptationClient = 'Refusé'",
+          "AND DATEDIFF(NOW(), DateEmissionOffre) < 365;"
+        ]
+      ],
+      "indice": "Comparez la date d'émission au 15/06/2023, ou utilisez DATEDIFF(NOW(), DateEmissionOffre) < 365 (NOW() renvoie la date du jour simulée)."
+    },
+    {
+      "id": "q23",
+      "theme": "Auto-jointure",
+      "enonce": "Afficher chaque chargé de clientèle (nom, prénom) avec le nom de son supérieur hiérarchique.",
+      "correction": [
+        "SELECT C.NomChargeClientele, C.PrenomChargeClientele, S.NomChargeClientele",
+        "FROM CHARGECLIENTELE C, CHARGECLIENTELE S",
+        "WHERE C.IdChargeClienteleSupHierarchique = S.IdChargeClientele;"
+      ],
+      "variantes": [
+        [
+          "SELECT C.NomChargeClientele, C.PrenomChargeClientele, S.NomChargeClientele AS Superieur",
+          "FROM CHARGECLIENTELE C",
+          "INNER JOIN CHARGECLIENTELE S ON C.IdChargeClienteleSupHierarchique = S.IdChargeClientele;"
+        ]
+      ],
+      "indice": "La table CHARGECLIENTELE est reliée à elle-même (relation réflexive). Utilisez-la deux fois dans le FROM avec deux alias : C (le chargé) et S (son supérieur)."
+    },
+    {
+      "id": "q24",
+      "theme": "Mises à jour",
+      "type": "write",
+      "enonce": "Une erreur de calcul a été commise : actualiser le taux de l'offre n° 3456812 au nouveau taux de 4,34 %.",
+      "annale": "2024",
+      "correction": [
+        "UPDATE OFFRE",
+        "SET TauxInteret = 4.34",
+        "WHERE IdOffre = 3456812;"
+      ],
+      "verif": "SELECT * FROM OFFRE ORDER BY IdOffre",
+      "indice": "UPDATE table SET colonne = valeur WHERE condition. Attention : en SQL le séparateur décimal est le point."
+    },
+    {
+      "id": "q25",
+      "theme": "Mises à jour",
+      "type": "write",
+      "enonce": "Le client vient d'accepter l'offre n° 3457027 : enregistrer cette acceptation.",
+      "correction": [
+        "UPDATE OFFRE",
+        "SET AcceptationClient = 'Accepté'",
+        "WHERE IdOffre = 3457027;"
+      ],
+      "verif": "SELECT * FROM OFFRE ORDER BY IdOffre",
+      "indice": "Les valeurs possibles d'AcceptationClient sont « En cours d'examen », « Accepté » et « Refusé » (avec l'accent)."
+    },
+    {
+      "id": "q26",
+      "theme": "Mises à jour",
+      "type": "write",
+      "enonce": "Clôturer le dossier n° 2341 à la date du jour (15/06/2024).",
+      "correction": [
+        "UPDATE DOSSIER",
+        "SET DateCloture = '15/06/2024'",
+        "WHERE IdDoss = 2341;"
+      ],
+      "variantes": [
+        [
+          "UPDATE DOSSIER",
+          "SET DateCloture = NOW()",
+          "WHERE IdDoss = 2341;"
+        ]
+      ],
+      "verif": "SELECT * FROM DOSSIER ORDER BY IdDoss",
+      "indice": "Une date peut s'écrire '15/06/2024' (elle sera convertie) ou être obtenue avec NOW()."
+    },
+    {
+      "id": "q27",
+      "theme": "Mises à jour",
+      "type": "write",
+      "enonce": "Crédit'Partner lance un nouveau produit : le « Prêt étudiant », qui portera l'identifiant 7. L'ajouter.",
+      "correction": [
+        "INSERT INTO PRODUIT",
+        "VALUES (7, 'Prêt étudiant');"
+      ],
+      "variantes": [
+        [
+          "INSERT INTO PRODUIT (IdProd, DesignationProd)",
+          "VALUES (7, 'Prêt étudiant');"
+        ]
+      ],
+      "verif": "SELECT * FROM PRODUIT ORDER BY IdProd",
+      "indice": "INSERT INTO table VALUES (valeur1, valeur2, …) dans l'ordre des colonnes de la table."
+    },
+    {
+      "id": "q28",
+      "theme": "Mises à jour",
+      "type": "write",
+      "enonce": "Supprimer les pièces jointes non conformes du dossier n° 2338 (le client va les renvoyer).",
+      "correction": [
+        "DELETE FROM PIECEJOINTE",
+        "WHERE IdDoss = 2338",
+        "AND ConformitePJ = 'N';"
+      ],
+      "verif": "SELECT * FROM PIECEJOINTE ORDER BY IdPJ",
+      "indice": "DELETE FROM table WHERE condition. Sans WHERE, toutes les lignes seraient supprimées !"
+    },
+    {
+      "id": "q29",
+      "theme": "Mises à jour",
+      "type": "write",
+      "enonce": "Supprimer le client n° 1067 (Olivier BRUNET), qui n'a jamais ouvert de dossier. Essayez ensuite de supprimer le client n° 1064 : que se passe-t-il, et pourquoi ?",
+      "correction": [
+        "DELETE FROM CLIENT",
+        "WHERE IdCli = 1067;"
+      ],
+      "verif": "SELECT * FROM CLIENT ORDER BY IdCli",
+      "indice": "Le client 1064 possède des dossiers : sa suppression est refusée par l'intégrité référentielle (DOSSIER.IdCli fait référence à CLIENT.IdCli). Il faudrait d'abord supprimer ses offres, pièces jointes et dossiers."
+    },
+    {
+      "id": "s01",
+      "theme": "Évolution du schéma",
+      "type": "schema",
+      "annale": "2024",
+      "enonce": "Le siège demande que la base puisse enregistrer : plusieurs emprunteurs (clients) à l'origine d'un même dossier, un emprunteur pouvant être à l'origine de plusieurs dossiers ; un ou plusieurs types d'assurance (1 – Décès, 2 – Perte totale et irréversible d'autonomie, 3 – Incapacité temporaire totale…) pour une offre et un client. Pour un emprunteur, une offre et un type d'assurance, on enregistre une quotité (pourcentage de couverture). Faites évoluer le schéma ci-dessous.",
+      "depart": [
+        "CLIENT",
+        "DOSSIER",
+        "OFFRE"
+      ],
+      "solution": {
+        "tables": [
+          {
+            "nom": "DOSSIER",
+            "interdits": [
+              "IdCli"
+            ]
+          },
+          {
+            "nom": "EMPRUNTER",
+            "alias": [
+              "EMPRUNT",
+              "EMPRUNTEUR",
+              "CONTRACTER",
+              "COEMPRUNTER"
+            ],
+            "role": "relier les emprunteurs (clients) et les dossiers",
+            "pk": [
+              "IdCli",
+              "IdDoss"
+            ],
+            "fk": {
+              "IdCli": "CLIENT",
+              "IdDoss": "DOSSIER"
+            }
+          },
+          {
+            "nom": "TYPE_ASSURANCE",
+            "alias": [
+              "TYPEASSURANCE",
+              "ASSURANCE",
+              "TYPE_ASSU",
+              "TYPES_ASSURANCE"
+            ],
+            "role": "décrire les types d'assurance",
+            "pk": [
+              "CodeTypeAssurance|IdTypeAssurance|CodeType|CodeAssurance|NumTypeAssurance|IdAssurance|NumAssurance"
+            ],
+            "attributs": [
+              "LibelleTypeAssurance|LibelleType|LibelleAssurance|Libelle"
+            ]
+          },
+          {
+            "nom": "SOUSCRIRE",
+            "alias": [
+              "COUVRIR",
+              "ASSURER",
+              "SOUSCRIPTION",
+              "GARANTIR",
+              "ADHERER"
+            ],
+            "role": "enregistrer la quotité d'un emprunteur pour une offre et un type d'assurance",
+            "pk": [
+              "IdCli",
+              "CodeTypeAssurance|IdTypeAssurance|CodeType|CodeAssurance|NumTypeAssurance|IdAssurance|NumAssurance",
+              "IdOffre"
+            ],
+            "fk": {
+              "IdCli": "CLIENT",
+              "CodeTypeAssurance|IdTypeAssurance|CodeType|CodeAssurance|NumTypeAssurance|IdAssurance|NumAssurance": "TYPE_ASSURANCE",
+              "IdOffre": "OFFRE"
+            },
+            "attributs": [
+              "Quotite|QuotiteAssurance|Pourcentage|TauxCouverture|PourcentageCouverture"
+            ]
+          }
+        ]
+      },
+      "indice": "Une relation « plusieurs à plusieurs » devient une table dont la clé primaire est composée des clés des tables reliées (et qui porte les informations propres au lien, comme la quotité). Si un dossier peut avoir plusieurs emprunteurs, IdCli ne peut plus rester dans DOSSIER."
+    },
+    {
+      "id": "p01",
+      "type": "processus",
+      "theme": "Processus",
+      "annale": "2024",
+      "enonce": "Document 2 – État actuel du processus de demande en ligne de crédit à la consommation. Dans la phase d'expérimentation, seuls les titulaires d'un compte personnel en ligne pourront faire une demande. « Après s'être connecté à son compte personnel en ligne, le client fait sa demande de prêt : il choisit le crédit qu'il souhaite contracter, indique le montant de prêt souhaité ainsi que la durée du prêt envisagée. Il téléverse aussi les pièces jointes exigées. Elles sont intégrées à sa demande. Le client doit ensuite prendre connaissance des conditions générales et spécifiques de vente puis procéder à la validation de sa demande de prêt. La demande de prêt du client est alors transférée automatiquement dans l'application EYES qui crée son dossier en lui attribuant un numéro de demande de prêt. Ensuite, l'application effectue une reconnaissance de pièces jointes. Quand les pièces jointes sont lisibles et conformes, le dossier est typé « à étudier ». Si une pièce jointe est illisible ou si les pièces jointes ne permettent pas de collecter toutes les informations nécessaires pour compléter intégralement le dossier client dans la base de données, le dossier est typé « incident ». Chaque matin, le service Client Web gère les dossiers d'incident. En effet, il procède à une alerte par téléphone auprès des clients ayant un dossier d'incident de moins de 24 heures afin qu'ils téléversent de nouvelles pièces jointes. À cette étape, le service clôture les dossiers toujours typés « incident » après 15 jours s'ils n'ont pas reçu les pièces jointes nécessaires. À la suite de l'alerte téléphonique, lorsque le client téléverse les nouvelles pièces jointes demandées, EYES relance la reconnaissance des pièces jointes et le dossier passe à l'état « à étudier » si ces pièces sont lisibles et conformes. Sinon, le dossier reste à l'état « incident » avec une nouvelle date d'incident pour éviter sa clôture à l'issue des 15 jours suivant sa création. Par ailleurs, le service Client Web se charge de gérer les dossiers à étudier. Si la demande de prêt est trop risquée, la demande est refusée par le service Client Web qui avertit le client. Si le projet est réalisable, un taux est attribué et une offre de prêt est envoyée au client. » Complétez le schéma (annexe A, déjà commencé) afin de schématiser la totalité du processus de demande en ligne de crédit à la consommation. Le détail des tâches n'est pas attendu.",
+      "couloirs": [
+        "Client",
+        "EYES",
+        "Service Client Web"
+      ],
+      "depart": {
+        "lanes": [
+          "Client",
+          "EYES",
+          "Service Client Web"
+        ],
+        "nodes": [
+          {
+            "id": "n1",
+            "kind": "event",
+            "label": "Demande de prêt",
+            "x": 120,
+            "y": 95
+          },
+          {
+            "id": "n2",
+            "kind": "operation",
+            "label": "Création du dossier",
+            "x": 360,
+            "y": 195,
+            "actions": [],
+            "rules": [
+              "Toujours"
+            ]
+          }
+        ],
+        "arrows": [
+          {
+            "id": "a1",
+            "from": "n1",
+            "rule": null,
+            "to": "n2"
+          }
+        ]
+      },
+      "elements": [
+        {
+          "kind": "event",
+          "label": "Dossier créé"
+        },
+        {
+          "kind": "event",
+          "label": "Nouvelles PJ"
+        },
+        {
+          "kind": "event",
+          "label": "Incident créé"
+        },
+        {
+          "kind": "event",
+          "label": "Dossier à étudier"
+        },
+        {
+          "kind": "event",
+          "label": "Chaque matin"
+        },
+        {
+          "kind": "event",
+          "label": "Alerte PJ à télécharger"
+        },
+        {
+          "kind": "event",
+          "label": "Dossier clôturé"
+        },
+        {
+          "kind": "event",
+          "label": "Dossier rejeté"
+        },
+        {
+          "kind": "event",
+          "label": "Offre de prêt"
+        },
+        {
+          "kind": "event",
+          "label": "Taux d'intérêt"
+        },
+        {
+          "kind": "operation",
+          "label": "Reconnaissance des PJ"
+        },
+        {
+          "kind": "operation",
+          "label": "Gestion des incidents"
+        },
+        {
+          "kind": "operation",
+          "label": "Étude de la demande client"
+        }
+      ],
+      "attendus": [
+        {
+          "operation": "Reconnaissance des PJ",
+          "alias": [
+            "Reconnaissance des pièces jointes",
+            "Reconnaissance PJ",
+            "Vérification des PJ",
+            "Contrôle des PJ",
+            "Vérification des pièces jointes"
+          ],
+          "synchronisation": "Dossier créé OU Nouvelles PJ",
+          "regles": [
+            "PJ illisibles ou non conformes",
+            "PJ lisibles et conformes"
+          ]
+        },
+        {
+          "operation": "Gestion des incidents",
+          "alias": [
+            "Gestion des dossiers d'incident",
+            "Traitement des incidents",
+            "Gestion incidents"
+          ],
+          "synchronisation": "Incident créé ET Chaque matin",
+          "regles": [
+            "Incident de moins de 24 h",
+            "Incident de plus de 15 jours"
+          ]
+        },
+        {
+          "operation": "Étude de la demande client",
+          "alias": [
+            "Étude de la demande",
+            "Étude du dossier",
+            "Gestion des dossiers à étudier",
+            "Étude demande"
+          ],
+          "synchronisation": "Dossier à étudier",
+          "regles": [
+            "Projet risqué",
+            "Projet réalisable"
+          ]
+        }
+      ],
+      "equivalents": {
+        "Dossier créé": [
+          "Dossier de prêt créé",
+          "Numéro de demande attribué"
+        ],
+        "Nouvelles PJ": [
+          "Nouvelles pièces jointes",
+          "PJ téléversées",
+          "Nouvelles PJ téléversées",
+          "Pièces jointes téléversées"
+        ],
+        "Incident créé": [
+          "Dossier incident",
+          "Dossier typé incident",
+          "Dossier en incident",
+          "Incident"
+        ],
+        "Dossier à étudier": [
+          "Dossier typé à étudier",
+          "Dossier complet"
+        ],
+        "Chaque matin": [
+          "Tous les matins",
+          "Matin",
+          "Début de journée"
+        ],
+        "PJ illisibles ou non conformes": [
+          "PJ non conformes",
+          "PJ illisibles",
+          "Non conformes",
+          "Illisibles ou non conformes",
+          "Dossier incomplet",
+          "PJ non OK"
+        ],
+        "PJ lisibles et conformes": [
+          "PJ conformes",
+          "Conformes",
+          "Lisibles et conformes",
+          "PJ OK"
+        ],
+        "Incident de moins de 24 h": [
+          "< 24 h",
+          "<24H",
+          "Moins de 24 h",
+          "Moins de 24 heures",
+          "Incident < 24 h"
+        ],
+        "Incident de plus de 15 jours": [
+          "> 15 jours",
+          "Incident>15jours",
+          "Plus de 15 jours",
+          "Incident > 15 jours"
+        ],
+        "Projet risqué": [
+          "Trop risqué",
+          "Demande risquée",
+          "Risqué",
+          "Refus"
+        ],
+        "Projet réalisable": [
+          "Réalisable",
+          "Demande acceptée",
+          "Accord"
+        ]
+      },
+      "solution": {
+        "lanes": [
+          "Client",
+          "EYES",
+          "Service Client Web"
+        ],
+        "nodes": [
+          {
+            "id": "n1",
+            "kind": "event",
+            "label": "Demande de prêt",
+            "x": 120,
+            "y": 95
+          },
+          {
+            "id": "n2",
+            "kind": "operation",
+            "label": "Création du dossier",
+            "x": 360,
+            "y": 195,
+            "actions": [],
+            "rules": [
+              "Toujours"
+            ]
+          },
+          {
+            "id": "n3",
+            "kind": "event",
+            "label": "Dossier créé",
+            "x": 360,
+            "y": 315
+          },
+          {
+            "id": "n4",
+            "kind": "event",
+            "label": "Nouvelles PJ",
+            "x": 120,
+            "y": 395
+          },
+          {
+            "id": "n5",
+            "kind": "sync",
+            "label": "",
+            "x": 360,
+            "y": 425,
+            "cond": "A ou B"
+          },
+          {
+            "id": "n6",
+            "kind": "operation",
+            "label": "Reconnaissance des PJ",
+            "x": 360,
+            "y": 535,
+            "actions": [],
+            "rules": [
+              "PJ illisibles ou non conformes",
+              "PJ lisibles et conformes"
+            ]
+          },
+          {
+            "id": "n7",
+            "kind": "event",
+            "label": "Incident créé",
+            "x": 310,
+            "y": 690
+          },
+          {
+            "id": "n9",
+            "kind": "event",
+            "label": "Chaque matin",
+            "x": 600,
+            "y": 640
+          },
+          {
+            "id": "n10",
+            "kind": "sync",
+            "label": "",
+            "x": 600,
+            "y": 765,
+            "cond": "A et B"
+          },
+          {
+            "id": "n11",
+            "kind": "operation",
+            "label": "Gestion des incidents",
+            "x": 600,
+            "y": 870,
+            "actions": [],
+            "rules": [
+              "Incident de moins de 24 h",
+              "Incident de plus de 15 jours"
+            ]
+          },
+          {
+            "id": "n12",
+            "kind": "event",
+            "label": "Alerte PJ à télécharger",
+            "x": 120,
+            "y": 1020
+          },
+          {
+            "id": "n13",
+            "kind": "event",
+            "label": "Dossier clôturé",
+            "x": 640,
+            "y": 1020
+          },
+          {
+            "id": "n8",
+            "kind": "event",
+            "label": "Dossier à étudier",
+            "x": 380,
+            "y": 1020
+          },
+          {
+            "id": "n14",
+            "kind": "operation",
+            "label": "Étude de la demande client",
+            "x": 600,
+            "y": 1170,
+            "actions": [],
+            "rules": [
+              "Projet risqué",
+              "Projet réalisable"
+            ]
+          },
+          {
+            "id": "n15",
+            "kind": "event",
+            "label": "Dossier rejeté",
+            "x": 120,
+            "y": 1300
+          },
+          {
+            "id": "n16",
+            "kind": "event",
+            "label": "Offre de prêt",
+            "x": 120,
+            "y": 1410
+          },
+          {
+            "id": "n17",
+            "kind": "event",
+            "label": "Taux d'intérêt",
+            "x": 340,
+            "y": 1410
+          }
+        ],
+        "arrows": [
+          {
+            "id": "a1",
+            "from": "n1",
+            "rule": null,
+            "to": "n2"
+          },
+          {
+            "id": "a2",
+            "from": "n2",
+            "rule": 0,
+            "to": "n3"
+          },
+          {
+            "id": "a3",
+            "from": "n3",
+            "rule": null,
+            "to": "n5",
+            "letter": "A"
+          },
+          {
+            "id": "a4",
+            "from": "n4",
+            "rule": null,
+            "to": "n5",
+            "letter": "B"
+          },
+          {
+            "id": "a5",
+            "from": "n5",
+            "rule": null,
+            "to": "n6"
+          },
+          {
+            "id": "a6",
+            "from": "n6",
+            "rule": 0,
+            "to": "n7"
+          },
+          {
+            "id": "a7",
+            "from": "n6",
+            "rule": 1,
+            "to": "n8"
+          },
+          {
+            "id": "a8",
+            "from": "n7",
+            "rule": null,
+            "to": "n10",
+            "letter": "A"
+          },
+          {
+            "id": "a9",
+            "from": "n9",
+            "rule": null,
+            "to": "n10",
+            "letter": "B"
+          },
+          {
+            "id": "a10",
+            "from": "n10",
+            "rule": null,
+            "to": "n11"
+          },
+          {
+            "id": "a11",
+            "from": "n11",
+            "rule": 0,
+            "to": "n12"
+          },
+          {
+            "id": "a12",
+            "from": "n11",
+            "rule": 1,
+            "to": "n13"
+          },
+          {
+            "id": "a13",
+            "from": "n8",
+            "rule": null,
+            "to": "n14"
+          },
+          {
+            "id": "a14",
+            "from": "n14",
+            "rule": 0,
+            "to": "n15"
+          },
+          {
+            "id": "a15",
+            "from": "n14",
+            "rule": 1,
+            "to": "n16"
+          },
+          {
+            "id": "a16",
+            "from": "n14",
+            "rule": 1,
+            "to": "n17"
+          }
+        ]
+      },
+      "autoevaluation": [
+        "La reconnaissance des PJ, dans le couloir EYES, est déclenchée par le dossier créé OU par l'arrivée de nouvelles PJ du client (synchronisation « A ou B »).",
+        "La reconnaissance des PJ a deux règles d'émission : PJ illisibles ou non conformes (incident créé) / PJ lisibles et conformes (dossier à étudier).",
+        "La gestion des incidents par le service Client Web attend un incident créé ET l'événement temporel « chaque matin ».",
+        "La gestion des incidents a deux cas : incident de moins de 24 h (alerte au client pour télécharger de nouvelles PJ) / incident de plus de 15 jours (dossier clôturé).",
+        "L'étude de la demande, déclenchée par le dossier à étudier, aboutit soit au dossier rejeté, soit à l'offre de prêt avec son taux d'intérêt."
+      ],
+      "indice": "Repérez les trois acteurs : le client, l'application EYES et le service Client Web. La reconnaissance des PJ peut être relancée : par quels événements différents peut-elle démarrer ? La gestion des incidents a lieu à un moment précis de la journée : pensez à un événement temporel. Chaque opération qui aboutit à deux situations différentes a deux règles d'émission."
+    }
+  ]
+}

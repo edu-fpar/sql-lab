@@ -1,0 +1,1298 @@
+{
+  "id": "dcg2025",
+  "titre": "DCG 2025 – SAS Ambulance Est",
+  "aujourdhui": "2025-03-14",
+  "contexte": "La SAS Ambulance Est, installée à Freyming-Merlebach (Moselle), assure le transport sanitaire de patients vers les hôpitaux de la région. Lorsqu'un PATIENT appelle, un TRANSPORT est créé (date, heure de départ prévue, lieux de départ et d'arrivée, besoins du patient, nombre d'ambulanciers nécessaires). Le service régulation lui attribue un VEHICULE (taxi conventionné, VSL, ambulance ou SMUR, voir TYPE_VEHICULE), puis le service exploitation affecte le ou les SALARIE qui l'effectuent (table EFFECTUER). Tant qu'un transport n'est pas parti, son heure de départ réelle est vide ; un transport prévu dans plusieurs jours peut ne pas encore avoir de véhicule. Les véhicules sont dotés d'EQUIPEMENT (table EQUIPER). Chaque salarié peut avoir un DIPLOME enregistré. Les heures sont notées 'hh:mm'.",
+  "source": "Inspiré du sujet DCG UE8 session 2025, dossier 1. Données entièrement fictives.",
+  "schemaGrid": {
+    "EQUIPEMENT": [
+      0,
+      0
+    ],
+    "EQUIPER": [
+      1,
+      0
+    ],
+    "VEHICULE": [
+      2,
+      0
+    ],
+    "PATIENT": [
+      0,
+      1
+    ],
+    "TRANSPORT": [
+      1,
+      1
+    ],
+    "TYPE_VEHICULE": [
+      2,
+      1
+    ],
+    "DIPLOME": [
+      0,
+      2
+    ],
+    "SALARIE": [
+      1,
+      2
+    ],
+    "EFFECTUER": [
+      2,
+      2
+    ]
+  },
+  "questions": [
+    {
+      "id": "q01",
+      "theme": "Une seule table",
+      "enonce": "Afficher la liste des types de véhicules utilisés par Ambulance Est (toutes les colonnes).",
+      "correction": [
+        "SELECT *",
+        "FROM TYPE_VEHICULE;"
+      ],
+      "indice": "L'étoile * permet d'afficher toutes les colonnes d'une table."
+    },
+    {
+      "id": "q02",
+      "theme": "Une seule table",
+      "enonce": "Les patients relevant du régime d'assurance maladie « Alsace-Lorraine » habitent dans le Bas-Rhin (67), le Haut-Rhin (68) ou la Moselle (57). Afficher le code, le nom et le prénom des patients habitant dans l'un de ces trois départements.",
+      "annale": "2025",
+      "correction": [
+        "SELECT CodePatient, NomPatient, PrenomPatient",
+        "FROM PATIENT",
+        "WHERE CPPatient LIKE '67%'",
+        "OR CPPatient LIKE '68%'",
+        "OR CPPatient LIKE '57%';"
+      ],
+      "variantes": [
+        [
+          "SELECT CodePatient, NomPatient, PrenomPatient",
+          "FROM PATIENT",
+          "WHERE CPPatient BETWEEN '57000' AND '57999'",
+          "OR CPPatient BETWEEN '67000' AND '68999';"
+        ]
+      ],
+      "indice": "Le département correspond aux deux premiers chiffres du code postal : CPPatient LIKE '57%' (le % remplace n'importe quelle suite de caractères ; sous Access on écrit '57*'). Attention : LIKE '%57%' retiendrait aussi Foug (54570)."
+    },
+    {
+      "id": "q03",
+      "theme": "Une seule table",
+      "enonce": "Afficher le nom, le prénom et le type des salariés dont aucun diplôme n'est enregistré, triés par ordre alphabétique des noms.",
+      "ordered": [
+        0
+      ],
+      "correction": [
+        "SELECT NomSal, PrenomSal, TypeSal",
+        "FROM SALARIE",
+        "WHERE NumDipl IS NULL",
+        "ORDER BY NomSal;"
+      ],
+      "indice": "Une valeur absente se teste avec IS NULL (et non = NULL)."
+    },
+    {
+      "id": "q04",
+      "theme": "Une seule table",
+      "enonce": "Seuls les ambulanciers et les auxiliaires ambulanciers peuvent conduire un véhicule. Afficher le numéro, le nom et le prénom de ces salariés, triés par nom puis par prénom.",
+      "ordered": [
+        1,
+        2
+      ],
+      "correction": [
+        "SELECT NumSal, NomSal, PrenomSal",
+        "FROM SALARIE",
+        "WHERE TypeSal IN ('Ambulancier', 'Auxiliaire ambulancier')",
+        "ORDER BY NomSal, PrenomSal;"
+      ],
+      "variantes": [
+        [
+          "SELECT NumSal, NomSal, PrenomSal",
+          "FROM SALARIE",
+          "WHERE TypeSal = 'Ambulancier' OR TypeSal = 'Auxiliaire ambulancier'",
+          "ORDER BY NomSal, PrenomSal;"
+        ]
+      ],
+      "indice": "IN ('valeur1', 'valeur2') évite d'écrire deux conditions reliées par OR. Pour trier sur deux colonnes : ORDER BY col1, col2."
+    },
+    {
+      "id": "q05",
+      "theme": "Calculs et agrégats",
+      "enonce": "Afficher le nombre de véhicules du parc, le prix d'acquisition total, le prix d'acquisition moyen et le prix d'acquisition le plus élevé.",
+      "correction": [
+        "SELECT COUNT(*), SUM(PrixAcquisition), AVG(PrixAcquisition), MAX(PrixAcquisition)",
+        "FROM VEHICULE;"
+      ],
+      "indice": "COUNT, SUM, AVG et MAX résument toute la table en une seule ligne. Un véhicule loué n'a pas de prix : AVG ignore les valeurs vides, COUNT(*) compte toutes les lignes."
+    },
+    {
+      "id": "q06",
+      "theme": "Calculs et agrégats",
+      "enonce": "Afficher, pour chaque type de salarié (TypeSal), le nombre de salariés.",
+      "correction": [
+        "SELECT TypeSal, COUNT(*)",
+        "FROM SALARIE",
+        "GROUP BY TypeSal;"
+      ],
+      "indice": "GROUP BY TypeSal forme un groupe par type ; COUNT(*) compte les lignes de chaque groupe."
+    },
+    {
+      "id": "q07",
+      "theme": "Dates",
+      "enonce": "Afficher le code, l'heure de départ prévue, le lieu de départ et le lieu d'arrivée des transports du 14/02/2025, triés par heure de départ prévue.",
+      "ordered": [
+        1
+      ],
+      "correction": [
+        "SELECT CodeTransport, HeureDepartPrevue, LieuDepart, LieuArrivee",
+        "FROM TRANSPORT",
+        "WHERE Date = '14/02/2025'",
+        "ORDER BY HeureDepartPrevue;"
+      ],
+      "indice": "Une date s'écrit entre apostrophes : Date = '14/02/2025'. Les heures 'hh:mm' se trient correctement par ordre alphabétique."
+    },
+    {
+      "id": "q08",
+      "theme": "Dates",
+      "enonce": "Afficher le code, la date, l'heure de départ prévue, le code du patient et l'immatriculation du véhicule des transports programmés à partir d'aujourd'hui (inclus), triés par date puis par heure de départ prévue.",
+      "ordered": [
+        1,
+        2
+      ],
+      "correction": [
+        "SELECT CodeTransport, Date, HeureDepartPrevue, CodePatient, Immatriculation",
+        "FROM TRANSPORT",
+        "WHERE Date >= NOW()",
+        "ORDER BY Date, HeureDepartPrevue;"
+      ],
+      "variantes": [
+        [
+          "SELECT CodeTransport, Date, HeureDepartPrevue, CodePatient, Immatriculation",
+          "FROM TRANSPORT",
+          "WHERE Date >= '14/03/2025'",
+          "ORDER BY Date, HeureDepartPrevue;"
+        ]
+      ],
+      "indice": "NOW() (ou CURDATE()) donne la date du jour, ici le 14/03/2025. Remarquez que les transports lointains n'ont pas encore de véhicule."
+    },
+    {
+      "id": "q09",
+      "theme": "Dates",
+      "enonce": "Afficher le code, la date, l'heure de départ prévue et l'heure de départ réelle des transports de février 2025 partis plus tard que prévu.",
+      "correction": [
+        "SELECT CodeTransport, Date, HeureDepartPrevue, HeureDepartReelle",
+        "FROM TRANSPORT",
+        "WHERE YEAR(Date) = 2025",
+        "AND MONTH(Date) = 2",
+        "AND HeureDepartReelle > HeureDepartPrevue;"
+      ],
+      "variantes": [
+        [
+          "SELECT CodeTransport, Date, HeureDepartPrevue, HeureDepartReelle",
+          "FROM TRANSPORT",
+          "WHERE Date BETWEEN '01/02/2025' AND '28/02/2025'",
+          "AND HeureDepartReelle > HeureDepartPrevue;"
+        ]
+      ],
+      "indice": "MONTH(Date) = 2 ne suffit pas : il faut aussi YEAR(Date) = 2025 (février 2024 existe aussi). Une condition peut comparer deux colonnes entre elles."
+    },
+    {
+      "id": "q10",
+      "theme": "Jointures",
+      "enonce": "Afin d'adapter son budget véhicules, Ambulance Est souhaite connaître le prix d'acquisition moyen des véhicules de type « Véhicule Sanitaire Léger ».",
+      "annale": "2025",
+      "correction": [
+        "SELECT AVG(PrixAcquisition)",
+        "FROM VEHICULE, TYPE_VEHICULE",
+        "WHERE VEHICULE.CodeType = TYPE_VEHICULE.CodeType",
+        "AND DesignType = 'Véhicule Sanitaire Léger';"
+      ],
+      "variantes": [
+        [
+          "SELECT AVG(PrixAcquisition)",
+          "FROM VEHICULE",
+          "INNER JOIN TYPE_VEHICULE ON VEHICULE.CodeType = TYPE_VEHICULE.CodeType",
+          "WHERE DesignType = 'Véhicule Sanitaire Léger';"
+        ]
+      ],
+      "indice": "La désignation du type est dans TYPE_VEHICULE, le prix dans VEHICULE : reliez-les par CodeType. AVG ignore le VSL loué, dont le prix n'est pas renseigné."
+    },
+    {
+      "id": "q11",
+      "theme": "Jointures",
+      "enonce": "Afficher le code et le nom des équipements du véhicule immatriculé BZ 225 AX.",
+      "correction": [
+        "SELECT EQUIPEMENT.CodeEquip, NomEquip",
+        "FROM EQUIPEMENT, EQUIPER",
+        "WHERE EQUIPEMENT.CodeEquip = EQUIPER.CodeEquip",
+        "AND Immatriculation = 'BZ 225 AX';"
+      ],
+      "variantes": [
+        [
+          "SELECT EQUIPEMENT.CodeEquip, NomEquip",
+          "FROM EQUIPEMENT",
+          "INNER JOIN EQUIPER ON EQUIPEMENT.CodeEquip = EQUIPER.CodeEquip",
+          "WHERE Immatriculation = 'BZ 225 AX';"
+        ]
+      ],
+      "indice": "EQUIPER relie les véhicules et les équipements. CodeEquip existe dans les deux tables : préfixez-le (EQUIPEMENT.CodeEquip)."
+    },
+    {
+      "id": "q12",
+      "theme": "Jointures",
+      "enonce": "Pour les transports du 14/02/2025, afficher l'heure de départ prévue, le nom et le prénom du patient, l'immatriculation du véhicule et la désignation de son type, triés par heure de départ prévue.",
+      "ordered": [
+        0
+      ],
+      "correction": [
+        "SELECT HeureDepartPrevue, NomPatient, PrenomPatient, VEHICULE.Immatriculation, DesignType",
+        "FROM TRANSPORT, PATIENT, VEHICULE, TYPE_VEHICULE",
+        "WHERE TRANSPORT.CodePatient = PATIENT.CodePatient",
+        "AND TRANSPORT.Immatriculation = VEHICULE.Immatriculation",
+        "AND VEHICULE.CodeType = TYPE_VEHICULE.CodeType",
+        "AND Date = '14/02/2025'",
+        "ORDER BY HeureDepartPrevue;"
+      ],
+      "variantes": [
+        [
+          "SELECT HeureDepartPrevue, NomPatient, PrenomPatient, VEHICULE.Immatriculation, DesignType",
+          "FROM TRANSPORT",
+          "INNER JOIN PATIENT ON TRANSPORT.CodePatient = PATIENT.CodePatient",
+          "INNER JOIN VEHICULE ON TRANSPORT.Immatriculation = VEHICULE.Immatriculation",
+          "INNER JOIN TYPE_VEHICULE ON VEHICULE.CodeType = TYPE_VEHICULE.CodeType",
+          "WHERE Date = '14/02/2025'",
+          "ORDER BY HeureDepartPrevue;"
+        ]
+      ],
+      "indice": "Quatre tables, donc trois conditions de jointure : TRANSPORT–PATIENT, TRANSPORT–VEHICULE et VEHICULE–TYPE_VEHICULE."
+    },
+    {
+      "id": "q13",
+      "theme": "Jointures",
+      "enonce": "Afficher l'immatriculation, la marque et le modèle des véhicules équipés d'au moins un respirateur portable (chaque véhicule ne doit apparaître qu'une fois).",
+      "correction": [
+        "SELECT DISTINCT VEHICULE.Immatriculation, MarqueVehic, ModeleVehic",
+        "FROM VEHICULE, EQUIPER, EQUIPEMENT",
+        "WHERE VEHICULE.Immatriculation = EQUIPER.Immatriculation",
+        "AND EQUIPER.CodeEquip = EQUIPEMENT.CodeEquip",
+        "AND NomEquip = 'Respirateur portable';"
+      ],
+      "variantes": [
+        [
+          "SELECT DISTINCT VEHICULE.Immatriculation, MarqueVehic, ModeleVehic",
+          "FROM VEHICULE",
+          "INNER JOIN EQUIPER ON VEHICULE.Immatriculation = EQUIPER.Immatriculation",
+          "INNER JOIN EQUIPEMENT ON EQUIPER.CodeEquip = EQUIPEMENT.CodeEquip",
+          "WHERE NomEquip = 'Respirateur portable';"
+        ]
+      ],
+      "indice": "Il existe deux modèles de respirateur portable (RP123 et RP200) ; un véhicule qui possède les deux apparaîtrait deux fois sans DISTINCT."
+    },
+    {
+      "id": "q14",
+      "theme": "Jointures",
+      "enonce": "Afficher le nom et le prénom des salariés qui ont déjà transporté le patient André BERNARD (sans doublon).",
+      "correction": [
+        "SELECT DISTINCT NomSal, PrenomSal",
+        "FROM SALARIE, EFFECTUER, TRANSPORT, PATIENT",
+        "WHERE SALARIE.NumSal = EFFECTUER.NumSal",
+        "AND EFFECTUER.CodeTransport = TRANSPORT.CodeTransport",
+        "AND TRANSPORT.CodePatient = PATIENT.CodePatient",
+        "AND NomPatient = 'BERNARD'",
+        "AND PrenomPatient = 'André';"
+      ],
+      "variantes": [
+        [
+          "SELECT DISTINCT NomSal, PrenomSal",
+          "FROM SALARIE",
+          "INNER JOIN EFFECTUER ON SALARIE.NumSal = EFFECTUER.NumSal",
+          "INNER JOIN TRANSPORT ON EFFECTUER.CodeTransport = TRANSPORT.CodeTransport",
+          "INNER JOIN PATIENT ON TRANSPORT.CodePatient = PATIENT.CodePatient",
+          "WHERE NomPatient = 'BERNARD'",
+          "AND PrenomPatient = 'André';"
+        ]
+      ],
+      "indice": "Du patient au salarié : PATIENT → TRANSPORT → EFFECTUER → SALARIE. Un même salarié a pu transporter ce patient plusieurs fois : pensez à DISTINCT."
+    },
+    {
+      "id": "q15",
+      "theme": "Jointures et regroupements",
+      "enonce": "Afficher, pour chaque type de véhicule (désignation), le nombre de transports réalisés en 2024.",
+      "correction": [
+        "SELECT DesignType, COUNT(*)",
+        "FROM TRANSPORT, VEHICULE, TYPE_VEHICULE",
+        "WHERE TRANSPORT.Immatriculation = VEHICULE.Immatriculation",
+        "AND VEHICULE.CodeType = TYPE_VEHICULE.CodeType",
+        "AND YEAR(Date) = 2024",
+        "GROUP BY DesignType;"
+      ],
+      "variantes": [
+        [
+          "SELECT DesignType, COUNT(*)",
+          "FROM TRANSPORT",
+          "INNER JOIN VEHICULE ON TRANSPORT.Immatriculation = VEHICULE.Immatriculation",
+          "INNER JOIN TYPE_VEHICULE ON VEHICULE.CodeType = TYPE_VEHICULE.CodeType",
+          "WHERE Date BETWEEN '01/01/2024' AND '31/12/2024'",
+          "GROUP BY DesignType;"
+        ]
+      ],
+      "indice": "Le transport connaît le véhicule, le véhicule connaît son type. La condition sur l'année se place dans le WHERE, avant le GROUP BY."
+    },
+    {
+      "id": "q16",
+      "theme": "Jointures et regroupements",
+      "enonce": "Monsieur ATTOUMANE souhaite connaître les salariés les plus sollicités. Afficher le numéro, le nom et le nombre de transports effectués des salariés ayant effectué plus de 50 transports en 2024, classés par nombre de transports décroissant.",
+      "annale": "2025",
+      "ordered": [
+        2
+      ],
+      "correction": [
+        "SELECT SALARIE.NumSal, NomSal, COUNT(*) AS NbTransports",
+        "FROM SALARIE, EFFECTUER, TRANSPORT",
+        "WHERE SALARIE.NumSal = EFFECTUER.NumSal",
+        "AND EFFECTUER.CodeTransport = TRANSPORT.CodeTransport",
+        "AND YEAR(Date) = 2024",
+        "GROUP BY SALARIE.NumSal, NomSal",
+        "HAVING COUNT(*) > 50",
+        "ORDER BY COUNT(*) DESC;"
+      ],
+      "variantes": [
+        [
+          "SELECT S.NumSal, NomSal, COUNT(*) AS NbTransports",
+          "FROM SALARIE S",
+          "INNER JOIN EFFECTUER E ON S.NumSal = E.NumSal",
+          "INNER JOIN TRANSPORT T ON E.CodeTransport = T.CodeTransport",
+          "WHERE YEAR(T.Date) = 2024",
+          "GROUP BY S.NumSal, NomSal",
+          "HAVING COUNT(*) > 50",
+          "ORDER BY COUNT(*) DESC;"
+        ]
+      ],
+      "indice": "La condition sur l'année va dans le WHERE ; la condition sur le nombre (un agrégat) va dans le HAVING. Regroupez par numéro de salarié : deux salariés s'appellent MULLER. « Plus de 50 » exclut exactement 50."
+    },
+    {
+      "id": "q17",
+      "theme": "Jointures et regroupements",
+      "enonce": "Afficher, pour chaque mois de l'année 2024, le numéro du mois et le nombre de transports, triés par mois.",
+      "ordered": [
+        0
+      ],
+      "correction": [
+        "SELECT MONTH(Date), COUNT(*)",
+        "FROM TRANSPORT",
+        "WHERE YEAR(Date) = 2024",
+        "GROUP BY MONTH(Date)",
+        "ORDER BY MONTH(Date);"
+      ],
+      "indice": "On peut regrouper sur une expression : GROUP BY MONTH(Date)."
+    },
+    {
+      "id": "q18",
+      "theme": "Jointures et regroupements",
+      "enonce": "Certains patients (dialyse, chimiothérapie) sont transportés très régulièrement. Afficher le code, le nom, le prénom et le nombre de transports des patients ayant bénéficié d'au moins 20 transports en 2024.",
+      "correction": [
+        "SELECT PATIENT.CodePatient, NomPatient, PrenomPatient, COUNT(*)",
+        "FROM PATIENT, TRANSPORT",
+        "WHERE PATIENT.CodePatient = TRANSPORT.CodePatient",
+        "AND YEAR(Date) = 2024",
+        "GROUP BY PATIENT.CodePatient, NomPatient, PrenomPatient",
+        "HAVING COUNT(*) >= 20;"
+      ],
+      "variantes": [
+        [
+          "SELECT PATIENT.CodePatient, NomPatient, PrenomPatient, COUNT(*)",
+          "FROM PATIENT",
+          "INNER JOIN TRANSPORT ON PATIENT.CodePatient = TRANSPORT.CodePatient",
+          "WHERE YEAR(Date) = 2024",
+          "GROUP BY PATIENT.CodePatient, NomPatient, PrenomPatient",
+          "HAVING COUNT(*) >= 20;"
+        ]
+      ],
+      "indice": "« Au moins 20 » s'écrit >= 20, dans le HAVING puisqu'il porte sur COUNT(*)."
+    },
+    {
+      "id": "q19",
+      "theme": "Sous-requêtes",
+      "enonce": "Afin de prospecter, Ambulance Est veut la liste des patients enregistrés qui n'ont jamais bénéficié d'un transport : afficher leur nom et leur prénom.",
+      "annale": "2025",
+      "correction": [
+        "SELECT NomPatient, PrenomPatient",
+        "FROM PATIENT",
+        "WHERE CodePatient NOT IN (SELECT CodePatient",
+        "                          FROM TRANSPORT);"
+      ],
+      "variantes": [
+        [
+          "SELECT NomPatient, PrenomPatient",
+          "FROM PATIENT P",
+          "WHERE NOT EXISTS (SELECT *",
+          "                  FROM TRANSPORT T",
+          "                  WHERE T.CodePatient = P.CodePatient);"
+        ],
+        [
+          "SELECT NomPatient, PrenomPatient",
+          "FROM PATIENT P",
+          "LEFT JOIN TRANSPORT T ON P.CodePatient = T.CodePatient",
+          "WHERE T.CodePatient IS NULL;"
+        ]
+      ],
+      "indice": "La sous-requête donne les codes des patients déjà transportés ; on garde ceux qui n'y figurent pas (NOT IN). Une jointure ne peut pas trouver ce qui n'existe pas."
+    },
+    {
+      "id": "q20",
+      "theme": "Sous-requêtes",
+      "enonce": "Afficher l'immatriculation, la marque, le modèle et le prix d'acquisition des véhicules achetés plus cher que le prix d'acquisition moyen du parc, triés par prix décroissant.",
+      "ordered": [
+        3
+      ],
+      "correction": [
+        "SELECT Immatriculation, MarqueVehic, ModeleVehic, PrixAcquisition",
+        "FROM VEHICULE",
+        "WHERE PrixAcquisition > (SELECT AVG(PrixAcquisition)",
+        "                         FROM VEHICULE)",
+        "ORDER BY PrixAcquisition DESC;"
+      ],
+      "indice": "Un agrégat ne peut pas être écrit directement dans le WHERE : calculez la moyenne dans une sous-requête entre parenthèses."
+    },
+    {
+      "id": "q21",
+      "theme": "Sous-requêtes",
+      "enonce": "Afficher l'immatriculation, la marque et le modèle des véhicules qui n'ont encore jamais été attribués à un transport.",
+      "correction": [
+        "SELECT Immatriculation, MarqueVehic, ModeleVehic",
+        "FROM VEHICULE",
+        "WHERE Immatriculation NOT IN (SELECT Immatriculation",
+        "                              FROM TRANSPORT",
+        "                              WHERE Immatriculation IS NOT NULL);"
+      ],
+      "variantes": [
+        [
+          "SELECT Immatriculation, MarqueVehic, ModeleVehic",
+          "FROM VEHICULE V",
+          "WHERE NOT EXISTS (SELECT *",
+          "                  FROM TRANSPORT T",
+          "                  WHERE T.Immatriculation = V.Immatriculation);"
+        ]
+      ],
+      "indice": "Piège : certains transports futurs n'ont pas encore de véhicule (Immatriculation vide). Si la sous-requête renvoie une valeur NULL, NOT IN ne renvoie aucune ligne ! Excluez les NULL dans la sous-requête, ou utilisez NOT EXISTS."
+    },
+    {
+      "id": "q22",
+      "theme": "Mises à jour",
+      "type": "write",
+      "enonce": "Le respirateur portable RP123 du véhicule immatriculé BZ 225 AX est arrivé en fin de vie : le supprimer des équipements de ce véhicule.",
+      "annale": "2025",
+      "correction": [
+        "DELETE FROM EQUIPER",
+        "WHERE Immatriculation = 'BZ 225 AX'",
+        "AND CodeEquip = 'RP123';"
+      ],
+      "verif": "SELECT * FROM EQUIPER ORDER BY Immatriculation, CodeEquip",
+      "indice": "C'est le lien entre le véhicule et l'équipement (table EQUIPER) qu'il faut supprimer, pas l'équipement lui-même : RP123 équipe encore d'autres ambulances. Aucune ligne d'une autre table ne fait référence à EQUIPER, la suppression ne pose donc pas de problème d'intégrité référentielle."
+    },
+    {
+      "id": "q23",
+      "theme": "Mises à jour",
+      "type": "write",
+      "enonce": "Ambulance Est abandonne complètement le modèle de respirateur RP123 : le retirer de tous les véhicules, puis le supprimer de la liste des équipements. Écrire les requêtes nécessaires, dans le bon ordre.",
+      "correction": [
+        "DELETE FROM EQUIPER",
+        "WHERE CodeEquip = 'RP123';",
+        "DELETE FROM EQUIPEMENT",
+        "WHERE CodeEquip = 'RP123';"
+      ],
+      "verif": "SELECT * FROM EQUIPEMENT ORDER BY CodeEquip",
+      "indice": "Supprimer d'abord l'équipement serait refusé (intégrité référentielle) : des lignes d'EQUIPER y font encore référence. Supprimez d'abord les lignes « enfants » d'EQUIPER, puis la ligne « parent » d'EQUIPEMENT. Écrivez les deux requêtes à la suite, séparées par un point-virgule."
+    },
+    {
+      "id": "q24",
+      "theme": "Mises à jour",
+      "type": "write",
+      "enonce": "Le transport n° 24568 de ce matin vient de partir à 07:34 : enregistrer son heure de départ réelle.",
+      "correction": [
+        "UPDATE TRANSPORT",
+        "SET HeureDepartReelle = '07:34'",
+        "WHERE CodeTransport = 24568;"
+      ],
+      "verif": "SELECT * FROM TRANSPORT ORDER BY CodeTransport",
+      "indice": "UPDATE … SET … WHERE : sans WHERE, tous les transports seraient modifiés."
+    },
+    {
+      "id": "q25",
+      "theme": "Mises à jour",
+      "type": "write",
+      "enonce": "Une nouvelle patiente appelle le standard : Odile SCHAEFFER, 12 rue des Mineurs, 57800 Freyming-Merlebach. L'enregistrer avec le code P1085.",
+      "correction": [
+        "INSERT INTO PATIENT",
+        "VALUES ('P1085', 'SCHAEFFER', 'Odile', '12 rue des Mineurs', '57800', 'Freyming-Merlebach');"
+      ],
+      "variantes": [
+        [
+          "INSERT INTO PATIENT (CodePatient, NomPatient, PrenomPatient, AdrPatient, CPPatient, VillePatient)",
+          "VALUES ('P1085', 'SCHAEFFER', 'Odile', '12 rue des Mineurs', '57800', 'Freyming-Merlebach');"
+        ]
+      ],
+      "verif": "SELECT * FROM PATIENT ORDER BY CodePatient",
+      "indice": "INSERT INTO table VALUES (…) dans l'ordre des colonnes de la table. Le code postal est un texte : entre apostrophes."
+    },
+    {
+      "id": "s01",
+      "theme": "Évolution du schéma",
+      "type": "schema",
+      "annale": "2025",
+      "enonce": "La table SALARIE regroupe les 200 employés, mais seuls les titulaires d'un diplôme d'État d'ambulancier (DEA) ou d'auxiliaire ambulancier (DAA) peuvent assurer le transport des patients. Le responsable informatique veut séparer les salariés exerçant une activité sanitaire (ambulanciers, auxiliaires ambulanciers…) des salariés des services administratifs, car les informations à conserver ne sont pas les mêmes : un salarié sanitaire doit justifier d'un diplôme (numéro, nom, grade) et de la date de sa dernière visite médicale annuelle ; pour un salarié administratif, on enregistre le nom de son service d'affectation (comptabilité, ressources humaines, régulation…) et son numéro de carte d'accès à la restauration. Les informations communes (nom, prénom, adresse, téléphone…) restent dans SALARIE. Faites évoluer le schéma ci-dessous en conséquence.",
+      "depart": [
+        "SALARIE",
+        "DIPLOME",
+        "EFFECTUER",
+        "TRANSPORT"
+      ],
+      "solution": {
+        "tables": [
+          {
+            "nom": "SALARIE",
+            "interdits": [
+              "TypeSal|TypeSalarie",
+              "NumDipl|NumDiplome|IdDipl|IdDiplome|CodeDipl|CodeDiplome"
+            ]
+          },
+          {
+            "nom": "SALARIE_SANITAIRE",
+            "alias": [
+              "SANITAIRE",
+              "SALARIESANITAIRE",
+              "SALARIE_SANIT",
+              "SAL_SANITAIRE",
+              "EMPLOYE_SANITAIRE",
+              "PERSONNEL_SANITAIRE",
+              "SALARIES_SANITAIRES",
+              "AMBULANCIER"
+            ],
+            "role": "les salariés sanitaires (une catégorie de salariés)",
+            "pk": [
+              "NumSalSanit|NumSal|NumSalSanitaire|NumSalarieSanitaire|NumSanit|NumSanitaire|NumSalS"
+            ],
+            "fk": {
+              "NumSalSanit|NumSal|NumSalSanitaire|NumSalarieSanitaire|NumSanit|NumSanitaire|NumSalS": "SALARIE",
+              "NumDipl|NumDiplome|IdDipl|IdDiplome|CodeDipl|CodeDiplome": "DIPLOME"
+            },
+            "attributs": [
+              "DateVisiteMedicale|DateVisiteMed|DateVisite|DateDerniereVisite|DateDernVisite|DateDerniereVisiteMedicale|DateDernVisiteMed|DateVM"
+            ]
+          },
+          {
+            "nom": "SALARIE_ADMINISTRATIF",
+            "alias": [
+              "ADMINISTRATIF",
+              "SALARIEADMINISTRATIF",
+              "SALARIE_ADMIN",
+              "SAL_ADMINISTRATIF",
+              "SAL_ADMIN",
+              "EMPLOYE_ADMINISTRATIF",
+              "PERSONNEL_ADMINISTRATIF",
+              "SALARIES_ADMINISTRATIFS"
+            ],
+            "role": "les salariés administratifs (une catégorie de salariés)",
+            "pk": [
+              "NumSalAdm|NumSal|NumSalAdmin|NumSalAdministratif|NumSalarieAdministratif|NumAdm|NumAdmin|NumSalA"
+            ],
+            "fk": {
+              "NumSalAdm|NumSal|NumSalAdmin|NumSalAdministratif|NumSalarieAdministratif|NumAdm|NumAdmin|NumSalA": "SALARIE"
+            },
+            "attributs": [
+              "NomService|LibelleService|Service|NomServiceAdm|ServiceAffectation",
+              "IdCarteRestau|NumCarteRestau|NumCarteRestauration|IdCarteRestauration|NumCarteAcces|NumCarte|IdCarte|CarteRestau|NumeroCarte|NumCarteCantine"
+            ]
+          },
+          {
+            "nom": "EFFECTUER",
+            "pk": [
+              "CodeTransport",
+              "NumSalSanit|NumSal|NumSalSanitaire|NumSalarieSanitaire|NumSanit|NumSanitaire|NumSalS"
+            ],
+            "fk": {
+              "NumSalSanit|NumSal|NumSalSanitaire|NumSalarieSanitaire|NumSanit|NumSanitaire|NumSalS": "SALARIE_SANITAIRE"
+            }
+          }
+        ],
+        "tablesOptionnelles": [
+          "SERVICE",
+          "SERVICES",
+          "SERVICE_ADMINISTRATIF"
+        ]
+      },
+      "variantes": [
+        {
+          "tables": [
+            {
+              "nom": "SALARIE",
+              "interdits": [
+                "TypeSal|TypeSalarie",
+                "NumDipl|NumDiplome|IdDipl|IdDiplome|CodeDipl|CodeDiplome"
+              ]
+            },
+            {
+              "nom": "SALARIE_SANITAIRE",
+              "alias": [
+                "SANITAIRE",
+                "SALARIESANITAIRE",
+                "SALARIE_SANIT",
+                "SAL_SANITAIRE",
+                "EMPLOYE_SANITAIRE",
+                "PERSONNEL_SANITAIRE",
+                "SALARIES_SANITAIRES",
+                "AMBULANCIER"
+              ],
+              "role": "les salariés sanitaires (une catégorie de salariés)",
+              "pk": [
+                "NumSalSanit|NumSal|NumSalSanitaire|NumSalarieSanitaire|NumSanit|NumSanitaire|NumSalS"
+              ],
+              "fk": {
+                "NumSalSanit|NumSal|NumSalSanitaire|NumSalarieSanitaire|NumSanit|NumSanitaire|NumSalS": "SALARIE",
+                "NumDipl|NumDiplome|IdDipl|IdDiplome|CodeDipl|CodeDiplome": "DIPLOME"
+              },
+              "attributs": [
+                "DateVisiteMedicale|DateVisiteMed|DateVisite|DateDerniereVisite|DateDernVisite|DateDerniereVisiteMedicale|DateDernVisiteMed|DateVM"
+              ]
+            },
+            {
+              "nom": "SALARIE_ADMINISTRATIF",
+              "alias": [
+                "ADMINISTRATIF",
+                "SALARIEADMINISTRATIF",
+                "SALARIE_ADMIN",
+                "SAL_ADMINISTRATIF",
+                "SAL_ADMIN",
+                "EMPLOYE_ADMINISTRATIF",
+                "PERSONNEL_ADMINISTRATIF",
+                "SALARIES_ADMINISTRATIFS"
+              ],
+              "role": "les salariés administratifs (une catégorie de salariés)",
+              "pk": [
+                "NumSalAdm|NumSal|NumSalAdmin|NumSalAdministratif|NumSalarieAdministratif|NumAdm|NumAdmin|NumSalA"
+              ],
+              "fk": {
+                "NumSalAdm|NumSal|NumSalAdmin|NumSalAdministratif|NumSalarieAdministratif|NumAdm|NumAdmin|NumSalA": "SALARIE",
+                "CodeService|IdService|NumService|NomService": "SERVICE"
+              },
+              "attributs": [
+                "IdCarteRestau|NumCarteRestau|NumCarteRestauration|IdCarteRestauration|NumCarteAcces|NumCarte|IdCarte|CarteRestau|NumeroCarte|NumCarteCantine"
+              ]
+            },
+            {
+              "nom": "EFFECTUER",
+              "pk": [
+                "CodeTransport",
+                "NumSalSanit|NumSal|NumSalSanitaire|NumSalarieSanitaire|NumSanit|NumSanitaire|NumSalS"
+              ],
+              "fk": {
+                "NumSalSanit|NumSal|NumSalSanitaire|NumSalarieSanitaire|NumSanit|NumSanitaire|NumSalS": "SALARIE_SANITAIRE"
+              }
+            },
+            {
+              "nom": "SERVICE",
+              "alias": [
+                "SERVICES",
+                "SERVICE_ADMINISTRATIF",
+                "SERVICE_ADMIN"
+              ],
+              "role": "décrire les services administratifs",
+              "pk": [
+                "CodeService|IdService|NumService|NomService"
+              ],
+              "optionnels": [
+                "NomService|LibelleService|Service|NomServiceAdm|ServiceAffectation"
+              ]
+            }
+          ],
+          "tablesOptionnelles": [
+            "SERVICE",
+            "SERVICES",
+            "SERVICE_ADMINISTRATIF"
+          ]
+        },
+        {
+          "tables": [
+            {
+              "nom": "SALARIE",
+              "interdits": [
+                "TypeSal|TypeSalarie",
+                "NumDipl|NumDiplome|IdDipl|IdDiplome|CodeDipl|CodeDiplome"
+              ]
+            },
+            {
+              "nom": "SALARIE_SANITAIRE",
+              "alias": [
+                "SANITAIRE",
+                "SALARIESANITAIRE",
+                "SALARIE_SANIT",
+                "SAL_SANITAIRE",
+                "EMPLOYE_SANITAIRE",
+                "PERSONNEL_SANITAIRE",
+                "SALARIES_SANITAIRES",
+                "AMBULANCIER"
+              ],
+              "role": "les salariés sanitaires (une catégorie de salariés)",
+              "pk": [
+                "NumSalSanit|NumSal|NumSalSanitaire|NumSalarieSanitaire|NumSanit|NumSanitaire|NumSalS"
+              ],
+              "fk": {
+                "NumSalSanit|NumSal|NumSalSanitaire|NumSalarieSanitaire|NumSanit|NumSanitaire|NumSalS": "SALARIE"
+              },
+              "attributs": [
+                "DateVisiteMedicale|DateVisiteMed|DateVisite|DateDerniereVisite|DateDernVisite|DateDerniereVisiteMedicale|DateDernVisiteMed|DateVM"
+              ]
+            },
+            {
+              "nom": "SALARIE_ADMINISTRATIF",
+              "alias": [
+                "ADMINISTRATIF",
+                "SALARIEADMINISTRATIF",
+                "SALARIE_ADMIN",
+                "SAL_ADMINISTRATIF",
+                "SAL_ADMIN",
+                "EMPLOYE_ADMINISTRATIF",
+                "PERSONNEL_ADMINISTRATIF",
+                "SALARIES_ADMINISTRATIFS"
+              ],
+              "role": "les salariés administratifs (une catégorie de salariés)",
+              "pk": [
+                "NumSalAdm|NumSal|NumSalAdmin|NumSalAdministratif|NumSalarieAdministratif|NumAdm|NumAdmin|NumSalA"
+              ],
+              "fk": {
+                "NumSalAdm|NumSal|NumSalAdmin|NumSalAdministratif|NumSalarieAdministratif|NumAdm|NumAdmin|NumSalA": "SALARIE"
+              },
+              "attributs": [
+                "NomService|LibelleService|Service|NomServiceAdm|ServiceAffectation",
+                "IdCarteRestau|NumCarteRestau|NumCarteRestauration|IdCarteRestauration|NumCarteAcces|NumCarte|IdCarte|CarteRestau|NumeroCarte|NumCarteCantine"
+              ]
+            },
+            {
+              "nom": "EFFECTUER",
+              "pk": [
+                "CodeTransport",
+                "NumSalSanit|NumSal|NumSalSanitaire|NumSalarieSanitaire|NumSanit|NumSanitaire|NumSalS"
+              ],
+              "fk": {
+                "NumSalSanit|NumSal|NumSalSanitaire|NumSalarieSanitaire|NumSanit|NumSanitaire|NumSalS": "SALARIE_SANITAIRE"
+              }
+            },
+            {
+              "nom": "POSSEDER",
+              "alias": [
+                "DETENIR",
+                "OBTENIR",
+                "AVOIR",
+                "DIPLOMER",
+                "ETRE_DIPLOME",
+                "POSSEDE",
+                "DIPLOME_SALARIE",
+                "JUSTIFIER"
+              ],
+              "role": "relier les salariés sanitaires et leurs diplômes",
+              "pk": [
+                "NumSalSanit|NumSal|NumSalSanitaire|NumSalarieSanitaire|NumSanit|NumSanitaire|NumSalS",
+                "NumDipl|NumDiplome|IdDipl|IdDiplome|CodeDipl|CodeDiplome"
+              ],
+              "fk": {
+                "NumSalSanit|NumSal|NumSalSanitaire|NumSalarieSanitaire|NumSanit|NumSanitaire|NumSalS": "SALARIE_SANITAIRE",
+                "NumDipl|NumDiplome|IdDipl|IdDiplome|CodeDipl|CodeDiplome": "DIPLOME"
+              },
+              "attributs": []
+            }
+          ],
+          "tablesOptionnelles": [
+            "SERVICE",
+            "SERVICES",
+            "SERVICE_ADMINISTRATIF"
+          ]
+        },
+        {
+          "tables": [
+            {
+              "nom": "SALARIE",
+              "interdits": [
+                "TypeSal|TypeSalarie",
+                "NumDipl|NumDiplome|IdDipl|IdDiplome|CodeDipl|CodeDiplome"
+              ]
+            },
+            {
+              "nom": "SALARIE_SANITAIRE",
+              "alias": [
+                "SANITAIRE",
+                "SALARIESANITAIRE",
+                "SALARIE_SANIT",
+                "SAL_SANITAIRE",
+                "EMPLOYE_SANITAIRE",
+                "PERSONNEL_SANITAIRE",
+                "SALARIES_SANITAIRES",
+                "AMBULANCIER"
+              ],
+              "role": "les salariés sanitaires (une catégorie de salariés)",
+              "pk": [
+                "NumSalSanit|NumSal|NumSalSanitaire|NumSalarieSanitaire|NumSanit|NumSanitaire|NumSalS"
+              ],
+              "fk": {
+                "NumSalSanit|NumSal|NumSalSanitaire|NumSalarieSanitaire|NumSanit|NumSanitaire|NumSalS": "SALARIE"
+              },
+              "attributs": [
+                "DateVisiteMedicale|DateVisiteMed|DateVisite|DateDerniereVisite|DateDernVisite|DateDerniereVisiteMedicale|DateDernVisiteMed|DateVM"
+              ]
+            },
+            {
+              "nom": "SALARIE_ADMINISTRATIF",
+              "alias": [
+                "ADMINISTRATIF",
+                "SALARIEADMINISTRATIF",
+                "SALARIE_ADMIN",
+                "SAL_ADMINISTRATIF",
+                "SAL_ADMIN",
+                "EMPLOYE_ADMINISTRATIF",
+                "PERSONNEL_ADMINISTRATIF",
+                "SALARIES_ADMINISTRATIFS"
+              ],
+              "role": "les salariés administratifs (une catégorie de salariés)",
+              "pk": [
+                "NumSalAdm|NumSal|NumSalAdmin|NumSalAdministratif|NumSalarieAdministratif|NumAdm|NumAdmin|NumSalA"
+              ],
+              "fk": {
+                "NumSalAdm|NumSal|NumSalAdmin|NumSalAdministratif|NumSalarieAdministratif|NumAdm|NumAdmin|NumSalA": "SALARIE",
+                "CodeService|IdService|NumService|NomService": "SERVICE"
+              },
+              "attributs": [
+                "IdCarteRestau|NumCarteRestau|NumCarteRestauration|IdCarteRestauration|NumCarteAcces|NumCarte|IdCarte|CarteRestau|NumeroCarte|NumCarteCantine"
+              ]
+            },
+            {
+              "nom": "EFFECTUER",
+              "pk": [
+                "CodeTransport",
+                "NumSalSanit|NumSal|NumSalSanitaire|NumSalarieSanitaire|NumSanit|NumSanitaire|NumSalS"
+              ],
+              "fk": {
+                "NumSalSanit|NumSal|NumSalSanitaire|NumSalarieSanitaire|NumSanit|NumSanitaire|NumSalS": "SALARIE_SANITAIRE"
+              }
+            },
+            {
+              "nom": "POSSEDER",
+              "alias": [
+                "DETENIR",
+                "OBTENIR",
+                "AVOIR",
+                "DIPLOMER",
+                "ETRE_DIPLOME",
+                "POSSEDE",
+                "DIPLOME_SALARIE",
+                "JUSTIFIER"
+              ],
+              "role": "relier les salariés sanitaires et leurs diplômes",
+              "pk": [
+                "NumSalSanit|NumSal|NumSalSanitaire|NumSalarieSanitaire|NumSanit|NumSanitaire|NumSalS",
+                "NumDipl|NumDiplome|IdDipl|IdDiplome|CodeDipl|CodeDiplome"
+              ],
+              "fk": {
+                "NumSalSanit|NumSal|NumSalSanitaire|NumSalarieSanitaire|NumSanit|NumSanitaire|NumSalS": "SALARIE_SANITAIRE",
+                "NumDipl|NumDiplome|IdDipl|IdDiplome|CodeDipl|CodeDiplome": "DIPLOME"
+              },
+              "attributs": []
+            },
+            {
+              "nom": "SERVICE",
+              "alias": [
+                "SERVICES",
+                "SERVICE_ADMINISTRATIF",
+                "SERVICE_ADMIN"
+              ],
+              "role": "décrire les services administratifs",
+              "pk": [
+                "CodeService|IdService|NumService|NomService"
+              ],
+              "optionnels": [
+                "NomService|LibelleService|Service|NomServiceAdm|ServiceAffectation"
+              ]
+            }
+          ],
+          "tablesOptionnelles": [
+            "SERVICE",
+            "SERVICES",
+            "SERVICE_ADMINISTRATIF"
+          ]
+        },
+        {
+          "tables": [
+            {
+              "nom": "SALARIE",
+              "interdits": [
+                "TypeSal|TypeSalarie",
+                "NumDipl|NumDiplome|IdDipl|IdDiplome|CodeDipl|CodeDiplome"
+              ]
+            },
+            {
+              "nom": "SALARIE_SANITAIRE",
+              "alias": [
+                "SANITAIRE",
+                "SALARIESANITAIRE",
+                "SALARIE_SANIT",
+                "SAL_SANITAIRE",
+                "EMPLOYE_SANITAIRE",
+                "PERSONNEL_SANITAIRE",
+                "SALARIES_SANITAIRES",
+                "AMBULANCIER"
+              ],
+              "role": "les salariés sanitaires (une catégorie de salariés)",
+              "pk": [
+                "NumSalSanit|NumSal|NumSalSanitaire|NumSalarieSanitaire|NumSanit|NumSanitaire|NumSalS"
+              ],
+              "fk": {
+                "NumSalSanit|NumSal|NumSalSanitaire|NumSalarieSanitaire|NumSanit|NumSanitaire|NumSalS": "SALARIE",
+                "NumDipl|NumDiplome|IdDipl|IdDiplome|CodeDipl|CodeDiplome": "DIPLOME"
+              },
+              "attributs": [
+                "DateVisiteMedicale|DateVisiteMed|DateVisite|DateDerniereVisite|DateDernVisite|DateDerniereVisiteMedicale|DateDernVisiteMed|DateVM"
+              ]
+            },
+            {
+              "nom": "SALARIE_ADMINISTRATIF",
+              "alias": [
+                "ADMINISTRATIF",
+                "SALARIEADMINISTRATIF",
+                "SALARIE_ADMIN",
+                "SAL_ADMINISTRATIF",
+                "SAL_ADMIN",
+                "EMPLOYE_ADMINISTRATIF",
+                "PERSONNEL_ADMINISTRATIF",
+                "SALARIES_ADMINISTRATIFS"
+              ],
+              "role": "les salariés administratifs (une catégorie de salariés)",
+              "pk": [
+                "NumSalAdm|NumSal|NumSalAdmin|NumSalAdministratif|NumSalarieAdministratif|NumAdm|NumAdmin|NumSalA"
+              ],
+              "fk": {
+                "NumSalAdm|NumSal|NumSalAdmin|NumSalAdministratif|NumSalarieAdministratif|NumAdm|NumAdmin|NumSalA": "SALARIE"
+              },
+              "attributs": [
+                "NomService|LibelleService|Service|NomServiceAdm|ServiceAffectation",
+                "IdCarteRestau|NumCarteRestau|NumCarteRestauration|IdCarteRestauration|NumCarteAcces|NumCarte|IdCarte|CarteRestau|NumeroCarte|NumCarteCantine"
+              ]
+            },
+            {
+              "nom": "EFFECTUER",
+              "pk": [
+                "CodeTransport",
+                "NumSalSanit|NumSal|NumSalSanitaire|NumSalarieSanitaire|NumSanit|NumSanitaire|NumSalS"
+              ],
+              "fk": {
+                "NumSalSanit|NumSal|NumSalSanitaire|NumSalarieSanitaire|NumSanit|NumSanitaire|NumSalS": "SALARIE"
+              }
+            }
+          ],
+          "tablesOptionnelles": [
+            "SERVICE",
+            "SERVICES",
+            "SERVICE_ADMINISTRATIF"
+          ],
+          "partiel": "Presque : la spécialisation est bien faite, mais EFFECTUER fait encore référence à SALARIE. Seuls les salariés sanitaires (titulaires du DEA ou du DAA) peuvent effectuer un transport : la clé étrangère de EFFECTUER doit pointer vers SALARIE_SANITAIRE."
+        }
+      ],
+      "indice": "C'est une spécialisation (relation « mère-fille ») : chaque catégorie de salariés devient une table dont la clé primaire est aussi une clé étrangère vers SALARIE, et ce qui ne concerne qu'une catégorie quitte SALARIE (le type de salarié devient alors inutile). Demandez-vous enfin quels salariés peuvent effectuer un transport."
+    },
+    {
+      "id": "p01",
+      "type": "processus",
+      "theme": "Processus",
+      "annale": "2025",
+      "enonce": "Partie 1 du processus de gestion des demandes de transport sanitaire. Albert Dendremont, standardiste : « Un patient appelle le standard de la société Ambulance Est afin de demander le service d'un véhicule sanitaire. Je demande au patient son code d'identification pour accéder à sa fiche « patient ». S'il n'en a pas, je renvoie l'appel au gestionnaire afin qu'il crée cette fiche. Le gestionnaire me renvoie ensuite l'appel. Je crée ensuite le transport dans la base de données à l'aide de la fiche « patient » et des informations que ce dernier me fournit : le lieu de départ, d'arrivée, la date, l'heure prévue et les éventuels équipements spécifiques. Une fois les besoins saisis, le transport est créé et une notification est alors envoyée au service régulation. » Élaborez le schéma événements-résultats de cette partie du processus.",
+      "couloirs": [
+        "Patient",
+        "Standard",
+        "Gestionnaire",
+        "Régulation"
+      ],
+      "elements": [
+        {
+          "kind": "event",
+          "label": "Appel"
+        },
+        {
+          "kind": "event",
+          "label": "Détails demande transport"
+        },
+        {
+          "kind": "event",
+          "label": "Fiche patient"
+        },
+        {
+          "kind": "event",
+          "label": "Patient à créer"
+        },
+        {
+          "kind": "event",
+          "label": "Fiche patient créée"
+        },
+        {
+          "kind": "event",
+          "label": "Transport créé"
+        },
+        {
+          "kind": "event",
+          "label": "Notification transport créé"
+        },
+        {
+          "kind": "operation",
+          "label": "Traitement demande"
+        },
+        {
+          "kind": "operation",
+          "label": "Création patient"
+        },
+        {
+          "kind": "operation",
+          "label": "Création transport"
+        }
+      ],
+      "attendus": [
+        {
+          "operation": "Création transport",
+          "alias": [
+            "Créer transport",
+            "Saisie transport",
+            "Enregistrement transport",
+            "Création du transport"
+          ],
+          "synchronisation": "Détails demande transport ET (Fiche patient OU Fiche patient créée)"
+        },
+        {
+          "operation": "Traitement demande",
+          "alias": [
+            "Traitement de la demande",
+            "Vérification patient",
+            "Accueil demande",
+            "Vérification fiche patient"
+          ],
+          "regles": [
+            "Patient existant",
+            "Patient non existant"
+          ]
+        }
+      ],
+      "equivalents": {
+        "Détails demande transport": [
+          "Détails demande",
+          "Demande de transport",
+          "Informations transport",
+          "Besoins transport",
+          "Détails du transport",
+          "Informations patient"
+        ],
+        "Fiche patient": [
+          "Fiche patient existante",
+          "Fiche trouvée",
+          "Patient identifié"
+        ],
+        "Fiche patient créée": [
+          "Patient créé",
+          "Fiche créée",
+          "Nouvelle fiche patient"
+        ],
+        "Patient existant": [
+          "Existant",
+          "Patient connu",
+          "Fiche existante"
+        ],
+        "Patient non existant": [
+          "Non existant",
+          "Patient inconnu",
+          "Patient absent",
+          "Fiche inexistante",
+          "Pas de fiche"
+        ]
+      },
+      "solution": {
+        "lanes": [
+          "Patient",
+          "Standard",
+          "Gestionnaire",
+          "Régulation"
+        ],
+        "nodes": [
+          {
+            "id": "n1",
+            "kind": "event",
+            "label": "Appel",
+            "x": 120,
+            "y": 95
+          },
+          {
+            "id": "n2",
+            "kind": "operation",
+            "label": "Traitement demande",
+            "x": 360,
+            "y": 205,
+            "actions": [
+              "Accueil téléphonique",
+              "Vérification fiche patient"
+            ],
+            "rules": [
+              "Patient existant",
+              "Patient non existant"
+            ]
+          },
+          {
+            "id": "n3",
+            "kind": "event",
+            "label": "Fiche patient",
+            "x": 360,
+            "y": 345
+          },
+          {
+            "id": "n4",
+            "kind": "event",
+            "label": "Patient à créer",
+            "x": 600,
+            "y": 330
+          },
+          {
+            "id": "n5",
+            "kind": "operation",
+            "label": "Création patient",
+            "x": 600,
+            "y": 445,
+            "actions": [
+              "Saisie des informations dans le fichier"
+            ],
+            "rules": [
+              "Toujours"
+            ]
+          },
+          {
+            "id": "n6",
+            "kind": "event",
+            "label": "Fiche patient créée",
+            "x": 600,
+            "y": 575
+          },
+          {
+            "id": "n7",
+            "kind": "event",
+            "label": "Détails demande transport",
+            "x": 120,
+            "y": 575
+          },
+          {
+            "id": "n8",
+            "kind": "sync",
+            "label": "",
+            "x": 360,
+            "y": 670,
+            "cond": "A et (B ou C)"
+          },
+          {
+            "id": "n9",
+            "kind": "operation",
+            "label": "Création transport",
+            "x": 360,
+            "y": 790,
+            "actions": [
+              "Saisie lieu de départ, d'arrivée, date, heure, équipements spécifiques"
+            ],
+            "rules": [
+              "Toujours"
+            ]
+          },
+          {
+            "id": "n10",
+            "kind": "event",
+            "label": "Transport créé",
+            "x": 360,
+            "y": 935
+          },
+          {
+            "id": "n11",
+            "kind": "event",
+            "label": "Notification transport créé",
+            "x": 840,
+            "y": 935
+          }
+        ],
+        "arrows": [
+          {
+            "id": "a1",
+            "from": "n1",
+            "rule": null,
+            "to": "n2"
+          },
+          {
+            "id": "a2",
+            "from": "n2",
+            "rule": 0,
+            "to": "n3"
+          },
+          {
+            "id": "a3",
+            "from": "n2",
+            "rule": 1,
+            "to": "n4"
+          },
+          {
+            "id": "a4",
+            "from": "n4",
+            "rule": null,
+            "to": "n5"
+          },
+          {
+            "id": "a5",
+            "from": "n5",
+            "rule": 0,
+            "to": "n6"
+          },
+          {
+            "id": "a6",
+            "from": "n7",
+            "rule": null,
+            "to": "n8",
+            "letter": "A"
+          },
+          {
+            "id": "a7",
+            "from": "n3",
+            "rule": null,
+            "to": "n8",
+            "letter": "B"
+          },
+          {
+            "id": "a8",
+            "from": "n6",
+            "rule": null,
+            "to": "n8",
+            "letter": "C"
+          },
+          {
+            "id": "a9",
+            "from": "n8",
+            "rule": null,
+            "to": "n9"
+          },
+          {
+            "id": "a10",
+            "from": "n9",
+            "rule": 0,
+            "to": "n10"
+          },
+          {
+            "id": "a11",
+            "from": "n9",
+            "rule": 0,
+            "to": "n11"
+          }
+        ]
+      },
+      "autoevaluation": [
+        "L'appel du patient est un événement placé dans le couloir « Patient ».",
+        "L'opération de traitement de la demande, au standard, a deux règles d'émission : patient existant / patient non existant.",
+        "Le gestionnaire crée la fiche quand le patient n'existe pas, puis produit l'événement « fiche patient créée ».",
+        "La création du transport attend les détails de la demande ET (la fiche patient OU la fiche patient créée) : c'est la synchronisation.",
+        "La création du transport produit deux résultats : le transport créé et la notification envoyée à la régulation."
+      ],
+      "indice": "Repérez les acteurs (couloirs), puis ce qui déclenche chaque opération. L'opération du standard aboutit à deux cas différents (deux règles d'émission). La création du transport a besoin de plusieurs choses à la fois : c'est là qu'il faut une synchronisation, avec une condition qui combine « et » et « ou »."
+    }
+  ]
+}

@@ -1,0 +1,921 @@
+{
+  "id": "dcg2009",
+  "titre": "DCG 2009 – STAR FINANCE, gestion privée",
+  "aujourdhui": "2009-05-15",
+  "contexte": "STAR FINANCE est une banque d'investissement. Son pôle de gestion privée gère les portefeuilles de valeurs mobilières de clients fortunés (CLIENT). Chaque client possède un ou plusieurs comptes titres (COMPTE, régime fiscal « PEA » ou « Ordinaire »), et chaque compte est classé dans une CATEGORIE de risque (« Risque faible », « Risque modéré »…). Les gestionnaires négocient des opérations d'achat ou de vente (OPERATION) portant sur une VALEUR (action ou obligation ; les actions n'ont pas de date d'échéance), puis répartissent la quantité négociée entre plusieurs comptes : chaque ligne de AFFECTER indique la quantité affectée à un compte (QuantiteAff). Le montant d'une opération (quantité × cours) n'est pas stocké : il se calcule. ARCH_OPE est une table d'archivage, de même structure qu'OPERATION, qui contient déjà les opérations de 1997 à 2003. Les noms du sujet (N°Client, Lib-Catégorie…) ont été écrits sans « N° », sans accents ni tirets (NumClient, LibCategorie…).",
+  "source": "Inspiré du sujet DCG UE8 session 2009, dossiers 1 et 2. Données entièrement fictives.",
+  "schemaGrid": {
+    "CLIENT": [
+      0,
+      0
+    ],
+    "COMPTE": [
+      1,
+      0
+    ],
+    "CATEGORIE": [
+      2,
+      0
+    ],
+    "AFFECTER": [
+      1,
+      1
+    ],
+    "OPERATION": [
+      0,
+      1
+    ],
+    "VALEUR": [
+      0,
+      2
+    ],
+    "ARCH_OPE": [
+      1,
+      2
+    ]
+  },
+  "questions": [
+    {
+      "id": "q01",
+      "theme": "Une seule table",
+      "enonce": "Afficher la liste des catégories de risque des comptes titres (toutes les colonnes).",
+      "correction": [
+        "SELECT *",
+        "FROM CATEGORIE;"
+      ],
+      "indice": "L'étoile * affiche toutes les colonnes d'une table."
+    },
+    {
+      "id": "q02",
+      "theme": "Une seule table",
+      "enonce": "Afficher le numéro, le nom et le prénom des clients domiciliés à Paris, triés par nom puis par prénom.",
+      "ordered": [
+        1,
+        2
+      ],
+      "correction": [
+        "SELECT NumClient, Nom, Prenom",
+        "FROM CLIENT",
+        "WHERE AdVille = 'Paris'",
+        "ORDER BY Nom, Prenom;"
+      ],
+      "indice": "Une condition sur un texte s'écrit entre apostrophes. ORDER BY accepte plusieurs colonnes, séparées par des virgules."
+    },
+    {
+      "id": "q03",
+      "theme": "Une seule table",
+      "enonce": "Les actions n'ont pas de date d'échéance (contrairement aux obligations). Afficher le code et le libellé des valeurs sans date d'échéance.",
+      "correction": [
+        "SELECT CodeValeur, LibelleValeur",
+        "FROM VALEUR",
+        "WHERE DateEcheance IS NULL;"
+      ],
+      "indice": "Une date non renseignée vaut NULL : on écrit IS NULL, pas = NULL."
+    },
+    {
+      "id": "q04",
+      "theme": "Dates",
+      "enonce": "Afficher le numéro, la date, le code de la valeur, la quantité et le cours des opérations de vente réalisées en 2008, par ordre chronologique.",
+      "ordered": [
+        1
+      ],
+      "correction": [
+        "SELECT NumOperation, DateOperation, CodeValeur, QuantiteNegociee, CoursNegocie",
+        "FROM OPERATION",
+        "WHERE SensOperation = 'Vente'",
+        "AND YEAR(DateOperation) = 2008",
+        "ORDER BY DateOperation;"
+      ],
+      "variantes": [
+        [
+          "SELECT NumOperation, DateOperation, CodeValeur, QuantiteNegociee, CoursNegocie",
+          "FROM OPERATION",
+          "WHERE SensOperation = 'Vente'",
+          "AND DateOperation BETWEEN '01/01/2008' AND '31/12/2008'",
+          "ORDER BY DateOperation;"
+        ]
+      ],
+      "indice": "YEAR() extrait l'année d'une date. Deux conditions se combinent avec AND."
+    },
+    {
+      "id": "q05",
+      "theme": "Calculs et agrégats",
+      "enonce": "Le montant négocié d'une opération est égal à la quantité négociée multipliée par le cours négocié. Afficher le numéro, la date et le montant négocié des opérations du mois de mars 2009.",
+      "correction": [
+        "SELECT NumOperation, DateOperation, QuantiteNegociee * CoursNegocie AS Montant",
+        "FROM OPERATION",
+        "WHERE MONTH(DateOperation) = 3",
+        "AND YEAR(DateOperation) = 2009;"
+      ],
+      "variantes": [
+        [
+          "SELECT NumOperation, DateOperation, QuantiteNegociee * CoursNegocie AS Montant",
+          "FROM OPERATION",
+          "WHERE DateOperation BETWEEN '01/03/2009' AND '31/03/2009';"
+        ]
+      ],
+      "indice": "Le montant n'est pas stocké : on le calcule dans le SELECT et on lui donne un nom avec AS. MONTH() et YEAR() extraient le mois et l'année."
+    },
+    {
+      "id": "q06",
+      "theme": "Calculs et agrégats",
+      "enonce": "Afficher, pour chaque sens d'opération (« Achat » ou « Vente »), le nombre d'opérations ainsi que la date de la première et de la dernière opération.",
+      "correction": [
+        "SELECT SensOperation, COUNT(*), MIN(DateOperation), MAX(DateOperation)",
+        "FROM OPERATION",
+        "GROUP BY SensOperation;"
+      ],
+      "indice": "GROUP BY SensOperation forme un groupe par sens ; COUNT, MIN et MAX sont calculés dans chaque groupe."
+    },
+    {
+      "id": "q07",
+      "theme": "Calculs et agrégats",
+      "enonce": "Afficher le nombre de comptes titres pour chaque régime fiscal (colonne Fiscalite : « PEA » ou « Ordinaire »).",
+      "correction": [
+        "SELECT Fiscalite, COUNT(*) AS NbComptes",
+        "FROM COMPTE",
+        "GROUP BY Fiscalite;"
+      ],
+      "indice": "Regroupez les comptes par régime fiscal, puis comptez les lignes de chaque groupe."
+    },
+    {
+      "id": "q08",
+      "theme": "Jointures",
+      "annale": "2009",
+      "enonce": "Afficher le nom et le prénom des clients possédant au moins un compte titre de la catégorie « Risque modéré ». Chaque client ne doit apparaître qu'une fois.",
+      "correction": [
+        "SELECT DISTINCT Nom, Prenom",
+        "FROM CLIENT, COMPTE, CATEGORIE",
+        "WHERE CLIENT.NumClient = COMPTE.NumClient",
+        "AND COMPTE.NumCategorie = CATEGORIE.NumCategorie",
+        "AND LibCategorie = 'Risque modéré';"
+      ],
+      "variantes": [
+        [
+          "SELECT DISTINCT Nom, Prenom",
+          "FROM CLIENT",
+          "INNER JOIN COMPTE ON CLIENT.NumClient = COMPTE.NumClient",
+          "INNER JOIN CATEGORIE ON COMPTE.NumCategorie = CATEGORIE.NumCategorie",
+          "WHERE LibCategorie = 'Risque modéré';"
+        ]
+      ],
+      "indice": "La catégorie est celle du compte (COMPTE.NumCategorie), son libellé est dans CATEGORIE. Un client qui a deux comptes « Risque modéré » apparaîtrait deux fois : DISTINCT supprime les doublons."
+    },
+    {
+      "id": "q09",
+      "theme": "Jointures",
+      "enonce": "Afficher le numéro, la date, le sens, la quantité et le cours des opérations portant sur la valeur « BNP Paribas », par ordre chronologique.",
+      "ordered": [
+        1
+      ],
+      "correction": [
+        "SELECT NumOperation, DateOperation, SensOperation, QuantiteNegociee, CoursNegocie",
+        "FROM OPERATION, VALEUR",
+        "WHERE OPERATION.CodeValeur = VALEUR.CodeValeur",
+        "AND LibelleValeur = 'BNP Paribas'",
+        "ORDER BY DateOperation;"
+      ],
+      "variantes": [
+        [
+          "SELECT NumOperation, DateOperation, SensOperation, QuantiteNegociee, CoursNegocie",
+          "FROM OPERATION",
+          "INNER JOIN VALEUR ON OPERATION.CodeValeur = VALEUR.CodeValeur",
+          "WHERE LibelleValeur = 'BNP Paribas'",
+          "ORDER BY DateOperation;"
+        ]
+      ],
+      "indice": "Le libellé de la valeur est dans VALEUR ; OPERATION ne contient que son code (CodeValeur)."
+    },
+    {
+      "id": "q10",
+      "theme": "Jointures",
+      "enonce": "L'opération n° 1366474 a été répartie entre plusieurs comptes. Afficher le détail de cette répartition : numéro du compte, nom et prénom du titulaire, quantité affectée.",
+      "correction": [
+        "SELECT AFFECTER.NumCompte, Nom, Prenom, QuantiteAff",
+        "FROM AFFECTER, COMPTE, CLIENT",
+        "WHERE AFFECTER.NumCompte = COMPTE.NumCompte",
+        "AND COMPTE.NumClient = CLIENT.NumClient",
+        "AND NumOperation = 1366474;"
+      ],
+      "variantes": [
+        [
+          "SELECT AFFECTER.NumCompte, Nom, Prenom, QuantiteAff",
+          "FROM AFFECTER",
+          "INNER JOIN COMPTE ON AFFECTER.NumCompte = COMPTE.NumCompte",
+          "INNER JOIN CLIENT ON COMPTE.NumClient = CLIENT.NumClient",
+          "WHERE NumOperation = 1366474;"
+        ]
+      ],
+      "indice": "La répartition d'une opération entre les comptes est enregistrée dans AFFECTER ; le titulaire d'un compte se trouve en passant par COMPTE."
+    },
+    {
+      "id": "q11",
+      "theme": "Regroupements",
+      "annale": "2009",
+      "enonce": "Afficher le nombre d'opérations par compte (numéro de compte et nombre d'opérations), pour les comptes ayant enregistré au moins une opération.",
+      "correction": [
+        "SELECT NumCompte, COUNT(NumOperation) AS NbOperations",
+        "FROM AFFECTER",
+        "GROUP BY NumCompte;"
+      ],
+      "variantes": [
+        [
+          "SELECT NumCompte, COUNT(*) AS NbOperations",
+          "FROM AFFECTER",
+          "GROUP BY NumCompte;"
+        ]
+      ],
+      "indice": "Chaque ligne de AFFECTER associe une opération à un compte : il suffit de compter ces lignes par compte, sans jointure."
+    },
+    {
+      "id": "q12",
+      "theme": "Jointures et regroupements",
+      "annale": "2009",
+      "enonce": "Afficher le total des montants des opérations par compte (numéro de compte et montant total). Le montant revenant à un compte est la quantité qui lui est affectée multipliée par le cours négocié ; on additionne achats et ventes sans les distinguer.",
+      "correction": [
+        "SELECT NumCompte, SUM(QuantiteAff * CoursNegocie) AS MontantTotal",
+        "FROM OPERATION, AFFECTER",
+        "WHERE OPERATION.NumOperation = AFFECTER.NumOperation",
+        "GROUP BY NumCompte;"
+      ],
+      "variantes": [
+        [
+          "SELECT NumCompte, SUM(QuantiteAff * CoursNegocie) AS MontantTotal",
+          "FROM OPERATION",
+          "INNER JOIN AFFECTER ON OPERATION.NumOperation = AFFECTER.NumOperation",
+          "GROUP BY NumCompte;"
+        ]
+      ],
+      "indice": "Le cours est dans OPERATION, la quantité affectée à chaque compte dans AFFECTER : joignez-les par NumOperation. On multiplie par la quantité affectée (et non la quantité négociée, qui est celle de toute l'opération)."
+    },
+    {
+      "id": "q13",
+      "theme": "Jointures et regroupements",
+      "enonce": "Afficher le nombre de comptes de chaque catégorie de risque (libellé de la catégorie et nombre de comptes).",
+      "correction": [
+        "SELECT LibCategorie, COUNT(*) AS NbComptes",
+        "FROM CATEGORIE, COMPTE",
+        "WHERE CATEGORIE.NumCategorie = COMPTE.NumCategorie",
+        "GROUP BY CATEGORIE.NumCategorie, LibCategorie;"
+      ],
+      "variantes": [
+        [
+          "SELECT LibCategorie, COUNT(NumCompte) AS NbComptes",
+          "FROM CATEGORIE",
+          "INNER JOIN COMPTE ON CATEGORIE.NumCategorie = COMPTE.NumCategorie",
+          "GROUP BY CATEGORIE.NumCategorie, LibCategorie;"
+        ]
+      ],
+      "indice": "Joignez CATEGORIE et COMPTE, puis regroupez par catégorie."
+    },
+    {
+      "id": "q14",
+      "theme": "Jointures et regroupements",
+      "enonce": "Afficher, pour chaque client, son numéro, son nom, son prénom et le montant total de ses achats (tous comptes confondus), du plus gros acheteur au plus petit. Le montant revenant à un compte est la quantité affectée multipliée par le cours négocié.",
+      "ordered": [
+        3
+      ],
+      "correction": [
+        "SELECT CLIENT.NumClient, Nom, Prenom, SUM(QuantiteAff * CoursNegocie) AS TotalAchats",
+        "FROM CLIENT, COMPTE, AFFECTER, OPERATION",
+        "WHERE CLIENT.NumClient = COMPTE.NumClient",
+        "AND COMPTE.NumCompte = AFFECTER.NumCompte",
+        "AND AFFECTER.NumOperation = OPERATION.NumOperation",
+        "AND SensOperation = 'Achat'",
+        "GROUP BY CLIENT.NumClient, Nom, Prenom",
+        "ORDER BY SUM(QuantiteAff * CoursNegocie) DESC;"
+      ],
+      "variantes": [
+        [
+          "SELECT CLIENT.NumClient, Nom, Prenom, SUM(QuantiteAff * CoursNegocie) AS TotalAchats",
+          "FROM CLIENT",
+          "INNER JOIN COMPTE ON CLIENT.NumClient = COMPTE.NumClient",
+          "INNER JOIN AFFECTER ON COMPTE.NumCompte = AFFECTER.NumCompte",
+          "INNER JOIN OPERATION ON AFFECTER.NumOperation = OPERATION.NumOperation",
+          "WHERE SensOperation = 'Achat'",
+          "GROUP BY CLIENT.NumClient, Nom, Prenom",
+          "ORDER BY TotalAchats DESC;"
+        ]
+      ],
+      "indice": "Quatre tables : CLIENT → COMPTE → AFFECTER → OPERATION. La condition sur le sens porte sur chaque ligne (WHERE) ; regroupez par client (deux clients s'appellent DUMAS : regroupez aussi par numéro)."
+    },
+    {
+      "id": "q15",
+      "theme": "Regroupements",
+      "enonce": "Quelles opérations (numéro) ont été réparties sur au moins 4 comptes ? Afficher aussi le nombre de comptes concernés.",
+      "correction": [
+        "SELECT NumOperation, COUNT(*) AS NbComptes",
+        "FROM AFFECTER",
+        "GROUP BY NumOperation",
+        "HAVING COUNT(*) >= 4;"
+      ],
+      "indice": "Une condition sur un COUNT se place dans HAVING, après le GROUP BY."
+    },
+    {
+      "id": "q16",
+      "theme": "Jointures et regroupements",
+      "enonce": "Contrôle de cohérence : la somme des quantités affectées aux comptes doit être égale à la quantité négociée de l'opération. Afficher le numéro, la quantité négociée et le total des quantités affectées des opérations pour lesquelles ce n'est pas le cas.",
+      "correction": [
+        "SELECT OPERATION.NumOperation, QuantiteNegociee, SUM(QuantiteAff) AS TotalAffecte",
+        "FROM OPERATION, AFFECTER",
+        "WHERE OPERATION.NumOperation = AFFECTER.NumOperation",
+        "GROUP BY OPERATION.NumOperation, QuantiteNegociee",
+        "HAVING SUM(QuantiteAff) <> QuantiteNegociee;"
+      ],
+      "variantes": [
+        [
+          "SELECT OPERATION.NumOperation, QuantiteNegociee, SUM(QuantiteAff) AS TotalAffecte",
+          "FROM OPERATION",
+          "INNER JOIN AFFECTER ON OPERATION.NumOperation = AFFECTER.NumOperation",
+          "GROUP BY OPERATION.NumOperation, QuantiteNegociee",
+          "HAVING SUM(QuantiteAff) != QuantiteNegociee;"
+        ]
+      ],
+      "indice": "Regroupez les affectations par opération ; la comparaison porte sur un total (SUM), elle se place donc dans HAVING. QuantiteNegociee doit figurer dans le GROUP BY pour être utilisée dans le HAVING et le SELECT."
+    },
+    {
+      "id": "q17",
+      "theme": "Sous-requêtes",
+      "annale": "2009",
+      "enonce": "Afficher le numéro et le nom des clients ne possédant pas de compte de la catégorie « Risque élevé ».",
+      "correction": [
+        "SELECT NumClient, Nom",
+        "FROM CLIENT",
+        "WHERE NumClient NOT IN (SELECT NumClient",
+        "                        FROM COMPTE, CATEGORIE",
+        "                        WHERE COMPTE.NumCategorie = CATEGORIE.NumCategorie",
+        "                        AND LibCategorie = 'Risque élevé');"
+      ],
+      "variantes": [
+        [
+          "SELECT NumClient, Nom",
+          "FROM CLIENT",
+          "WHERE NOT EXISTS (SELECT *",
+          "                  FROM COMPTE, CATEGORIE",
+          "                  WHERE COMPTE.NumCategorie = CATEGORIE.NumCategorie",
+          "                  AND LibCategorie = 'Risque élevé'",
+          "                  AND COMPTE.NumClient = CLIENT.NumClient);"
+        ],
+        [
+          "SELECT NumClient, Nom",
+          "FROM CLIENT",
+          "WHERE NumClient NOT IN (SELECT NumClient",
+          "                        FROM COMPTE",
+          "                        INNER JOIN CATEGORIE ON COMPTE.NumCategorie = CATEGORIE.NumCategorie",
+          "                        WHERE LibCategorie = 'Risque élevé');"
+        ]
+      ],
+      "indice": "La sous-requête donne les numéros des clients qui ont un compte « Risque élevé » ; NOT IN garde les autres. Attention : écrire LibCategorie <> 'Risque élevé' avec une simple jointure garderait les clients qui ont aussi un autre compte. Pas de point-virgule à l'intérieur de la sous-requête."
+    },
+    {
+      "id": "q18",
+      "theme": "Sous-requêtes",
+      "enonce": "Quels comptes titres (numéro, date de création, numéro du client) n'ont enregistré aucune opération ?",
+      "correction": [
+        "SELECT NumCompte, DateCreation, NumClient",
+        "FROM COMPTE",
+        "WHERE NumCompte NOT IN (SELECT NumCompte",
+        "                        FROM AFFECTER);"
+      ],
+      "variantes": [
+        [
+          "SELECT NumCompte, DateCreation, NumClient",
+          "FROM COMPTE",
+          "WHERE NOT EXISTS (SELECT *",
+          "                  FROM AFFECTER",
+          "                  WHERE AFFECTER.NumCompte = COMPTE.NumCompte);"
+        ]
+      ],
+      "indice": "Un compte a enregistré une opération s'il figure dans AFFECTER. NOT IN garde les autres."
+    },
+    {
+      "id": "q19",
+      "theme": "Sous-requêtes",
+      "enonce": "Quelles valeurs (code et libellé) n'ont fait l'objet d'aucune opération enregistrée dans la table OPERATION ?",
+      "correction": [
+        "SELECT CodeValeur, LibelleValeur",
+        "FROM VALEUR",
+        "WHERE CodeValeur NOT IN (SELECT CodeValeur",
+        "                         FROM OPERATION);"
+      ],
+      "variantes": [
+        [
+          "SELECT CodeValeur, LibelleValeur",
+          "FROM VALEUR",
+          "WHERE NOT EXISTS (SELECT *",
+          "                  FROM OPERATION",
+          "                  WHERE OPERATION.CodeValeur = VALEUR.CodeValeur);"
+        ]
+      ],
+      "indice": "La sous-requête donne les codes des valeurs présentes dans OPERATION ; NOT IN garde les autres."
+    },
+    {
+      "id": "q20",
+      "theme": "Mises à jour",
+      "type": "write",
+      "annale": "2009",
+      "enonce": "Pour archiver les opérations anciennes, l'administrateur a créé la table ARCH_OPE, de même structure que la table OPERATION (elle contient déjà les opérations archivées de 1997 à 2003). Insérer dans ARCH_OPE les opérations antérieures au 1er janvier 2005. (Dans le sujet, la date était saisie au clavier lors de l'exécution de la requête.)",
+      "correction": [
+        "INSERT INTO ARCH_OPE",
+        "SELECT *",
+        "FROM OPERATION",
+        "WHERE DateOperation < '01/01/2005';"
+      ],
+      "variantes": [
+        [
+          "INSERT INTO ARCH_OPE (NumOperation, DateOperation, SensOperation, QuantiteNegociee, CoursNegocie, CodeValeur)",
+          "SELECT NumOperation, DateOperation, SensOperation, QuantiteNegociee, CoursNegocie, CodeValeur",
+          "FROM OPERATION",
+          "WHERE YEAR(DateOperation) < 2005;"
+        ]
+      ],
+      "verif": "SELECT * FROM ARCH_OPE ORDER BY NumOperation",
+      "indice": "INSERT INTO … SELECT … insère dans une table le résultat d'une requête. SELECT * convient ici, car les deux tables ont exactement les mêmes colonnes, dans le même ordre. « Antérieures au 1er janvier 2005 » : strictement avant, donc <."
+    },
+    {
+      "id": "q21",
+      "theme": "Mises à jour",
+      "type": "write",
+      "annale": "2009",
+      "enonce": "Supprimer de la table ARCH_OPE les opérations archivées dont l'année est inférieure ou égale à 2000.",
+      "correction": [
+        "DELETE FROM ARCH_OPE",
+        "WHERE YEAR(DateOperation) <= 2000;"
+      ],
+      "variantes": [
+        [
+          "DELETE FROM ARCH_OPE",
+          "WHERE DateOperation < '01/01/2001';"
+        ]
+      ],
+      "verif": "SELECT * FROM ARCH_OPE ORDER BY NumOperation",
+      "indice": "Toute l'année 2000 doit être supprimée, y compris le mois de décembre : avec une date, il faudrait écrire < '01/01/2001' (et non <= '01/01/2000', qui garderait presque toute l'année 2000)."
+    },
+    {
+      "id": "q22",
+      "theme": "Mises à jour",
+      "type": "write",
+      "enonce": "Les opérations antérieures au 1er janvier 2005 ayant été archivées, il faut maintenant les supprimer de la table OPERATION. Essayez d'abord : DELETE FROM OPERATION WHERE DateOperation < '01/01/2005'. La suppression est refusée : pourquoi ? Écrivez ensuite un script qui supprime d'abord leurs affectations aux comptes, puis les opérations elles-mêmes. Chaque exécution repart de la base d'origine : les deux requêtes doivent figurer dans votre script, séparées par un point-virgule.",
+      "correction": [
+        "DELETE FROM AFFECTER",
+        "WHERE NumOperation IN (SELECT NumOperation",
+        "                       FROM OPERATION",
+        "                       WHERE DateOperation < '01/01/2005');",
+        "DELETE FROM OPERATION",
+        "WHERE DateOperation < '01/01/2005';"
+      ],
+      "variantes": [
+        [
+          "DELETE FROM AFFECTER",
+          "WHERE NumOperation IN (SELECT NumOperation",
+          "                       FROM OPERATION",
+          "                       WHERE YEAR(DateOperation) < 2005);",
+          "DELETE FROM OPERATION",
+          "WHERE YEAR(DateOperation) < 2005;"
+        ]
+      ],
+      "verif": "SELECT * FROM OPERATION ORDER BY NumOperation",
+      "indice": "AFFECTER.NumOperation est une clé étrangère qui fait référence à OPERATION : tant qu'une opération est affectée à des comptes, l'intégrité référentielle interdit de la supprimer. AFFECTER ne contient pas la date : une sous-requête sur OPERATION donne les numéros des opérations à supprimer."
+    },
+    {
+      "id": "q23",
+      "theme": "Mises à jour",
+      "type": "write",
+      "enonce": "Mme Martine MARCHAL (client n° 1002) souhaite une gestion plus prudente : son compte n° 50114, actuellement classé « Risque élevé », passe dans la catégorie « Risque modéré » (catégorie n° 2). Écrire la requête correspondante.",
+      "correction": [
+        "UPDATE COMPTE",
+        "SET NumCategorie = 2",
+        "WHERE NumCompte = 50114;"
+      ],
+      "verif": "SELECT * FROM COMPTE ORDER BY NumCompte",
+      "indice": "La catégorie est une propriété du compte (COMPTE.NumCategorie), pas du client. Ciblez le compte par son numéro : sans WHERE, tous les comptes changeraient de catégorie."
+    },
+    {
+      "id": "s01",
+      "type": "schema",
+      "theme": "Évolution du schéma",
+      "annale": "2009",
+      "enonce": "On s'intéresse maintenant à un autre pôle de STAR FINANCE, la gestion collective des OPCVM (fonds de placement), dont la base est distincte de celle de cet exercice. On part des tables TITRE et OPERATION ci-dessous. Règles de gestion : chaque OPCVM (code, libellé, date de création) appartient à une seule famille (code, libellé : monétaires, obligataires, actions…) et est confié à un seul gestionnaire (code, nom) ; chaque titre appartient à une seule catégorie (code, libellé : actions, obligations, titres participatifs…) ; une opération porte sur un seul titre et est négociée avec une seule contrepartie agréée (code, libellé, montant maximal d'engagement) ; une même opération peut être répartie entre plusieurs OPCVM : le ticket d'affectation indique, pour chaque OPCVM concerné, la quantité qui lui est affectée. Complétez le schéma.",
+      "depart": [
+        {
+          "nom": "TITRE",
+          "colonnes": [
+            "_CodeTitre",
+            "LibTitre",
+            "NomiTitre",
+            "DateEmi",
+            "DateEch"
+          ]
+        },
+        {
+          "nom": "OPERATION",
+          "colonnes": [
+            "_NumOpe",
+            "DateOpe",
+            "DateVope",
+            "Sens",
+            "QteNeg",
+            "CoursNeg"
+          ]
+        }
+      ],
+      "solution": {
+        "tables": [
+          {
+            "nom": "FAMILLE_OPC",
+            "alias": [
+              "FAMILLE",
+              "FAMILLES",
+              "FAMILLE_OPCVM",
+              "FAMILLEOPC"
+            ],
+            "role": "classer les OPCVM par famille (monétaires, obligataires, actions…)",
+            "pk": [
+              "CodeFam|CodeFamille|NumFam|NumFamille|IdFam"
+            ],
+            "attributs": [
+              "LibFam|LibFamille|LibelleFamille|LibelleFam|NomFamille"
+            ]
+          },
+          {
+            "nom": "GESTIONNAIRE",
+            "alias": [
+              "GESTIONNAIRES"
+            ],
+            "role": "décrire les gestionnaires des fonds",
+            "pk": [
+              "CodeGest|CodeGestionnaire|NumGest|NumGestionnaire|IdGest"
+            ],
+            "attributs": [
+              "NomGest|NomGestionnaire|Nom"
+            ]
+          },
+          {
+            "nom": "OPCVM",
+            "alias": [
+              "OPC",
+              "FONDS"
+            ],
+            "role": "décrire les fonds (OPCVM) gérés par la société",
+            "pk": [
+              "CodeOpc|CodeOpcvm|NumOpc|NumOpcvm|IdOpc|IdOpcvm|NumeroOpcvm"
+            ],
+            "fk": {
+              "CodeFam|CodeFamille|NumFam|NumFamille|IdFam": "FAMILLE_OPC",
+              "CodeGest|CodeGestionnaire|NumGest|NumGestionnaire|IdGest": "GESTIONNAIRE"
+            },
+            "attributs": [
+              "LibOpc|LibOpcvm|LibelleOpc|LibelleOpcvm|NomOpcvm",
+              "DateCreat|DateCreation|DateCreatOpc|DateCreationOpcvm"
+            ]
+          },
+          {
+            "nom": "CATEGORIE",
+            "alias": [
+              "CATEGORIE_TITRE",
+              "CATEGORIES",
+              "CATEGORIETITRE"
+            ],
+            "role": "classer les titres par catégorie (actions, obligations…)",
+            "pk": [
+              "CodeCat|CodeCategorie|NumCat|NumCategorie|IdCat"
+            ],
+            "attributs": [
+              "LibCat|LibCategorie|LibelleCat|LibelleCategorie"
+            ]
+          },
+          {
+            "nom": "CONTREPARTIE",
+            "alias": [
+              "CONTREPARTIES"
+            ],
+            "role": "décrire les contreparties agréées et leur montant maximal d'engagement",
+            "pk": [
+              "CodeCont|CodeContrepartie|NumCont|NumContrepartie|IdCont"
+            ],
+            "attributs": [
+              "LibCont|LibContrepartie|LibelleCont|LibelleContrepartie|NomContrepartie",
+              "MontEng|MontantEng|MontantEngagement|MontEngagement|EngagementMax"
+            ]
+          },
+          {
+            "nom": "TITRE",
+            "fk": {
+              "CodeCat|CodeCategorie|NumCat|NumCategorie|IdCat": "CATEGORIE"
+            }
+          },
+          {
+            "nom": "OPERATION",
+            "fk": {
+              "CodeTitre|NumTitre|IdTitre": "TITRE",
+              "CodeCont|CodeContrepartie|NumCont|NumContrepartie|IdCont": "CONTREPARTIE"
+            }
+          },
+          {
+            "nom": "AFFECTER",
+            "alias": [
+              "AFFECTATION",
+              "AFFECTATIONS",
+              "REPARTIR",
+              "REPARTITION"
+            ],
+            "role": "répartir la quantité négociée d'une opération entre les OPCVM concernés",
+            "pk": [
+              "NumOpe|NumOperation|CodeOpe|IdOpe",
+              "CodeOpc|CodeOpcvm|NumOpc|NumOpcvm|IdOpc|IdOpcvm|NumeroOpcvm"
+            ],
+            "fk": {
+              "NumOpe|NumOperation|CodeOpe|IdOpe": "OPERATION",
+              "CodeOpc|CodeOpcvm|NumOpc|NumOpcvm|IdOpc|IdOpcvm|NumeroOpcvm": "OPCVM"
+            },
+            "attributs": [
+              "QteAff|QuantiteAff|QteAffectee|QuantiteAffectee"
+            ]
+          }
+        ]
+      },
+      "variantes": [
+        {
+          "tables": [
+            {
+              "nom": "FAMILLE_OPC",
+              "alias": [
+                "FAMILLE",
+                "FAMILLES",
+                "FAMILLE_OPCVM",
+                "FAMILLEOPC"
+              ],
+              "role": "classer les OPCVM par famille (monétaires, obligataires, actions…)",
+              "pk": [
+                "CodeFam|CodeFamille|NumFam|NumFamille|IdFam"
+              ],
+              "attributs": [
+                "LibFam|LibFamille|LibelleFamille|LibelleFam|NomFamille"
+              ]
+            },
+            {
+              "nom": "GESTIONNAIRE",
+              "alias": [
+                "GESTIONNAIRES"
+              ],
+              "role": "décrire les gestionnaires des fonds",
+              "pk": [
+                "CodeGest|CodeGestionnaire|NumGest|NumGestionnaire|IdGest"
+              ],
+              "attributs": [
+                "NomGest|NomGestionnaire|Nom"
+              ]
+            },
+            {
+              "nom": "OPCVM",
+              "alias": [
+                "OPC",
+                "FONDS"
+              ],
+              "role": "décrire les fonds (OPCVM) gérés par la société",
+              "pk": [
+                "CodeOpc|CodeOpcvm|NumOpc|NumOpcvm|IdOpc|IdOpcvm|NumeroOpcvm"
+              ],
+              "fk": {
+                "CodeFam|CodeFamille|NumFam|NumFamille|IdFam": "FAMILLE_OPC",
+                "CodeGest|CodeGestionnaire|NumGest|NumGestionnaire|IdGest": "GESTIONNAIRE"
+              },
+              "attributs": [
+                "LibOpc|LibOpcvm|LibelleOpc|LibelleOpcvm|NomOpcvm",
+                "DateCreat|DateCreation|DateCreatOpc|DateCreationOpcvm"
+              ]
+            },
+            {
+              "nom": "CATEGORIE",
+              "alias": [
+                "CATEGORIE_TITRE",
+                "CATEGORIES",
+                "CATEGORIETITRE"
+              ],
+              "role": "classer les titres par catégorie (actions, obligations…)",
+              "pk": [
+                "CodeCat|CodeCategorie|NumCat|NumCategorie|IdCat"
+              ],
+              "attributs": [
+                "LibCat|LibCategorie|LibelleCat|LibelleCategorie"
+              ]
+            },
+            {
+              "nom": "CONTREPARTIE",
+              "alias": [
+                "CONTREPARTIES"
+              ],
+              "role": "décrire les contreparties agréées et leur montant maximal d'engagement",
+              "pk": [
+                "CodeCont|CodeContrepartie|NumCont|NumContrepartie|IdCont"
+              ],
+              "attributs": [
+                "LibCont|LibContrepartie|LibelleCont|LibelleContrepartie|NomContrepartie",
+                "MontEng|MontantEng|MontantEngagement|MontEngagement|EngagementMax"
+              ]
+            },
+            {
+              "nom": "TITRE",
+              "fk": {
+                "CodeCat|CodeCategorie|NumCat|NumCategorie|IdCat": "CATEGORIE"
+              }
+            },
+            {
+              "nom": "OPERATION",
+              "fk": {
+                "CodeTitre|NumTitre|IdTitre": "TITRE",
+                "CodeCont|CodeContrepartie|NumCont|NumContrepartie|IdCont": "CONTREPARTIE",
+                "CodeOpc|CodeOpcvm|NumOpc|NumOpcvm|IdOpc|IdOpcvm|NumeroOpcvm": "OPCVM"
+              }
+            }
+          ],
+          "partiel": "Presque : une même opération peut être répartie entre plusieurs OPCVM (le ticket d'affectation de l'opération 1367890 en compte cinq), avec une quantité pour chacun. Une clé étrangère vers OPCVM dans OPERATION ne permet d'en désigner qu'un : il faut une table d'association entre OPERATION et OPCVM, qui porte la quantité affectée."
+        }
+      ],
+      "indice": "Cinq tables de référence à créer (familles, gestionnaires, OPCVM, catégories de titres, contreparties) ; « un seul » se traduit par une clé étrangère. La répartition d'une opération entre plusieurs OPCVM est une relation « plusieurs à plusieurs » qui porte une quantité."
+    },
+    {
+      "id": "s02",
+      "type": "schema",
+      "theme": "Évolution du schéma",
+      "annale": "2009",
+      "enonce": "Toujours pour la gestion collective : les OPCVM sont valorisés tous les jours. Pour cela, on relève quotidiennement le cours de chaque titre (un seul cours par titre et par jour, celui de l'ouverture) ainsi que la quantité de chaque titre détenue en portefeuille par chaque OPCVM. Exemple de valorisation au 13/02/2009 de l'OPCVM 013 « Star Obligation » : titre FR0010171975, quantité en portefeuille 50 000 000, cours 1,00 € ; titre FR0010112052, quantité 20 000 000, cours 1,0601 €… Le total et la valeur de la part sont calculés et ne sont pas stockés. Complétez le schéma.",
+      "depart": [
+        {
+          "nom": "OPCVM",
+          "colonnes": [
+            "_CodeOpc",
+            "LibOpc",
+            "DateCreat",
+            "#CodeFam>FAMILLE_OPC",
+            "#CodeGest>GESTIONNAIRE"
+          ]
+        },
+        {
+          "nom": "TITRE",
+          "colonnes": [
+            "_CodeTitre",
+            "LibTitre",
+            "NomiTitre",
+            "DateEmi",
+            "DateEch",
+            "#CodeCat>CATEGORIE"
+          ]
+        }
+      ],
+      "solution": {
+        "tables": [
+          {
+            "nom": "COMPOSER",
+            "alias": [
+              "COMPOSITION",
+              "PORTEFEUILLE",
+              "DETENIR",
+              "POSSEDER",
+              "VALORISATION",
+              "CONTENIR"
+            ],
+            "role": "enregistrer chaque jour la quantité de chaque titre détenue par chaque OPCVM",
+            "pk": [
+              "CodeOpc|CodeOpcvm|NumOpc|NumOpcvm|IdOpc|IdOpcvm|NumeroOpcvm",
+              "CodeTitre|NumTitre|IdTitre",
+              "DateJour|Date|DateValo|DateValorisation|DateCours|DateCotation|Jour|DateCompo"
+            ],
+            "fk": {
+              "CodeOpc|CodeOpcvm|NumOpc|NumOpcvm|IdOpc|IdOpcvm|NumeroOpcvm": "OPCVM",
+              "CodeTitre|NumTitre|IdTitre": "TITRE"
+            },
+            "attributs": [
+              "QtePort|QtePortefeuille|QuantitePortefeuille|Quantite|Qte|QteDetenue"
+            ]
+          },
+          {
+            "nom": "COTER",
+            "alias": [
+              "COURS",
+              "COTATION",
+              "COTATIONS",
+              "COTE",
+              "HISTO_COURS"
+            ],
+            "role": "enregistrer le cours d'ouverture de chaque titre chaque jour",
+            "pk": [
+              "CodeTitre|NumTitre|IdTitre",
+              "DateJour|Date|DateValo|DateValorisation|DateCours|DateCotation|Jour|DateCompo"
+            ],
+            "fk": {
+              "CodeTitre|NumTitre|IdTitre": "TITRE"
+            },
+            "attributs": [
+              "Cours|CoursOuverture|CoursTitre|CoursJour"
+            ]
+          }
+        ],
+        "tablesOptionnelles": [
+          "DATE",
+          "DATES",
+          "JOUR",
+          "JOURS",
+          "CALENDRIER"
+        ]
+      },
+      "variantes": [
+        {
+          "tables": [
+            {
+              "nom": "COMPOSER",
+              "alias": [
+                "COMPOSITION",
+                "PORTEFEUILLE",
+                "DETENIR",
+                "POSSEDER",
+                "VALORISATION",
+                "CONTENIR"
+              ],
+              "role": "enregistrer chaque jour la quantité de chaque titre détenue par chaque OPCVM",
+              "pk": [
+                "CodeOpc|CodeOpcvm|NumOpc|NumOpcvm|IdOpc|IdOpcvm|NumeroOpcvm",
+                "CodeTitre|NumTitre|IdTitre"
+              ],
+              "fk": {
+                "CodeOpc|CodeOpcvm|NumOpc|NumOpcvm|IdOpc|IdOpcvm|NumeroOpcvm": "OPCVM",
+                "CodeTitre|NumTitre|IdTitre": "TITRE"
+              },
+              "attributs": [
+                "QtePort|QtePortefeuille|QuantitePortefeuille|Quantite|Qte|QteDetenue",
+                "DateJour|Date|DateValo|DateValorisation|DateCours|DateCotation|Jour|DateCompo"
+              ]
+            },
+            {
+              "nom": "COTER",
+              "alias": [
+                "COURS",
+                "COTATION",
+                "COTATIONS",
+                "COTE",
+                "HISTO_COURS"
+              ],
+              "role": "enregistrer le cours d'ouverture de chaque titre chaque jour",
+              "pk": [
+                "CodeTitre|NumTitre|IdTitre",
+                "DateJour|Date|DateValo|DateValorisation|DateCours|DateCotation|Jour|DateCompo"
+              ],
+              "fk": {
+                "CodeTitre|NumTitre|IdTitre": "TITRE"
+              },
+              "attributs": [
+                "Cours|CoursOuverture|CoursTitre|CoursJour"
+              ]
+            }
+          ],
+          "tablesOptionnelles": [
+            "DATE",
+            "DATES",
+            "JOUR",
+            "JOURS",
+            "CALENDRIER"
+          ],
+          "partiel": "Presque : la composition du portefeuille est relevée chaque jour. Avec la clé (OPCVM, titre), on ne pourrait garder qu'une seule quantité par titre et par OPCVM, sans historique : la date doit faire partie de la clé primaire."
+        },
+        {
+          "tables": [
+            {
+              "nom": "COMPOSER",
+              "alias": [
+                "COMPOSITION",
+                "PORTEFEUILLE",
+                "DETENIR",
+                "POSSEDER",
+                "VALORISATION",
+                "CONTENIR"
+              ],
+              "role": "enregistrer chaque jour la quantité de chaque titre détenue par chaque OPCVM",
+              "pk": [
+                "CodeOpc|CodeOpcvm|NumOpc|NumOpcvm|IdOpc|IdOpcvm|NumeroOpcvm",
+                "CodeTitre|NumTitre|IdTitre",
+                "DateJour|Date|DateValo|DateValorisation|DateCours|DateCotation|Jour|DateCompo"
+              ],
+              "fk": {
+                "CodeOpc|CodeOpcvm|NumOpc|NumOpcvm|IdOpc|IdOpcvm|NumeroOpcvm": "OPCVM",
+                "CodeTitre|NumTitre|IdTitre": "TITRE"
+              },
+              "attributs": [
+                "QtePort|QtePortefeuille|QuantitePortefeuille|Quantite|Qte|QteDetenue",
+                "Cours|CoursOuverture|CoursTitre|CoursJour"
+              ]
+            }
+          ],
+          "tablesOptionnelles": [
+            "DATE",
+            "DATES",
+            "JOUR",
+            "JOURS",
+            "CALENDRIER"
+          ],
+          "partiel": "Presque : le cours d'un titre ne dépend que du titre et du jour, pas de l'OPCVM qui le détient. Placé dans la table de composition, il serait répété pour chaque OPCVM (redondance, risque d'incohérence) et inconnu pour un titre détenu par aucun OPCVM : il faut une table à part pour les cours, de clé (titre, date)."
+        }
+      ],
+      "indice": "Deux informations relevées chaque jour : la quantité détenue dépend de l'OPCVM, du titre et du jour ; le cours ne dépend que du titre et du jour. Chacune donne une table dont la date fait partie de la clé primaire."
+    }
+  ]
+}

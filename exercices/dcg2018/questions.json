@@ -1,0 +1,1244 @@
+{
+  "id": "dcg2018",
+  "titre": "DCG 2018 – 3D logistic, livraisons",
+  "aujourdhui": "2018-04-16",
+  "contexte": "3D logistic est une entreprise de logistique (siège à Cavaillon) qui stocke les marchandises de ses clients dans trois ENTREPOT (CAV Cavaillon, BER Berre-l'Étang, BRE Brebières) et les livre à des points de livraison (PDL : grandes surfaces, enseignes spécialisées). Les SALARIE sont chauffeurs (CHAUFFEUR : permis poids lourds, date de la dernière visite médicale), manutentionnaires (MANUTENTIONNAIRE : CACES, entrepôt, chef d'équipe NumSalChef) ou personnel administratif ; la clé de CHAUFFEUR et de MANUTENTIONNAIRE est le NumSal du salarié. Chaque jour, un chauffeur est affecté à un seul VEHICULE (AFFECTER, clé : NumSal + DateJour) et effectue une ou plusieurs TOURNEE (EFFECTUER). Une tournée part d'un entrepôt, dure DureeEstim heures, a un kilométrage théorique (NbKMTheor) et dessert des PDL dans un ordre donné (TOURNEE_PDL). Le véhicule d'une tournée n'est pas enregistré dans TOURNEE : on le retrouve par le chauffeur et la date, dans AFFECTER. Le sujet utilisait plusieurs noms pour une même colonne (NumSalChauf, DateVisitMed, DateDerVisitMed…) : ici, la clé d'un salarié s'appelle toujours NumSal et la date de visite DateDernVisitMed. Le PTRA est en tonnes, le volume en m³.",
+  "source": "Inspiré du sujet DCG UE8 session 2018. Données entièrement fictives.",
+  "schemaGrid": {
+    "ENTREPOT": [
+      0,
+      0
+    ],
+    "MANUTENTIONNAIRE": [
+      1,
+      0
+    ],
+    "SALARIE": [
+      2,
+      0
+    ],
+    "TOURNEE": [
+      0,
+      1
+    ],
+    "EFFECTUER": [
+      1,
+      1
+    ],
+    "CHAUFFEUR": [
+      2,
+      1
+    ],
+    "TOURNEE_PDL": [
+      0,
+      2
+    ],
+    "AFFECTER": [
+      1,
+      2
+    ],
+    "VEHICULE": [
+      2,
+      2
+    ],
+    "PDL": [
+      0,
+      3
+    ]
+  },
+  "questions": [
+    {
+      "id": "q01",
+      "theme": "Une seule table",
+      "enonce": "Afficher la liste des entrepôts de 3D logistic (toutes les colonnes).",
+      "correction": [
+        "SELECT *",
+        "FROM ENTREPOT;"
+      ],
+      "indice": "L'étoile * permet d'afficher toutes les colonnes d'une table."
+    },
+    {
+      "id": "q02",
+      "theme": "Une seule table",
+      "enonce": "Afficher l'immatriculation, le volume et le PTRA des véhicules qui ont plus de 2 essieux, du PTRA le plus élevé au plus faible.",
+      "ordered": [
+        2
+      ],
+      "correction": [
+        "SELECT NumImmat, Volume, PTRA",
+        "FROM VEHICULE",
+        "WHERE NbEssieu > 2",
+        "ORDER BY PTRA DESC;"
+      ],
+      "indice": "ORDER BY … DESC trie du plus grand au plus petit."
+    },
+    {
+      "id": "q03",
+      "theme": "Une seule table",
+      "annale": "2018",
+      "enonce": "Afficher la liste des PDL (code et ville) dont au moins une coordonnée GPS (GPSLatPDL = latitude ; GPSLongPDL = longitude) n'a pas été renseignée. La liste sera affichée dans l'ordre alphabétique de la ville.",
+      "ordered": [
+        1
+      ],
+      "correction": [
+        "SELECT CodePDL, AdresseVillePDL",
+        "FROM PDL",
+        "WHERE GPSLatPDL IS NULL",
+        "OR GPSLongPDL IS NULL",
+        "ORDER BY AdresseVillePDL;"
+      ],
+      "indice": "« Au moins une des deux » : les deux conditions IS NULL sont reliées par OR (avec AND, il faudrait que les deux manquent)."
+    },
+    {
+      "id": "q04",
+      "theme": "Une seule table",
+      "enonce": "Afficher le code, la durée estimée (en heures) et le kilométrage théorique des tournées de l'entrepôt CAV dont le kilométrage théorique dépasse 200 km.",
+      "correction": [
+        "SELECT CodeTourn, DureeEstim, NbKMTheor",
+        "FROM TOURNEE",
+        "WHERE CodeEnt = 'CAV'",
+        "AND NbKMTheor > 200;"
+      ],
+      "indice": "Deux conditions à vérifier en même temps : AND."
+    },
+    {
+      "id": "q05",
+      "theme": "Calculs et agrégats",
+      "enonce": "Afficher, pour chaque entrepôt (code), le nombre de tournées qui en partent et leur kilométrage théorique moyen.",
+      "correction": [
+        "SELECT CodeEnt, COUNT(*) AS NbTournees, AVG(NbKMTheor) AS KmMoyen",
+        "FROM TOURNEE",
+        "GROUP BY CodeEnt;"
+      ],
+      "indice": "Le code de l'entrepôt de départ est dans TOURNEE : un GROUP BY CodeEnt suffit, sans jointure."
+    },
+    {
+      "id": "q06",
+      "theme": "Dates",
+      "annale": "2018",
+      "enonce": "Quel est le nombre de tournées effectuées par le chauffeur dont le numéro de salarié est 141, dans la journée du 12 mars 2018 ?",
+      "correction": [
+        "SELECT COUNT(*) AS NbTournees",
+        "FROM EFFECTUER",
+        "WHERE NumSal = 141",
+        "AND DateJour = '12/03/2018';"
+      ],
+      "variantes": [
+        [
+          "SELECT COUNT(CodeTourn) AS NbTournees",
+          "FROM EFFECTUER",
+          "WHERE NumSal = 141",
+          "AND DateJour = '2018-03-12';"
+        ]
+      ],
+      "indice": "Chaque ligne de EFFECTUER est une tournée effectuée par un chauffeur un jour donné. Une date s'écrit '12/03/2018' (ou '2018-03-12')."
+    },
+    {
+      "id": "q07",
+      "theme": "Dates",
+      "enonce": "Afficher le numéro de salarié, le numéro de permis PL et la date d'obtention du permis des chauffeurs qui ont obtenu leur permis PL avant 1995.",
+      "correction": [
+        "SELECT NumSal, NumPermisPL, DateObtention",
+        "FROM CHAUFFEUR",
+        "WHERE YEAR(DateObtention) < 1995;"
+      ],
+      "variantes": [
+        [
+          "SELECT NumSal, NumPermisPL, DateObtention",
+          "FROM CHAUFFEUR",
+          "WHERE DateObtention < '01/01/1995';"
+        ]
+      ],
+      "indice": "YEAR() extrait l'année d'une date ; on peut aussi comparer directement la date à '01/01/1995'."
+    },
+    {
+      "id": "q08",
+      "theme": "Jointures",
+      "enonce": "Afficher le nom, le prénom et le numéro de permis PL de chaque chauffeur, triés par nom.",
+      "ordered": [
+        0
+      ],
+      "correction": [
+        "SELECT NomSal, PrenomSal, NumPermisPL",
+        "FROM SALARIE, CHAUFFEUR",
+        "WHERE SALARIE.NumSal = CHAUFFEUR.NumSal",
+        "ORDER BY NomSal;"
+      ],
+      "variantes": [
+        [
+          "SELECT NomSal, PrenomSal, NumPermisPL",
+          "FROM SALARIE",
+          "INNER JOIN CHAUFFEUR ON SALARIE.NumSal = CHAUFFEUR.NumSal",
+          "ORDER BY NomSal;"
+        ]
+      ],
+      "indice": "Le nom est dans SALARIE, le permis dans CHAUFFEUR : les deux tables ont la même clé NumSal."
+    },
+    {
+      "id": "q09",
+      "theme": "Jointures",
+      "annale": "2018",
+      "enonce": "Afficher la liste des chauffeurs (nom et prénom) dont la dernière visite médicale date de plus de 5 ans (plus de 1825 jours) par rapport à la date du jour d'exécution de la requête (ici le 16/04/2018).",
+      "correction": [
+        "SELECT S.NomSal, S.PrenomSal",
+        "FROM SALARIE S, CHAUFFEUR C",
+        "WHERE S.NumSal = C.NumSal",
+        "AND DATEDIFF(NOW(), C.DateDernVisitMed) > 1825;"
+      ],
+      "variantes": [
+        [
+          "SELECT S.NomSal, S.PrenomSal",
+          "FROM SALARIE S",
+          "INNER JOIN CHAUFFEUR C ON S.NumSal = C.NumSal",
+          "WHERE DATEDIFF(CURDATE(), C.DateDernVisitMed) > 1825;"
+        ]
+      ],
+      "indice": "DATEDIFF(NOW(), DateDernVisitMed) donne le nombre de jours écoulés depuis la dernière visite (NOW() renvoie la date du jour). L'écriture Access du corrigé, NOW() - DateDerVisitMed, ne fonctionne pas ici (et le nom de colonne y est mal orthographié)."
+    },
+    {
+      "id": "q10",
+      "theme": "Jointures",
+      "annale": "2018",
+      "enonce": "Afficher la liste sans doublons des chauffeurs (numéro, nom et prénom) qui ont été affectés au véhicule immatriculé ER-784-AJ au cours du mois de mars 2018.",
+      "correction": [
+        "SELECT DISTINCT A.NumSal, S.NomSal, S.PrenomSal",
+        "FROM SALARIE S, AFFECTER A",
+        "WHERE S.NumSal = A.NumSal",
+        "AND A.NumImmat = 'ER-784-AJ'",
+        "AND A.DateJour BETWEEN '01/03/2018' AND '31/03/2018';"
+      ],
+      "variantes": [
+        [
+          "SELECT DISTINCT C.NumSal, S.NomSal, S.PrenomSal",
+          "FROM SALARIE S, CHAUFFEUR C, AFFECTER A",
+          "WHERE S.NumSal = C.NumSal",
+          "AND C.NumSal = A.NumSal",
+          "AND A.NumImmat = 'ER-784-AJ'",
+          "AND YEAR(A.DateJour) = 2018",
+          "AND MONTH(A.DateJour) = 3;"
+        ],
+        [
+          "SELECT DISTINCT A.NumSal, S.NomSal, S.PrenomSal",
+          "FROM SALARIE S",
+          "INNER JOIN AFFECTER A ON S.NumSal = A.NumSal",
+          "WHERE A.NumImmat = 'ER-784-AJ'",
+          "AND A.DateJour BETWEEN '01/03/2018' AND '31/03/2018';"
+        ]
+      ],
+      "indice": "Un même chauffeur a pu conduire ce véhicule plusieurs jours en mars : DISTINCT supprime les doublons. Passer par CHAUFFEUR n'est pas nécessaire (AFFECTER.NumSal mène directement à SALARIE). Le numéro d'immatriculation s'écrit entre apostrophes droites."
+    },
+    {
+      "id": "q11",
+      "theme": "Jointures",
+      "enonce": "Afficher les PDL desservis par la tournée CAV03 (code, raison sociale et ville du PDL), dans l'ordre de passage.",
+      "ordered": [
+        0
+      ],
+      "correction": [
+        "SELECT P.CodePDL, P.RaisonSociale, P.AdresseVillePDL",
+        "FROM TOURNEE_PDL TP, PDL P",
+        "WHERE TP.CodePDL = P.CodePDL",
+        "AND TP.CodeTourn = 'CAV03'",
+        "ORDER BY TP.OrdrePassage;"
+      ],
+      "variantes": [
+        [
+          "SELECT P.CodePDL, P.RaisonSociale, P.AdresseVillePDL",
+          "FROM TOURNEE_PDL TP",
+          "INNER JOIN PDL P ON TP.CodePDL = P.CodePDL",
+          "WHERE TP.CodeTourn = 'CAV03'",
+          "ORDER BY TP.OrdrePassage;"
+        ]
+      ],
+      "indice": "TOURNEE_PDL indique les PDL de chaque tournée et leur ordre de passage ; on peut trier sur une colonne qui n'est pas affichée."
+    },
+    {
+      "id": "q12",
+      "theme": "Jointures",
+      "enonce": "Afficher le nom, le prénom et le numéro de CACES des manutentionnaires de l'entrepôt de Brebières.",
+      "correction": [
+        "SELECT S.NomSal, S.PrenomSal, M.NumCACES",
+        "FROM SALARIE S, MANUTENTIONNAIRE M, ENTREPOT E",
+        "WHERE S.NumSal = M.NumSal",
+        "AND M.CodeEnt = E.CodeEnt",
+        "AND E.AdresseVilleEnt = 'Brebières';"
+      ],
+      "variantes": [
+        [
+          "SELECT S.NomSal, S.PrenomSal, M.NumCACES",
+          "FROM SALARIE S",
+          "INNER JOIN MANUTENTIONNAIRE M ON S.NumSal = M.NumSal",
+          "INNER JOIN ENTREPOT E ON M.CodeEnt = E.CodeEnt",
+          "WHERE E.AdresseVilleEnt = 'Brebières';"
+        ]
+      ],
+      "indice": "La ville de l'entrepôt est dans ENTREPOT, le n° de CACES dans MANUTENTIONNAIRE et le nom dans SALARIE : trois tables."
+    },
+    {
+      "id": "q13",
+      "theme": "Jointures",
+      "enonce": "Pour la journée du 12 mars 2018, afficher chaque tournée effectuée (code de la tournée) avec le nom du chauffeur et l'immatriculation du véhicule qu'il conduisait ce jour-là.",
+      "correction": [
+        "SELECT E.CodeTourn, S.NomSal, A.NumImmat",
+        "FROM EFFECTUER E, AFFECTER A, SALARIE S",
+        "WHERE E.NumSal = A.NumSal",
+        "AND E.DateJour = A.DateJour",
+        "AND E.NumSal = S.NumSal",
+        "AND E.DateJour = '12/03/2018';"
+      ],
+      "variantes": [
+        [
+          "SELECT E.CodeTourn, S.NomSal, A.NumImmat",
+          "FROM EFFECTUER E",
+          "INNER JOIN AFFECTER A ON E.NumSal = A.NumSal AND E.DateJour = A.DateJour",
+          "INNER JOIN SALARIE S ON E.NumSal = S.NumSal",
+          "WHERE E.DateJour = '12/03/2018';"
+        ]
+      ],
+      "indice": "Le véhicule n'est pas lié à la tournée : il est lié au chauffeur pour une journée (AFFECTER). Il faut donc relier EFFECTUER et AFFECTER sur le chauffeur ET sur la date (clé composée) ; sinon, chaque tournée est associée à tous les véhicules que le chauffeur a conduits."
+    },
+    {
+      "id": "q14",
+      "theme": "Jointures et regroupements",
+      "enonce": "Afficher les tournées (code) qui desservent au moins 6 PDL, avec leur nombre de PDL.",
+      "correction": [
+        "SELECT CodeTourn, COUNT(*) AS NbPDL",
+        "FROM TOURNEE_PDL",
+        "GROUP BY CodeTourn",
+        "HAVING COUNT(*) >= 6;"
+      ],
+      "variantes": [
+        [
+          "SELECT CodeTourn, COUNT(CodePDL) AS NbPDL",
+          "FROM TOURNEE_PDL",
+          "GROUP BY CodeTourn",
+          "HAVING COUNT(CodePDL) >= 6;"
+        ]
+      ],
+      "indice": "La condition « au moins 6 PDL » porte sur le nombre de lignes de chaque groupe : HAVING, pas WHERE."
+    },
+    {
+      "id": "q15",
+      "theme": "Jointures et regroupements",
+      "annale": "2018",
+      "enonce": "Afficher le nombre de kilomètres théoriques effectués par véhicule au cours du mois de mars 2018. Seuls les véhicules ayant parcouru au moins 5000 km devront être affichés. La requête devra produire le tableau suivant : Numéro d'immatriculation | Kms théoriques parcourus en mars (par exemple XV-447-DP 6205 ; ER-784-AJ 5402 ; JP-451-JG 7587…).",
+      "correction": [
+        "SELECT A.NumImmat AS \"Numéro d'immatriculation\", SUM(T.NbKMTheor) AS \"Kms théoriques parcourus en mars\"",
+        "FROM TOURNEE T, EFFECTUER E, AFFECTER A",
+        "WHERE T.CodeTourn = E.CodeTourn",
+        "AND E.NumSal = A.NumSal",
+        "AND E.DateJour = A.DateJour",
+        "AND E.DateJour BETWEEN '01/03/2018' AND '31/03/2018'",
+        "GROUP BY A.NumImmat",
+        "HAVING SUM(T.NbKMTheor) >= 5000;"
+      ],
+      "variantes": [
+        [
+          "SELECT A.NumImmat AS \"Numéro d'immatriculation\", SUM(T.NbKMTheor) AS \"Kms théoriques parcourus en mars\"",
+          "FROM TOURNEE T",
+          "INNER JOIN EFFECTUER E ON T.CodeTourn = E.CodeTourn",
+          "INNER JOIN AFFECTER A ON E.NumSal = A.NumSal AND E.DateJour = A.DateJour",
+          "WHERE YEAR(E.DateJour) = 2018",
+          "AND MONTH(E.DateJour) = 3",
+          "GROUP BY A.NumImmat",
+          "HAVING SUM(T.NbKMTheor) >= 5000;"
+        ]
+      ],
+      "indice": "Le kilométrage est dans TOURNEE, la tournée effectuée dans EFFECTUER et le véhicule dans AFFECTER : EFFECTUER et AFFECTER se relient sur le chauffeur ET sur la date. « Au moins 5000 » s'écrit >= 5000 (un véhicule a fait exactement 5000 km). Un alias contenant des espaces ou une apostrophe s'écrit entre guillemets doubles : AS \"Numéro d'immatriculation\" (les crochets [ ] du corrigé sont une écriture Access)."
+    },
+    {
+      "id": "q16",
+      "theme": "Jointures et regroupements",
+      "enonce": "Afficher, pour chaque chauffeur, son nom, son prénom et le nombre de jours où il a été affecté à un véhicule en mars 2018, du plus grand nombre de jours au plus petit.",
+      "ordered": [
+        2
+      ],
+      "correction": [
+        "SELECT S.NomSal, S.PrenomSal, COUNT(*) AS NbJours",
+        "FROM SALARIE S, AFFECTER A",
+        "WHERE S.NumSal = A.NumSal",
+        "AND A.DateJour BETWEEN '01/03/2018' AND '31/03/2018'",
+        "GROUP BY S.NumSal, S.NomSal, S.PrenomSal",
+        "ORDER BY NbJours DESC;"
+      ],
+      "variantes": [
+        [
+          "SELECT S.NomSal, S.PrenomSal, COUNT(A.DateJour) AS NbJours",
+          "FROM SALARIE S",
+          "INNER JOIN AFFECTER A ON S.NumSal = A.NumSal",
+          "WHERE A.DateJour BETWEEN '01/03/2018' AND '31/03/2018'",
+          "GROUP BY S.NumSal, S.NomSal, S.PrenomSal",
+          "ORDER BY COUNT(A.DateJour) DESC;"
+        ]
+      ],
+      "indice": "Un chauffeur n'a qu'une affectation par jour (clé de AFFECTER : NumSal + DateJour) : compter ses lignes de mars donne son nombre de jours. Regroupez par NumSal (deux chauffeurs peuvent porter le même nom)."
+    },
+    {
+      "id": "q17",
+      "theme": "Jointures et regroupements",
+      "enonce": "Afficher, pour chaque entrepôt (ville), le total des kilomètres théoriques des tournées effectuées en mars 2018.",
+      "correction": [
+        "SELECT EN.AdresseVilleEnt, SUM(T.NbKMTheor) AS TotalKm",
+        "FROM ENTREPOT EN, TOURNEE T, EFFECTUER E",
+        "WHERE EN.CodeEnt = T.CodeEnt",
+        "AND T.CodeTourn = E.CodeTourn",
+        "AND E.DateJour BETWEEN '01/03/2018' AND '31/03/2018'",
+        "GROUP BY EN.CodeEnt, EN.AdresseVilleEnt;"
+      ],
+      "variantes": [
+        [
+          "SELECT EN.AdresseVilleEnt, SUM(T.NbKMTheor) AS TotalKm",
+          "FROM ENTREPOT EN",
+          "INNER JOIN TOURNEE T ON EN.CodeEnt = T.CodeEnt",
+          "INNER JOIN EFFECTUER E ON T.CodeTourn = E.CodeTourn",
+          "WHERE E.DateJour BETWEEN '01/03/2018' AND '31/03/2018'",
+          "GROUP BY EN.CodeEnt, EN.AdresseVilleEnt;"
+        ]
+      ],
+      "indice": "Chaque ligne de EFFECTUER est une tournée réalisée un jour donné : additionnez le kilométrage de la tournée correspondante, par entrepôt de départ."
+    },
+    {
+      "id": "q18",
+      "theme": "Sous-requêtes",
+      "enonce": "Afficher l'immatriculation des véhicules qui n'ont été affectés à aucun chauffeur en mars 2018.",
+      "correction": [
+        "SELECT NumImmat",
+        "FROM VEHICULE",
+        "WHERE NumImmat NOT IN (SELECT NumImmat",
+        "                       FROM AFFECTER",
+        "                       WHERE DateJour BETWEEN '01/03/2018' AND '31/03/2018');"
+      ],
+      "variantes": [
+        [
+          "SELECT V.NumImmat",
+          "FROM VEHICULE V",
+          "WHERE NOT EXISTS (SELECT *",
+          "                  FROM AFFECTER A",
+          "                  WHERE A.NumImmat = V.NumImmat",
+          "                  AND A.DateJour BETWEEN '01/03/2018' AND '31/03/2018');"
+        ]
+      ],
+      "indice": "La sous-requête donne les véhicules affectés en mars ; NOT IN garde les autres. La condition sur la date se place dans la sous-requête."
+    },
+    {
+      "id": "q19",
+      "theme": "Sous-requêtes",
+      "enonce": "Afficher les PDL (code, raison sociale et ville) qui ne sont desservis par aucune tournée.",
+      "correction": [
+        "SELECT CodePDL, RaisonSociale, AdresseVillePDL",
+        "FROM PDL",
+        "WHERE CodePDL NOT IN (SELECT CodePDL",
+        "                      FROM TOURNEE_PDL);"
+      ],
+      "variantes": [
+        [
+          "SELECT P.CodePDL, P.RaisonSociale, P.AdresseVillePDL",
+          "FROM PDL P",
+          "WHERE NOT EXISTS (SELECT *",
+          "                  FROM TOURNEE_PDL TP",
+          "                  WHERE TP.CodePDL = P.CodePDL);"
+        ]
+      ],
+      "indice": "Les PDL desservis figurent dans TOURNEE_PDL."
+    },
+    {
+      "id": "q20",
+      "theme": "Sous-requêtes",
+      "enonce": "Quelle est la tournée la plus longue (plus grand kilométrage théorique) ? Afficher son code, son kilométrage et la ville de son entrepôt de départ.",
+      "correction": [
+        "SELECT T.CodeTourn, T.NbKMTheor, E.AdresseVilleEnt",
+        "FROM TOURNEE T, ENTREPOT E",
+        "WHERE T.CodeEnt = E.CodeEnt",
+        "AND T.NbKMTheor = (SELECT MAX(NbKMTheor)",
+        "                   FROM TOURNEE);"
+      ],
+      "variantes": [
+        [
+          "SELECT T.CodeTourn, T.NbKMTheor, E.AdresseVilleEnt",
+          "FROM TOURNEE T",
+          "INNER JOIN ENTREPOT E ON T.CodeEnt = E.CodeEnt",
+          "WHERE T.NbKMTheor = (SELECT MAX(NbKMTheor)",
+          "                     FROM TOURNEE);"
+        ]
+      ],
+      "indice": "Calculez le kilométrage maximum dans une sous-requête, puis gardez la (ou les) tournée(s) qui l'atteignent."
+    },
+    {
+      "id": "q21",
+      "theme": "Sous-requêtes",
+      "enonce": "Un salarié peut être chauffeur, manutentionnaire, ou ni l'un ni l'autre (personnel administratif), mais jamais les deux. Afficher le numéro, le nom et le prénom des salariés du personnel administratif.",
+      "correction": [
+        "SELECT NumSal, NomSal, PrenomSal",
+        "FROM SALARIE",
+        "WHERE NumSal NOT IN (SELECT NumSal FROM CHAUFFEUR)",
+        "AND NumSal NOT IN (SELECT NumSal FROM MANUTENTIONNAIRE);"
+      ],
+      "variantes": [
+        [
+          "SELECT S.NumSal, S.NomSal, S.PrenomSal",
+          "FROM SALARIE S",
+          "WHERE NOT EXISTS (SELECT * FROM CHAUFFEUR C WHERE C.NumSal = S.NumSal)",
+          "AND NOT EXISTS (SELECT * FROM MANUTENTIONNAIRE M WHERE M.NumSal = S.NumSal);"
+        ]
+      ],
+      "indice": "Deux sous-requêtes : le salarié ne doit figurer ni dans CHAUFFEUR, ni dans MANUTENTIONNAIRE."
+    },
+    {
+      "id": "q22",
+      "theme": "Auto-jointure",
+      "enonce": "Chaque manutentionnaire peut être dirigé par un autre manutentionnaire, son chef (NumSalChef). Pour les manutentionnaires de l'entrepôt CAV qui ont un chef, afficher leur nom et prénom ainsi que le nom et le prénom de leur chef.",
+      "correction": [
+        "SELECT S.NomSal, S.PrenomSal, CH.NomSal AS NomChef, CH.PrenomSal AS PrenomChef",
+        "FROM MANUTENTIONNAIRE M, SALARIE S, SALARIE CH",
+        "WHERE M.NumSal = S.NumSal",
+        "AND M.NumSalChef = CH.NumSal",
+        "AND M.CodeEnt = 'CAV';"
+      ],
+      "variantes": [
+        [
+          "SELECT S.NomSal, S.PrenomSal, CH.NomSal AS NomChef, CH.PrenomSal AS PrenomChef",
+          "FROM MANUTENTIONNAIRE M",
+          "INNER JOIN SALARIE S ON M.NumSal = S.NumSal",
+          "INNER JOIN SALARIE CH ON M.NumSalChef = CH.NumSal",
+          "WHERE M.CodeEnt = 'CAV';"
+        ]
+      ],
+      "indice": "Les noms du manutentionnaire et de son chef sont tous deux dans SALARIE : utilisez cette table deux fois avec deux alias, l'une reliée à M.NumSal, l'autre à M.NumSalChef."
+    },
+    {
+      "id": "q23",
+      "theme": "Mises à jour",
+      "type": "write",
+      "annale": "2018",
+      "enonce": "Le chauffeur n° 114 vient de passer sa visite médicale de contrôle du permis PL le 10 avril 2018. Mettre à jour la base.",
+      "correction": [
+        "UPDATE CHAUFFEUR",
+        "SET DateDernVisitMed = '10/04/2018'",
+        "WHERE NumSal = 114;"
+      ],
+      "variantes": [
+        [
+          "UPDATE CHAUFFEUR",
+          "SET DateDernVisitMed = '2018-04-10'",
+          "WHERE NumSal = 114;"
+        ]
+      ],
+      "verif": "SELECT * FROM CHAUFFEUR ORDER BY NumSal",
+      "indice": "UPDATE … SET … WHERE : sans WHERE, tous les chauffeurs auraient cette date. La date s'écrit '10/04/2018' (#10/04/2018# est l'écriture Access)."
+    },
+    {
+      "id": "q24",
+      "theme": "Mises à jour",
+      "type": "write",
+      "enonce": "Le mardi 17/04/2018, le chauffeur n° 114 sera affecté au véhicule FN-118-RT. Enregistrer cette affectation.",
+      "correction": [
+        "INSERT INTO AFFECTER",
+        "VALUES (114, '17/04/2018', 'FN-118-RT');"
+      ],
+      "variantes": [
+        [
+          "INSERT INTO AFFECTER (NumSal, DateJour, NumImmat)",
+          "VALUES (114, '2018-04-17', 'FN-118-RT');"
+        ]
+      ],
+      "verif": "SELECT * FROM AFFECTER ORDER BY NumSal, DateJour",
+      "indice": "Une affectation est identifiée par le chauffeur et le jour ; les valeurs se donnent dans l'ordre des colonnes de AFFECTER (NumSal, DateJour, NumImmat)."
+    },
+    {
+      "id": "q25",
+      "theme": "Mises à jour",
+      "type": "write",
+      "enonce": "Le véhicule DK-905-ZE, qui n'a jamais été affecté à un chauffeur, vient d'être vendu : le supprimer de la base. Essayez ensuite de supprimer le véhicule ER-784-AJ : que se passe-t-il, et pourquoi ?",
+      "correction": [
+        "DELETE FROM VEHICULE",
+        "WHERE NumImmat = 'DK-905-ZE';"
+      ],
+      "verif": "SELECT * FROM VEHICULE ORDER BY NumImmat",
+      "indice": "Le véhicule ER-784-AJ figure dans AFFECTER : sa suppression est refusée par l'intégrité référentielle (AFFECTER.NumImmat fait référence à VEHICULE.NumImmat). Il faudrait d'abord supprimer ses affectations… et perdre l'historique des tournées."
+    },
+    {
+      "id": "s01",
+      "type": "schema",
+      "theme": "Évolution du schéma",
+      "annale": "2018",
+      "enonce": "Le schéma ci-dessous est l'extrait du schéma relationnel fourni par le sujet (annexe 2). Complétez-le avec les relations manquantes, d'après les règles de gestion : (1) un manutentionnaire est un salarié titulaire du CACES « cariste » (on enregistre son numéro de CACES) ; il est rattaché à un seul entrepôt ; il peut être dirigé par un autre manutentionnaire, son chef d'équipe. Un salarié n'est jamais à la fois chauffeur et manutentionnaire. (2) Les véhicules sont décrits par leur immatriculation, leur nombre d'essieux, leur volume et leur PTRA. Chaque jour, un chauffeur est affecté à un seul véhicule (AFFECTER contient déjà la colonne NumImmat). (3) Une tournée dessert plusieurs PDL, et un même PDL peut être desservi par plusieurs tournées.",
+      "depart": [
+        {
+          "nom": "SALARIE",
+          "colonnes": [
+            "_NumSal",
+            "NomSal",
+            "PrenomSal",
+            "DateNaissSal"
+          ]
+        },
+        {
+          "nom": "CHAUFFEUR",
+          "colonnes": [
+            "_#NumSal>SALARIE",
+            "NumPermisPL",
+            "DateObtention",
+            "DateDernVisitMed"
+          ]
+        },
+        {
+          "nom": "TOURNEE",
+          "colonnes": [
+            "_CodeTourn",
+            "DureeEstim",
+            "NbKMTheor",
+            "#CodeEnt>ENTREPOT"
+          ]
+        },
+        {
+          "nom": "AFFECTER",
+          "colonnes": [
+            "_#NumSal>CHAUFFEUR",
+            "_DateJour",
+            "NumImmat"
+          ]
+        },
+        {
+          "nom": "EFFECTUER",
+          "colonnes": [
+            "_#NumSal>CHAUFFEUR",
+            "_DateJour",
+            "_#CodeTourn>TOURNEE"
+          ]
+        },
+        {
+          "nom": "ENTREPOT",
+          "colonnes": [
+            "_CodeEnt",
+            "AdresseRueEnt",
+            "AdresseCpEnt",
+            "AdresseVilleEnt",
+            "GPSLatEnt",
+            "GPSLongEnt",
+            "Surface"
+          ]
+        },
+        {
+          "nom": "PDL",
+          "colonnes": [
+            "_CodePDL",
+            "RaisonSociale",
+            "AdresseRuePDL",
+            "AdresseCPPDL",
+            "AdresseVillePDL",
+            "GPSLatPDL",
+            "GPSLongPDL",
+            "TelephonePDL"
+          ]
+        }
+      ],
+      "solution": {
+        "tables": [
+          {
+            "nom": "MANUTENTIONNAIRE",
+            "alias": [
+              "MANUTENTIONNAIRES",
+              "MANUT"
+            ],
+            "role": "les manutentionnaires (une catégorie de salariés), leur CACES, leur entrepôt et leur chef",
+            "pk": [
+              "NumSal|NumSalManut|NumManut|NumSalManutentionnaire"
+            ],
+            "fk": {
+              "NumSal|NumSalManut|NumManut|NumSalManutentionnaire": "SALARIE",
+              "CodeEnt": "ENTREPOT",
+              "NumSalChef|NumSalManutChef|NumSalManut_Chef|NumChef|NumSalResponsable|NumChefEquipe|NumSalDirigeant": "MANUTENTIONNAIRE"
+            },
+            "attributs": [
+              "NumCACES|CACES|NoCACES|NumeroCACES"
+            ]
+          },
+          {
+            "nom": "VEHICULE",
+            "alias": [
+              "VEHICULES",
+              "CAMION",
+              "CAMIONS"
+            ],
+            "role": "décrire les véhicules",
+            "pk": [
+              "NumImmat|Immatriculation|NumImmatriculation|Immat"
+            ],
+            "attributs": [
+              "NbEssieu|NbEssieux|NombreEssieux|NbreEssieux",
+              "Volume|VolumeVehicule",
+              "PTRA"
+            ]
+          },
+          {
+            "nom": "AFFECTER",
+            "fk": {
+              "NumImmat": "VEHICULE"
+            }
+          },
+          {
+            "nom": "CONCERNER",
+            "alias": [
+              "TOURNEE_PDL",
+              "DESSERVIR",
+              "PASSER",
+              "TOURNEEPDL",
+              "PDL_TOURNEE"
+            ],
+            "role": "indiquer les PDL desservis par chaque tournée",
+            "pk": [
+              "CodeTourn",
+              "CodePDL"
+            ],
+            "fk": {
+              "CodeTourn": "TOURNEE",
+              "CodePDL": "PDL"
+            },
+            "optionnels": [
+              "OrdrePassage|Ordre|NumOrdre|RangPassage"
+            ]
+          }
+        ],
+        "tablesOptionnelles": [
+          "DATE",
+          "DATES",
+          "JOUR",
+          "JOURS",
+          "CALENDRIER"
+        ]
+      },
+      "variantes": [
+        {
+          "tables": [
+            {
+              "nom": "MANUTENTIONNAIRE",
+              "alias": [
+                "MANUTENTIONNAIRES",
+                "MANUT"
+              ],
+              "role": "les manutentionnaires (une catégorie de salariés), leur CACES, leur entrepôt et leur chef",
+              "pk": [
+                "NumSal|NumSalManut|NumManut|NumSalManutentionnaire"
+              ],
+              "fk": {
+                "NumSal|NumSalManut|NumManut|NumSalManutentionnaire": "SALARIE",
+                "CodeEnt": "ENTREPOT",
+                "NumSalChef|NumSalManutChef|NumSalManut_Chef|NumChef|NumSalResponsable|NumChefEquipe|NumSalDirigeant": "SALARIE"
+              },
+              "attributs": [
+                "NumCACES|CACES|NoCACES|NumeroCACES"
+              ]
+            },
+            {
+              "nom": "VEHICULE",
+              "alias": [
+                "VEHICULES",
+                "CAMION",
+                "CAMIONS"
+              ],
+              "role": "décrire les véhicules",
+              "pk": [
+                "NumImmat|Immatriculation|NumImmatriculation|Immat"
+              ],
+              "attributs": [
+                "NbEssieu|NbEssieux|NombreEssieux|NbreEssieux",
+                "Volume|VolumeVehicule",
+                "PTRA"
+              ]
+            },
+            {
+              "nom": "AFFECTER",
+              "fk": {
+                "NumImmat": "VEHICULE"
+              }
+            },
+            {
+              "nom": "CONCERNER",
+              "alias": [
+                "TOURNEE_PDL",
+                "DESSERVIR",
+                "PASSER",
+                "TOURNEEPDL",
+                "PDL_TOURNEE"
+              ],
+              "role": "indiquer les PDL desservis par chaque tournée",
+              "pk": [
+                "CodeTourn",
+                "CodePDL"
+              ],
+              "fk": {
+                "CodeTourn": "TOURNEE",
+                "CodePDL": "PDL"
+              },
+              "optionnels": [
+                "OrdrePassage|Ordre|NumOrdre|RangPassage"
+              ]
+            }
+          ],
+          "tablesOptionnelles": [
+            "DATE",
+            "DATES",
+            "JOUR",
+            "JOURS",
+            "CALENDRIER"
+          ]
+        }
+      ],
+      "indice": "Un sous-type devient une table dont la clé primaire est aussi une clé étrangère vers la table générique (comme CHAUFFEUR). Le chef est un autre manutentionnaire : une clé étrangère de la table vers elle-même, avec un autre nom que la clé. Une relation « plusieurs à plusieurs » devient une table à clé composée. N'oubliez pas de relier NumImmat de AFFECTER à sa table."
+    },
+    {
+      "id": "s02",
+      "type": "schema",
+      "theme": "Évolution du schéma",
+      "annale": "2018",
+      "enonce": "Chaque véhicule sera équipé d'un dispositif de géolocalisation : on enregistre la date d'installation du dispositif dans le véhicule et la date de sa dernière vérification. Chaque entrepôt dispose de quais numérotés de 1 à n dans l'entrepôt (le quai n° 3 de Cavaillon n'est pas le quai n° 3 de Brebières), avec une longueur et la capacité de relevage de leur niveleur. Un chargement a un numéro unique, une date et une heure ; il est effectué sur un seul quai et transporté par un seul véhicule ; il est réalisé par un manutentionnaire et contrôlé par un autre manutentionnaire. Le chargement est ensuite réparti sur plusieurs PDL, et on enregistre l'heure de passage du véhicule à chaque PDL. Complétez le schéma ci-dessous.",
+      "depart": [
+        "ENTREPOT",
+        "MANUTENTIONNAIRE",
+        "VEHICULE",
+        "PDL"
+      ],
+      "solution": {
+        "tables": [
+          {
+            "nom": "VEHICULE",
+            "attributs": [
+              "DateInstal|DateInstallation|DateInstalDispositif",
+              "DateVerif|DateVerification|DateDerniereVerif|DateDernVerif"
+            ]
+          },
+          {
+            "nom": "QUAI",
+            "alias": [
+              "QUAIS"
+            ],
+            "role": "décrire les quais de chaque entrepôt",
+            "pk": [
+              "CodeEnt",
+              "CodeQuai|NumQuai|NoQuai|NumeroQuai"
+            ],
+            "fk": {
+              "CodeEnt": "ENTREPOT"
+            },
+            "attributs": [
+              "LongueurQuai|Longueur",
+              "CapaciteRelevage|Capacite|CapaciteNiveleur"
+            ]
+          },
+          {
+            "nom": "CHARGEMENT",
+            "alias": [
+              "CHARGEMENTS"
+            ],
+            "role": "enregistrer les chargements (date, quai, véhicule, manutentionnaires)",
+            "pk": [
+              "NumCharge|NumCharg|NumChargement|NoCharge|NoChargement|CodeCharge|CodeChargement"
+            ],
+            "fk": {
+              "CodeEnt": "QUAI",
+              "CodeQuai|NumQuai|NoQuai|NumeroQuai": "QUAI",
+              "NumSalRealise|NumSalReal|NumManutRealise|NumSalRealisation|NumSalChargement|NumSalCharge|NumManutCharge|NumSalChargeur|NumSalRealiser|NumManutChargement": "MANUTENTIONNAIRE",
+              "NumSalControle|NumSalCtrl|NumManutControle|NumSalControleur|NumSalVerif|NumManutControleur|NumSalControler": "MANUTENTIONNAIRE",
+              "NumImmat": "VEHICULE"
+            },
+            "attributs": [
+              "DateCharge|DateCharg|DateChargement"
+            ],
+            "optionnels": [
+              "HeureCharge|HeureCharg|HeureChargement"
+            ]
+          },
+          {
+            "nom": "LIVRER",
+            "alias": [
+              "LIVRAISON",
+              "LIVRAISONS",
+              "REPARTIR",
+              "CHARGEMENT_PDL",
+              "DESSERVIR",
+              "PASSAGE"
+            ],
+            "role": "enregistrer l'heure de passage à chaque PDL pour chaque chargement",
+            "pk": [
+              "NumCharge|NumCharg|NumChargement|NoCharge|NoChargement|CodeCharge|CodeChargement",
+              "CodePDL"
+            ],
+            "fk": {
+              "NumCharge|NumCharg|NumChargement|NoCharge|NoChargement|CodeCharge|CodeChargement": "CHARGEMENT",
+              "CodePDL": "PDL"
+            },
+            "attributs": [
+              "HeurePDL|HeurePassage|HeureLivraison|HeurePassagePDL"
+            ]
+          }
+        ]
+      },
+      "variantes": [
+        {
+          "tables": [
+            {
+              "nom": "VEHICULE",
+              "attributs": [
+                "DateInstal|DateInstallation|DateInstalDispositif",
+                "DateVerif|DateVerification|DateDerniereVerif|DateDernVerif"
+              ]
+            },
+            {
+              "nom": "QUAI",
+              "alias": [
+                "QUAIS"
+              ],
+              "role": "décrire les quais de chaque entrepôt",
+              "pk": [
+                "CodeEnt",
+                "CodeQuai|NumQuai|NoQuai|NumeroQuai"
+              ],
+              "fk": {
+                "CodeEnt": "ENTREPOT"
+              },
+              "attributs": [
+                "LongueurQuai|Longueur",
+                "CapaciteRelevage|Capacite|CapaciteNiveleur"
+              ]
+            },
+            {
+              "nom": "CHARGEMENT",
+              "alias": [
+                "CHARGEMENTS"
+              ],
+              "role": "enregistrer les chargements (date, quai, véhicule, manutentionnaires)",
+              "pk": [
+                "NumCharge|NumCharg|NumChargement|NoCharge|NoChargement|CodeCharge|CodeChargement"
+              ],
+              "fk": {
+                "CodeEnt": "ENTREPOT",
+                "CodeQuai|NumQuai|NoQuai|NumeroQuai": "QUAI",
+                "NumSalRealise|NumSalReal|NumManutRealise|NumSalRealisation|NumSalChargement|NumSalCharge|NumManutCharge|NumSalChargeur|NumSalRealiser|NumManutChargement": "MANUTENTIONNAIRE",
+                "NumSalControle|NumSalCtrl|NumManutControle|NumSalControleur|NumSalVerif|NumManutControleur|NumSalControler": "MANUTENTIONNAIRE",
+                "NumImmat": "VEHICULE"
+              },
+              "attributs": [
+                "DateCharge|DateCharg|DateChargement"
+              ],
+              "optionnels": [
+                "HeureCharge|HeureCharg|HeureChargement"
+              ]
+            },
+            {
+              "nom": "LIVRER",
+              "alias": [
+                "LIVRAISON",
+                "LIVRAISONS",
+                "REPARTIR",
+                "CHARGEMENT_PDL",
+                "DESSERVIR",
+                "PASSAGE"
+              ],
+              "role": "enregistrer l'heure de passage à chaque PDL pour chaque chargement",
+              "pk": [
+                "NumCharge|NumCharg|NumChargement|NoCharge|NoChargement|CodeCharge|CodeChargement",
+                "CodePDL"
+              ],
+              "fk": {
+                "NumCharge|NumCharg|NumChargement|NoCharge|NoChargement|CodeCharge|CodeChargement": "CHARGEMENT",
+                "CodePDL": "PDL"
+              },
+              "attributs": [
+                "HeurePDL|HeurePassage|HeureLivraison|HeurePassagePDL"
+              ]
+            }
+          ],
+          "partiel": "Presque : un quai est identifié par le couple (CodeEnt, CodeQuai). Dans CHARGEMENT, CodeEnt et CodeQuai forment ensemble la référence au quai utilisé : les deux doivent faire référence à QUAI (et non CodeEnt à ENTREPOT)."
+        }
+      ],
+      "indice": "Un quai numéroté dans son entrepôt a une clé composée (identifiant relatif). Un chargement, fait sur un seul quai, reprend toute la clé du quai. Deux rôles différents d'un manutentionnaire (réaliser, contrôler) donnent deux clés étrangères de noms différents vers la même table. La relation entre chargements et PDL porte une heure : c'est une table à clé composée."
+    },
+    {
+      "id": "p01",
+      "type": "processus",
+      "theme": "Processus",
+      "annale": "2018",
+      "enonce": "Dossier 3 – Gestion des palettes perdues. L'entreprise a décidé de tester un processus de gestion des palettes perdues au sein de l'entrepôt de Cavaillon : elles sont triées puis revendues à un négociant en palettes d'occasion. C'est un manutentionnaire qui a été chargé de cette activité. Annexe 5 – Entretien avec le manutentionnaire : « Dans l'entrepôt de Cavaillon, j'ai été chargé par la direction de gérer les palettes perdues. Chaque fin d'après-midi, du lundi au vendredi, je regroupe et décompte les palettes perdues de la journée selon les différents types répertoriés. Ce décompte est ensuite saisi dans une fiche de saisie hebdomadaire. Tous les samedis, le négociant qui recycle nos palettes envoie un camion pour récupérer les palettes de la semaine (uniquement celles qui sont en bon état). Avant son arrivée, j'évalue l'état et recompte les palettes du même type afin d'établir la fiche de chargement transporteur dont un exemplaire est remis au chauffeur du négociant (à titre de bon de livraison). Je contrôle alors la quantité de palettes remises au transporteur par rapport à la quantité totale de palettes collectées au fil de la semaine. Ces deux quantités peuvent être différentes : en effet, il arrive parfois que quelques palettes soient en trop mauvais état (abîmées au cours de la semaine) et donc mises au rebut. Cette différence de nombre de palettes est appelée « casse ». Je complète alors une fiche de casse annuelle permettant d'évaluer la perte en euro liée à la « casse ». » Établissez un schéma (événements-résultats) du processus de gestion des palettes perdues.",
+      "elements": [
+        {
+          "kind": "event",
+          "label": "Fin d'après-midi"
+        },
+        {
+          "kind": "event",
+          "label": "Fiche de saisie hebdomadaire complétée"
+        },
+        {
+          "kind": "event",
+          "label": "Samedi"
+        },
+        {
+          "kind": "event",
+          "label": "Fiche de chargement"
+        },
+        {
+          "kind": "event",
+          "label": "Bon de livraison"
+        },
+        {
+          "kind": "event",
+          "label": "Fiche de casse complétée"
+        },
+        {
+          "kind": "event",
+          "label": "Livraison conforme"
+        },
+        {
+          "kind": "operation",
+          "label": "Gestion journalière des palettes"
+        },
+        {
+          "kind": "operation",
+          "label": "Livraison des palettes"
+        },
+        {
+          "kind": "operation",
+          "label": "Contrôle écarts"
+        }
+      ],
+      "attendus": [
+        {
+          "operation": "Contrôle écarts",
+          "alias": [
+            "Contrôle des écarts",
+            "Contrôle des quantités",
+            "Contrôle quantités",
+            "Contrôle de la casse",
+            "Comparaison des quantités",
+            "Contrôle livraison"
+          ],
+          "synchronisation": "Fiche de saisie hebdomadaire complétée ET Fiche de chargement",
+          "regles": [
+            "Quantité différente",
+            "Quantité identique"
+          ]
+        }
+      ],
+      "equivalents": {
+        "Fiche de saisie hebdomadaire complétée": [
+          "Feuille saisie hebdomadaire complétée",
+          "Fiche hebdomadaire",
+          "Feuille de saisie hebdomadaire",
+          "Décompte hebdomadaire",
+          "Décompte saisi",
+          "Fiche de saisie",
+          "Quantité hebdomadaire"
+        ],
+        "Fiche de chargement": [
+          "Fiche de chargement transporteur",
+          "Fiche de chargement établie",
+          "Palettes chargées",
+          "Quantité livrée"
+        ],
+        "Quantité différente": [
+          "QTE différente",
+          "Écart",
+          "Casse",
+          "Différence",
+          "Quantités différentes",
+          "Écart constaté"
+        ],
+        "Quantité identique": [
+          "QTE ok",
+          "Pas d'écart",
+          "Pas de casse",
+          "Quantités identiques",
+          "Quantité OK",
+          "Conforme",
+          "Sinon"
+        ],
+        "Livraison conforme": [
+          "Contrôle terminé",
+          "Aucune casse",
+          "Pas de casse",
+          "Quantités conformes"
+        ]
+      },
+      "solution": {
+        "lanes": [
+          "Manutentionnaire",
+          "Transporteur / chauffeur"
+        ],
+        "nodes": [
+          {
+            "id": "n1",
+            "kind": "event",
+            "label": "Fin d'après-midi",
+            "x": 120,
+            "y": 95
+          },
+          {
+            "id": "n2",
+            "kind": "operation",
+            "label": "Gestion journalière des palettes",
+            "x": 120,
+            "y": 215,
+            "actions": [
+              "Regroupement des palettes par type",
+              "Saisie du décompte dans la fiche hebdomadaire"
+            ],
+            "rules": [
+              "Toujours"
+            ]
+          },
+          {
+            "id": "n3",
+            "kind": "event",
+            "label": "Fiche de saisie hebdomadaire complétée",
+            "x": 65,
+            "y": 350
+          },
+          {
+            "id": "n4",
+            "kind": "event",
+            "label": "Samedi",
+            "x": 165,
+            "y": 455
+          },
+          {
+            "id": "n5",
+            "kind": "operation",
+            "label": "Livraison des palettes",
+            "x": 165,
+            "y": 600,
+            "actions": [
+              "Évaluation de l'état des palettes",
+              "Décompte des palettes à livrer",
+              "Établissement de la fiche de chargement"
+            ],
+            "rules": [
+              "Toujours"
+            ]
+          },
+          {
+            "id": "n6",
+            "kind": "event",
+            "label": "Fiche de chargement",
+            "x": 165,
+            "y": 755
+          },
+          {
+            "id": "n7",
+            "kind": "event",
+            "label": "Bon de livraison",
+            "x": 360,
+            "y": 755
+          },
+          {
+            "id": "n8",
+            "kind": "sync",
+            "label": "",
+            "x": 120,
+            "y": 850,
+            "cond": "A et B"
+          },
+          {
+            "id": "n9",
+            "kind": "operation",
+            "label": "Contrôle écarts",
+            "x": 120,
+            "y": 965,
+            "actions": [
+              "Contrôle de la quantité livrée par rapport à la quantité hebdomadaire"
+            ],
+            "rules": [
+              "Quantité différente",
+              "Quantité identique"
+            ]
+          },
+          {
+            "id": "n10",
+            "kind": "event",
+            "label": "Fiche de casse complétée",
+            "x": 80,
+            "y": 1095
+          },
+          {
+            "id": "n11",
+            "kind": "event",
+            "label": "Livraison conforme",
+            "x": 300,
+            "y": 1095
+          }
+        ],
+        "arrows": [
+          {
+            "id": "a1",
+            "from": "n1",
+            "rule": null,
+            "to": "n2"
+          },
+          {
+            "id": "a2",
+            "from": "n2",
+            "rule": 0,
+            "to": "n3"
+          },
+          {
+            "id": "a3",
+            "from": "n4",
+            "rule": null,
+            "to": "n5"
+          },
+          {
+            "id": "a4",
+            "from": "n5",
+            "rule": 0,
+            "to": "n6"
+          },
+          {
+            "id": "a5",
+            "from": "n5",
+            "rule": 0,
+            "to": "n7"
+          },
+          {
+            "id": "a6",
+            "from": "n3",
+            "rule": null,
+            "to": "n8",
+            "letter": "A"
+          },
+          {
+            "id": "a7",
+            "from": "n6",
+            "rule": null,
+            "to": "n8",
+            "letter": "B"
+          },
+          {
+            "id": "a8",
+            "from": "n8",
+            "rule": null,
+            "to": "n9"
+          },
+          {
+            "id": "a9",
+            "from": "n9",
+            "rule": 0,
+            "to": "n10"
+          },
+          {
+            "id": "a10",
+            "from": "n9",
+            "rule": 1,
+            "to": "n11"
+          }
+        ]
+      },
+      "autoevaluation": [
+        "Le manutentionnaire réalise toutes les opérations ; le transporteur (chauffeur du négociant) ne fait que recevoir le bon de livraison.",
+        "Deux événements temporels déclenchent le processus : chaque fin d'après-midi (gestion journalière) et chaque samedi (livraison des palettes).",
+        "La livraison des palettes produit la fiche de chargement et le bon de livraison remis au chauffeur.",
+        "Le contrôle des écarts attend la fiche de saisie hebdomadaire ET la fiche de chargement : c'est une synchronisation.",
+        "Le contrôle des écarts a deux règles d'émission : quantités différentes (fiche de casse complétée) / quantités identiques."
+      ],
+      "indice": "Deux rythmes différents : une opération quotidienne et une opération hebdomadaire, chacune déclenchée par un événement temporel. Le contrôle compare deux informations produites par ces deux opérations : il ne peut avoir lieu que lorsque les deux sont disponibles. Ce contrôle n'aboutit pas toujours au même résultat."
+    }
+  ]
+}

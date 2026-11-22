@@ -1,0 +1,1581 @@
+{
+  "id": "dcg2015",
+  "titre": "DCG 2015 – Gaya, hôtels en Bretagne",
+  "aujourdhui": "2015-05-15",
+  "contexte": "La société Gaya exploite 14 hôtels, surtout en Bretagne, près des ports de plaisance (HOTEL, numérotés de 1 à 14 ; CategorieHotel est un nombre de 1 à 5 ; DateCreation est la date à laquelle l'hôtel a rejoint Gaya). Un CLIENT, identifié par son numéro de compte (411…), effectue des RESERVATION ; une réservation peut être annulée (AnnuleRes = 'O') et donne lieu à zéro, une ou plusieurs FACTURE (PayeFac = 'O' si elle est payée, 'N' sinon). Chaque hôtel propose plusieurs types de chambres (TYPECHAMBRE, Fumeur = 'O' ou 'N') : TARIF donne pour chaque hôtel et chaque type le prix HT par nuit et le nombre de chambres. REDUCTION donne le taux de réduction accordé par un hôtel pour une PERIODE et un type de chambre ; TxReduction est exprimé en points de pourcentage (15 signifie 15 %). Simplification par rapport au sujet : les chambres et leur planning ne sont pas dans la base, chaque réservation porte donc directement le numéro de l'hôtel réservé (NumHotel) ; les noms de colonnes n'ont ni accents ni parenthèses (PayéFac(O/N) devient PayeFac).",
+  "source": "Inspiré du sujet DCG UE8 session 2015. Données entièrement fictives.",
+  "schemaGrid": {
+    "CLIENT": [
+      0,
+      0
+    ],
+    "RESERVATION": [
+      1,
+      0
+    ],
+    "FACTURE": [
+      2,
+      0
+    ],
+    "TARIF": [
+      0,
+      1
+    ],
+    "HOTEL": [
+      1,
+      1
+    ],
+    "PERIODE": [
+      2,
+      1
+    ],
+    "TYPECHAMBRE": [
+      0,
+      2
+    ],
+    "REDUCTION": [
+      1,
+      2
+    ]
+  },
+  "questions": [
+    {
+      "id": "q01",
+      "theme": "Une seule table",
+      "enonce": "Afficher le nom, la ville et la catégorie de tous les hôtels de la société, triés par ordre alphabétique des noms.",
+      "ordered": [
+        0
+      ],
+      "correction": [
+        "SELECT NomHotel, VilleHotel, CategorieHotel",
+        "FROM HOTEL",
+        "ORDER BY NomHotel;"
+      ],
+      "indice": "Toutes les informations sont dans HOTEL ; le tri se fait avec ORDER BY."
+    },
+    {
+      "id": "q02",
+      "theme": "Une seule table",
+      "enonce": "Afficher le nom, la ville et le code postal des hôtels situés dans le Finistère (code postal commençant par 29).",
+      "correction": [
+        "SELECT NomHotel, VilleHotel, CPHotel",
+        "FROM HOTEL",
+        "WHERE CPHotel LIKE '29%';"
+      ],
+      "indice": "LIKE '29%' : le % remplace n'importe quelle suite de caractères après « 29 ». Le code postal est un texte."
+    },
+    {
+      "id": "q03",
+      "theme": "Une seule table",
+      "enonce": "Afficher le numéro, le nom et le prénom des clients dont l'adresse électronique n'est pas connue.",
+      "correction": [
+        "SELECT NumCli, NomCli, PrenomCli",
+        "FROM CLIENT",
+        "WHERE MelCli IS NULL;"
+      ],
+      "indice": "Une valeur absente se teste avec IS NULL (et non = NULL)."
+    },
+    {
+      "id": "q04",
+      "theme": "Calculs et agrégats",
+      "enonce": "Combien de factures n'ont pas encore été payées (toutes années confondues) ?",
+      "correction": [
+        "SELECT COUNT(*)",
+        "FROM FACTURE",
+        "WHERE PayeFac = 'N';"
+      ],
+      "variantes": [
+        [
+          "SELECT COUNT(NumFac)",
+          "FROM FACTURE",
+          "WHERE PayeFac = 'N';"
+        ]
+      ],
+      "indice": "PayeFac vaut 'O' (payée) ou 'N' (impayée). COUNT(*) compte les lignes retenues par le WHERE."
+    },
+    {
+      "id": "q05",
+      "theme": "Calculs et agrégats",
+      "enonce": "Quelle est la durée moyenne (en nombre de nuits) des réservations qui n'ont pas été annulées ?",
+      "correction": [
+        "SELECT AVG(NbNuitRes)",
+        "FROM RESERVATION",
+        "WHERE AnnuleRes = 'N';"
+      ],
+      "indice": "AVG calcule une moyenne ; les réservations annulées ont AnnuleRes = 'O'."
+    },
+    {
+      "id": "q06",
+      "theme": "Calculs et agrégats",
+      "enonce": "Afficher, pour chaque catégorie d'hôtel, le nombre d'hôtels de cette catégorie.",
+      "correction": [
+        "SELECT CategorieHotel, COUNT(*) AS NbHotels",
+        "FROM HOTEL",
+        "GROUP BY CategorieHotel;"
+      ],
+      "indice": "GROUP BY CategorieHotel forme un groupe par catégorie ; COUNT(*) compte les hôtels de chaque groupe."
+    },
+    {
+      "id": "q07",
+      "theme": "Dates",
+      "annale": "2015",
+      "enonce": "Afficher le nombre de réservations annulées dont la date de début est comprise entre le 01/07/2014 et le 31/08/2014 (bornes incluses).",
+      "correction": [
+        "SELECT COUNT(*) AS NbReservationsAnnulees",
+        "FROM RESERVATION",
+        "WHERE DateDebRes BETWEEN '01/07/2014' AND '31/08/2014'",
+        "AND AnnuleRes = 'O';"
+      ],
+      "variantes": [
+        [
+          "SELECT COUNT(*)",
+          "FROM RESERVATION",
+          "WHERE DateDebRes >= '2014-07-01' AND DateDebRes <= '2014-08-31'",
+          "AND AnnuleRes = 'O';"
+        ],
+        [
+          "SELECT COUNT(NumRes)",
+          "FROM RESERVATION",
+          "WHERE YEAR(DateDebRes) = 2014",
+          "AND MONTH(DateDebRes) IN (7, 8)",
+          "AND AnnuleRes = 'O';"
+        ]
+      ],
+      "indice": "BETWEEN inclut les deux bornes. Une réservation annulée a AnnuleRes = 'O'. Le corrigé officiel écrivait COUNT* : les parenthèses sont obligatoires, COUNT(*)."
+    },
+    {
+      "id": "q08",
+      "theme": "Dates",
+      "enonce": "Afficher le numéro, la date et l'indicateur de paiement des factures émises en décembre 2014.",
+      "correction": [
+        "SELECT NumFac, DateFac, PayeFac",
+        "FROM FACTURE",
+        "WHERE YEAR(DateFac) = 2014",
+        "AND MONTH(DateFac) = 12;"
+      ],
+      "variantes": [
+        [
+          "SELECT NumFac, DateFac, PayeFac",
+          "FROM FACTURE",
+          "WHERE DateFac BETWEEN '01/12/2014' AND '31/12/2014';"
+        ]
+      ],
+      "indice": "YEAR(date) et MONTH(date) donnent l'année et le mois d'une date."
+    },
+    {
+      "id": "q09",
+      "theme": "Dates",
+      "enonce": "Quels sont les séjours en cours à la date du jour ? Afficher le numéro, la date de début et la date de fin des réservations non annulées qui ont commencé au plus tard aujourd'hui et dont la date de fin est postérieure à la date du jour.",
+      "correction": [
+        "SELECT NumRes, DateDebRes, DateFinRes",
+        "FROM RESERVATION",
+        "WHERE AnnuleRes = 'N'",
+        "AND DateDebRes <= NOW()",
+        "AND DateFinRes > NOW();"
+      ],
+      "variantes": [
+        [
+          "SELECT NumRes, DateDebRes, DateFinRes",
+          "FROM RESERVATION",
+          "WHERE AnnuleRes = 'N'",
+          "AND NOW() >= DateDebRes",
+          "AND NOW() < DateFinRes;"
+        ]
+      ],
+      "indice": "NOW() (ou CURDATE()) donne la date du jour. Attention aux réservations annulées, et à celle qui se termine aujourd'hui (date de fin non postérieure)."
+    },
+    {
+      "id": "q10",
+      "theme": "Jointures",
+      "enonce": "Afficher les réservations du client HERBERT (n° 411001208) : numéro de réservation, date de début, nom de l'hôtel et indicateur d'annulation, de la plus récente à la plus ancienne.",
+      "ordered": [
+        1
+      ],
+      "correction": [
+        "SELECT NumRes, DateDebRes, NomHotel, AnnuleRes",
+        "FROM RESERVATION, HOTEL",
+        "WHERE RESERVATION.NumHotel = HOTEL.NumHotel",
+        "AND NumCli = 411001208",
+        "ORDER BY DateDebRes DESC;"
+      ],
+      "variantes": [
+        [
+          "SELECT NumRes, DateDebRes, NomHotel, AnnuleRes",
+          "FROM RESERVATION",
+          "INNER JOIN HOTEL ON RESERVATION.NumHotel = HOTEL.NumHotel",
+          "WHERE NumCli = 411001208",
+          "ORDER BY DateDebRes DESC;"
+        ]
+      ],
+      "indice": "Le nom de l'hôtel est dans HOTEL : reliez RESERVATION et HOTEL par NumHotel."
+    },
+    {
+      "id": "q11",
+      "theme": "Jointures",
+      "annale": "2015",
+      "enonce": "Afficher la liste sans doublon des clients (numéro, nom et prénom) ayant au moins une facture de 2014 impayée.",
+      "correction": [
+        "SELECT DISTINCT CLIENT.NumCli, NomCli, PrenomCli",
+        "FROM CLIENT, RESERVATION, FACTURE",
+        "WHERE CLIENT.NumCli = RESERVATION.NumCli",
+        "AND RESERVATION.NumRes = FACTURE.NumRes",
+        "AND PayeFac = 'N'",
+        "AND YEAR(DateFac) = 2014;"
+      ],
+      "variantes": [
+        [
+          "SELECT DISTINCT CLIENT.NumCli, NomCli, PrenomCli",
+          "FROM CLIENT",
+          "INNER JOIN RESERVATION ON CLIENT.NumCli = RESERVATION.NumCli",
+          "INNER JOIN FACTURE ON RESERVATION.NumRes = FACTURE.NumRes",
+          "WHERE PayeFac = 'N'",
+          "AND DateFac BETWEEN '01/01/2014' AND '31/12/2014';"
+        ]
+      ],
+      "indice": "Il faut passer de FACTURE à CLIENT par RESERVATION. Un client qui a deux factures impayées sortirait deux fois : DISTINCT, mais sur les colonnes du client seulement (DISTINCT * garderait une ligne par facture). Deux clients différents peuvent porter le même nom : gardez le numéro."
+    },
+    {
+      "id": "q12",
+      "theme": "Jointures",
+      "enonce": "Afficher les tarifs pratiqués par le « Grand Hôtel de la Rade » : libellé du type de chambre, indicateur fumeur et prix HT, du moins cher au plus cher.",
+      "ordered": [
+        2
+      ],
+      "correction": [
+        "SELECT LibelleType, Fumeur, PrixHT",
+        "FROM TARIF, TYPECHAMBRE, HOTEL",
+        "WHERE TARIF.NumType = TYPECHAMBRE.NumType",
+        "AND TARIF.NumHotel = HOTEL.NumHotel",
+        "AND NomHotel = 'Grand Hôtel de la Rade'",
+        "ORDER BY PrixHT;"
+      ],
+      "variantes": [
+        [
+          "SELECT LibelleType, Fumeur, PrixHT",
+          "FROM TARIF",
+          "INNER JOIN TYPECHAMBRE ON TARIF.NumType = TYPECHAMBRE.NumType",
+          "INNER JOIN HOTEL ON TARIF.NumHotel = HOTEL.NumHotel",
+          "WHERE NomHotel = 'Grand Hôtel de la Rade'",
+          "ORDER BY PrixHT;"
+        ]
+      ],
+      "indice": "TARIF relie un hôtel et un type de chambre : joignez-le à TYPECHAMBRE (libellé) et à HOTEL (nom)."
+    },
+    {
+      "id": "q13",
+      "theme": "Jointures",
+      "enonce": "Pour l'« Hôtel des Remparts » en « Basse saison », afficher pour chaque type de chambre : le libellé du type, le prix HT, le taux de réduction et le prix HT après réduction. Rappel : TxReduction est exprimé en points de pourcentage (15 signifie 15 %).",
+      "correction": [
+        "SELECT LibelleType, PrixHT, TxReduction, PrixHT * (1 - TxReduction / 100) AS PrixReduit",
+        "FROM TARIF, REDUCTION, TYPECHAMBRE, HOTEL, PERIODE",
+        "WHERE TARIF.NumHotel = REDUCTION.NumHotel",
+        "AND TARIF.NumType = REDUCTION.NumType",
+        "AND TARIF.NumType = TYPECHAMBRE.NumType",
+        "AND TARIF.NumHotel = HOTEL.NumHotel",
+        "AND REDUCTION.NumPeriode = PERIODE.NumPeriode",
+        "AND NomHotel = 'Hôtel des Remparts'",
+        "AND LibellePeriode = 'Basse saison';"
+      ],
+      "variantes": [
+        [
+          "SELECT LibelleType, PrixHT, TxReduction, PrixHT - PrixHT * TxReduction / 100",
+          "FROM TARIF",
+          "INNER JOIN REDUCTION ON TARIF.NumHotel = REDUCTION.NumHotel AND TARIF.NumType = REDUCTION.NumType",
+          "INNER JOIN TYPECHAMBRE ON TARIF.NumType = TYPECHAMBRE.NumType",
+          "INNER JOIN HOTEL ON TARIF.NumHotel = HOTEL.NumHotel",
+          "INNER JOIN PERIODE ON REDUCTION.NumPeriode = PERIODE.NumPeriode",
+          "WHERE NomHotel = 'Hôtel des Remparts'",
+          "AND LibellePeriode = 'Basse saison';"
+        ]
+      ],
+      "indice": "Le prix est dans TARIF, le taux dans REDUCTION : ces deux tables se relient par DEUX colonnes à la fois (NumHotel ET NumType). Avec 15 points, le prix réduit vaut PrixHT * (1 - 15 / 100)."
+    },
+    {
+      "id": "q14",
+      "theme": "Jointures et regroupements",
+      "annale": "2015",
+      "enonce": "Afficher les informations permettant de compléter le tableau suivant : numéro du client, nom du client, nombre de réservations annulées. Seuls les clients ayant plus de 3 réservations annulées doivent figurer (exemples : 411001208 HERBERT 4 ; 411000825 THOLLAS 5 ; …).",
+      "correction": [
+        "SELECT CLIENT.NumCli AS Numero, NomCli AS NomClient, COUNT(NumRes) AS NbReservationsAnnulees",
+        "FROM CLIENT, RESERVATION",
+        "WHERE CLIENT.NumCli = RESERVATION.NumCli",
+        "AND AnnuleRes = 'O'",
+        "GROUP BY CLIENT.NumCli, NomCli",
+        "HAVING COUNT(NumRes) > 3;"
+      ],
+      "variantes": [
+        [
+          "SELECT CLIENT.NumCli, NomCli, COUNT(*)",
+          "FROM CLIENT",
+          "INNER JOIN RESERVATION ON CLIENT.NumCli = RESERVATION.NumCli",
+          "WHERE AnnuleRes = 'O'",
+          "GROUP BY CLIENT.NumCli, NomCli",
+          "HAVING COUNT(*) >= 4;"
+        ]
+      ],
+      "indice": "NumCli existe dans CLIENT et dans RESERVATION : préfixez-le. Le filtre sur les annulations va dans WHERE (avant le regroupement), la condition sur le nombre dans HAVING. Un alias contenant des espaces devrait être entre guillemets : préférez NbReservationsAnnulees."
+    },
+    {
+      "id": "q15",
+      "theme": "Jointures et regroupements",
+      "enonce": "Afficher, pour chaque hôtel, son nom et le nombre de réservations non annulées dont le séjour a commencé en 2014, de l'hôtel qui en a le plus à celui qui en a le moins.",
+      "ordered": [
+        1
+      ],
+      "correction": [
+        "SELECT NomHotel, COUNT(*) AS NbReservations",
+        "FROM HOTEL, RESERVATION",
+        "WHERE HOTEL.NumHotel = RESERVATION.NumHotel",
+        "AND AnnuleRes = 'N'",
+        "AND YEAR(DateDebRes) = 2014",
+        "GROUP BY HOTEL.NumHotel, NomHotel",
+        "ORDER BY COUNT(*) DESC;"
+      ],
+      "variantes": [
+        [
+          "SELECT NomHotel, COUNT(NumRes) AS NbReservations",
+          "FROM HOTEL",
+          "INNER JOIN RESERVATION ON HOTEL.NumHotel = RESERVATION.NumHotel",
+          "WHERE AnnuleRes = 'N'",
+          "AND DateDebRes BETWEEN '01/01/2014' AND '31/12/2014'",
+          "GROUP BY HOTEL.NumHotel, NomHotel",
+          "ORDER BY NbReservations DESC;"
+        ]
+      ],
+      "indice": "Regroupez les réservations par hôtel (GROUP BY) après avoir filtré l'année et les annulations dans le WHERE ; triez avec ORDER BY … DESC."
+    },
+    {
+      "id": "q16",
+      "theme": "Jointures et regroupements",
+      "enonce": "Le nombre de chambres d'un hôtel est la somme des chambres de chaque type (NbChambreTyp dans TARIF). Afficher le nom et le nombre total de chambres des hôtels qui ont plus de 40 chambres.",
+      "correction": [
+        "SELECT NomHotel, SUM(NbChambreTyp) AS NbChambres",
+        "FROM HOTEL, TARIF",
+        "WHERE HOTEL.NumHotel = TARIF.NumHotel",
+        "GROUP BY HOTEL.NumHotel, NomHotel",
+        "HAVING SUM(NbChambreTyp) > 40;"
+      ],
+      "variantes": [
+        [
+          "SELECT NomHotel, SUM(NbChambreTyp)",
+          "FROM HOTEL",
+          "INNER JOIN TARIF ON HOTEL.NumHotel = TARIF.NumHotel",
+          "GROUP BY HOTEL.NumHotel, NomHotel",
+          "HAVING SUM(NbChambreTyp) >= 41;"
+        ]
+      ],
+      "indice": "SUM additionne les chambres de chaque type de l'hôtel ; la condition sur cette somme se place dans HAVING."
+    },
+    {
+      "id": "q17",
+      "theme": "Jointures et regroupements",
+      "enonce": "Afficher les clients (numéro, nom, prénom) qui ont au moins deux factures impayées, toutes années confondues, avec le nombre de factures impayées.",
+      "correction": [
+        "SELECT CLIENT.NumCli, NomCli, PrenomCli, COUNT(*) AS NbImpayees",
+        "FROM CLIENT, RESERVATION, FACTURE",
+        "WHERE CLIENT.NumCli = RESERVATION.NumCli",
+        "AND RESERVATION.NumRes = FACTURE.NumRes",
+        "AND PayeFac = 'N'",
+        "GROUP BY CLIENT.NumCli, NomCli, PrenomCli",
+        "HAVING COUNT(*) >= 2;"
+      ],
+      "variantes": [
+        [
+          "SELECT CLIENT.NumCli, NomCli, PrenomCli, COUNT(NumFac)",
+          "FROM CLIENT",
+          "INNER JOIN RESERVATION ON CLIENT.NumCli = RESERVATION.NumCli",
+          "INNER JOIN FACTURE ON RESERVATION.NumRes = FACTURE.NumRes",
+          "WHERE PayeFac = 'N'",
+          "GROUP BY CLIENT.NumCli, NomCli, PrenomCli",
+          "HAVING COUNT(NumFac) > 1;"
+        ]
+      ],
+      "indice": "Trois tables : CLIENT → RESERVATION → FACTURE. Regroupez par client ; deux homonymes doivent rester deux groupes distincts (regroupez aussi sur le numéro)."
+    },
+    {
+      "id": "q18",
+      "theme": "Sous-requêtes",
+      "enonce": "Le service comptable recherche les séjours à facturer : afficher le numéro, la date de fin et le numéro du client des réservations non annulées dont la date de fin est antérieure à la date du jour et qui n'ont donné lieu à aucune facture.",
+      "correction": [
+        "SELECT NumRes, DateFinRes, NumCli",
+        "FROM RESERVATION",
+        "WHERE AnnuleRes = 'N'",
+        "AND DateFinRes < NOW()",
+        "AND NumRes NOT IN (SELECT NumRes",
+        "                   FROM FACTURE);"
+      ],
+      "variantes": [
+        [
+          "SELECT NumRes, DateFinRes, NumCli",
+          "FROM RESERVATION",
+          "WHERE AnnuleRes = 'N'",
+          "AND DateFinRes < CURDATE()",
+          "AND NOT EXISTS (SELECT *",
+          "                FROM FACTURE",
+          "                WHERE FACTURE.NumRes = RESERVATION.NumRes);"
+        ]
+      ],
+      "indice": "Une réservation peut n'avoir aucune facture : la sous-requête donne les réservations facturées, NOT IN garde les autres."
+    },
+    {
+      "id": "q19",
+      "theme": "Sous-requêtes",
+      "enonce": "Afficher le numéro, le nom, le prénom et la ville des clients qui n'ont jamais effectué de réservation.",
+      "correction": [
+        "SELECT NumCli, NomCli, PrenomCli, VilleCli",
+        "FROM CLIENT",
+        "WHERE NumCli NOT IN (SELECT NumCli",
+        "                     FROM RESERVATION);"
+      ],
+      "variantes": [
+        [
+          "SELECT NumCli, NomCli, PrenomCli, VilleCli",
+          "FROM CLIENT",
+          "WHERE NOT EXISTS (SELECT *",
+          "                  FROM RESERVATION",
+          "                  WHERE RESERVATION.NumCli = CLIENT.NumCli);"
+        ]
+      ],
+      "indice": "La sous-requête donne les numéros des clients présents dans RESERVATION ; NOT IN garde les autres."
+    },
+    {
+      "id": "q20",
+      "theme": "Sous-requêtes",
+      "enonce": "Quelle est la chambre la plus chère de la société ? Afficher le nom de l'hôtel, le libellé du type de chambre et le prix HT.",
+      "correction": [
+        "SELECT NomHotel, LibelleType, PrixHT",
+        "FROM TARIF, HOTEL, TYPECHAMBRE",
+        "WHERE TARIF.NumHotel = HOTEL.NumHotel",
+        "AND TARIF.NumType = TYPECHAMBRE.NumType",
+        "AND PrixHT = (SELECT MAX(PrixHT)",
+        "              FROM TARIF);"
+      ],
+      "variantes": [
+        [
+          "SELECT NomHotel, LibelleType, PrixHT",
+          "FROM TARIF",
+          "INNER JOIN HOTEL ON TARIF.NumHotel = HOTEL.NumHotel",
+          "INNER JOIN TYPECHAMBRE ON TARIF.NumType = TYPECHAMBRE.NumType",
+          "WHERE PrixHT = (SELECT MAX(PrixHT)",
+          "                FROM TARIF);"
+        ]
+      ],
+      "indice": "La sous-requête calcule le prix maximum ; la requête principale cherche le tarif qui a ce prix. On ne peut pas écrire MAX(PrixHT) directement dans le WHERE."
+    },
+    {
+      "id": "q21",
+      "theme": "Sous-requêtes",
+      "enonce": "Les hôtels qui ont rejoint la société récemment n'accordent encore aucune réduction. Afficher le nom, la ville et la date d'entrée dans Gaya des hôtels qui n'ont aucun taux de réduction enregistré.",
+      "correction": [
+        "SELECT NomHotel, VilleHotel, DateCreation",
+        "FROM HOTEL",
+        "WHERE NumHotel NOT IN (SELECT NumHotel",
+        "                       FROM REDUCTION);"
+      ],
+      "variantes": [
+        [
+          "SELECT NomHotel, VilleHotel, DateCreation",
+          "FROM HOTEL",
+          "WHERE NOT EXISTS (SELECT *",
+          "                  FROM REDUCTION",
+          "                  WHERE REDUCTION.NumHotel = HOTEL.NumHotel);"
+        ]
+      ],
+      "indice": "La sous-requête donne les hôtels présents dans REDUCTION ; NOT IN garde les autres."
+    },
+    {
+      "id": "q22",
+      "theme": "Mises à jour",
+      "type": "write",
+      "annale": "2015",
+      "enonce": "Les taux de réduction sont exprimés en points de pourcentage (15 signifie 15 %). Augmenter de 0,5 point tous les taux de réduction actuels (un taux de 15 passe à 15,5).",
+      "correction": [
+        "UPDATE REDUCTION",
+        "SET TxReduction = TxReduction + 0.5;"
+      ],
+      "verif": "SELECT * FROM REDUCTION ORDER BY NumHotel, NumPeriode, NumType",
+      "indice": "UPDATE … SET colonne = colonne + … ; toutes les lignes sont concernées, il n'y a donc pas de WHERE. En SQL, le séparateur décimal est le point."
+    },
+    {
+      "id": "q23",
+      "theme": "Mises à jour",
+      "type": "write",
+      "annale": "2015",
+      "enonce": "Ajouter dans la base le quinzième établissement : l'hôtel n° 15, « Hôtel de la Plage », de 3e catégorie (CategorieHotel = 3), situé 28 boulevard de l'Océan à Damgan (56750), qui a rejoint la société Gaya le 20 avril 2015 (DateCreation). Son téléphone et son responsable ne sont pas encore connus.",
+      "correction": [
+        "INSERT INTO HOTEL (NumHotel, NomHotel, DateCreation, AdRueHotel, CPHotel, VilleHotel, CategorieHotel)",
+        "VALUES (15, 'Hôtel de la Plage', '2015-04-20', '28 boulevard de l''Océan', '56750', 'Damgan', 3);"
+      ],
+      "variantes": [
+        [
+          "INSERT INTO HOTEL",
+          "VALUES (15, 'Hôtel de la Plage', '20/04/2015', '28 boulevard de l''Océan', '56750', 'Damgan', NULL, NULL, 3);"
+        ]
+      ],
+      "verif": "SELECT * FROM HOTEL ORDER BY NumHotel",
+      "indice": "HOTEL a 9 colonnes : sans liste de colonnes, il faut 9 valeurs (NULL pour le téléphone et le responsable). Une date et un texte s'écrivent entre apostrophes ; l'apostrophe de « l'Océan » se double : 'l''Océan'."
+    },
+    {
+      "id": "q24",
+      "theme": "Mises à jour",
+      "type": "write",
+      "enonce": "Julie GARCIA vient de régler la facture n° 14352. Enregistrer ce paiement.",
+      "correction": [
+        "UPDATE FACTURE",
+        "SET PayeFac = 'O'",
+        "WHERE NumFac = 14352;"
+      ],
+      "verif": "SELECT * FROM FACTURE ORDER BY NumFac",
+      "indice": "UPDATE … SET … WHERE : sans WHERE, toutes les factures seraient marquées payées."
+    },
+    {
+      "id": "q25",
+      "theme": "Mises à jour",
+      "type": "write",
+      "enonce": "Pour alléger la base, supprimer les réservations annulées dont la date de début est antérieure au 01/01/2014.",
+      "correction": [
+        "DELETE FROM RESERVATION",
+        "WHERE AnnuleRes = 'O'",
+        "AND DateDebRes < '01/01/2014';"
+      ],
+      "variantes": [
+        [
+          "DELETE FROM RESERVATION",
+          "WHERE AnnuleRes = 'O'",
+          "AND YEAR(DateDebRes) < 2014;"
+        ]
+      ],
+      "verif": "SELECT * FROM RESERVATION ORDER BY NumRes",
+      "indice": "DELETE FROM … WHERE … : les deux conditions sont reliées par AND. Une réservation annulée n'a pas de facture : la suppression n'est donc pas bloquée par l'intégrité référentielle (une réservation facturée, elle, ne pourrait pas être supprimée)."
+    },
+    {
+      "id": "s01",
+      "type": "schema",
+      "theme": "Évolution du schéma",
+      "annale": "2015",
+      "enonce": "Le schéma ci-dessous est l'extrait du schéma relationnel fourni par le sujet (RESERVATION n'y contient pas l'hôtel). Complétez-le pour traduire la partie du modèle conceptuel consacrée aux chambres. Chaque hôtel comprend des chambres numérotées dans l'hôtel : la chambre n° 12 existe dans plusieurs hôtels, une chambre est donc identifiée par son hôtel et son numéro. Pour chaque chambre, on connaît la présence d'une baignoire (ChBain), d'une douche (ChDouche), de WC (ChWC), d'un téléphone (ChTel) et le nombre de couchages (ChCouchage) ; chaque chambre est d'un seul type. Le planning enregistre, pour chaque date du calendrier (table DATE) et chaque chambre, le nombre de personnes qui l'occupent ; à une date donnée, une chambre n'est associée qu'à une seule réservation, alors qu'une réservation peut porter sur plusieurs chambres et plusieurs dates.",
+      "depart": [
+        {
+          "nom": "RESERVATION",
+          "colonnes": [
+            "_NumRes",
+            "NbChambreRes",
+            "NbNuitRes",
+            "DateDebRes",
+            "DateFinRes",
+            "AnnuleRes",
+            "#NumCli>CLIENT"
+          ]
+        },
+        "HOTEL",
+        "TYPECHAMBRE",
+        {
+          "nom": "DATE",
+          "colonnes": [
+            "_Date"
+          ]
+        }
+      ],
+      "solution": {
+        "tables": [
+          {
+            "nom": "CHAMBRE",
+            "alias": [
+              "CHAMBRES"
+            ],
+            "role": "décrire les chambres de chaque hôtel",
+            "pk": [
+              "NumHotel",
+              "NumChambre|NoChambre|NumeroChambre|NumCh"
+            ],
+            "fk": {
+              "NumHotel": "HOTEL",
+              "NumType": "TYPECHAMBRE"
+            },
+            "attributs": [
+              "ChBain|Bain|Baignoire",
+              "ChDouche|Douche",
+              "ChWC|WC",
+              "ChCouchage|Couchage|NbCouchages|NbCouchage|NbLits",
+              "ChTel|Telephone|Tel|ChTelephone"
+            ]
+          },
+          {
+            "nom": "PLANNING",
+            "alias": [
+              "PLANNINGS",
+              "OCCUPATION",
+              "OCCUPER",
+              "OCCUPATIONS"
+            ],
+            "role": "enregistrer, jour par jour, l'occupation de chaque chambre et la réservation correspondante",
+            "pk": [
+              "Date|DateJour|DatePlanning|DateNuit",
+              "NumHotel",
+              "NumChambre|NoChambre|NumeroChambre|NumCh"
+            ],
+            "fk": {
+              "Date|DateJour|DatePlanning|DateNuit": "DATE",
+              "NumHotel": "CHAMBRE",
+              "NumChambre|NoChambre|NumeroChambre|NumCh": "CHAMBRE",
+              "NumRes": "RESERVATION"
+            },
+            "attributs": [
+              "NbPersonne|NbPersonnes|NombrePersonnes|NbPers"
+            ]
+          }
+        ]
+      },
+      "variantes": [
+        {
+          "tables": [
+            {
+              "nom": "CHAMBRE",
+              "alias": [
+                "CHAMBRES"
+              ],
+              "role": "décrire les chambres de chaque hôtel",
+              "pk": [
+                "NumHotel",
+                "NumChambre|NoChambre|NumeroChambre|NumCh"
+              ],
+              "fk": {
+                "NumHotel": "HOTEL",
+                "NumType": "TYPECHAMBRE"
+              },
+              "attributs": [
+                "ChBain|Bain|Baignoire",
+                "ChDouche|Douche",
+                "ChWC|WC",
+                "ChCouchage|Couchage|NbCouchages|NbCouchage|NbLits",
+                "ChTel|Telephone|Tel|ChTelephone"
+              ]
+            },
+            {
+              "nom": "PLANNING",
+              "alias": [
+                "PLANNINGS",
+                "OCCUPATION",
+                "OCCUPER",
+                "OCCUPATIONS"
+              ],
+              "role": "enregistrer, jour par jour, l'occupation de chaque chambre et la réservation correspondante",
+              "pk": [
+                "Date|DateJour|DatePlanning|DateNuit",
+                "NumHotel",
+                "NumChambre|NoChambre|NumeroChambre|NumCh"
+              ],
+              "fk": {
+                "Date|DateJour|DatePlanning|DateNuit": "DATE",
+                "NumHotel": "HOTEL",
+                "NumChambre|NoChambre|NumeroChambre|NumCh": "CHAMBRE",
+                "NumRes": "RESERVATION"
+              },
+              "attributs": [
+                "NbPersonne|NbPersonnes|NombrePersonnes|NbPers"
+              ]
+            }
+          ],
+          "partiel": "Presque : dans PLANNING, NumHotel et NumChambre forment ENSEMBLE la clé étrangère qui désigne une chambre ; les deux flèches doivent pointer vers CHAMBRE (et non NumHotel vers HOTEL)."
+        },
+        {
+          "tables": [
+            {
+              "nom": "CHAMBRE",
+              "alias": [
+                "CHAMBRES"
+              ],
+              "role": "décrire les chambres de chaque hôtel",
+              "pk": [
+                "NumChambre|NoChambre|NumeroChambre|NumCh"
+              ],
+              "fk": {
+                "NumHotel": "HOTEL",
+                "NumType": "TYPECHAMBRE"
+              },
+              "attributs": [
+                "ChBain|Bain|Baignoire",
+                "ChDouche|Douche",
+                "ChWC|WC",
+                "ChCouchage|Couchage|NbCouchages|NbCouchage|NbLits",
+                "ChTel|Telephone|Tel|ChTelephone"
+              ]
+            },
+            {
+              "nom": "PLANNING",
+              "alias": [
+                "PLANNINGS",
+                "OCCUPATION",
+                "OCCUPER",
+                "OCCUPATIONS"
+              ],
+              "role": "enregistrer, jour par jour, l'occupation de chaque chambre et la réservation correspondante",
+              "pk": [
+                "Date|DateJour|DatePlanning|DateNuit",
+                "NumChambre|NoChambre|NumeroChambre|NumCh"
+              ],
+              "fk": {
+                "Date|DateJour|DatePlanning|DateNuit": "DATE",
+                "NumChambre|NoChambre|NumeroChambre|NumCh": "CHAMBRE",
+                "NumRes": "RESERVATION"
+              },
+              "attributs": [
+                "NbPersonne|NbPersonnes|NombrePersonnes|NbPers"
+              ],
+              "optionnels": [
+                "NumHotel"
+              ]
+            }
+          ],
+          "partiel": "Presque : le numéro seul ne suffit pas à identifier une chambre (la chambre n° 12 existe dans plusieurs hôtels). CHAMBRE a un identifiant relatif : sa clé primaire est (NumHotel, NumChambre), et PLANNING doit reprendre les deux attributs."
+        },
+        {
+          "tables": [
+            {
+              "nom": "CHAMBRE",
+              "alias": [
+                "CHAMBRES"
+              ],
+              "role": "décrire les chambres de chaque hôtel",
+              "pk": [
+                "NumHotel",
+                "NumChambre|NoChambre|NumeroChambre|NumCh"
+              ],
+              "fk": {
+                "NumHotel": "HOTEL",
+                "NumType": "TYPECHAMBRE"
+              },
+              "attributs": [
+                "ChBain|Bain|Baignoire",
+                "ChDouche|Douche",
+                "ChWC|WC",
+                "ChCouchage|Couchage|NbCouchages|NbCouchage|NbLits",
+                "ChTel|Telephone|Tel|ChTelephone"
+              ]
+            },
+            {
+              "nom": "PLANNING",
+              "alias": [
+                "PLANNINGS",
+                "OCCUPATION",
+                "OCCUPER",
+                "OCCUPATIONS"
+              ],
+              "role": "enregistrer, jour par jour, l'occupation de chaque chambre et la réservation correspondante",
+              "pk": [
+                "Date|DateJour|DatePlanning|DateNuit",
+                "NumHotel",
+                "NumChambre|NoChambre|NumeroChambre|NumCh",
+                "NumRes"
+              ],
+              "fk": {
+                "Date|DateJour|DatePlanning|DateNuit": "DATE",
+                "NumHotel": "CHAMBRE",
+                "NumChambre|NoChambre|NumeroChambre|NumCh": "CHAMBRE",
+                "NumRes": "RESERVATION"
+              },
+              "attributs": [
+                "NbPersonne|NbPersonnes|NombrePersonnes|NbPers"
+              ]
+            }
+          ],
+          "partiel": "Presque : à une date donnée, une chambre n'est associée qu'à UNE réservation. NumRes est donc une simple clé étrangère de PLANNING, pas une partie de sa clé primaire (Date, NumHotel, NumChambre)."
+        }
+      ],
+      "indice": "Une chambre est identifiée relativement à son hôtel : sa clé primaire est composée. Le planning est une association entre DATE et CHAMBRE : sa clé reprend la date et la clé (composée) de la chambre. La réservation, unique pour une chambre à une date, n'est qu'une clé étrangère."
+    },
+    {
+      "id": "s02",
+      "type": "schema",
+      "theme": "Évolution du schéma",
+      "annale": "2015",
+      "enonce": "Complétez le schéma ci-dessous pour traduire le reste du modèle conceptuel. Chaque hôtel propose plusieurs types de chambres : pour chaque hôtel et chaque type proposé, on enregistre le prix HT et le nombre de chambres de ce type. Une réduction (taux) peut être accordée par un hôtel, pour une période et un type de chambre donnés. Une facture est réglée par un seul moyen de paiement : par chèque, on enregistre le numéro du chèque (NumCh) et la banque (BanqueCh) ; par carte bancaire, le numéro de la carte (NumC) et sa date de fin de validité (DateFinC). Les factures réglées par virement ou en espèces n'ont pas d'information complémentaire. Dans le modèle conceptuel, chèques et cartes sont deux spécialisations de la facture.",
+      "depart": [
+        {
+          "nom": "FACTURE",
+          "colonnes": [
+            "_NumFac",
+            "DateFac",
+            "PayeFac",
+            "#NumRes>RESERVATION"
+          ]
+        },
+        "HOTEL",
+        "TYPECHAMBRE",
+        "PERIODE"
+      ],
+      "solution": {
+        "tables": [
+          {
+            "nom": "TARIF",
+            "alias": [
+              "TARIFS",
+              "PROPOSER",
+              "TARIFER"
+            ],
+            "role": "enregistrer le prix HT et le nombre de chambres de chaque type dans chaque hôtel",
+            "pk": [
+              "NumType",
+              "NumHotel"
+            ],
+            "fk": {
+              "NumType": "TYPECHAMBRE",
+              "NumHotel": "HOTEL"
+            },
+            "attributs": [
+              "PrixHT|Prix|PrixHorsTaxe|PrixChambre",
+              "NbChambreTyp|NbChambreType|NbChambres|NbChambre|NombreChambres"
+            ]
+          },
+          {
+            "nom": "REDUCTION",
+            "alias": [
+              "REDUCTIONS",
+              "REMISE",
+              "REMISES"
+            ],
+            "role": "enregistrer le taux de réduction accordé par un hôtel, pour une période et un type de chambre",
+            "pk": [
+              "NumHotel",
+              "NumPeriode",
+              "NumType"
+            ],
+            "fk": {
+              "NumHotel": "HOTEL",
+              "NumPeriode": "PERIODE",
+              "NumType": "TYPECHAMBRE"
+            },
+            "attributs": [
+              "TxReduction|TauxReduction|Taux|TxReduc|TauxReduc"
+            ]
+          },
+          {
+            "nom": "CHEQUE",
+            "alias": [
+              "CHEQUES",
+              "PAIEMENT_CHEQUE",
+              "REGLEMENT_CHEQUE",
+              "FACTURE_CHEQUE"
+            ],
+            "role": "les factures réglées par chèque",
+            "pk": [
+              "NumFac|NumFacture"
+            ],
+            "fk": {
+              "NumFac|NumFacture": "FACTURE"
+            },
+            "attributs": [
+              "NumCh|NumCheque|NumeroCheque",
+              "BanqueCh|Banque|BanqueCheque"
+            ]
+          },
+          {
+            "nom": "CARTE",
+            "alias": [
+              "CARTES",
+              "CARTE_BANCAIRE",
+              "CB",
+              "PAIEMENT_CARTE",
+              "REGLEMENT_CARTE",
+              "FACTURE_CARTE"
+            ],
+            "role": "les factures réglées par carte bancaire",
+            "pk": [
+              "NumFac|NumFacture"
+            ],
+            "fk": {
+              "NumFac|NumFacture": "FACTURE"
+            },
+            "attributs": [
+              "NumC|NumCarte|NumeroCarte|NumCB",
+              "DateFinC|DateFinCarte|DateExpiration|DateFinValidite|DateValidite|DateExpirationCarte"
+            ]
+          }
+        ],
+        "tablesOptionnelles": [
+          "VIREMENT",
+          "VIREMENTS",
+          "ESPECES",
+          "ESPECE"
+        ]
+      },
+      "variantes": [
+        {
+          "tables": [
+            {
+              "nom": "TARIF",
+              "alias": [
+                "TARIFS",
+                "PROPOSER",
+                "TARIFER"
+              ],
+              "role": "enregistrer le prix HT et le nombre de chambres de chaque type dans chaque hôtel",
+              "pk": [
+                "NumType",
+                "NumHotel"
+              ],
+              "fk": {
+                "NumType": "TYPECHAMBRE",
+                "NumHotel": "HOTEL"
+              },
+              "attributs": [
+                "PrixHT|Prix|PrixHorsTaxe|PrixChambre",
+                "NbChambreTyp|NbChambreType|NbChambres|NbChambre|NombreChambres"
+              ]
+            },
+            {
+              "nom": "REDUCTION",
+              "alias": [
+                "REDUCTIONS",
+                "REMISE",
+                "REMISES"
+              ],
+              "role": "enregistrer le taux de réduction accordé par un hôtel, pour une période et un type de chambre",
+              "pk": [
+                "NumHotel",
+                "NumPeriode",
+                "NumType"
+              ],
+              "fk": {
+                "NumHotel": "HOTEL",
+                "NumPeriode": "PERIODE",
+                "NumType": "TYPECHAMBRE"
+              },
+              "attributs": [
+                "TxReduction|TauxReduction|Taux|TxReduc|TauxReduc"
+              ]
+            },
+            {
+              "nom": "FACTURE",
+              "attributs": [
+                "NumCh|NumCheque|NumeroCheque",
+                "BanqueCh|Banque|BanqueCheque",
+                "NumC|NumCarte|NumeroCarte|NumCB",
+                "DateFinC|DateFinCarte|DateExpiration|DateFinValidite|DateValidite|DateExpirationCarte"
+              ]
+            }
+          ],
+          "tablesOptionnelles": [
+            "VIREMENT",
+            "VIREMENTS",
+            "ESPECES",
+            "ESPECE"
+          ],
+          "partiel": "Presque : placer les informations du chèque et de la carte dans FACTURE fonctionne, mais laisse des colonnes vides et ne traduit pas la spécialisation. Attendu : une table par sous-type (CHEQUE, CARTE), dont la clé primaire NumFac est aussi une clé étrangère vers FACTURE."
+        }
+      ],
+      "indice": "Une association porteuse de données entre deux (ou trois) entités devient une table dont la clé primaire est composée des clés des tables reliées. Pour une spécialisation, chaque sous-type devient une table dont la clé primaire est aussi une clé étrangère vers la table générique."
+    },
+    {
+      "id": "p01",
+      "type": "processus",
+      "theme": "Processus",
+      "annale": "2015",
+      "enonce": "Dossier 3, partie 2 : processus d'attribution des emplacements sur ponton. Les emplacements sur ponton étant limités en nombre et en taille, une procédure a été rédigée par le responsable de la gestion des emplacements du port de Pors-Koad. Le processus met en évidence la participation du propriétaire demandeur, le secrétariat et le responsable de la gestion des pontons. Annexe 7 – Modalités de fonctionnement de la liste d'attente : « Le propriétaire demandeur envoie le formulaire d'inscription dûment complété au responsable de gestion des pontons. Une fois l'enregistrement du formulaire effectué, le responsable de la gestion des pontons calcule le rang du propriétaire demandeur sur la liste d'attente et lui envoie un mail de confirmation en accusant réception de son inscription, et en indiquant le rang retenu ainsi que la date d'enregistrement. La liste des demandes en attente est alors mise à jour. L'inscription sur la liste d'attente doit être renouvelée chaque année. Pour simplifier la procédure, le secrétariat du port envoie à chaque inscrit, en début d'année, un courrier de confirmation d'inscription à retourner dans le mois, accompagné d'une facture de 15 €. L'enregistrement du règlement du propriétaire demandeur est effectué par le secrétariat. À défaut de réponse avant la fin du mois, la demande sera annulée par le secrétariat qui met à jour la liste d'attente des demandes, récupérée auprès du responsable de gestion des pontons. Tous les deux mois, le responsable de gestion du ponton attribue les emplacements disponibles. Il informe le propriétaire demandeur par courrier qui précise le détail de la proposition de place (emplacement, date, tarif). Le secrétariat reçoit l'acceptation du demandeur et lui retourne un contrat à signer accompagné d'une demande de versement de deux mois d'avance. À réception du contrat signé accompagné du règlement, la liste précédente des demandes en attente est alors mise à jour et l'emplacement est attribué définitivement. » Établissez une représentation schématique (schéma événements-résultats) du processus de gestion des listes d'attente.",
+      "elements": [
+        {
+          "kind": "event",
+          "label": "Formulaire complété"
+        },
+        {
+          "kind": "event",
+          "label": "Mail de confirmation"
+        },
+        {
+          "kind": "event",
+          "label": "Liste des demandes MAJ"
+        },
+        {
+          "kind": "event",
+          "label": "Début d'année"
+        },
+        {
+          "kind": "event",
+          "label": "Courrier de confirmation"
+        },
+        {
+          "kind": "event",
+          "label": "Facture 15 euros"
+        },
+        {
+          "kind": "event",
+          "label": "30 janvier"
+        },
+        {
+          "kind": "event",
+          "label": "Paiement"
+        },
+        {
+          "kind": "event",
+          "label": "Demande annulée"
+        },
+        {
+          "kind": "event",
+          "label": "Règlement validé"
+        },
+        {
+          "kind": "event",
+          "label": "Liste réinscriptions MAJ"
+        },
+        {
+          "kind": "event",
+          "label": "Tous les deux mois"
+        },
+        {
+          "kind": "event",
+          "label": "Courrier envoyé"
+        },
+        {
+          "kind": "event",
+          "label": "Acceptation"
+        },
+        {
+          "kind": "event",
+          "label": "Contrat à signer"
+        },
+        {
+          "kind": "event",
+          "label": "Demande de règlement"
+        },
+        {
+          "kind": "event",
+          "label": "Contrat signé"
+        },
+        {
+          "kind": "event",
+          "label": "Règlement"
+        },
+        {
+          "kind": "event",
+          "label": "Emplacement attribué"
+        },
+        {
+          "kind": "event",
+          "label": "Liste d'attente MAJ"
+        },
+        {
+          "kind": "operation",
+          "label": "Traitement enregistrement"
+        },
+        {
+          "kind": "operation",
+          "label": "Traitement réinscription"
+        },
+        {
+          "kind": "operation",
+          "label": "Traitement paiement"
+        },
+        {
+          "kind": "operation",
+          "label": "Attribution des emplacements"
+        },
+        {
+          "kind": "operation",
+          "label": "Rédaction contrat"
+        },
+        {
+          "kind": "operation",
+          "label": "Attribution définitive"
+        }
+      ],
+      "attendus": [
+        {
+          "operation": "Traitement paiement",
+          "alias": [
+            "Traitement du paiement",
+            "Enregistrement règlement",
+            "Enregistrement du règlement",
+            "Traitement réponse",
+            "Traitement règlement",
+            "Contrôle paiement"
+          ],
+          "synchronisation": "Liste des demandes MAJ ET (Paiement OU 30 janvier)",
+          "regles": [
+            "Payé",
+            "Non payé"
+          ]
+        },
+        {
+          "operation": "Attribution définitive",
+          "alias": [
+            "Attribution définitive emplacement",
+            "Attribuer définitivement",
+            "Réception contrat",
+            "Réception du contrat signé"
+          ],
+          "synchronisation": "Contrat signé ET Règlement ET Liste réinscriptions MAJ"
+        }
+      ],
+      "equivalents": {
+        "Liste des demandes MAJ": [
+          "Liste d'attente",
+          "Liste des demandes",
+          "Liste d'attente mise à jour",
+          "Liste des demandes mise à jour",
+          "Liste des demandes en attente"
+        ],
+        "Paiement": [
+          "Règlement 15 euros",
+          "Paiement 15 €",
+          "Paiement facture",
+          "Règlement facture",
+          "Règlement de la facture",
+          "Confirmation et règlement",
+          "Réponse du demandeur"
+        ],
+        "30 janvier": [
+          "Fin janvier",
+          "Fin du mois",
+          "Fin de mois",
+          "31 janvier",
+          "Délai d'un mois",
+          "Délai écoulé",
+          "Échéance"
+        ],
+        "Contrat signé": [
+          "Contrat retourné",
+          "Contrat signé reçu"
+        ],
+        "Règlement": [
+          "Versement",
+          "Avance",
+          "Avance de deux mois",
+          "Règlement deux mois",
+          "Paiement avance",
+          "Versement de l'avance"
+        ],
+        "Liste réinscriptions MAJ": [
+          "Liste MAJ",
+          "Liste mise à jour",
+          "Liste à jour",
+          "Liste des demandes actualisée"
+        ],
+        "Payé": [
+          "Paiement reçu",
+          "Règlement reçu",
+          "Réponse reçue"
+        ],
+        "Non payé": [
+          "Pas de paiement",
+          "Pas de réponse",
+          "Sans réponse",
+          "Absence de règlement",
+          "Non réglé",
+          "Impayé"
+        ]
+      },
+      "solution": {
+        "lanes": [
+          "Demandeur (propriétaire)",
+          "Secrétariat",
+          "Responsable gestion des pontons"
+        ],
+        "nodes": [
+          {
+            "id": "n1",
+            "kind": "event",
+            "label": "Formulaire complété",
+            "x": 120,
+            "y": 95
+          },
+          {
+            "id": "n2",
+            "kind": "operation",
+            "label": "Traitement enregistrement",
+            "x": 600,
+            "y": 200,
+            "actions": [
+              "Enregistrement du formulaire",
+              "Calcul du rang sur la liste d'attente"
+            ],
+            "rules": [
+              "Toujours"
+            ]
+          },
+          {
+            "id": "n3",
+            "kind": "event",
+            "label": "Mail de confirmation",
+            "x": 120,
+            "y": 330
+          },
+          {
+            "id": "n4",
+            "kind": "event",
+            "label": "Liste des demandes MAJ",
+            "x": 600,
+            "y": 330
+          },
+          {
+            "id": "n5",
+            "kind": "event",
+            "label": "Début d'année",
+            "x": 360,
+            "y": 420
+          },
+          {
+            "id": "n6",
+            "kind": "operation",
+            "label": "Traitement réinscription",
+            "x": 360,
+            "y": 540,
+            "actions": [
+              "Envoi du courrier de confirmation d'inscription",
+              "Envoi de la facture de 15 €"
+            ],
+            "rules": [
+              "Toujours"
+            ]
+          },
+          {
+            "id": "n7",
+            "kind": "event",
+            "label": "Courrier de confirmation",
+            "x": 120,
+            "y": 640
+          },
+          {
+            "id": "n8",
+            "kind": "event",
+            "label": "Facture 15 euros",
+            "x": 120,
+            "y": 740
+          },
+          {
+            "id": "n10",
+            "kind": "event",
+            "label": "30 janvier",
+            "x": 360,
+            "y": 740
+          },
+          {
+            "id": "n9",
+            "kind": "event",
+            "label": "Paiement",
+            "x": 120,
+            "y": 840
+          },
+          {
+            "id": "n11",
+            "kind": "sync",
+            "label": "",
+            "x": 360,
+            "y": 870,
+            "cond": "A et (B ou C)"
+          },
+          {
+            "id": "n12",
+            "kind": "operation",
+            "label": "Traitement paiement",
+            "x": 360,
+            "y": 990,
+            "actions": [
+              "Enregistrement du règlement",
+              "Mise à jour de la liste d'attente"
+            ],
+            "rules": [
+              "Payé",
+              "Non payé"
+            ]
+          },
+          {
+            "id": "n15",
+            "kind": "event",
+            "label": "Demande annulée",
+            "x": 120,
+            "y": 1120
+          },
+          {
+            "id": "n13",
+            "kind": "event",
+            "label": "Règlement validé",
+            "x": 360,
+            "y": 1130
+          },
+          {
+            "id": "n14",
+            "kind": "event",
+            "label": "Liste réinscriptions MAJ",
+            "x": 600,
+            "y": 1130
+          },
+          {
+            "id": "n16",
+            "kind": "event",
+            "label": "Tous les deux mois",
+            "x": 600,
+            "y": 1250
+          },
+          {
+            "id": "n17",
+            "kind": "operation",
+            "label": "Attribution des emplacements",
+            "x": 600,
+            "y": 1380,
+            "actions": [
+              "Attribution des emplacements disponibles",
+              "Courrier de proposition (emplacement, date, tarif)"
+            ],
+            "rules": [
+              "Toujours"
+            ]
+          },
+          {
+            "id": "n18",
+            "kind": "event",
+            "label": "Courrier envoyé",
+            "x": 120,
+            "y": 1510
+          },
+          {
+            "id": "n19",
+            "kind": "event",
+            "label": "Acceptation",
+            "x": 120,
+            "y": 1610
+          },
+          {
+            "id": "n20",
+            "kind": "operation",
+            "label": "Rédaction contrat",
+            "x": 360,
+            "y": 1720,
+            "actions": [
+              "Réception de l'acceptation",
+              "Rédaction du contrat",
+              "Demande de versement de deux mois d'avance"
+            ],
+            "rules": [
+              "Toujours"
+            ]
+          },
+          {
+            "id": "n21",
+            "kind": "event",
+            "label": "Contrat à signer",
+            "x": 120,
+            "y": 1850
+          },
+          {
+            "id": "n22",
+            "kind": "event",
+            "label": "Demande de règlement",
+            "x": 120,
+            "y": 1950
+          },
+          {
+            "id": "n23",
+            "kind": "event",
+            "label": "Contrat signé",
+            "x": 120,
+            "y": 2050
+          },
+          {
+            "id": "n24",
+            "kind": "event",
+            "label": "Règlement",
+            "x": 120,
+            "y": 2150
+          },
+          {
+            "id": "n25",
+            "kind": "sync",
+            "label": "",
+            "x": 360,
+            "y": 2190,
+            "cond": "A et B et C"
+          },
+          {
+            "id": "n26",
+            "kind": "operation",
+            "label": "Attribution définitive",
+            "x": 360,
+            "y": 2310,
+            "actions": [
+              "Mise à jour de la liste d'attente",
+              "Attribution définitive de l'emplacement"
+            ],
+            "rules": [
+              "Toujours"
+            ]
+          },
+          {
+            "id": "n27",
+            "kind": "event",
+            "label": "Emplacement attribué",
+            "x": 120,
+            "y": 2450
+          },
+          {
+            "id": "n28",
+            "kind": "event",
+            "label": "Liste d'attente MAJ",
+            "x": 600,
+            "y": 2450
+          }
+        ],
+        "arrows": [
+          {
+            "id": "a1",
+            "from": "n1",
+            "rule": null,
+            "to": "n2"
+          },
+          {
+            "id": "a2",
+            "from": "n2",
+            "rule": 0,
+            "to": "n3"
+          },
+          {
+            "id": "a3",
+            "from": "n2",
+            "rule": 0,
+            "to": "n4"
+          },
+          {
+            "id": "a4",
+            "from": "n5",
+            "rule": null,
+            "to": "n6"
+          },
+          {
+            "id": "a5",
+            "from": "n6",
+            "rule": 0,
+            "to": "n7"
+          },
+          {
+            "id": "a6",
+            "from": "n6",
+            "rule": 0,
+            "to": "n8"
+          },
+          {
+            "id": "a7",
+            "from": "n4",
+            "rule": null,
+            "to": "n11",
+            "letter": "A"
+          },
+          {
+            "id": "a8",
+            "from": "n9",
+            "rule": null,
+            "to": "n11",
+            "letter": "B"
+          },
+          {
+            "id": "a9",
+            "from": "n10",
+            "rule": null,
+            "to": "n11",
+            "letter": "C"
+          },
+          {
+            "id": "a10",
+            "from": "n11",
+            "rule": null,
+            "to": "n12"
+          },
+          {
+            "id": "a11",
+            "from": "n12",
+            "rule": 0,
+            "to": "n13"
+          },
+          {
+            "id": "a12",
+            "from": "n12",
+            "rule": 0,
+            "to": "n14"
+          },
+          {
+            "id": "a13",
+            "from": "n12",
+            "rule": 1,
+            "to": "n15"
+          },
+          {
+            "id": "a14",
+            "from": "n16",
+            "rule": null,
+            "to": "n17"
+          },
+          {
+            "id": "a15",
+            "from": "n17",
+            "rule": 0,
+            "to": "n18"
+          },
+          {
+            "id": "a16",
+            "from": "n19",
+            "rule": null,
+            "to": "n20"
+          },
+          {
+            "id": "a17",
+            "from": "n20",
+            "rule": 0,
+            "to": "n21"
+          },
+          {
+            "id": "a18",
+            "from": "n20",
+            "rule": 0,
+            "to": "n22"
+          },
+          {
+            "id": "a19",
+            "from": "n23",
+            "rule": null,
+            "to": "n25",
+            "letter": "A"
+          },
+          {
+            "id": "a20",
+            "from": "n24",
+            "rule": null,
+            "to": "n25",
+            "letter": "B"
+          },
+          {
+            "id": "a21",
+            "from": "n14",
+            "rule": null,
+            "to": "n25",
+            "letter": "C"
+          },
+          {
+            "id": "a22",
+            "from": "n25",
+            "rule": null,
+            "to": "n26"
+          },
+          {
+            "id": "a23",
+            "from": "n26",
+            "rule": 0,
+            "to": "n27"
+          },
+          {
+            "id": "a24",
+            "from": "n26",
+            "rule": 0,
+            "to": "n28"
+          }
+        ]
+      },
+      "autoevaluation": [
+        "Trois acteurs : le propriétaire demandeur, le secrétariat et le responsable de la gestion des pontons ; les opérations sont placées chez l'acteur qui les réalise.",
+        "Le formulaire complété déclenche l'enregistrement par le responsable, qui produit le mail de confirmation et la liste des demandes mise à jour.",
+        "Des événements temporels déclenchent des opérations : le début d'année (réinscription), la fin du mois (annulation faute de paiement), tous les deux mois (attribution des emplacements).",
+        "Le traitement du paiement a deux règles d'émission : payé (règlement validé, liste mise à jour) / non payé (demande annulée).",
+        "L'attribution définitive attend plusieurs événements (contrat signé, règlement, liste) : c'est une synchronisation « ET ».",
+        "Les résultats envoyés au demandeur (mail, courrier, facture, contrat à signer) sont des événements produits par les opérations."
+      ],
+      "indice": "Suivez la description dans l'ordre : inscription, réinscription annuelle, attribution tous les deux mois. Repérez les événements temporels (début d'année, fin du mois, tous les deux mois), qui déclenchent une opération comme un événement externe. Le secrétariat traite la réinscription selon que le demandeur a payé ou non : deux règles d'émission, et une synchronisation qui combine « et » et « ou » (le paiement arrive, ou bien le délai expire). La dernière étape n'a lieu qu'à réception de plusieurs documents à la fois."
+    }
+  ]
+}

@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SQL Lab – DCG UE8</title>
+  <!--SQLLAB_CONFIG-->
+  <meta name="description" content="Entraînement aux requêtes SQL pour l'UE8 du DCG, directement dans le navigateur.">
+  <meta name="author" content="François Parlant">
+  <link rel="stylesheet" href="lib/codemirror/codemirror.css">
+  <link rel="stylesheet" href="lib/codemirror/show-hint.css">
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <button class="icon-btn menu-btn" id="btnSidebar" type="button" aria-controls="sidebar" aria-expanded="true" title="Afficher / masquer la liste des questions" aria-label="Afficher ou masquer la liste des questions">☰</button>
+      <span class="logo" aria-hidden="true">SQL</span>
+      <div>
+        <h1>SQL Lab</h1>
+        <p class="subtitle">Entraînement aux requêtes – DCG UE8</p>
+      </div>
+    </div>
+    <label class="ex-select">
+      <span>Exercice</span>
+      <select id="exercice"></select>
+    </label>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar" id="sidebar">
+      <div class="progress">
+        <div class="progress-label"><span id="progressText">0 / 0</span> réussies</div>
+        <div class="progress-bar"><div id="progressFill"></div></div>
+        <p class="small muted lms-status" id="lmsStatus" hidden></p>
+      </div>
+      <nav id="questionList" aria-label="Questions"></nav>
+      <section class="packs" aria-labelledby="packsTitle">
+        <h3 id="packsTitle">Questions complémentaires</h3>
+        <ul id="packList"></ul>
+        <div class="packs-actions">
+          <label class="btn small" title="Questions (.json) ou exercice complet avec sa base (.zip, .sqlite, .sql)">Importer un fichier…
+            <input type="file" id="packFile" accept=".json,.zip,.sqlite,.sqlite3,.db,.sql,application/json,application/zip" hidden>
+          </label>
+          <a class="btn small ghost" id="linkCreate" href="create.html">Créer des questions</a>
+        </div>
+      </section>
+    </aside>
+
+    <main class="main">
+      <aside class="schema-col" id="schemaCol">
+        <details class="card context" id="contextBox">
+          <summary>Contexte de l'exercice</summary>
+          <p id="contexte"></p>
+          <p class="muted small" id="source"></p>
+        </details>
+        <section class="card schema" aria-label="Schéma de la base">
+          <div class="schema-head">
+            <div class="tabs" role="tablist">
+              <button type="button" role="tab" id="tabDiagram" aria-controls="panelDiagram" aria-selected="true">Diagramme</button>
+              <button type="button" role="tab" id="tabList" aria-controls="panelList" aria-selected="false">Schéma relationnel</button>
+            </div>
+            <span class="spacer"></span>
+            <span class="dg-tools" id="dgTools">
+              <button class="icon-btn" id="dgiZoomOut" type="button" title="Réduire" aria-label="Réduire">−</button>
+              <button class="icon-btn" id="dgiZoomIn" type="button" title="Agrandir le texte" aria-label="Agrandir le texte">+</button>
+              <button class="icon-btn" id="dgiReset" type="button" title="Réinitialiser la disposition et le zoom" aria-label="Réinitialiser la disposition">⟲</button>
+              <button class="icon-btn" id="btnDiagram" type="button" title="Ouvrir en grand" aria-label="Ouvrir le diagramme en grand">⤢</button>
+            </span>
+            <button class="icon-btn" id="btnCollapse" type="button" title="Replier / déplier" aria-expanded="true" aria-controls="schemaBody">▾</button>
+          </div>
+          <div id="schemaBody">
+            <div id="panelDiagram" role="tabpanel" aria-labelledby="tabDiagram">
+              <div id="diagramInline" class="diagram-wrap inline"></div>
+              <p class="muted small legend">Glissez les tables pour les déplacer · double-clic : contenu de la table · clé primaire <u>soulignée</u>, clé étrangère <i>#en italique</i></p>
+            </div>
+            <div id="panelList" role="tabpanel" aria-labelledby="tabList" hidden>
+              <p class="muted small legend">clé primaire <u>soulignée</u> · clé étrangère <i>#en italique</i> · cliquez sur une table pour voir son contenu</p>
+              <ul id="schema" class="schema-list"></ul>
+            </div>
+          </div>
+        </section>
+      </aside>
+      <div class="splitter" id="splitter" role="separator" aria-orientation="vertical" aria-label="Largeur du schéma" tabindex="0" title="Glisser pour élargir le schéma"></div>
+
+      <div class="work">
+      <div id="notice" class="notice feedback ok" role="status" hidden>
+        <span></span>
+        <button type="button" class="icon-btn" aria-label="Fermer le message">✕</button>
+      </div>
+      <section class="card question" aria-live="polite">
+        <div class="question-head">
+          <span class="badge" id="qTheme"></span>
+          <span class="badge annale" id="qAnnale" hidden></span>
+          <span class="qnum" id="qNum"></span>
+        </div>
+        <p class="enonce" id="qEnonce"></p>
+        <div class="intro" id="qIntro" hidden></div>
+        <p class="write-note" id="qWriteNote" hidden>✎ Requête de modification : elle est exécutée sur une copie de la base, vos changements ne sont jamais conservés.</p>
+
+        <label for="editor" class="sr-only">Votre requête SQL</label>
+        <textarea id="editor" spellcheck="false" autocomplete="off" autocapitalize="off"
+          placeholder="Écrivez votre requête ici, puis Ctrl + Entrée pour l'exécuter"></textarea>
+        <div id="schemaEditor" class="schema-editor" hidden></div>
+        <div id="processEditor" class="process-editor" hidden></div>
+        <p class="editor-help muted small" hidden>Complétion : tapez le début d'un nom de table ou de colonne, ou <kbd>Ctrl</kbd>+<kbd>Espace</kbd> ; après <code>CLIENT.</code> (ou un alias <code>C.</code>) les colonnes de la table sont proposées.</p>
+
+        <div class="actions">
+          <button class="btn primary" id="btnRun" type="button">▶ Exécuter <kbd>Ctrl</kbd><kbd>⏎</kbd></button>
+          <span class="q-tools" id="qTools">
+            <button class="btn" id="btnExpected" type="button" aria-pressed="false">Résultat attendu</button>
+            <button class="btn" id="btnHint" type="button" aria-pressed="false">Indice</button>
+            <button class="btn" id="btnCorrection" type="button" aria-pressed="false">Correction</button>
+          </span>
+          <span class="spacer"></span>
+          <button class="btn ghost" id="btnPrev" type="button">← Précédente</button>
+          <button class="btn ghost" id="btnNext" type="button">Suivante →</button>
+        </div>
+
+        <div id="hint" class="hint" hidden></div>
+        <div id="correction" class="correction" hidden></div>
+        <div id="feedback" class="feedback" hidden></div>
+      </section>
+
+      <section class="card results" id="resultsCard" hidden>
+        <div id="results"></div>
+      </section>
+
+      <section class="card results" id="expectedCard" hidden>
+        <div id="expected"></div>
+      </section>
+
+      <details class="card memo">
+        <summary>Aide-mémoire SQL</summary>
+        <div class="memo-grid">
+          <div>
+            <h3>Consultation</h3>
+<pre>SELECT colonne1, colonne2
+FROM TABLE1, TABLE2
+WHERE TABLE1.cle = TABLE2.cle
+  AND condition
+GROUP BY colonne1
+HAVING COUNT(*) &gt; 3
+ORDER BY colonne1 DESC;</pre>
+          </div>
+          <div>
+            <h3>Jointure avec JOIN</h3>
+<pre>SELECT colonne1, colonne2
+FROM TABLE1
+INNER JOIN TABLE2
+  ON TABLE1.cle = TABLE2.cle
+WHERE condition;</pre>
+            <h3>Sous-requête</h3>
+<pre>WHERE id NOT IN (SELECT id
+                 FROM TABLE2)</pre>
+          </div>
+          <div>
+            <h3>Mises à jour</h3>
+<pre>INSERT INTO TABLE VALUES (v1, v2);
+UPDATE TABLE SET col = valeur
+  WHERE condition;
+DELETE FROM TABLE WHERE condition;</pre>
+          </div>
+          <div>
+            <h3>Dates</h3>
+            <ul class="small">
+              <li><code>YEAR(d)</code>, <code>MONTH(d)</code>, <code>DAY(d)</code></li>
+              <li><code>'15/06/2024'</code> ou <code>#15/06/2024#</code> sont acceptés</li>
+              <li><code>BETWEEN '01/01/2023' AND '31/12/2023'</code></li>
+              <li><code>NOW()</code> / <code>CURDATE()</code> : date du jour simulée</li>
+              <li><code>DATEDIFF(fin, début)</code> : écart en jours</li>
+            </ul>
+            <h3>Pièges fréquents</h3>
+            <ul class="small">
+              <li><code>IS NULL</code> et non <code>= NULL</code></li>
+              <li>décimales avec un point : <code>4.34</code></li>
+              <li>condition sur COUNT/SUM → <code>HAVING</code></li>
+            </ul>
+          </div>
+        </div>
+      </details>
+
+      <footer class="footer muted small">
+        <span id="todayNote"></span> · Les modifications sont fictives : la base repart de zéro à chaque exécution. ·
+        Moteur SQLite (sql.js) dans votre navigateur, aucune réponse n'est envoyée.
+      </footer>
+      </div>
+    </main>
+  </div>
+
+  <dialog id="diagramDialog" class="diagram-dialog" aria-labelledby="dgTitle">
+    <div class="dlg-head">
+      <div>
+        <h2 id="dgTitle">Schéma relationnel</h2>
+        <p class="muted small">Glissez les tables pour les déplacer · double-clic sur une table : voir son contenu</p>
+      </div>
+      <span class="spacer"></span>
+      <button class="btn small" id="dgZoomOut" type="button" aria-label="Réduire">−</button>
+      <button class="btn small" id="dgZoomIn" type="button" aria-label="Agrandir">+</button>
+      <button class="btn small" id="dgReset" type="button">Réinitialiser la disposition</button>
+      <button class="btn small primary" id="dgClose" type="button">Fermer</button>
+    </div>
+    <div id="diagram" class="diagram-wrap"></div>
+  </dialog>
+
+  <div id="loading" class="loading">Chargement de la base…</div>
+
+  <script src="lib/sql.js/sql-wasm.js"></script>
+  <script src="lib/fflate/fflate.js"></script>
+  <script src="lib/codemirror/codemirror.js"></script>
+  <script src="lib/codemirror/sql.js"></script>
+  <script src="lib/codemirror/show-hint.js"></script>
+  <script src="lib/codemirror/sql-hint.js"></script>
+  <script src="lib/codemirror/placeholder.js"></script>
+  <script src="assets/compat.js"></script>
+  <script src="assets/compare.js"></script>
+  <script src="assets/engine.js"></script>
+  <script src="assets/diagram.js"></script>
+  <script src="assets/packs.js"></script>
+  <script src="assets/library.js"></script>
+  <script src="assets/scorm.js"></script>
+  <script src="assets/schemacheck.js"></script>
+  <script src="assets/schema-editor.js"></script>
+  <script src="assets/processcheck.js"></script>
+  <script src="assets/process-editor.js"></script>
+  <script src="assets/app.js"></script>
+</body>
+</html>

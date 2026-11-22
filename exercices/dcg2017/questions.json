@@ -1,0 +1,1192 @@
+{
+  "id": "dcg2017",
+  "titre": "DCG 2017 – Soufflé, agences de voyage",
+  "aujourdhui": "2017-12-15",
+  "contexte": "La société Soufflé (siège à Lille) gère un réseau d'agences de voyage (AGENCE) dans le Nord de la France. Le personnel des agences dépose des demandes d'intervention (DEMANDE) concernant un MATERIEL (PC, imprimante, serveur…), classé par TYPE_MATERIEL. Les demandes sont traitées par les intervenants du service maintenance du siège : chaque INTERVENTION enregistre l'intervenant (CodePersonnelInt), la date et le nombre d'heures (Nbh) ; une demande peut mobiliser plusieurs intervenants. Chaque demande a des SUIVI numérotés 1, 2, 3… Personnels d'agence et intervenants sont dans la même table PERSONNEL : TypePersonnel vaut « Agence » ou « Intervenant », et CodeAgence n'est renseigné que pour le personnel d'agence (dans le sujet d'origine, ces deux catégories étaient des sous-types). DelaiDemande est le délai souhaité, en jours ; EtatDemande vaut « En attente », « En cours » ou « Terminée ». Le sujet permettait de retrouver l'agence d'une demande par le demandeur ou par le matériel ; ici, MATERIEL n'est pas rattaché à une agence : l'agence d'une demande est celle de la personne qui l'a déposée. Les numéros de demande (DEM-09, DEM-152…) ne suivent pas l'ordre chronologique.",
+  "source": "Inspiré du sujet DCG UE8 session 2017. Données entièrement fictives.",
+  "schemaGrid": {
+    "AGENCE": [
+      0,
+      0
+    ],
+    "PERSONNEL": [
+      1,
+      0
+    ],
+    "INTERVENTION": [
+      2,
+      0
+    ],
+    "MATERIEL": [
+      0,
+      1
+    ],
+    "DEMANDE": [
+      1,
+      1
+    ],
+    "SUIVI": [
+      2,
+      1
+    ],
+    "TYPE_MATERIEL": [
+      0,
+      2
+    ]
+  },
+  "questions": [
+    {
+      "id": "q01",
+      "theme": "Une seule table",
+      "enonce": "Afficher la liste des agences de voyage de la société Soufflé (toutes les colonnes).",
+      "correction": [
+        "SELECT *",
+        "FROM AGENCE;"
+      ],
+      "indice": "L'étoile * permet d'afficher toutes les colonnes d'une table."
+    },
+    {
+      "id": "q02",
+      "theme": "Une seule table",
+      "enonce": "Afficher le code et le nom des matériels de la marque Epson (le nom du matériel contient le mot « Epson »).",
+      "correction": [
+        "SELECT CodeMateriel, NomMateriel",
+        "FROM MATERIEL",
+        "WHERE NomMateriel LIKE '%Epson%';"
+      ],
+      "indice": "LIKE compare un texte à un modèle : % remplace n'importe quelle suite de caractères, au début comme à la fin."
+    },
+    {
+      "id": "q03",
+      "theme": "Une seule table",
+      "annale": "2017",
+      "enonce": "Quels sont les personnels des agences (nom et prénom) ne pouvant être joints facilement, c'est-à-dire ceux dont le téléphone n'est pas renseigné ? Les intervenants du service maintenance ne sont pas concernés.",
+      "correction": [
+        "SELECT NomPersonnel, PrenomPersonnel",
+        "FROM PERSONNEL",
+        "WHERE TypePersonnel = 'Agence'",
+        "AND TelPersonnel IS NULL;"
+      ],
+      "variantes": [
+        [
+          "SELECT NomPersonnel, PrenomPersonnel",
+          "FROM PERSONNEL",
+          "WHERE CodeAgence IS NOT NULL",
+          "AND TelPersonnel IS NULL;"
+        ]
+      ],
+      "indice": "Une information non renseignée se teste avec IS NULL (et non = NULL). Les personnels d'agence ont TypePersonnel = 'Agence' (ou, ce qui revient au même, un CodeAgence renseigné) : un intervenant sans téléphone ne doit pas apparaître."
+    },
+    {
+      "id": "q04",
+      "theme": "Une seule table",
+      "enonce": "Afficher le code, le nom, le prénom et l'adresse mail des intervenants du service maintenance, triés par nom.",
+      "ordered": [
+        1
+      ],
+      "correction": [
+        "SELECT CodePersonnel, NomPersonnel, PrenomPersonnel, MailPersonnel",
+        "FROM PERSONNEL",
+        "WHERE TypePersonnel = 'Intervenant'",
+        "ORDER BY NomPersonnel;"
+      ],
+      "variantes": [
+        [
+          "SELECT CodePersonnel, NomPersonnel, PrenomPersonnel, MailPersonnel",
+          "FROM PERSONNEL",
+          "WHERE CodeAgence IS NULL",
+          "ORDER BY NomPersonnel;"
+        ]
+      ],
+      "indice": "Intervenants et personnels d'agence sont dans la même table PERSONNEL : c'est la colonne TypePersonnel qui les distingue."
+    },
+    {
+      "id": "q05",
+      "theme": "Calculs et agrégats",
+      "enonce": "Combien de demandes d'intervention sont encore « En attente » ?",
+      "correction": [
+        "SELECT COUNT(*) AS NbDemandesEnAttente",
+        "FROM DEMANDE",
+        "WHERE EtatDemande = 'En attente';"
+      ],
+      "indice": "COUNT(*) compte les lignes qui vérifient la condition du WHERE."
+    },
+    {
+      "id": "q06",
+      "theme": "Calculs et agrégats",
+      "enonce": "Afficher, pour chaque état de demande (EtatDemande), le nombre de demandes correspondantes.",
+      "correction": [
+        "SELECT EtatDemande, COUNT(*) AS NbDemandes",
+        "FROM DEMANDE",
+        "GROUP BY EtatDemande;"
+      ],
+      "indice": "GROUP BY EtatDemande forme un groupe par état ; COUNT(*) compte les demandes de chaque groupe."
+    },
+    {
+      "id": "q07",
+      "theme": "Calculs et agrégats",
+      "enonce": "Afficher le nombre total d'heures d'intervention enregistrées et la durée moyenne d'une intervention (en heures).",
+      "correction": [
+        "SELECT SUM(Nbh) AS TotalHeures, AVG(Nbh) AS DureeMoyenne",
+        "FROM INTERVENTION;"
+      ],
+      "indice": "Le nombre d'heures de chaque intervention est la colonne Nbh de INTERVENTION : SUM additionne, AVG fait la moyenne."
+    },
+    {
+      "id": "q08",
+      "theme": "Dates",
+      "enonce": "Afficher les demandes déposées en novembre 2017 (numéro, date et motif), de la plus ancienne à la plus récente.",
+      "ordered": [
+        1
+      ],
+      "correction": [
+        "SELECT NoDemande, DateDemande, MotifDemande",
+        "FROM DEMANDE",
+        "WHERE YEAR(DateDemande) = 2017",
+        "AND MONTH(DateDemande) = 11",
+        "ORDER BY DateDemande;"
+      ],
+      "variantes": [
+        [
+          "SELECT NoDemande, DateDemande, MotifDemande",
+          "FROM DEMANDE",
+          "WHERE DateDemande BETWEEN '01/11/2017' AND '30/11/2017'",
+          "ORDER BY DateDemande;"
+        ]
+      ],
+      "indice": "YEAR() et MONTH() extraient l'année et le mois d'une date ; on peut aussi utiliser BETWEEN '01/11/2017' AND '30/11/2017'."
+    },
+    {
+      "id": "q09",
+      "theme": "Dates",
+      "enonce": "Le responsable de la maintenance veut relancer les demandes non terminées (« En attente » ou « En cours ») déposées depuis plus de 30 jours (nous sommes le 15/12/2017). Afficher leur numéro, leur date, leur motif et leur état.",
+      "correction": [
+        "SELECT NoDemande, DateDemande, MotifDemande, EtatDemande",
+        "FROM DEMANDE",
+        "WHERE EtatDemande <> 'Terminée'",
+        "AND DATEDIFF(NOW(), DateDemande) > 30;"
+      ],
+      "variantes": [
+        [
+          "SELECT NoDemande, DateDemande, MotifDemande, EtatDemande",
+          "FROM DEMANDE",
+          "WHERE EtatDemande IN ('En attente', 'En cours')",
+          "AND DateDemande < '15/11/2017';"
+        ]
+      ],
+      "indice": "DATEDIFF(NOW(), DateDemande) donne le nombre de jours écoulés depuis la demande (NOW() renvoie la date du jour, ici le 15/12/2017). Une demande du 15/11/2017 a exactement 30 jours : elle n'est pas « à plus de 30 jours »."
+    },
+    {
+      "id": "q10",
+      "theme": "Jointures",
+      "enonce": "Afficher le code et le nom des matériels de type « Serveur ».",
+      "correction": [
+        "SELECT CodeMateriel, NomMateriel",
+        "FROM MATERIEL, TYPE_MATERIEL",
+        "WHERE MATERIEL.CodeTypeMateriel = TYPE_MATERIEL.CodeTypeMateriel",
+        "AND NomTypeMateriel = 'Serveur';"
+      ],
+      "variantes": [
+        [
+          "SELECT CodeMateriel, NomMateriel",
+          "FROM MATERIEL",
+          "INNER JOIN TYPE_MATERIEL ON MATERIEL.CodeTypeMateriel = TYPE_MATERIEL.CodeTypeMateriel",
+          "WHERE NomTypeMateriel = 'Serveur';"
+        ]
+      ],
+      "indice": "Le nom du type (« Serveur ») est dans TYPE_MATERIEL : reliez MATERIEL et TYPE_MATERIEL par CodeTypeMateriel."
+    },
+    {
+      "id": "q11",
+      "theme": "Jointures",
+      "enonce": "Afficher le nom, le prénom et le téléphone du personnel de l'agence « Voyage-ARRAS ».",
+      "correction": [
+        "SELECT NomPersonnel, PrenomPersonnel, TelPersonnel",
+        "FROM PERSONNEL, AGENCE",
+        "WHERE PERSONNEL.CodeAgence = AGENCE.CodeAgence",
+        "AND NomAgence = 'Voyage-ARRAS';"
+      ],
+      "variantes": [
+        [
+          "SELECT NomPersonnel, PrenomPersonnel, TelPersonnel",
+          "FROM PERSONNEL",
+          "INNER JOIN AGENCE ON PERSONNEL.CodeAgence = AGENCE.CodeAgence",
+          "WHERE NomAgence = 'Voyage-ARRAS';"
+        ]
+      ],
+      "indice": "Le nom de l'agence est dans AGENCE, le personnel dans PERSONNEL : la jointure se fait sur CodeAgence."
+    },
+    {
+      "id": "q12",
+      "theme": "Jointures",
+      "annale": "2017",
+      "enonce": "Afin de préparer les interventions, écrire la requête qui donne les demandes déclenchées le 14 mars 2017, avec les colonnes : n° de demande, code du matériel, nom du matériel, code de l'agence, nom de l'agence et motif de la demande. Le résultat sera trié par nom d'agence. L'agence d'une demande est celle de la personne qui l'a déposée.",
+      "ordered": [
+        4
+      ],
+      "correction": [
+        "SELECT D.NoDemande, M.CodeMateriel, M.NomMateriel, A.CodeAgence, A.NomAgence, D.MotifDemande",
+        "FROM DEMANDE D, MATERIEL M, PERSONNEL P, AGENCE A",
+        "WHERE D.CodeMateriel = M.CodeMateriel",
+        "AND D.CodePersonnel = P.CodePersonnel",
+        "AND P.CodeAgence = A.CodeAgence",
+        "AND D.DateDemande = '14/03/2017'",
+        "ORDER BY A.NomAgence;"
+      ],
+      "variantes": [
+        [
+          "SELECT D.NoDemande, M.CodeMateriel, M.NomMateriel, A.CodeAgence, A.NomAgence, D.MotifDemande",
+          "FROM DEMANDE D",
+          "INNER JOIN MATERIEL M ON D.CodeMateriel = M.CodeMateriel",
+          "INNER JOIN PERSONNEL P ON D.CodePersonnel = P.CodePersonnel",
+          "INNER JOIN AGENCE A ON P.CodeAgence = A.CodeAgence",
+          "WHERE D.DateDemande = '14/03/2017'",
+          "ORDER BY A.NomAgence;"
+        ]
+      ],
+      "indice": "Quatre tables : DEMANDE, MATERIEL (nom du matériel), PERSONNEL (le demandeur, qui donne l'agence) et AGENCE (nom de l'agence). CodeMateriel et CodeAgence existent dans deux tables : préfixez-les (M.CodeMateriel, A.CodeAgence), sinon la colonne est « ambiguë »."
+    },
+    {
+      "id": "q13",
+      "theme": "Jointures",
+      "enonce": "Afficher les interventions réalisées en 2017 par l'intervenant Fabien CARON : n° de la demande, motif de la demande, date de l'intervention et nombre d'heures, triées par date d'intervention.",
+      "ordered": [
+        2
+      ],
+      "correction": [
+        "SELECT D.NoDemande, D.MotifDemande, I.DateIntervention, I.Nbh",
+        "FROM PERSONNEL P, INTERVENTION I, DEMANDE D",
+        "WHERE P.CodePersonnel = I.CodePersonnelInt",
+        "AND I.NoDemande = D.NoDemande",
+        "AND P.NomPersonnel = 'CARON'",
+        "AND P.PrenomPersonnel = 'Fabien'",
+        "AND YEAR(I.DateIntervention) = 2017",
+        "ORDER BY I.DateIntervention;"
+      ],
+      "variantes": [
+        [
+          "SELECT D.NoDemande, D.MotifDemande, I.DateIntervention, I.Nbh",
+          "FROM PERSONNEL P",
+          "INNER JOIN INTERVENTION I ON P.CodePersonnel = I.CodePersonnelInt",
+          "INNER JOIN DEMANDE D ON I.NoDemande = D.NoDemande",
+          "WHERE P.NomPersonnel = 'CARON'",
+          "AND P.PrenomPersonnel = 'Fabien'",
+          "AND I.DateIntervention BETWEEN '01/01/2017' AND '31/12/2017'",
+          "ORDER BY I.DateIntervention;"
+        ]
+      ],
+      "indice": "Dans INTERVENTION, l'intervenant est identifié par CodePersonnelInt, qui fait référence à PERSONNEL.CodePersonnel. Le motif est dans DEMANDE."
+    },
+    {
+      "id": "q14",
+      "theme": "Jointures et regroupements",
+      "annale": "2017",
+      "enonce": "Quel est, pour l'année 2017, le nombre total de demandes d'intervention pour le type de matériel nommé « imprimante » ?",
+      "correction": [
+        "SELECT COUNT(*) AS NbDemandesImprimante",
+        "FROM DEMANDE D, MATERIEL M, TYPE_MATERIEL T",
+        "WHERE D.CodeMateriel = M.CodeMateriel",
+        "AND M.CodeTypeMateriel = T.CodeTypeMateriel",
+        "AND YEAR(D.DateDemande) = 2017",
+        "AND T.NomTypeMateriel = 'imprimante';"
+      ],
+      "variantes": [
+        [
+          "SELECT COUNT(D.NoDemande) AS NbDemandesImprimante",
+          "FROM DEMANDE D",
+          "INNER JOIN MATERIEL M ON D.CodeMateriel = M.CodeMateriel",
+          "INNER JOIN TYPE_MATERIEL T ON M.CodeTypeMateriel = T.CodeTypeMateriel",
+          "WHERE D.DateDemande BETWEEN '01/01/2017' AND '31/12/2017'",
+          "AND T.NomTypeMateriel = 'imprimante';"
+        ]
+      ],
+      "indice": "La demande porte sur un matériel, le matériel a un type, le type a un nom : trois tables à relier. Les textes s'écrivent entre apostrophes droites ('imprimante'), pas entre guillemets typographiques."
+    },
+    {
+      "id": "q15",
+      "theme": "Jointures et regroupements",
+      "annale": "2017",
+      "enonce": "Dénombrer les matériels par type : afficher le code du type de matériel, le nom du type et le nombre de matériels concernés. On n'affichera que les types dont le nombre de matériels est supérieur à 50. Le résultat sera donné par ordre décroissant du nombre de matériels.",
+      "ordered": [
+        2
+      ],
+      "correction": [
+        "SELECT T.CodeTypeMateriel, T.NomTypeMateriel, COUNT(*) AS NbMateriels",
+        "FROM TYPE_MATERIEL T, MATERIEL M",
+        "WHERE T.CodeTypeMateriel = M.CodeTypeMateriel",
+        "GROUP BY T.CodeTypeMateriel, T.NomTypeMateriel",
+        "HAVING COUNT(*) > 50",
+        "ORDER BY NbMateriels DESC;"
+      ],
+      "variantes": [
+        [
+          "SELECT T.CodeTypeMateriel, T.NomTypeMateriel, COUNT(M.CodeMateriel) AS NbMateriels",
+          "FROM TYPE_MATERIEL T",
+          "INNER JOIN MATERIEL M ON T.CodeTypeMateriel = M.CodeTypeMateriel",
+          "GROUP BY T.CodeTypeMateriel, T.NomTypeMateriel",
+          "HAVING COUNT(M.CodeMateriel) > 50",
+          "ORDER BY COUNT(M.CodeMateriel) DESC;"
+        ]
+      ],
+      "indice": "La condition porte sur le nombre de matériels du groupe : elle va dans HAVING, pas dans WHERE. « Supérieur à 50 » exclut un type qui en compte exactement 50. Pour trier, réutilisez l'alias ou COUNT(*)."
+    },
+    {
+      "id": "q16",
+      "theme": "Jointures et regroupements",
+      "enonce": "Afficher, pour chaque agence (nom de l'agence), le nombre de demandes déposées en 2017 par son personnel, de l'agence qui en a déposé le plus à celle qui en a déposé le moins.",
+      "ordered": [
+        1
+      ],
+      "correction": [
+        "SELECT A.NomAgence, COUNT(*) AS NbDemandes",
+        "FROM AGENCE A, PERSONNEL P, DEMANDE D",
+        "WHERE A.CodeAgence = P.CodeAgence",
+        "AND P.CodePersonnel = D.CodePersonnel",
+        "AND YEAR(D.DateDemande) = 2017",
+        "GROUP BY A.CodeAgence, A.NomAgence",
+        "ORDER BY NbDemandes DESC;"
+      ],
+      "variantes": [
+        [
+          "SELECT A.NomAgence, COUNT(*) AS NbDemandes",
+          "FROM AGENCE A",
+          "INNER JOIN PERSONNEL P ON A.CodeAgence = P.CodeAgence",
+          "INNER JOIN DEMANDE D ON P.CodePersonnel = D.CodePersonnel",
+          "WHERE YEAR(D.DateDemande) = 2017",
+          "GROUP BY A.CodeAgence, A.NomAgence",
+          "ORDER BY COUNT(*) DESC;"
+        ]
+      ],
+      "indice": "DEMANDE ne contient pas l'agence : passez par la personne qui a déposé la demande (PERSONNEL), puis par AGENCE. Regroupez par agence et triez sur le nombre (DESC)."
+    },
+    {
+      "id": "q17",
+      "theme": "Jointures et regroupements",
+      "enonce": "Afficher, pour chaque intervenant ayant réalisé au moins une intervention, son nom, son prénom et le nombre total d'heures d'intervention, du plus grand total au plus petit.",
+      "ordered": [
+        2
+      ],
+      "correction": [
+        "SELECT P.NomPersonnel, P.PrenomPersonnel, SUM(I.Nbh) AS TotalHeures",
+        "FROM PERSONNEL P, INTERVENTION I",
+        "WHERE P.CodePersonnel = I.CodePersonnelInt",
+        "GROUP BY P.CodePersonnel, P.NomPersonnel, P.PrenomPersonnel",
+        "ORDER BY TotalHeures DESC;"
+      ],
+      "variantes": [
+        [
+          "SELECT P.NomPersonnel, P.PrenomPersonnel, SUM(I.Nbh) AS TotalHeures",
+          "FROM PERSONNEL P",
+          "INNER JOIN INTERVENTION I ON P.CodePersonnel = I.CodePersonnelInt",
+          "GROUP BY P.CodePersonnel, P.NomPersonnel, P.PrenomPersonnel",
+          "ORDER BY SUM(I.Nbh) DESC;"
+        ]
+      ],
+      "indice": "Reliez PERSONNEL.CodePersonnel à INTERVENTION.CodePersonnelInt, regroupez par intervenant et additionnez Nbh."
+    },
+    {
+      "id": "q18",
+      "theme": "Jointures et regroupements",
+      "enonce": "Pour les demandes déposées en 2017 par le personnel de l'agence AG-095 (Voyage-DOUAI), afficher le n° de la demande, le nom du demandeur et le nom de chaque intervenant qui l'a traitée.",
+      "correction": [
+        "SELECT D.NoDemande, DEM.NomPersonnel AS Demandeur, INTV.NomPersonnel AS Intervenant",
+        "FROM PERSONNEL DEM, DEMANDE D, INTERVENTION I, PERSONNEL INTV",
+        "WHERE DEM.CodePersonnel = D.CodePersonnel",
+        "AND D.NoDemande = I.NoDemande",
+        "AND I.CodePersonnelInt = INTV.CodePersonnel",
+        "AND DEM.CodeAgence = 'AG-095'",
+        "AND YEAR(D.DateDemande) = 2017;"
+      ],
+      "variantes": [
+        [
+          "SELECT D.NoDemande, DEM.NomPersonnel AS Demandeur, INTV.NomPersonnel AS Intervenant",
+          "FROM PERSONNEL DEM",
+          "INNER JOIN DEMANDE D ON DEM.CodePersonnel = D.CodePersonnel",
+          "INNER JOIN INTERVENTION I ON D.NoDemande = I.NoDemande",
+          "INNER JOIN PERSONNEL INTV ON I.CodePersonnelInt = INTV.CodePersonnel",
+          "WHERE DEM.CodeAgence = 'AG-095'",
+          "AND YEAR(D.DateDemande) = 2017;"
+        ]
+      ],
+      "indice": "Demandeur et intervenant sont tous deux dans PERSONNEL : il faut utiliser cette table deux fois, avec deux alias différents (par exemple DEM pour le demandeur, INTV pour l'intervenant)."
+    },
+    {
+      "id": "q19",
+      "theme": "Sous-requêtes",
+      "annale": "2017",
+      "enonce": "Quels sont les personnels des agences (nom et prénom) n'ayant jamais déposé de demande d'intervention ?",
+      "correction": [
+        "SELECT NomPersonnel, PrenomPersonnel",
+        "FROM PERSONNEL",
+        "WHERE TypePersonnel = 'Agence'",
+        "AND CodePersonnel NOT IN (SELECT CodePersonnel",
+        "                          FROM DEMANDE);"
+      ],
+      "variantes": [
+        [
+          "SELECT NomPersonnel, PrenomPersonnel",
+          "FROM PERSONNEL P",
+          "WHERE P.TypePersonnel = 'Agence'",
+          "AND NOT EXISTS (SELECT *",
+          "                FROM DEMANDE D",
+          "                WHERE D.CodePersonnel = P.CodePersonnel);"
+        ],
+        [
+          "SELECT NomPersonnel, PrenomPersonnel",
+          "FROM PERSONNEL",
+          "WHERE CodeAgence IS NOT NULL",
+          "AND CodePersonnel NOT IN (SELECT CodePersonnel",
+          "                          FROM DEMANDE);"
+        ]
+      ],
+      "indice": "La sous-requête donne les codes des personnes qui ont déposé au moins une demande ; NOT IN garde les autres. Sans la condition sur TypePersonnel, les intervenants (qui ne déposent pas de demande) apparaîtraient aussi. Attention aux homonymes : comparez les codes, pas les noms."
+    },
+    {
+      "id": "q20",
+      "theme": "Sous-requêtes",
+      "enonce": "Afficher les demandes (numéro, date et état) qui n'ont encore fait l'objet d'aucune intervention.",
+      "correction": [
+        "SELECT NoDemande, DateDemande, EtatDemande",
+        "FROM DEMANDE",
+        "WHERE NoDemande NOT IN (SELECT NoDemande",
+        "                        FROM INTERVENTION);"
+      ],
+      "variantes": [
+        [
+          "SELECT NoDemande, DateDemande, EtatDemande",
+          "FROM DEMANDE D",
+          "WHERE NOT EXISTS (SELECT *",
+          "                  FROM INTERVENTION I",
+          "                  WHERE I.NoDemande = D.NoDemande);"
+        ]
+      ],
+      "indice": "Les demandes déjà traitées figurent dans INTERVENTION. Ne vous fiez pas à l'état : une demande peut être « En cours » sans qu'aucune intervention n'ait encore été enregistrée."
+    },
+    {
+      "id": "q21",
+      "theme": "Sous-requêtes",
+      "enonce": "Quelle est l'intervention la plus longue (plus grand nombre d'heures) ? Afficher le nom et le prénom de l'intervenant, le n° de la demande et le nombre d'heures. Attention : il peut y en avoir plusieurs.",
+      "correction": [
+        "SELECT P.NomPersonnel, P.PrenomPersonnel, I.NoDemande, I.Nbh",
+        "FROM PERSONNEL P, INTERVENTION I",
+        "WHERE P.CodePersonnel = I.CodePersonnelInt",
+        "AND I.Nbh = (SELECT MAX(Nbh)",
+        "             FROM INTERVENTION);"
+      ],
+      "variantes": [
+        [
+          "SELECT P.NomPersonnel, P.PrenomPersonnel, I.NoDemande, I.Nbh",
+          "FROM PERSONNEL P",
+          "INNER JOIN INTERVENTION I ON P.CodePersonnel = I.CodePersonnelInt",
+          "WHERE I.Nbh = (SELECT MAX(Nbh)",
+          "               FROM INTERVENTION);"
+        ]
+      ],
+      "indice": "On ne peut pas écrire WHERE Nbh = MAX(Nbh) : calculez le maximum dans une sous-requête, puis comparez-le au nombre d'heures de chaque intervention."
+    },
+    {
+      "id": "q22",
+      "theme": "Mises à jour",
+      "type": "write",
+      "enonce": "La sauvegarde du serveur a été réparée : la demande DEM-152 est terminée. Enregistrer ce changement d'état.",
+      "correction": [
+        "UPDATE DEMANDE",
+        "SET EtatDemande = 'Terminée'",
+        "WHERE NoDemande = 'DEM-152';"
+      ],
+      "verif": "SELECT * FROM DEMANDE ORDER BY NoDemande",
+      "indice": "UPDATE … SET … WHERE : sans WHERE, toutes les demandes passeraient à l'état « Terminée ». L'état s'écrit exactement 'Terminée', avec l'accent."
+    },
+    {
+      "id": "q23",
+      "theme": "Mises à jour",
+      "type": "write",
+      "enonce": "La pièce commandée pour la demande DEM-150 a été reçue. Enregistrer le suivi n° 3 de cette demande, avec le descriptif « Batterie reçue et remplacée ».",
+      "correction": [
+        "INSERT INTO SUIVI",
+        "VALUES ('DEM-150', 3, 'Batterie reçue et remplacée');"
+      ],
+      "variantes": [
+        [
+          "INSERT INTO SUIVI (NoDemande, NoSuivi, DescriptifSuivi)",
+          "VALUES ('DEM-150', 3, 'Batterie reçue et remplacée');"
+        ]
+      ],
+      "verif": "SELECT * FROM SUIVI ORDER BY NoDemande, NoSuivi",
+      "indice": "Un suivi est identifié par le couple (NoDemande, NoSuivi) : le n° 3 existe déjà pour d'autres demandes, mais pas pour DEM-150. Les valeurs se donnent dans l'ordre des colonnes de la table."
+    },
+    {
+      "id": "q24",
+      "theme": "Mises à jour",
+      "type": "write",
+      "enonce": "La demande DEM-158 a été saisie deux fois par erreur (c'est un doublon de DEM-157). La supprimer.",
+      "correction": [
+        "DELETE FROM DEMANDE",
+        "WHERE NoDemande = 'DEM-158';"
+      ],
+      "verif": "SELECT * FROM DEMANDE ORDER BY NoDemande",
+      "indice": "DELETE FROM … WHERE : ciblez la demande par son numéro. Cette demande n'a ni intervention ni suivi : sa suppression ne pose pas de problème d'intégrité référentielle."
+    },
+    {
+      "id": "q25",
+      "theme": "Mises à jour",
+      "type": "write",
+      "annale": "2017",
+      "enonce": "Il faut supprimer de la base toutes les demandes dont la date est antérieure au 1er janvier 2016. Essayez d'abord : DELETE FROM DEMANDE WHERE DateDemande < '01/01/2016'. Elle est refusée : pourquoi ? Écrivez ensuite un script qui supprime d'abord les suivis et les interventions de ces demandes, puis les demandes elles-mêmes. Chaque exécution repart de la base d'origine : les trois requêtes doivent figurer dans votre script, séparées par un point-virgule.",
+      "correction": [
+        "DELETE FROM SUIVI",
+        "WHERE NoDemande IN (SELECT NoDemande FROM DEMANDE WHERE DateDemande < '01/01/2016');",
+        "DELETE FROM INTERVENTION",
+        "WHERE NoDemande IN (SELECT NoDemande FROM DEMANDE WHERE DateDemande < '01/01/2016');",
+        "DELETE FROM DEMANDE",
+        "WHERE DateDemande < '01/01/2016';"
+      ],
+      "variantes": [
+        [
+          "DELETE FROM INTERVENTION",
+          "WHERE NoDemande IN (SELECT NoDemande FROM DEMANDE WHERE YEAR(DateDemande) < 2016);",
+          "DELETE FROM SUIVI",
+          "WHERE NoDemande IN (SELECT NoDemande FROM DEMANDE WHERE YEAR(DateDemande) < 2016);",
+          "DELETE FROM DEMANDE",
+          "WHERE YEAR(DateDemande) < 2016;"
+        ]
+      ],
+      "verif": "SELECT * FROM DEMANDE ORDER BY NoDemande",
+      "indice": "SUIVI.NoDemande et INTERVENTION.NoDemande sont des clés étrangères vers DEMANDE : l'intégrité référentielle interdit de supprimer une demande qui a encore des suivis ou des interventions. Supprimez d'abord les lignes « filles » (sous-requête sur les demandes d'avant 2016), puis les demandes. Au DCG, la réponse « l'utilisateur doit avoir les droits de suppression » est aussi acceptée. Attention : DELETE * et les dates #01/01/2016# sont des écritures Access."
+    },
+    {
+      "id": "s01",
+      "type": "schema",
+      "theme": "Évolution du schéma",
+      "annale": "2017",
+      "enonce": "Dans la version d'origine du sujet, le personnel était modélisé avec deux sous-types et une demande pouvait porter sur un logiciel. Le schéma ci-dessous est le schéma relationnel partiel de cette version (annexe 2) : les personnels d'agence y sont déjà traduits par PERS_AGENCE, et DEMANDE contient déjà la colonne CodeLogiciel. Complétez-le d'après les règles du modèle conceptuel : (1) un personnel est soit un personnel d'agence, soit un intervenant du service maintenance (sous-type sans propriété propre) ; (2) une demande porte soit sur un matériel, soit sur un logiciel (code, nom, descriptif, version), jamais sur les deux ; (3) une demande est traitée par un ou plusieurs intervenants, et on enregistre le nombre d'heures (Nbh) passé par chaque intervenant sur chaque demande ; (4) chaque demande fait l'objet de suivis numérotés 1, 2, 3… à l'intérieur de la demande, avec un descriptif (un suivi n'existe pas sans sa demande) ; (5) un intervenant est spécialisé dans un ou plusieurs types de matériel et dans un ou plusieurs logiciels.",
+      "depart": [
+        {
+          "nom": "PERSONNEL",
+          "colonnes": [
+            "_CodePersonnel",
+            "NomPersonnel",
+            "PrenomPersonnel",
+            "TelPersonnel",
+            "MailPersonnel"
+          ]
+        },
+        {
+          "nom": "PERS_AGENCE",
+          "colonnes": [
+            "_#CodePersonnelAgence>PERSONNEL",
+            "#CodeAgence>AGENCE"
+          ]
+        },
+        {
+          "nom": "AGENCE",
+          "colonnes": [
+            "_CodeAgence",
+            "NomAgence",
+            "RueAgence",
+            "CPAgence",
+            "VilleAgence",
+            "TelAgence",
+            "MailAgence"
+          ]
+        },
+        {
+          "nom": "MATERIEL",
+          "colonnes": [
+            "_CodeMateriel",
+            "NomMateriel",
+            "#CodeTypeMateriel>TYPE_MATERIEL",
+            "#CodeAgence>AGENCE"
+          ]
+        },
+        {
+          "nom": "DEMANDE",
+          "colonnes": [
+            "_NoDemande",
+            "MotifDemande",
+            "DateDemande",
+            "DelaiDemande",
+            "EtatDemande",
+            "#CodePersonnelAgence>PERS_AGENCE",
+            "#CodeMateriel>MATERIEL",
+            "CodeLogiciel"
+          ]
+        },
+        {
+          "nom": "TYPE_MATERIEL",
+          "colonnes": [
+            "_CodeTypeMateriel",
+            "NomTypeMateriel"
+          ]
+        }
+      ],
+      "solution": {
+        "tables": [
+          {
+            "nom": "DEMANDE",
+            "fk": {
+              "CodeLogiciel|NumLogiciel|IdLogiciel|RefLogiciel": "LOGICIEL"
+            }
+          },
+          {
+            "nom": "PERS_INTERVENANT",
+            "alias": [
+              "INTERVENANT",
+              "INTERVENANTS",
+              "PERSONNEL_INTERVENANT",
+              "PERS_INTERV",
+              "PERSINTERVENANT",
+              "PERSONNELINTERVENANT"
+            ],
+            "role": "les intervenants du service maintenance (une catégorie de personnel)",
+            "pk": [
+              "CodePersonnelIntervenant|CodePersonnelInt|CodeIntervenant|CodePersInt|CodePersIntervenant|CodePersonnel"
+            ],
+            "fk": {
+              "CodePersonnelIntervenant|CodePersonnelInt|CodeIntervenant|CodePersInt|CodePersIntervenant|CodePersonnel": "PERSONNEL"
+            }
+          },
+          {
+            "nom": "LOGICIEL",
+            "alias": [
+              "LOGICIELS"
+            ],
+            "role": "décrire les logiciels (nom, descriptif, version)",
+            "pk": [
+              "CodeLogiciel|NumLogiciel|IdLogiciel|RefLogiciel"
+            ],
+            "attributs": [
+              "NomLogiciel|Nom|LibelleLogiciel",
+              "DescriptifLogiciel|Descriptif|DescriptionLogiciel|Description",
+              "VersionLogiciel|Version|NumVersion"
+            ]
+          },
+          {
+            "nom": "TRAITER",
+            "alias": [
+              "TRAITEMENT",
+              "INTERVENTION",
+              "INTERVENIR",
+              "INTERVENTIONS"
+            ],
+            "role": "enregistrer le nombre d'heures passé par chaque intervenant sur chaque demande",
+            "pk": [
+              "NoDemande|NumDemande|NumeroDemande|No_Demande|CodeDemande",
+              "CodePersonnelIntervenant|CodePersonnelInt|CodeIntervenant|CodePersInt|CodePersIntervenant|CodePersonnel"
+            ],
+            "fk": {
+              "NoDemande|NumDemande|NumeroDemande|No_Demande|CodeDemande": "DEMANDE",
+              "CodePersonnelIntervenant|CodePersonnelInt|CodeIntervenant|CodePersInt|CodePersIntervenant|CodePersonnel": "PERS_INTERVENANT"
+            },
+            "attributs": [
+              "Nbh|NbHeures|NombreHeures|NbreHeures|NbH|NombreDHeures"
+            ]
+          },
+          {
+            "nom": "SUIVI",
+            "alias": [
+              "SUIVIS",
+              "SUIVI_DEMANDE"
+            ],
+            "role": "enregistrer les suivis numérotés de chaque demande",
+            "pk": [
+              "NoDemande|NumDemande|NumeroDemande|No_Demande|CodeDemande",
+              "NoSuivi|NumSuivi|NumeroSuivi|No_Suivi"
+            ],
+            "fk": {
+              "NoDemande|NumDemande|NumeroDemande|No_Demande|CodeDemande": "DEMANDE"
+            },
+            "attributs": [
+              "DescriptifSuivi|Descriptif|DescriptionSuivi|LibelleSuivi|Description"
+            ]
+          },
+          {
+            "nom": "SPECIALISER1",
+            "alias": [
+              "SPECIALISER_MATERIEL",
+              "SPECIALISATION_MATERIEL",
+              "SPECIALISTE_MATERIEL",
+              "COMPETENCE_MATERIEL",
+              "SPECIALISER_TYPE",
+              "SPECIALISATION_TYPE",
+              "SPECIALISERMATERIEL"
+            ],
+            "role": "indiquer les types de matériel dans lesquels chaque intervenant est spécialisé",
+            "pk": [
+              "CodePersonnelIntervenant|CodePersonnelInt|CodeIntervenant|CodePersInt|CodePersIntervenant|CodePersonnel",
+              "CodeTypeMateriel|CodeType"
+            ],
+            "fk": {
+              "CodePersonnelIntervenant|CodePersonnelInt|CodeIntervenant|CodePersInt|CodePersIntervenant|CodePersonnel": "PERS_INTERVENANT",
+              "CodeTypeMateriel|CodeType": "TYPE_MATERIEL"
+            }
+          },
+          {
+            "nom": "SPECIALISER2",
+            "alias": [
+              "SPECIALISER_LOGICIEL",
+              "SPECIALISATION_LOGICIEL",
+              "SPECIALISTE_LOGICIEL",
+              "COMPETENCE_LOGICIEL",
+              "SPECIALISERLOGICIEL"
+            ],
+            "role": "indiquer les logiciels dans lesquels chaque intervenant est spécialisé",
+            "pk": [
+              "CodePersonnelIntervenant|CodePersonnelInt|CodeIntervenant|CodePersInt|CodePersIntervenant|CodePersonnel",
+              "CodeLogiciel|NumLogiciel|IdLogiciel|RefLogiciel"
+            ],
+            "fk": {
+              "CodePersonnelIntervenant|CodePersonnelInt|CodeIntervenant|CodePersInt|CodePersIntervenant|CodePersonnel": "PERS_INTERVENANT",
+              "CodeLogiciel|NumLogiciel|IdLogiciel|RefLogiciel": "LOGICIEL"
+            }
+          }
+        ]
+      },
+      "variantes": [
+        {
+          "tables": [
+            {
+              "nom": "DEMANDE",
+              "fk": {
+                "CodeLogiciel|NumLogiciel|IdLogiciel|RefLogiciel": "LOGICIEL"
+              }
+            },
+            {
+              "nom": "PERS_INTERVENANT",
+              "alias": [
+                "INTERVENANT",
+                "INTERVENANTS",
+                "PERSONNEL_INTERVENANT",
+                "PERS_INTERV",
+                "PERSINTERVENANT",
+                "PERSONNELINTERVENANT"
+              ],
+              "role": "les intervenants du service maintenance (une catégorie de personnel)",
+              "pk": [
+                "CodePersonnelIntervenant|CodePersonnelInt|CodeIntervenant|CodePersInt|CodePersIntervenant|CodePersonnel"
+              ],
+              "fk": {
+                "CodePersonnelIntervenant|CodePersonnelInt|CodeIntervenant|CodePersInt|CodePersIntervenant|CodePersonnel": "PERSONNEL"
+              }
+            },
+            {
+              "nom": "LOGICIEL",
+              "alias": [
+                "LOGICIELS"
+              ],
+              "role": "décrire les logiciels (nom, descriptif, version)",
+              "pk": [
+                "CodeLogiciel|NumLogiciel|IdLogiciel|RefLogiciel"
+              ],
+              "attributs": [
+                "NomLogiciel|Nom|LibelleLogiciel",
+                "DescriptifLogiciel|Descriptif|DescriptionLogiciel|Description",
+                "VersionLogiciel|Version|NumVersion"
+              ]
+            },
+            {
+              "nom": "TRAITER",
+              "alias": [
+                "TRAITEMENT",
+                "INTERVENTION",
+                "INTERVENIR",
+                "INTERVENTIONS"
+              ],
+              "role": "enregistrer le nombre d'heures passé par chaque intervenant sur chaque demande",
+              "pk": [
+                "NoDemande|NumDemande|NumeroDemande|No_Demande|CodeDemande",
+                "CodePersonnelIntervenant|CodePersonnelInt|CodeIntervenant|CodePersInt|CodePersIntervenant|CodePersonnel"
+              ],
+              "fk": {
+                "NoDemande|NumDemande|NumeroDemande|No_Demande|CodeDemande": "DEMANDE",
+                "CodePersonnelIntervenant|CodePersonnelInt|CodeIntervenant|CodePersInt|CodePersIntervenant|CodePersonnel": "PERSONNEL"
+              },
+              "attributs": [
+                "Nbh|NbHeures|NombreHeures|NbreHeures|NbH|NombreDHeures"
+              ]
+            },
+            {
+              "nom": "SUIVI",
+              "alias": [
+                "SUIVIS",
+                "SUIVI_DEMANDE"
+              ],
+              "role": "enregistrer les suivis numérotés de chaque demande",
+              "pk": [
+                "NoDemande|NumDemande|NumeroDemande|No_Demande|CodeDemande",
+                "NoSuivi|NumSuivi|NumeroSuivi|No_Suivi"
+              ],
+              "fk": {
+                "NoDemande|NumDemande|NumeroDemande|No_Demande|CodeDemande": "DEMANDE"
+              },
+              "attributs": [
+                "DescriptifSuivi|Descriptif|DescriptionSuivi|LibelleSuivi|Description"
+              ]
+            },
+            {
+              "nom": "SPECIALISER1",
+              "alias": [
+                "SPECIALISER_MATERIEL",
+                "SPECIALISATION_MATERIEL",
+                "SPECIALISTE_MATERIEL",
+                "COMPETENCE_MATERIEL",
+                "SPECIALISER_TYPE",
+                "SPECIALISATION_TYPE",
+                "SPECIALISERMATERIEL"
+              ],
+              "role": "indiquer les types de matériel dans lesquels chaque intervenant est spécialisé",
+              "pk": [
+                "CodePersonnelIntervenant|CodePersonnelInt|CodeIntervenant|CodePersInt|CodePersIntervenant|CodePersonnel",
+                "CodeTypeMateriel|CodeType"
+              ],
+              "fk": {
+                "CodePersonnelIntervenant|CodePersonnelInt|CodeIntervenant|CodePersInt|CodePersIntervenant|CodePersonnel": "PERSONNEL",
+                "CodeTypeMateriel|CodeType": "TYPE_MATERIEL"
+              }
+            },
+            {
+              "nom": "SPECIALISER2",
+              "alias": [
+                "SPECIALISER_LOGICIEL",
+                "SPECIALISATION_LOGICIEL",
+                "SPECIALISTE_LOGICIEL",
+                "COMPETENCE_LOGICIEL",
+                "SPECIALISERLOGICIEL"
+              ],
+              "role": "indiquer les logiciels dans lesquels chaque intervenant est spécialisé",
+              "pk": [
+                "CodePersonnelIntervenant|CodePersonnelInt|CodeIntervenant|CodePersInt|CodePersIntervenant|CodePersonnel",
+                "CodeLogiciel|NumLogiciel|IdLogiciel|RefLogiciel"
+              ],
+              "fk": {
+                "CodePersonnelIntervenant|CodePersonnelInt|CodeIntervenant|CodePersInt|CodePersIntervenant|CodePersonnel": "PERSONNEL",
+                "CodeLogiciel|NumLogiciel|IdLogiciel|RefLogiciel": "LOGICIEL"
+              }
+            }
+          ],
+          "partiel": "Presque : les tables sont les bonnes, mais les intervenants qui traitent les demandes et ont des spécialités sont ceux du sous-type PERS_INTERVENANT : dans TRAITER, SPECIALISER1 et SPECIALISER2, CodePersonnelIntervenant doit faire référence à PERS_INTERVENANT (et non à PERSONNEL, qui contient aussi le personnel des agences)."
+        },
+        {
+          "tables": [
+            {
+              "nom": "DEMANDE",
+              "fk": {
+                "CodeLogiciel|NumLogiciel|IdLogiciel|RefLogiciel": "LOGICIEL"
+              }
+            },
+            {
+              "nom": "LOGICIEL",
+              "alias": [
+                "LOGICIELS"
+              ],
+              "role": "décrire les logiciels (nom, descriptif, version)",
+              "pk": [
+                "CodeLogiciel|NumLogiciel|IdLogiciel|RefLogiciel"
+              ],
+              "attributs": [
+                "NomLogiciel|Nom|LibelleLogiciel",
+                "DescriptifLogiciel|Descriptif|DescriptionLogiciel|Description",
+                "VersionLogiciel|Version|NumVersion"
+              ]
+            },
+            {
+              "nom": "TRAITER",
+              "alias": [
+                "TRAITEMENT",
+                "INTERVENTION",
+                "INTERVENIR",
+                "INTERVENTIONS"
+              ],
+              "role": "enregistrer le nombre d'heures passé par chaque intervenant sur chaque demande",
+              "pk": [
+                "NoDemande|NumDemande|NumeroDemande|No_Demande|CodeDemande",
+                "CodePersonnelIntervenant|CodePersonnelInt|CodeIntervenant|CodePersInt|CodePersIntervenant|CodePersonnel"
+              ],
+              "fk": {
+                "NoDemande|NumDemande|NumeroDemande|No_Demande|CodeDemande": "DEMANDE",
+                "CodePersonnelIntervenant|CodePersonnelInt|CodeIntervenant|CodePersInt|CodePersIntervenant|CodePersonnel": "PERSONNEL"
+              },
+              "attributs": [
+                "Nbh|NbHeures|NombreHeures|NbreHeures|NbH|NombreDHeures"
+              ]
+            },
+            {
+              "nom": "SUIVI",
+              "alias": [
+                "SUIVIS",
+                "SUIVI_DEMANDE"
+              ],
+              "role": "enregistrer les suivis numérotés de chaque demande",
+              "pk": [
+                "NoDemande|NumDemande|NumeroDemande|No_Demande|CodeDemande",
+                "NoSuivi|NumSuivi|NumeroSuivi|No_Suivi"
+              ],
+              "fk": {
+                "NoDemande|NumDemande|NumeroDemande|No_Demande|CodeDemande": "DEMANDE"
+              },
+              "attributs": [
+                "DescriptifSuivi|Descriptif|DescriptionSuivi|LibelleSuivi|Description"
+              ]
+            },
+            {
+              "nom": "SPECIALISER1",
+              "alias": [
+                "SPECIALISER_MATERIEL",
+                "SPECIALISATION_MATERIEL",
+                "SPECIALISTE_MATERIEL",
+                "COMPETENCE_MATERIEL",
+                "SPECIALISER_TYPE",
+                "SPECIALISATION_TYPE",
+                "SPECIALISERMATERIEL"
+              ],
+              "role": "indiquer les types de matériel dans lesquels chaque intervenant est spécialisé",
+              "pk": [
+                "CodePersonnelIntervenant|CodePersonnelInt|CodeIntervenant|CodePersInt|CodePersIntervenant|CodePersonnel",
+                "CodeTypeMateriel|CodeType"
+              ],
+              "fk": {
+                "CodePersonnelIntervenant|CodePersonnelInt|CodeIntervenant|CodePersInt|CodePersIntervenant|CodePersonnel": "PERSONNEL",
+                "CodeTypeMateriel|CodeType": "TYPE_MATERIEL"
+              }
+            },
+            {
+              "nom": "SPECIALISER2",
+              "alias": [
+                "SPECIALISER_LOGICIEL",
+                "SPECIALISATION_LOGICIEL",
+                "SPECIALISTE_LOGICIEL",
+                "COMPETENCE_LOGICIEL",
+                "SPECIALISERLOGICIEL"
+              ],
+              "role": "indiquer les logiciels dans lesquels chaque intervenant est spécialisé",
+              "pk": [
+                "CodePersonnelIntervenant|CodePersonnelInt|CodeIntervenant|CodePersInt|CodePersIntervenant|CodePersonnel",
+                "CodeLogiciel|NumLogiciel|IdLogiciel|RefLogiciel"
+              ],
+              "fk": {
+                "CodePersonnelIntervenant|CodePersonnelInt|CodeIntervenant|CodePersInt|CodePersIntervenant|CodePersonnel": "PERSONNEL",
+                "CodeLogiciel|NumLogiciel|IdLogiciel|RefLogiciel": "LOGICIEL"
+              }
+            }
+          ],
+          "partiel": "Presque : toutes les associations sont traduites, mais le sous-type « intervenant » a disparu. Comme PERS_AGENCE pour le personnel d'agence, il faut une table PERS_INTERVENANT dont la clé primaire est aussi une clé étrangère vers PERSONNEL ; TRAITER, SPECIALISER1 et SPECIALISER2 y font ensuite référence."
+        }
+      ],
+      "indice": "Un sous-type devient une table dont la clé primaire est aussi une clé étrangère vers la table générique (comme PERS_AGENCE). Une association « plusieurs à plusieurs » devient une table dont la clé est composée des clés des tables reliées (et qui porte ses propres informations, comme Nbh). Un suivi numéroté dans sa demande a une clé composée : n° de demande + n° de suivi. Enfin, CodeLogiciel de DEMANDE doit devenir une clé étrangère."
+    },
+    {
+      "id": "s02",
+      "type": "schema",
+      "theme": "Évolution du schéma",
+      "annale": "2017",
+      "enonce": "Les agences proposent des voyages organisés sous forme de circuits. On veut enregistrer : les dossiers de voyage (numéro, nombre de personnes) ; les circuits (numéro, nom, prix, nombre minimum et nombre maximum de personnes) ; les étapes (code, descriptif) ; les dates de départ et d'arrivée de chaque étape d'un circuit. Règles de gestion : un dossier de voyage correspond à un circuit choisi par un client ; un circuit est composé de plusieurs étapes, et une même étape peut être reprise dans plusieurs circuits (à des dates différentes) ; un circuit ne passe jamais deux fois par la même étape ; une étape comprend une ville de départ et une ville d'arrivée, nécessairement différente ; chaque circuit est accompagné par un seul accompagnateur. Complétez le schéma ci-dessous. (Au DCG 2017, le schéma relationnel était fourni et il fallait remonter au modèle conceptuel ; ici, on fait le chemin inverse.)",
+      "depart": [
+        {
+          "nom": "CLIENT",
+          "colonnes": [
+            "_NumClient",
+            "NomClient",
+            "PrenomClient",
+            "RueClient",
+            "CPClient",
+            "VilleClient",
+            "TelClient",
+            "MailClient"
+          ]
+        },
+        {
+          "nom": "ACCOMPAGNATEUR",
+          "colonnes": [
+            "_NumAccompagnateur",
+            "NomAccompagnateur",
+            "PrenomAccompagnateur"
+          ]
+        },
+        {
+          "nom": "VILLE",
+          "colonnes": [
+            "_NumVille",
+            "NomVille",
+            "NomPays"
+          ]
+        }
+      ],
+      "solution": {
+        "tables": [
+          {
+            "nom": "DOSSIER_VOYAGE",
+            "alias": [
+              "DOSSIER",
+              "DOSSIERS",
+              "DOSSIERVOYAGE",
+              "DOSSIER_VOYAGE_CIRCUIT",
+              "DOSSIERS_VOYAGE",
+              "VOYAGE"
+            ],
+            "role": "enregistrer les dossiers de voyage (client, circuit choisi, nombre de personnes)",
+            "pk": [
+              "NumDossierVoyage|NumDossier|NoDossier|NumeroDossier|CodeDossier|NoDossierVoyage|IdDossier"
+            ],
+            "fk": {
+              "NumClient|NoClient|NumeroClient|CodeClient|NumCli|IdClient": "CLIENT",
+              "NumCircuit|NoCircuit|NumeroCircuit|CodeCircuit|IdCircuit": "CIRCUIT"
+            },
+            "attributs": [
+              "NombrePersonnesVoyage|NombrePersonnes|NbPersonnes|NbPers|NombrePers|NbPersonnesVoyage|NbVoyageurs"
+            ]
+          },
+          {
+            "nom": "CIRCUIT",
+            "alias": [
+              "CIRCUITS"
+            ],
+            "role": "décrire les circuits et leur accompagnateur",
+            "pk": [
+              "NumCircuit|NoCircuit|NumeroCircuit|CodeCircuit|IdCircuit"
+            ],
+            "fk": {
+              "NumAccompagnateur|NoAccompagnateur|NumeroAccompagnateur|CodeAccompagnateur|NumAcc|IdAccompagnateur": "ACCOMPAGNATEUR"
+            },
+            "attributs": [
+              "NomCircuit|Nom|LibelleCircuit",
+              "PrixCircuit|Prix",
+              "NombreMinPersCircuit|NbMinPers|NbMinPersonnes|NombreMinPersonnes|NbPersMin|NombreMinPers|NbMin|MinPersonnes",
+              "NombreMaxPersCircuit|NbMaxPers|NbMaxPersonnes|NombreMaxPersonnes|NbPersMax|NombreMaxPers|NbMax|MaxPersonnes"
+            ]
+          },
+          {
+            "nom": "ETAPE",
+            "alias": [
+              "ETAPES"
+            ],
+            "role": "décrire les étapes (ville de départ et ville d'arrivée)",
+            "pk": [
+              "CodeEtape|NumEtape|NoEtape|NumeroEtape|IdEtape"
+            ],
+            "fk": {
+              "NumVilleDepartEtape|NumVilleDepart|NoVilleDepart|CodeVilleDepart|VilleDepart|VilleDepartEtape|NumVilleDep|IdVilleDepart": "VILLE",
+              "NumVilleArriveeEtape|NumVilleArrivee|NoVilleArrivee|CodeVilleArrivee|VilleArrivee|VilleArriveeEtape|NumVilleArr|IdVilleArrivee": "VILLE"
+            },
+            "attributs": [
+              "Descriptif|DescriptifEtape|DescriptionEtape|LibelleEtape|Description"
+            ]
+          },
+          {
+            "nom": "COMPRENDRE",
+            "alias": [
+              "COMPOSER",
+              "CIRCUIT_ETAPE",
+              "ETAPE_CIRCUIT",
+              "CONTENIR",
+              "INCLURE",
+              "COMPORTER",
+              "PASSER_PAR"
+            ],
+            "role": "indiquer les étapes de chaque circuit, avec leurs dates",
+            "pk": [
+              "NumCircuit|NoCircuit|NumeroCircuit|CodeCircuit|IdCircuit",
+              "CodeEtape|NumEtape|NoEtape|NumeroEtape|IdEtape"
+            ],
+            "fk": {
+              "NumCircuit|NoCircuit|NumeroCircuit|CodeCircuit|IdCircuit": "CIRCUIT",
+              "CodeEtape|NumEtape|NoEtape|NumeroEtape|IdEtape": "ETAPE"
+            },
+            "attributs": [
+              "DateDepartEtape|DateDepart|DateDebutEtape|DateDebut",
+              "DateArriveeEtape|DateArrivee|DateFinEtape|DateFin"
+            ]
+          }
+        ]
+      },
+      "variantes": [
+        {
+          "tables": [
+            {
+              "nom": "DOSSIER_VOYAGE",
+              "alias": [
+                "DOSSIER",
+                "DOSSIERS",
+                "DOSSIERVOYAGE",
+                "DOSSIER_VOYAGE_CIRCUIT",
+                "DOSSIERS_VOYAGE",
+                "VOYAGE"
+              ],
+              "role": "enregistrer les dossiers de voyage (client, circuit choisi, nombre de personnes)",
+              "pk": [
+                "NumDossierVoyage|NumDossier|NoDossier|NumeroDossier|CodeDossier|NoDossierVoyage|IdDossier"
+              ],
+              "fk": {
+                "NumClient|NoClient|NumeroClient|CodeClient|NumCli|IdClient": "CLIENT",
+                "NumCircuit|NoCircuit|NumeroCircuit|CodeCircuit|IdCircuit": "CIRCUIT"
+              },
+              "attributs": [
+                "NombrePersonnesVoyage|NombrePersonnes|NbPersonnes|NbPers|NombrePers|NbPersonnesVoyage|NbVoyageurs"
+              ]
+            },
+            {
+              "nom": "CIRCUIT",
+              "alias": [
+                "CIRCUITS"
+              ],
+              "role": "décrire les circuits et leur accompagnateur",
+              "pk": [
+                "NumCircuit|NoCircuit|NumeroCircuit|CodeCircuit|IdCircuit"
+              ],
+              "fk": {
+                "NumAccompagnateur|NoAccompagnateur|NumeroAccompagnateur|CodeAccompagnateur|NumAcc|IdAccompagnateur": "ACCOMPAGNATEUR"
+              },
+              "attributs": [
+                "NomCircuit|Nom|LibelleCircuit",
+                "PrixCircuit|Prix",
+                "NombreMinPersCircuit|NbMinPers|NbMinPersonnes|NombreMinPersonnes|NbPersMin|NombreMinPers|NbMin|MinPersonnes",
+                "NombreMaxPersCircuit|NbMaxPers|NbMaxPersonnes|NombreMaxPersonnes|NbPersMax|NombreMaxPers|NbMax|MaxPersonnes"
+              ]
+            },
+            {
+              "nom": "ETAPE",
+              "alias": [
+                "ETAPES"
+              ],
+              "role": "décrire les étapes (ville de départ et ville d'arrivée)",
+              "pk": [
+                "CodeEtape|NumEtape|NoEtape|NumeroEtape|IdEtape"
+              ],
+              "fk": {
+                "NumVilleDepartEtape|NumVilleDepart|NoVilleDepart|CodeVilleDepart|VilleDepart|VilleDepartEtape|NumVilleDep|IdVilleDepart": "VILLE",
+                "NumVilleArriveeEtape|NumVilleArrivee|NoVilleArrivee|CodeVilleArrivee|VilleArrivee|VilleArriveeEtape|NumVilleArr|IdVilleArrivee": "VILLE"
+              },
+              "attributs": [
+                "Descriptif|DescriptifEtape|DescriptionEtape|LibelleEtape|Description",
+                "DateDepartEtape|DateDepart|DateDebutEtape|DateDebut",
+                "DateArriveeEtape|DateArrivee|DateFinEtape|DateFin"
+              ]
+            },
+            {
+              "nom": "COMPRENDRE",
+              "alias": [
+                "COMPOSER",
+                "CIRCUIT_ETAPE",
+                "ETAPE_CIRCUIT",
+                "CONTENIR",
+                "INCLURE",
+                "COMPORTER",
+                "PASSER_PAR"
+              ],
+              "role": "indiquer les étapes de chaque circuit, avec leurs dates",
+              "pk": [
+                "NumCircuit|NoCircuit|NumeroCircuit|CodeCircuit|IdCircuit",
+                "CodeEtape|NumEtape|NoEtape|NumeroEtape|IdEtape"
+              ],
+              "fk": {
+                "NumCircuit|NoCircuit|NumeroCircuit|CodeCircuit|IdCircuit": "CIRCUIT",
+                "CodeEtape|NumEtape|NoEtape|NumeroEtape|IdEtape": "ETAPE"
+              }
+            }
+          ],
+          "partiel": "Presque : une même étape est reprise dans plusieurs circuits, à des dates différentes. Les dates de départ et d'arrivée dépendent donc du couple (circuit, étape) : elles doivent figurer dans la table qui relie circuits et étapes, pas dans ETAPE."
+        }
+      ],
+      "indice": "Une étape a deux villes : deux clés étrangères différentes vers la même table VILLE (ville de départ, ville d'arrivée). La relation « plusieurs à plusieurs » entre circuits et étapes devient une table à clé composée, qui porte les informations dépendant à la fois du circuit et de l'étape. Un dossier ne concerne qu'un client et qu'un circuit : de simples clés étrangères."
+    }
+  ]
+}

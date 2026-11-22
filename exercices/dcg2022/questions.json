@@ -1,0 +1,1652 @@
+{
+  "id": "dcg2022",
+  "titre": "DCG 2022 – Thermes Marins de Saint-Malo",
+  "aujourdhui": "2022-03-15",
+  "contexte": "Les Thermes Marins de Saint-Malo proposent des SEJOURS de thalassothérapie de 6 jours (« MER & DÉTENTE », « MER & MAMAN BÉBÉ »…), chacun composé de plusieurs SOINS (table COMPOSER). Un client RESERVE un séjour qui débute à une date donnée (DateDebutSejour). À son arrivée, il reçoit son planning : chaque soin est PLANIFIE à une date (DateSoin) et une heure de début (HeureSoin, stockée sous forme de texte 'HH:MM', par exemple '09:40'), avec un membre du PERSONNEL. Les soins sont regroupés par demi-journée, entre 08:30 et 19:00. Chaque soin a une durée en minutes et se déroule toujours dans le même SALON (six salons, dont le Spa) ; chaque membre du personnel est affecté à un salon. La date du jour simulée est le 15/03/2022.",
+  "source": "Inspiré du sujet DCG UE8 session 2022, dossier 3. Données entièrement fictives.",
+  "schemaGrid": {
+    "CLIENT": [
+      0,
+      0
+    ],
+    "RESERVER": [
+      1,
+      0
+    ],
+    "SEJOUR": [
+      2,
+      0
+    ],
+    "PLANIFIER": [
+      0,
+      1
+    ],
+    "SOIN": [
+      1,
+      1
+    ],
+    "COMPOSER": [
+      2,
+      1
+    ],
+    "PERSONNEL": [
+      0,
+      2
+    ],
+    "SALON": [
+      1,
+      2
+    ]
+  },
+  "questions": [
+    {
+      "id": "q01",
+      "theme": "Une seule table",
+      "enonce": "Afficher la liste des séjours proposés par les Thermes Marins (toutes les colonnes).",
+      "correction": [
+        "SELECT *",
+        "FROM SEJOUR;"
+      ],
+      "indice": "L'étoile * permet d'afficher toutes les colonnes d'une table."
+    },
+    {
+      "id": "q02",
+      "theme": "Une seule table",
+      "enonce": "Afficher le nom, le prénom et le téléphone des clients habitant à Saint-Malo, triés par ordre alphabétique des noms.",
+      "ordered": [
+        0
+      ],
+      "correction": [
+        "SELECT NomClient, PrenomClient, TelClient",
+        "FROM CLIENT",
+        "WHERE AdrVilleClient = 'Saint-Malo'",
+        "ORDER BY NomClient;"
+      ],
+      "indice": "Une condition sur un texte s'écrit entre apostrophes : AdrVilleClient = 'Saint-Malo'. Le tri se fait avec ORDER BY."
+    },
+    {
+      "id": "q03",
+      "theme": "Une seule table",
+      "enonce": "Afficher les clients (numéro, nom, prénom et téléphone) dont l'adresse mail n'est pas renseignée.",
+      "correction": [
+        "SELECT NumClient, NomClient, PrenomClient, TelClient",
+        "FROM CLIENT",
+        "WHERE MailClient IS NULL;"
+      ],
+      "indice": "Une valeur absente se teste avec IS NULL (et non = NULL)."
+    },
+    {
+      "id": "q04",
+      "theme": "Une seule table",
+      "enonce": "Afficher les soins de modelage (code, libellé et durée), c'est-à-dire ceux dont le libellé commence par « Modelage ».",
+      "correction": [
+        "SELECT CodeSoin, LibelleSoin, DureeSoin",
+        "FROM SOIN",
+        "WHERE LibelleSoin LIKE 'Modelage%';"
+      ],
+      "indice": "LIKE avec % permet de rechercher un début de texte : LIKE 'Modelage%'."
+    },
+    {
+      "id": "q05",
+      "theme": "Calculs et agrégats",
+      "enonce": "Combien de clients habitent en Ille-et-Vilaine (code postal commençant par 35) ?",
+      "correction": [
+        "SELECT COUNT(*)",
+        "FROM CLIENT",
+        "WHERE CpClient LIKE '35%';"
+      ],
+      "indice": "COUNT(*) compte les lignes ; le code postal est un texte, que l'on peut filtrer avec LIKE '35%'."
+    },
+    {
+      "id": "q06",
+      "theme": "Calculs et agrégats",
+      "enonce": "Afficher la durée moyenne, la durée la plus courte et la durée la plus longue des soins (en minutes).",
+      "correction": [
+        "SELECT AVG(DureeSoin), MIN(DureeSoin), MAX(DureeSoin)",
+        "FROM SOIN;"
+      ],
+      "indice": "Fonctions AVG (moyenne), MIN et MAX."
+    },
+    {
+      "id": "q07",
+      "theme": "Calculs et agrégats",
+      "enonce": "Afficher le nombre de soins par salon (code du salon, nombre de soins), en ne comptant que les soins dont la durée est supérieure à 60 minutes.",
+      "annale": "2022",
+      "correction": [
+        "SELECT CodeSalon, COUNT(*)",
+        "FROM SOIN",
+        "WHERE DureeSoin > 60",
+        "GROUP BY CodeSalon;"
+      ],
+      "indice": "La condition sur la durée porte sur chaque soin, avant le regroupement : elle se place dans le WHERE. « Par salon » se traduit par GROUP BY CodeSalon. « Supérieure à 60 » : > 60 (un soin de 60 minutes ne compte pas)."
+    },
+    {
+      "id": "q08",
+      "theme": "Dates et heures",
+      "enonce": "Afficher les réservations (numéro de client, code du séjour, date de début) des séjours débutant en février 2022.",
+      "correction": [
+        "SELECT NumClient, CodeSejour, DateDebutSejour",
+        "FROM RESERVER",
+        "WHERE MONTH(DateDebutSejour) = 2",
+        "AND YEAR(DateDebutSejour) = 2022;"
+      ],
+      "variantes": [
+        [
+          "SELECT NumClient, CodeSejour, DateDebutSejour",
+          "FROM RESERVER",
+          "WHERE DateDebutSejour BETWEEN '01/02/2022' AND '28/02/2022';"
+        ]
+      ],
+      "indice": "Combinez MONTH() et YEAR(), ou utilisez BETWEEN avec deux dates : BETWEEN '01/02/2022' AND '28/02/2022'."
+    },
+    {
+      "id": "q09",
+      "theme": "Dates et heures",
+      "enonce": "Afficher les soins planifiés le 17/02/2022 à partir de 17:00 (numéro de client, heure, code du soin), triés par heure.",
+      "ordered": [
+        1
+      ],
+      "correction": [
+        "SELECT NumClient, HeureSoin, CodeSoin",
+        "FROM PLANIFIER",
+        "WHERE DateSoin = '17/02/2022'",
+        "AND HeureSoin >= '17:00'",
+        "ORDER BY HeureSoin;"
+      ],
+      "indice": "L'heure est un texte au format 'HH:MM' : on peut la comparer à '17:00' comme un texte. « À partir de » signifie >=."
+    },
+    {
+      "id": "q10",
+      "theme": "Dates et heures",
+      "enonce": "Combien de soins ont été planifiés en fin de journée (heure de début à partir de 18:00) au cours du mois de février 2022 ?",
+      "correction": [
+        "SELECT COUNT(*)",
+        "FROM PLANIFIER",
+        "WHERE HeureSoin >= '18:00'",
+        "AND MONTH(DateSoin) = 2",
+        "AND YEAR(DateSoin) = 2022;"
+      ],
+      "variantes": [
+        [
+          "SELECT COUNT(*)",
+          "FROM PLANIFIER",
+          "WHERE HeureSoin >= '18:00'",
+          "AND DateSoin BETWEEN '01/02/2022' AND '28/02/2022';"
+        ]
+      ],
+      "indice": "Deux conditions reliées par AND : l'une sur l'heure ('18:00'), l'autre sur la date du soin."
+    },
+    {
+      "id": "q11",
+      "theme": "Jointures",
+      "enonce": "Afficher la liste des clients (numéro, nom et prénom) qui ont réservé un séjour « MER & MAMAN BÉBÉ » ayant débuté en janvier 2022.",
+      "annale": "2022",
+      "correction": [
+        "SELECT CLIENT.NumClient, NomClient, PrenomClient",
+        "FROM CLIENT, RESERVER, SEJOUR",
+        "WHERE CLIENT.NumClient = RESERVER.NumClient",
+        "AND RESERVER.CodeSejour = SEJOUR.CodeSejour",
+        "AND LibelleSejour = 'MER & MAMAN BÉBÉ'",
+        "AND MONTH(DateDebutSejour) = 1",
+        "AND YEAR(DateDebutSejour) = 2022;"
+      ],
+      "variantes": [
+        [
+          "SELECT CLIENT.NumClient, NomClient, PrenomClient",
+          "FROM CLIENT",
+          "INNER JOIN RESERVER ON CLIENT.NumClient = RESERVER.NumClient",
+          "INNER JOIN SEJOUR ON RESERVER.CodeSejour = SEJOUR.CodeSejour",
+          "WHERE LibelleSejour = 'MER & MAMAN BÉBÉ'",
+          "AND DateDebutSejour BETWEEN '01/01/2022' AND '31/01/2022';"
+        ]
+      ],
+      "indice": "Trois tables : CLIENT → RESERVER → SEJOUR (le libellé du séjour est dans SEJOUR). Attention aux accents de « BÉBÉ », et à l'année : un séjour « MER & MAMAN BÉBÉ » a aussi débuté en janvier 2021."
+    },
+    {
+      "id": "q12",
+      "theme": "Jointures",
+      "enonce": "Afficher le nom et le prénom des membres du personnel affectés au « Salon Algues ».",
+      "correction": [
+        "SELECT NomPersonnel, PrenomPersonnel",
+        "FROM PERSONNEL, SALON",
+        "WHERE PERSONNEL.CodeSalon = SALON.CodeSalon",
+        "AND LibelleSalon = 'Salon Algues';"
+      ],
+      "variantes": [
+        [
+          "SELECT NomPersonnel, PrenomPersonnel",
+          "FROM PERSONNEL",
+          "INNER JOIN SALON ON PERSONNEL.CodeSalon = SALON.CodeSalon",
+          "WHERE LibelleSalon = 'Salon Algues';"
+        ]
+      ],
+      "indice": "Le libellé du salon est dans SALON, le personnel dans PERSONNEL : reliez les deux tables par CodeSalon (présent dans les deux tables, donc à préfixer)."
+    },
+    {
+      "id": "q13",
+      "theme": "Jointures",
+      "enonce": "Afficher la composition du séjour « MER & DÉTOX » : libellé et durée de chacun des soins qui le composent.",
+      "correction": [
+        "SELECT LibelleSoin, DureeSoin",
+        "FROM SEJOUR, COMPOSER, SOIN",
+        "WHERE SEJOUR.CodeSejour = COMPOSER.CodeSejour",
+        "AND COMPOSER.CodeSoin = SOIN.CodeSoin",
+        "AND LibelleSejour = 'MER & DÉTOX';"
+      ],
+      "variantes": [
+        [
+          "SELECT LibelleSoin, DureeSoin",
+          "FROM SEJOUR",
+          "INNER JOIN COMPOSER ON SEJOUR.CodeSejour = COMPOSER.CodeSejour",
+          "INNER JOIN SOIN ON COMPOSER.CodeSoin = SOIN.CodeSoin",
+          "WHERE LibelleSejour = 'MER & DÉTOX';"
+        ]
+      ],
+      "indice": "COMPOSER fait le lien entre SEJOUR et SOIN : deux conditions de jointure."
+    },
+    {
+      "id": "q14",
+      "theme": "Jointures",
+      "enonce": "Reconstituer le planning de la cliente n° 1012 pour la journée du 27/01/2022 : heure, libellé du soin, nom du membre du personnel et libellé du salon, triés par heure.",
+      "ordered": [
+        0
+      ],
+      "correction": [
+        "SELECT HeureSoin, LibelleSoin, NomPersonnel, LibelleSalon",
+        "FROM PLANIFIER, SOIN, PERSONNEL, SALON",
+        "WHERE PLANIFIER.CodeSoin = SOIN.CodeSoin",
+        "AND PLANIFIER.NumPersonnel = PERSONNEL.NumPersonnel",
+        "AND SOIN.CodeSalon = SALON.CodeSalon",
+        "AND NumClient = 1012",
+        "AND DateSoin = '27/01/2022'",
+        "ORDER BY HeureSoin;"
+      ],
+      "variantes": [
+        [
+          "SELECT HeureSoin, LibelleSoin, NomPersonnel, LibelleSalon",
+          "FROM PLANIFIER",
+          "INNER JOIN SOIN ON PLANIFIER.CodeSoin = SOIN.CodeSoin",
+          "INNER JOIN PERSONNEL ON PLANIFIER.NumPersonnel = PERSONNEL.NumPersonnel",
+          "INNER JOIN SALON ON SOIN.CodeSalon = SALON.CodeSalon",
+          "WHERE NumClient = 1012",
+          "AND DateSoin = '27/01/2022'",
+          "ORDER BY HeureSoin;"
+        ]
+      ],
+      "indice": "Quatre tables donc trois conditions de jointure. Le salon est celui du soin (SOIN.CodeSalon) : PERSONNEL contient aussi un CodeSalon, il faut donc préciser la table."
+    },
+    {
+      "id": "q15",
+      "theme": "Jointures",
+      "enonce": "Afficher sans doublon les clients (numéro, nom et prénom) qui ont reçu au moins un soin dispensé par un membre du personnel nommé LEROY en février 2022.",
+      "correction": [
+        "SELECT DISTINCT CLIENT.NumClient, NomClient, PrenomClient",
+        "FROM CLIENT, PLANIFIER, PERSONNEL",
+        "WHERE CLIENT.NumClient = PLANIFIER.NumClient",
+        "AND PLANIFIER.NumPersonnel = PERSONNEL.NumPersonnel",
+        "AND NomPersonnel = 'LEROY'",
+        "AND MONTH(DateSoin) = 2",
+        "AND YEAR(DateSoin) = 2022;"
+      ],
+      "variantes": [
+        [
+          "SELECT DISTINCT CLIENT.NumClient, NomClient, PrenomClient",
+          "FROM CLIENT",
+          "INNER JOIN PLANIFIER ON CLIENT.NumClient = PLANIFIER.NumClient",
+          "INNER JOIN PERSONNEL ON PLANIFIER.NumPersonnel = PERSONNEL.NumPersonnel",
+          "WHERE NomPersonnel = 'LEROY'",
+          "AND DateSoin BETWEEN '01/02/2022' AND '28/02/2022';"
+        ]
+      ],
+      "indice": "Un client reçoit plusieurs soins : sans DISTINCT, il apparaîtrait plusieurs fois."
+    },
+    {
+      "id": "q16",
+      "theme": "Jointures et regroupements",
+      "enonce": "Afficher la liste des séjours (code et libellé) réservés par plus de 20 clients.",
+      "annale": "2022",
+      "correction": [
+        "SELECT SEJOUR.CodeSejour, LibelleSejour",
+        "FROM SEJOUR, RESERVER",
+        "WHERE SEJOUR.CodeSejour = RESERVER.CodeSejour",
+        "GROUP BY SEJOUR.CodeSejour, LibelleSejour",
+        "HAVING COUNT(*) > 20;"
+      ],
+      "variantes": [
+        [
+          "SELECT SEJOUR.CodeSejour, LibelleSejour",
+          "FROM SEJOUR",
+          "INNER JOIN RESERVER ON SEJOUR.CodeSejour = RESERVER.CodeSejour",
+          "GROUP BY SEJOUR.CodeSejour, LibelleSejour",
+          "HAVING COUNT(*) > 20;"
+        ],
+        [
+          "SELECT SEJOUR.CodeSejour, LibelleSejour",
+          "FROM SEJOUR, RESERVER",
+          "WHERE SEJOUR.CodeSejour = RESERVER.CodeSejour",
+          "GROUP BY SEJOUR.CodeSejour, LibelleSejour",
+          "HAVING COUNT(DISTINCT RESERVER.NumClient) > 20;"
+        ]
+      ],
+      "indice": "Regroupez les réservations par séjour, puis gardez les groupes de plus de 20 lignes : une condition sur un COUNT se place dans HAVING. « Plus de 20 » signifie > 20 (un séjour en compte exactement 20)."
+    },
+    {
+      "id": "q17",
+      "theme": "Jointures et regroupements",
+      "enonce": "Afficher, pour chaque salon (libellé), le nombre de soins planifiés en janvier 2022, du salon le plus sollicité au moins sollicité.",
+      "ordered": [
+        1
+      ],
+      "correction": [
+        "SELECT LibelleSalon, COUNT(*)",
+        "FROM PLANIFIER, SOIN, SALON",
+        "WHERE PLANIFIER.CodeSoin = SOIN.CodeSoin",
+        "AND SOIN.CodeSalon = SALON.CodeSalon",
+        "AND MONTH(DateSoin) = 1",
+        "AND YEAR(DateSoin) = 2022",
+        "GROUP BY LibelleSalon",
+        "ORDER BY COUNT(*) DESC;"
+      ],
+      "variantes": [
+        [
+          "SELECT LibelleSalon, COUNT(*) AS NbSoins",
+          "FROM PLANIFIER",
+          "INNER JOIN SOIN ON PLANIFIER.CodeSoin = SOIN.CodeSoin",
+          "INNER JOIN SALON ON SOIN.CodeSalon = SALON.CodeSalon",
+          "WHERE DateSoin BETWEEN '01/01/2022' AND '31/01/2022'",
+          "GROUP BY LibelleSalon",
+          "ORDER BY NbSoins DESC;"
+        ]
+      ],
+      "indice": "PLANIFIER → SOIN → SALON. Filtrez d'abord les dates (WHERE), puis regroupez par salon et triez sur le nombre (DESC)."
+    },
+    {
+      "id": "q18",
+      "theme": "Jointures et regroupements",
+      "enonce": "Afficher, pour chaque séjour (code et libellé), le nombre de soins qui le composent et la durée totale de ces soins (en minutes).",
+      "correction": [
+        "SELECT SEJOUR.CodeSejour, LibelleSejour, COUNT(*), SUM(DureeSoin)",
+        "FROM SEJOUR, COMPOSER, SOIN",
+        "WHERE SEJOUR.CodeSejour = COMPOSER.CodeSejour",
+        "AND COMPOSER.CodeSoin = SOIN.CodeSoin",
+        "GROUP BY SEJOUR.CodeSejour, LibelleSejour;"
+      ],
+      "variantes": [
+        [
+          "SELECT SEJOUR.CodeSejour, LibelleSejour, COUNT(*), SUM(DureeSoin)",
+          "FROM SEJOUR",
+          "INNER JOIN COMPOSER ON SEJOUR.CodeSejour = COMPOSER.CodeSejour",
+          "INNER JOIN SOIN ON COMPOSER.CodeSoin = SOIN.CodeSoin",
+          "GROUP BY SEJOUR.CodeSejour, LibelleSejour;"
+        ]
+      ],
+      "indice": "COUNT compte les soins de chaque groupe, SUM additionne leurs durées. Toutes les colonnes non calculées du SELECT doivent figurer dans le GROUP BY."
+    },
+    {
+      "id": "q19",
+      "theme": "Sous-requêtes",
+      "enonce": "Afficher la liste des soins (code et libellé) qui ne sont pas planifiés le 27 janvier 2022.",
+      "annale": "2022",
+      "correction": [
+        "SELECT CodeSoin, LibelleSoin",
+        "FROM SOIN",
+        "WHERE CodeSoin NOT IN (SELECT CodeSoin",
+        "                       FROM PLANIFIER",
+        "                       WHERE DateSoin = '27/01/2022');"
+      ],
+      "variantes": [
+        [
+          "SELECT CodeSoin, LibelleSoin",
+          "FROM SOIN S",
+          "WHERE NOT EXISTS (SELECT *",
+          "                  FROM PLANIFIER P",
+          "                  WHERE P.CodeSoin = S.CodeSoin",
+          "                  AND DateSoin = '27/01/2022');"
+        ]
+      ],
+      "indice": "« Qui ne sont pas planifiés » : NOT IN (sous-requête qui liste les codes des soins planifiés ce jour-là). Une jointure avec DateSoin <> '27/01/2022' ne convient pas."
+    },
+    {
+      "id": "q20",
+      "theme": "Sous-requêtes",
+      "enonce": "Afficher les clients (numéro, nom, prénom et ville) qui n'ont encore jamais réservé de séjour.",
+      "correction": [
+        "SELECT NumClient, NomClient, PrenomClient, AdrVilleClient",
+        "FROM CLIENT",
+        "WHERE NumClient NOT IN (SELECT NumClient",
+        "                        FROM RESERVER);"
+      ],
+      "variantes": [
+        [
+          "SELECT NumClient, NomClient, PrenomClient, AdrVilleClient",
+          "FROM CLIENT C",
+          "WHERE NOT EXISTS (SELECT *",
+          "                  FROM RESERVER R",
+          "                  WHERE R.NumClient = C.NumClient);"
+        ]
+      ],
+      "indice": "Même raisonnement que la question précédente, entre CLIENT et RESERVER."
+    },
+    {
+      "id": "q21",
+      "theme": "Sous-requêtes",
+      "enonce": "Afficher les soins (libellé et durée) dont la durée est supérieure à la durée moyenne de l'ensemble des soins.",
+      "correction": [
+        "SELECT LibelleSoin, DureeSoin",
+        "FROM SOIN",
+        "WHERE DureeSoin > (SELECT AVG(DureeSoin)",
+        "                   FROM SOIN);"
+      ],
+      "indice": "On ne peut pas écrire WHERE DureeSoin > AVG(DureeSoin) : il faut calculer la moyenne dans une sous-requête."
+    },
+    {
+      "id": "q22",
+      "theme": "Mises à jour",
+      "type": "write",
+      "enonce": "La nouveauté 2022 est le séjour intitulé « MER & MÉDITATION », de code MMD. L'ajouter.",
+      "annale": "2022",
+      "correction": [
+        "INSERT INTO SEJOUR",
+        "VALUES ('MMD', 'MER & MÉDITATION');"
+      ],
+      "variantes": [
+        [
+          "INSERT INTO SEJOUR (CodeSejour, LibelleSejour)",
+          "VALUES ('MMD', 'MER & MÉDITATION');"
+        ]
+      ],
+      "verif": "SELECT * FROM SEJOUR ORDER BY CodeSejour",
+      "indice": "INSERT INTO table VALUES (valeur1, valeur2) dans l'ordre des colonnes de la table ; les textes s'écrivent entre apostrophes."
+    },
+    {
+      "id": "q23",
+      "theme": "Mises à jour",
+      "type": "write",
+      "enonce": "Le soin « Méditation guidée » (code MEDI) entre désormais dans la composition du séjour « MER & CAPITAL SOMMEIL » (code MCS). Enregistrer cette information.",
+      "correction": [
+        "INSERT INTO COMPOSER",
+        "VALUES ('MCS', 'MEDI');"
+      ],
+      "variantes": [
+        [
+          "INSERT INTO COMPOSER (CodeSejour, CodeSoin)",
+          "VALUES ('MCS', 'MEDI');"
+        ]
+      ],
+      "verif": "SELECT * FROM COMPOSER ORDER BY CodeSejour, CodeSoin",
+      "indice": "La composition d'un séjour est enregistrée dans COMPOSER (CodeSejour, CodeSoin)."
+    },
+    {
+      "id": "q24",
+      "theme": "Mises à jour",
+      "type": "write",
+      "enonce": "La cliente n° 1060 (Chloé GUILLOU) communique son adresse mail : chloe.guillou@gmail.com. L'enregistrer.",
+      "correction": [
+        "UPDATE CLIENT",
+        "SET MailClient = 'chloe.guillou@gmail.com'",
+        "WHERE NumClient = 1060;"
+      ],
+      "verif": "SELECT * FROM CLIENT ORDER BY NumClient",
+      "indice": "UPDATE table SET colonne = valeur WHERE condition. Sans WHERE, tous les clients seraient modifiés."
+    },
+    {
+      "id": "q25",
+      "theme": "Mises à jour",
+      "type": "write",
+      "enonce": "Souffrant, le client n° 1098 annule tous ses soins prévus le 16/03/2022. Supprimer ces soins du planning.",
+      "correction": [
+        "DELETE FROM PLANIFIER",
+        "WHERE NumClient = 1098",
+        "AND DateSoin = '16/03/2022';"
+      ],
+      "verif": "SELECT * FROM PLANIFIER ORDER BY NumClient, DateSoin, HeureSoin",
+      "indice": "DELETE FROM table WHERE condition : deux conditions (le client et la date). Sans WHERE, tout le planning serait supprimé !"
+    },
+    {
+      "id": "s01",
+      "theme": "Évolution du schéma",
+      "type": "schema",
+      "annale": "2022",
+      "enonce": "Les personnels des Thermes Marins sont soit des hydrothérapeutes, soit des esthéticiennes. Un hydrothérapeute peut être affecté dans un autre salon après une formation : on conserve seulement la date de sa dernière formation, et la base doit permettre de connaître la date de première affectation d'un hydrothérapeute dans chaque salon. Les esthéticiennes dispensent leurs soins dans un seul spa ; pour chaque spa, on mémorise son code, son nom et sa surface. Un spa peut proposer à la vente des produits cosmétiques (code, nom du produit et prix unitaire). Complétez le schéma ci-dessous.",
+      "depart": [
+        {
+          "nom": "PERSONNEL",
+          "colonnes": [
+            "_NumPersonnel",
+            "NomPersonnel",
+            "PrenomPersonnel"
+          ]
+        },
+        {
+          "nom": "SALON",
+          "colonnes": [
+            "_CodeSalon",
+            "LibelleSalon",
+            "NombreCabines"
+          ]
+        }
+      ],
+      "solution": {
+        "tables": [
+          {
+            "nom": "HYDROTHERAPEUTE",
+            "alias": [
+              "HYDRO",
+              "HYDROTHERAPEUTES"
+            ],
+            "role": "les hydrothérapeutes (une catégorie du personnel)",
+            "pk": [
+              "NumPersonnelHydro|NumPersonnel|NumHydro|NumHydrotherapeute|NumPersonnelHydrotherapeute"
+            ],
+            "fk": {
+              "NumPersonnelHydro|NumPersonnel|NumHydro|NumHydrotherapeute|NumPersonnelHydrotherapeute": "PERSONNEL"
+            },
+            "attributs": [
+              "DateDernFormation|DateDerniereFormation|DateFormation|DateDernFormat"
+            ]
+          },
+          {
+            "nom": "ESTHETICIENNE",
+            "alias": [
+              "ESTHETICIENNES",
+              "ESTHET"
+            ],
+            "role": "les esthéticiennes (une catégorie du personnel)",
+            "pk": [
+              "NumPersonnelEsthet|NumPersonnel|NumEsthet|NumEstheticienne|NumPersonnelEstheticienne"
+            ],
+            "fk": {
+              "NumPersonnelEsthet|NumPersonnel|NumEsthet|NumEstheticienne|NumPersonnelEstheticienne": "PERSONNEL",
+              "CodeSpa|NumSpa|IdSpa": "SPA"
+            }
+          },
+          {
+            "nom": "SPA",
+            "alias": [
+              "SPAS"
+            ],
+            "role": "décrire les spas",
+            "pk": [
+              "CodeSpa|NumSpa|IdSpa"
+            ],
+            "attributs": [
+              "NomSpa|Nom|LibelleSpa",
+              "SurfaceSpa|Surface"
+            ]
+          },
+          {
+            "nom": "AFFECTATION",
+            "alias": [
+              "AFFECTER",
+              "AFFECTE",
+              "AFFECTATIONS",
+              "ETRE_AFFECTE"
+            ],
+            "role": "enregistrer la date de première affectation d'un hydrothérapeute dans un salon",
+            "pk": [
+              "NumPersonnelHydro|NumPersonnel|NumHydro|NumHydrotherapeute|NumPersonnelHydrotherapeute",
+              "CodeSalon"
+            ],
+            "fk": {
+              "NumPersonnelHydro|NumPersonnel|NumHydro|NumHydrotherapeute|NumPersonnelHydrotherapeute": "HYDROTHERAPEUTE",
+              "CodeSalon": "SALON"
+            },
+            "attributs": [
+              "DateAffectation|DatePremiereAffectation|DateAff|DatePremAffectation"
+            ]
+          },
+          {
+            "nom": "PRODUIT",
+            "alias": [
+              "PRODUITS",
+              "PRODUIT_COSMETIQUE"
+            ],
+            "role": "décrire les produits cosmétiques",
+            "pk": [
+              "CodeProduit|NumProduit|IdProduit|RefProduit"
+            ],
+            "attributs": [
+              "NomProduit|Nom|LibelleProduit|Designation|DesignationProduit",
+              "PrixUnitaire|Prix|PrixProduit|PU|PrixVente"
+            ]
+          },
+          {
+            "nom": "PROPOSER",
+            "alias": [
+              "PROPOSE",
+              "VENDRE",
+              "OFFRIR",
+              "PROPOSITION",
+              "DISTRIBUER"
+            ],
+            "role": "indiquer quels produits chaque spa propose",
+            "pk": [
+              "CodeSpa|NumSpa|IdSpa",
+              "CodeProduit|NumProduit|IdProduit|RefProduit"
+            ],
+            "fk": {
+              "CodeSpa|NumSpa|IdSpa": "SPA",
+              "CodeProduit|NumProduit|IdProduit|RefProduit": "PRODUIT"
+            },
+            "attributs": []
+          }
+        ]
+      },
+      "variantes": [
+        {
+          "tables": [
+            {
+              "nom": "HYDROTHERAPEUTE",
+              "alias": [
+                "HYDRO",
+                "HYDROTHERAPEUTES"
+              ],
+              "role": "les hydrothérapeutes (une catégorie du personnel)",
+              "pk": [
+                "NumPersonnelHydro|NumPersonnel|NumHydro|NumHydrotherapeute|NumPersonnelHydrotherapeute"
+              ],
+              "fk": {
+                "NumPersonnelHydro|NumPersonnel|NumHydro|NumHydrotherapeute|NumPersonnelHydrotherapeute": "PERSONNEL"
+              },
+              "attributs": [
+                "DateDernFormation|DateDerniereFormation|DateFormation|DateDernFormat"
+              ]
+            },
+            {
+              "nom": "ESTHETICIENNE",
+              "alias": [
+                "ESTHETICIENNES",
+                "ESTHET"
+              ],
+              "role": "les esthéticiennes (une catégorie du personnel)",
+              "pk": [
+                "NumPersonnelEsthet|NumPersonnel|NumEsthet|NumEstheticienne|NumPersonnelEstheticienne"
+              ],
+              "fk": {
+                "NumPersonnelEsthet|NumPersonnel|NumEsthet|NumEstheticienne|NumPersonnelEstheticienne": "PERSONNEL",
+                "CodeSpa|NumSpa|IdSpa": "SPA"
+              }
+            },
+            {
+              "nom": "SPA",
+              "alias": [
+                "SPAS"
+              ],
+              "role": "décrire les spas",
+              "pk": [
+                "CodeSpa|NumSpa|IdSpa"
+              ],
+              "attributs": [
+                "NomSpa|Nom|LibelleSpa",
+                "SurfaceSpa|Surface"
+              ]
+            },
+            {
+              "nom": "AFFECTATION",
+              "alias": [
+                "AFFECTER",
+                "AFFECTE",
+                "AFFECTATIONS",
+                "ETRE_AFFECTE"
+              ],
+              "role": "enregistrer la date de première affectation d'un hydrothérapeute dans un salon",
+              "pk": [
+                "NumPersonnelHydro|NumPersonnel|NumHydro|NumHydrotherapeute|NumPersonnelHydrotherapeute",
+                "CodeSalon"
+              ],
+              "fk": {
+                "NumPersonnelHydro|NumPersonnel|NumHydro|NumHydrotherapeute|NumPersonnelHydrotherapeute": "HYDROTHERAPEUTE",
+                "CodeSalon": "SALON"
+              },
+              "attributs": [
+                "DateAffectation|DatePremiereAffectation|DateAff|DatePremAffectation"
+              ]
+            },
+            {
+              "nom": "PRODUIT",
+              "alias": [
+                "PRODUITS",
+                "PRODUIT_COSMETIQUE"
+              ],
+              "role": "décrire les produits cosmétiques",
+              "pk": [
+                "CodeProduit|NumProduit|IdProduit|RefProduit"
+              ],
+              "attributs": [
+                "NomProduit|Nom|LibelleProduit|Designation|DesignationProduit"
+              ]
+            },
+            {
+              "nom": "PROPOSER",
+              "alias": [
+                "PROPOSE",
+                "VENDRE",
+                "OFFRIR",
+                "PROPOSITION",
+                "DISTRIBUER"
+              ],
+              "role": "indiquer quels produits chaque spa propose",
+              "pk": [
+                "CodeSpa|NumSpa|IdSpa",
+                "CodeProduit|NumProduit|IdProduit|RefProduit"
+              ],
+              "fk": {
+                "CodeSpa|NumSpa|IdSpa": "SPA",
+                "CodeProduit|NumProduit|IdProduit|RefProduit": "PRODUIT"
+              },
+              "attributs": [
+                "PrixUnitaire|Prix|PrixProduit|PU|PrixVente"
+              ]
+            }
+          ]
+        },
+        {
+          "tables": [
+            {
+              "nom": "HYDROTHERAPEUTE",
+              "alias": [
+                "HYDRO",
+                "HYDROTHERAPEUTES"
+              ],
+              "role": "les hydrothérapeutes (une catégorie du personnel)",
+              "pk": [
+                "NumPersonnelHydro|NumPersonnel|NumHydro|NumHydrotherapeute|NumPersonnelHydrotherapeute"
+              ],
+              "fk": {
+                "NumPersonnelHydro|NumPersonnel|NumHydro|NumHydrotherapeute|NumPersonnelHydrotherapeute": "PERSONNEL"
+              },
+              "attributs": [
+                "DateDernFormation|DateDerniereFormation|DateFormation|DateDernFormat"
+              ]
+            },
+            {
+              "nom": "ESTHETICIENNE",
+              "alias": [
+                "ESTHETICIENNES",
+                "ESTHET"
+              ],
+              "role": "les esthéticiennes (une catégorie du personnel)",
+              "pk": [
+                "NumPersonnelEsthet|NumPersonnel|NumEsthet|NumEstheticienne|NumPersonnelEstheticienne"
+              ],
+              "fk": {
+                "NumPersonnelEsthet|NumPersonnel|NumEsthet|NumEstheticienne|NumPersonnelEstheticienne": "PERSONNEL",
+                "CodeSpa|NumSpa|IdSpa": "SPA"
+              }
+            },
+            {
+              "nom": "SPA",
+              "alias": [
+                "SPAS"
+              ],
+              "role": "décrire les spas",
+              "pk": [
+                "CodeSpa|NumSpa|IdSpa"
+              ],
+              "attributs": [
+                "NomSpa|Nom|LibelleSpa",
+                "SurfaceSpa|Surface"
+              ]
+            },
+            {
+              "nom": "AFFECTATION",
+              "alias": [
+                "AFFECTER",
+                "AFFECTE",
+                "AFFECTATIONS",
+                "ETRE_AFFECTE"
+              ],
+              "role": "enregistrer la date de première affectation d'un hydrothérapeute dans un salon",
+              "pk": [
+                "NumPersonnelHydro|NumPersonnel|NumHydro|NumHydrotherapeute|NumPersonnelHydrotherapeute",
+                "CodeSalon"
+              ],
+              "fk": {
+                "NumPersonnelHydro|NumPersonnel|NumHydro|NumHydrotherapeute|NumPersonnelHydrotherapeute": "HYDROTHERAPEUTE",
+                "CodeSalon": "SALON"
+              },
+              "attributs": [
+                "DateAffectation|DatePremiereAffectation|DateAff|DatePremAffectation"
+              ]
+            },
+            {
+              "nom": "PRODUIT",
+              "alias": [
+                "PRODUITS",
+                "PRODUIT_COSMETIQUE"
+              ],
+              "role": "décrire les produits cosmétiques",
+              "pk": [
+                "CodeProduit|NumProduit|IdProduit|RefProduit"
+              ],
+              "attributs": [
+                "NomProduit|Nom|LibelleProduit|Designation|DesignationProduit",
+                "PrixUnitaire|Prix|PrixProduit|PU|PrixVente",
+                "CodeSpa|NumSpa|IdSpa"
+              ],
+              "fk": {
+                "CodeSpa|NumSpa|IdSpa": "SPA"
+              }
+            }
+          ],
+          "partiel": "Presque : avec CodeSpa dans PRODUIT, un produit ne pourrait être proposé que par un seul spa. Or un spa propose plusieurs produits et un même produit peut être proposé par plusieurs spas : il faut une table d'association entre SPA et PRODUIT."
+        }
+      ],
+      "indice": "Hydrothérapeutes et esthéticiennes sont des catégories du personnel : chacune devient une table dont la clé primaire est aussi une clé étrangère vers PERSONNEL. La date de première affectation dépend à la fois de l'hydrothérapeute et du salon. Entre SPA et PRODUIT, la relation est « plusieurs à plusieurs »."
+    },
+    {
+      "id": "p01",
+      "type": "processus",
+      "theme": "Processus",
+      "annale": "2022",
+      "enonce": "Dossier 1 – Conception d'une installation Thalasso-Spa. Document 1 : « Les clients (investisseurs ou opérateurs) prennent un premier contact avec GRI par courrier ou téléphone. Le secrétariat fixe un premier rendez-vous (date, heure, lieu) et envoie un dossier d'informations à compléter au potentiel client. Lors du premier rendez-vous, l'équipe conception vérifie avec le client les informations du dossier complété, puis étudie le dossier pour rendre un avis qui consiste soit à le valider soit à ne pas le valider. Si le dossier est validé, l'équipe de conception prépare le dossier de conception et fixe le rendez-vous pour la visite préliminaire. Dans le cas où le dossier n'est pas validé, ce dernier est retourné au client et la demande d'expertise n'est pas retenue. Lors de la visite préliminaire, l'équipe conception élabore la stratégie commerciale et la mise en place de l'offre de prestations. Cette offre de prestation est transmise à l'équipe technique pour étude. À partir de l'offre de prestations, l'équipe technique peut procéder à l'étude de programmation : définition du cahier des charges et des surfaces d'exploitation. Dans un souci d'intégration dans le site considéré, une attention toute particulière sera portée aux contraintes de circulation des clients et aux contraintes d'exploitation. À l'issue de l'étude de programmation, l'équipe technique met à disposition du client le document appelé masterplan à valider. Ce masterplan validé permet à l'équipe technique de démarrer les études techniques. Ces études vont déterminer les plans techniques et les carnets de détails techniques (le respect de cotes précises d'élévation, d'implantation des jets et divers équipements, un système et des schémas de filtration ad hoc, des systèmes et des plans d'implantation des matériels, des préconisations matérielles, etc.). Lorsque les études techniques sont terminées, l'équipe conception rassemble l'ensemble des documents techniques et fait parvenir au client un dossier technique de conception complet. Tous les mois ou à la demande du client, l'équipe de conception réalise une revue de projet pour faire le point sur l'avancement du dossier de conception et échanger avec le client. Si des livrables (documents, maquettes…) sont à valider par le client, ils lui sont envoyés. Un compte-rendu de la revue de projet est envoyé au client. » Le schéma événement-résultat du document 1 (fourni) ne représente qu'une partie de ce processus. Identifiez la partie du processus qui n'est pas représentée sur le schéma et complétez le schéma du processus afin qu'il soit en adéquation avec la description faite dans le document 1.",
+      "couloirs": [
+        "Client",
+        "Secrétariat",
+        "Équipe conception",
+        "Équipe technique"
+      ],
+      "depart": {
+        "lanes": [
+          "Client",
+          "Secrétariat",
+          "Équipe conception",
+          "Équipe technique"
+        ],
+        "nodes": [
+          {
+            "id": "n1",
+            "kind": "event",
+            "label": "Demande d'expertise",
+            "x": 120,
+            "y": 95
+          },
+          {
+            "id": "n2",
+            "kind": "operation",
+            "label": "Gestion rendez-vous",
+            "x": 360,
+            "y": 200,
+            "actions": [
+              "Vérification planning pour heure, date",
+              "Préparation du dossier d'informations"
+            ],
+            "rules": [
+              "Toujours"
+            ]
+          },
+          {
+            "id": "n3",
+            "kind": "event",
+            "label": "Rendez-vous proposé",
+            "x": 120,
+            "y": 265
+          },
+          {
+            "id": "n4",
+            "kind": "event",
+            "label": "Dossier d'informations à compléter",
+            "x": 120,
+            "y": 365
+          },
+          {
+            "id": "n5",
+            "kind": "event",
+            "label": "Date rendez-vous",
+            "x": 120,
+            "y": 465
+          },
+          {
+            "id": "n6",
+            "kind": "event",
+            "label": "Dossier d'informations complété",
+            "x": 120,
+            "y": 565
+          },
+          {
+            "id": "n7",
+            "kind": "sync",
+            "label": "",
+            "x": 600,
+            "y": 545,
+            "cond": "A et B"
+          },
+          {
+            "id": "n8",
+            "kind": "operation",
+            "label": "Préparation conception",
+            "x": 600,
+            "y": 670,
+            "actions": [
+              "Vérification des informations du dossier",
+              "Préparation du dossier de conception"
+            ],
+            "rules": [
+              "Dossier non validé",
+              "Dossier validé"
+            ]
+          },
+          {
+            "id": "n9",
+            "kind": "event",
+            "label": "Dossier non retenu",
+            "x": 120,
+            "y": 700
+          },
+          {
+            "id": "n10",
+            "kind": "event",
+            "label": "Rendez-vous visite fixé",
+            "x": 120,
+            "y": 820
+          },
+          {
+            "id": "n11",
+            "kind": "event",
+            "label": "Dossier de conception",
+            "x": 640,
+            "y": 830
+          },
+          {
+            "id": "n12",
+            "kind": "event",
+            "label": "Date visite",
+            "x": 120,
+            "y": 930
+          },
+          {
+            "id": "n13",
+            "kind": "sync",
+            "label": "",
+            "x": 600,
+            "y": 930,
+            "cond": "A et B"
+          },
+          {
+            "id": "n14",
+            "kind": "operation",
+            "label": "Visite préliminaire",
+            "x": 600,
+            "y": 1050,
+            "actions": [
+              "Élaboration stratégie",
+              "Mise en place offre"
+            ],
+            "rules": [
+              "Toujours"
+            ]
+          },
+          {
+            "id": "n15",
+            "kind": "event",
+            "label": "Dossier de conception retenu",
+            "x": 120,
+            "y": 1170
+          },
+          {
+            "id": "n16",
+            "kind": "event",
+            "label": "Offre de prestation",
+            "x": 840,
+            "y": 1170
+          }
+        ],
+        "arrows": [
+          {
+            "id": "a1",
+            "from": "n1",
+            "rule": null,
+            "to": "n2"
+          },
+          {
+            "id": "a2",
+            "from": "n2",
+            "rule": 0,
+            "to": "n3"
+          },
+          {
+            "id": "a3",
+            "from": "n2",
+            "rule": 0,
+            "to": "n4"
+          },
+          {
+            "id": "a4",
+            "from": "n5",
+            "rule": null,
+            "to": "n7",
+            "letter": "A"
+          },
+          {
+            "id": "a5",
+            "from": "n6",
+            "rule": null,
+            "to": "n7",
+            "letter": "B"
+          },
+          {
+            "id": "a6",
+            "from": "n7",
+            "rule": null,
+            "to": "n8"
+          },
+          {
+            "id": "a7",
+            "from": "n8",
+            "rule": 0,
+            "to": "n9"
+          },
+          {
+            "id": "a8",
+            "from": "n8",
+            "rule": 1,
+            "to": "n10"
+          },
+          {
+            "id": "a9",
+            "from": "n8",
+            "rule": 1,
+            "to": "n11"
+          },
+          {
+            "id": "a10",
+            "from": "n12",
+            "rule": null,
+            "to": "n13",
+            "letter": "A"
+          },
+          {
+            "id": "a11",
+            "from": "n11",
+            "rule": null,
+            "to": "n13",
+            "letter": "B"
+          },
+          {
+            "id": "a12",
+            "from": "n13",
+            "rule": null,
+            "to": "n14"
+          },
+          {
+            "id": "a13",
+            "from": "n14",
+            "rule": 0,
+            "to": "n15"
+          },
+          {
+            "id": "a14",
+            "from": "n14",
+            "rule": 0,
+            "to": "n16"
+          }
+        ]
+      },
+      "elements": [
+        {
+          "kind": "event",
+          "label": "Masterplan à valider"
+        },
+        {
+          "kind": "event",
+          "label": "Masterplan validé"
+        },
+        {
+          "kind": "event",
+          "label": "Documents études techniques réalisés"
+        },
+        {
+          "kind": "event",
+          "label": "Dossier technique de conception"
+        },
+        {
+          "kind": "event",
+          "label": "Demande revue de projet"
+        },
+        {
+          "kind": "event",
+          "label": "Chaque mois"
+        },
+        {
+          "kind": "event",
+          "label": "Compte-rendu revue de projet"
+        },
+        {
+          "kind": "event",
+          "label": "Livrables envoyés"
+        },
+        {
+          "kind": "operation",
+          "label": "Étude de programmation"
+        },
+        {
+          "kind": "operation",
+          "label": "Études techniques"
+        },
+        {
+          "kind": "operation",
+          "label": "Finalisation dossier technique"
+        },
+        {
+          "kind": "operation",
+          "label": "Revue de projet"
+        }
+      ],
+      "attendus": [
+        {
+          "operation": "Étude de programmation",
+          "alias": [
+            "Étude programmation",
+            "Études de programmation",
+            "Programmation",
+            "Définition du cahier des charges",
+            "Élaboration du masterplan"
+          ],
+          "manque": "Il manque l'étude de programmation réalisée par l'équipe technique à partir de l'offre de prestation."
+        },
+        {
+          "operation": "Études techniques",
+          "alias": [
+            "Étude technique",
+            "Réalisation des études techniques",
+            "Élaboration des plans techniques"
+          ],
+          "manque": "Il manque les études techniques, lancées par l'équipe technique une fois le masterplan validé."
+        },
+        {
+          "operation": "Finalisation dossier technique",
+          "alias": [
+            "Finalisation du dossier technique",
+            "Constitution du dossier technique",
+            "Dossier technique",
+            "Rassemblement des documents techniques",
+            "Envoi du dossier technique"
+          ],
+          "manque": "Il manque l'opération de l'équipe conception qui rassemble les documents techniques et envoie au client le dossier technique de conception."
+        },
+        {
+          "operation": "Revue de projet",
+          "alias": [
+            "Revue projet",
+            "Réalisation revue de projet",
+            "Point d'avancement"
+          ],
+          "synchronisation": "Demande revue de projet OU Chaque mois",
+          "regles": [
+            "Livrables validés",
+            "Livrables à valider"
+          ],
+          "manque": "Il manque la revue de projet, réalisée tous les mois ou à la demande du client."
+        }
+      ],
+      "equivalents": {
+        "Demande revue de projet": [
+          "Demande du client",
+          "Demande de revue",
+          "Demande revue",
+          "Demande client",
+          "Demande de revue de projet"
+        ],
+        "Chaque mois": [
+          "Tous les mois",
+          "Fin de mois",
+          "Mensuel",
+          "Début de mois",
+          "Échéance mensuelle",
+          "Mois"
+        ],
+        "Livrables validés": [
+          "Pas de livrable à valider",
+          "Aucun livrable à valider",
+          "Pas de livrable",
+          "Sans livrable",
+          "Livrables déjà validés",
+          "Rien à valider"
+        ],
+        "Livrables à valider": [
+          "Livrables à faire valider",
+          "Avec livrables",
+          "Livrables à envoyer",
+          "Livrables non validés"
+        ]
+      },
+      "solution": {
+        "lanes": [
+          "Client",
+          "Secrétariat",
+          "Équipe conception",
+          "Équipe technique"
+        ],
+        "nodes": [
+          {
+            "id": "n1",
+            "kind": "event",
+            "label": "Demande d'expertise",
+            "x": 120,
+            "y": 95
+          },
+          {
+            "id": "n2",
+            "kind": "operation",
+            "label": "Gestion rendez-vous",
+            "x": 360,
+            "y": 200,
+            "actions": [
+              "Vérification planning pour heure, date",
+              "Préparation du dossier d'informations"
+            ],
+            "rules": [
+              "Toujours"
+            ]
+          },
+          {
+            "id": "n3",
+            "kind": "event",
+            "label": "Rendez-vous proposé",
+            "x": 120,
+            "y": 265
+          },
+          {
+            "id": "n4",
+            "kind": "event",
+            "label": "Dossier d'informations à compléter",
+            "x": 120,
+            "y": 365
+          },
+          {
+            "id": "n5",
+            "kind": "event",
+            "label": "Date rendez-vous",
+            "x": 120,
+            "y": 465
+          },
+          {
+            "id": "n6",
+            "kind": "event",
+            "label": "Dossier d'informations complété",
+            "x": 120,
+            "y": 565
+          },
+          {
+            "id": "n7",
+            "kind": "sync",
+            "label": "",
+            "x": 600,
+            "y": 545,
+            "cond": "A et B"
+          },
+          {
+            "id": "n8",
+            "kind": "operation",
+            "label": "Préparation conception",
+            "x": 600,
+            "y": 670,
+            "actions": [
+              "Vérification des informations du dossier",
+              "Préparation du dossier de conception"
+            ],
+            "rules": [
+              "Dossier non validé",
+              "Dossier validé"
+            ]
+          },
+          {
+            "id": "n9",
+            "kind": "event",
+            "label": "Dossier non retenu",
+            "x": 120,
+            "y": 700
+          },
+          {
+            "id": "n10",
+            "kind": "event",
+            "label": "Rendez-vous visite fixé",
+            "x": 120,
+            "y": 820
+          },
+          {
+            "id": "n11",
+            "kind": "event",
+            "label": "Dossier de conception",
+            "x": 640,
+            "y": 830
+          },
+          {
+            "id": "n12",
+            "kind": "event",
+            "label": "Date visite",
+            "x": 120,
+            "y": 930
+          },
+          {
+            "id": "n13",
+            "kind": "sync",
+            "label": "",
+            "x": 600,
+            "y": 930,
+            "cond": "A et B"
+          },
+          {
+            "id": "n14",
+            "kind": "operation",
+            "label": "Visite préliminaire",
+            "x": 600,
+            "y": 1050,
+            "actions": [
+              "Élaboration stratégie",
+              "Mise en place offre"
+            ],
+            "rules": [
+              "Toujours"
+            ]
+          },
+          {
+            "id": "n15",
+            "kind": "event",
+            "label": "Dossier de conception retenu",
+            "x": 120,
+            "y": 1170
+          },
+          {
+            "id": "n16",
+            "kind": "event",
+            "label": "Offre de prestation",
+            "x": 840,
+            "y": 1170
+          },
+          {
+            "id": "n17",
+            "kind": "operation",
+            "label": "Étude de programmation",
+            "x": 840,
+            "y": 1300,
+            "actions": [
+              "Définition du cahier des charges et des surfaces d'exploitation"
+            ],
+            "rules": [
+              "Toujours"
+            ]
+          },
+          {
+            "id": "n18",
+            "kind": "event",
+            "label": "Masterplan à valider",
+            "x": 120,
+            "y": 1420
+          },
+          {
+            "id": "n19",
+            "kind": "event",
+            "label": "Masterplan validé",
+            "x": 120,
+            "y": 1530
+          },
+          {
+            "id": "n20",
+            "kind": "operation",
+            "label": "Études techniques",
+            "x": 840,
+            "y": 1640,
+            "actions": [
+              "Élaboration des plans techniques et carnets de détails"
+            ],
+            "rules": [
+              "Toujours"
+            ]
+          },
+          {
+            "id": "n21",
+            "kind": "event",
+            "label": "Documents études techniques réalisés",
+            "x": 600,
+            "y": 1780
+          },
+          {
+            "id": "n22",
+            "kind": "operation",
+            "label": "Finalisation dossier technique",
+            "x": 600,
+            "y": 1910,
+            "actions": [
+              "Vérification documents techniques"
+            ],
+            "rules": [
+              "Toujours"
+            ]
+          },
+          {
+            "id": "n23",
+            "kind": "event",
+            "label": "Dossier technique de conception",
+            "x": 120,
+            "y": 2040
+          },
+          {
+            "id": "n24",
+            "kind": "event",
+            "label": "Demande revue de projet",
+            "x": 120,
+            "y": 2170
+          },
+          {
+            "id": "n25",
+            "kind": "event",
+            "label": "Chaque mois",
+            "x": 650,
+            "y": 2150
+          },
+          {
+            "id": "n26",
+            "kind": "sync",
+            "label": "",
+            "x": 600,
+            "y": 2250,
+            "cond": "A ou B"
+          },
+          {
+            "id": "n27",
+            "kind": "operation",
+            "label": "Revue de projet",
+            "x": 600,
+            "y": 2390,
+            "actions": [
+              "Point sur l'avancement du dossier de conception",
+              "Échanges avec le client",
+              "Validation des livrables"
+            ],
+            "rules": [
+              "Livrables validés",
+              "Livrables à valider"
+            ]
+          },
+          {
+            "id": "n28",
+            "kind": "event",
+            "label": "Compte-rendu revue de projet",
+            "x": 120,
+            "y": 2540
+          },
+          {
+            "id": "n29",
+            "kind": "event",
+            "label": "Livrables envoyés",
+            "x": 120,
+            "y": 2650
+          }
+        ],
+        "arrows": [
+          {
+            "id": "a1",
+            "from": "n1",
+            "rule": null,
+            "to": "n2"
+          },
+          {
+            "id": "a2",
+            "from": "n2",
+            "rule": 0,
+            "to": "n3"
+          },
+          {
+            "id": "a3",
+            "from": "n2",
+            "rule": 0,
+            "to": "n4"
+          },
+          {
+            "id": "a4",
+            "from": "n5",
+            "rule": null,
+            "to": "n7",
+            "letter": "A"
+          },
+          {
+            "id": "a5",
+            "from": "n6",
+            "rule": null,
+            "to": "n7",
+            "letter": "B"
+          },
+          {
+            "id": "a6",
+            "from": "n7",
+            "rule": null,
+            "to": "n8"
+          },
+          {
+            "id": "a7",
+            "from": "n8",
+            "rule": 0,
+            "to": "n9"
+          },
+          {
+            "id": "a8",
+            "from": "n8",
+            "rule": 1,
+            "to": "n10"
+          },
+          {
+            "id": "a9",
+            "from": "n8",
+            "rule": 1,
+            "to": "n11"
+          },
+          {
+            "id": "a10",
+            "from": "n12",
+            "rule": null,
+            "to": "n13",
+            "letter": "A"
+          },
+          {
+            "id": "a11",
+            "from": "n11",
+            "rule": null,
+            "to": "n13",
+            "letter": "B"
+          },
+          {
+            "id": "a12",
+            "from": "n13",
+            "rule": null,
+            "to": "n14"
+          },
+          {
+            "id": "a13",
+            "from": "n14",
+            "rule": 0,
+            "to": "n15"
+          },
+          {
+            "id": "a14",
+            "from": "n14",
+            "rule": 0,
+            "to": "n16"
+          },
+          {
+            "id": "a15",
+            "from": "n16",
+            "rule": null,
+            "to": "n17"
+          },
+          {
+            "id": "a16",
+            "from": "n17",
+            "rule": 0,
+            "to": "n18"
+          },
+          {
+            "id": "a17",
+            "from": "n19",
+            "rule": null,
+            "to": "n20"
+          },
+          {
+            "id": "a18",
+            "from": "n20",
+            "rule": 0,
+            "to": "n21"
+          },
+          {
+            "id": "a19",
+            "from": "n21",
+            "rule": null,
+            "to": "n22"
+          },
+          {
+            "id": "a20",
+            "from": "n22",
+            "rule": 0,
+            "to": "n23"
+          },
+          {
+            "id": "a21",
+            "from": "n24",
+            "rule": null,
+            "to": "n26",
+            "letter": "A"
+          },
+          {
+            "id": "a22",
+            "from": "n25",
+            "rule": null,
+            "to": "n26",
+            "letter": "B"
+          },
+          {
+            "id": "a23",
+            "from": "n26",
+            "rule": null,
+            "to": "n27"
+          },
+          {
+            "id": "a24",
+            "from": "n27",
+            "rule": 0,
+            "to": "n28"
+          },
+          {
+            "id": "a25",
+            "from": "n27",
+            "rule": 1,
+            "to": "n28"
+          },
+          {
+            "id": "a26",
+            "from": "n27",
+            "rule": 1,
+            "to": "n29"
+          }
+        ]
+      },
+      "autoevaluation": [
+        "La partie manquante est l'étude de programmation et les études techniques, après la visite préliminaire, ainsi que la revue de projet.",
+        "L'étude de programmation (équipe technique) est déclenchée par l'offre de prestation et produit le masterplan à valider, adressé au client.",
+        "Les études techniques sont déclenchées par le masterplan validé par le client ; l'équipe conception finalise ensuite le dossier et envoie au client le dossier technique de conception.",
+        "La revue de projet (équipe conception) se déclenche chaque mois OU à la demande du client : synchronisation avec un « ou » et un événement temporel.",
+        "La revue de projet a deux règles d'émission : un compte-rendu est toujours envoyé, et les livrables sont envoyés au client seulement s'il y en a à valider."
+      ],
+      "indice": "Comparez la description du document 1 avec le schéma fourni : il s'arrête à « Offre de prestation ». Suivez la suite du texte acteur par acteur (équipe technique, client, équipe conception) en alternant opérations et événements. Le dernier paragraphe décrit une opération à part, déclenchée de deux façons différentes (laquelle suffit ?), et dont les résultats dépendent de la présence de livrables à valider."
+    }
+  ]
+}

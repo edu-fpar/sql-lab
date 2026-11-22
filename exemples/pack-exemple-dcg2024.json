@@ -1,0 +1,61 @@
+{
+  "format": "sql-lab-questions/1",
+  "exercice": "dcg2024",
+  "titre": "Exemple – révisions jointures et dates",
+  "auteur": "SQL Lab",
+  "description": "Pack de démonstration : à importer dans SQL Lab ou à ouvrir dans l'espace de création.",
+  "questions": [
+    {
+      "id": "x01",
+      "theme": "Jointures",
+      "enonce": "Afficher le nom et le prénom des clients ayant au moins un dossier non clos, sans doublon, triés par nom.",
+      "correction": [
+        "SELECT DISTINCT NomCli, PrenomCli",
+        "FROM CLIENT, DOSSIER",
+        "WHERE CLIENT.IdCli = DOSSIER.IdCli",
+        "AND DateCloture IS NULL",
+        "ORDER BY NomCli;"
+      ],
+      "variantes": [[
+        "SELECT DISTINCT NomCli, PrenomCli",
+        "FROM CLIENT",
+        "INNER JOIN DOSSIER ON CLIENT.IdCli = DOSSIER.IdCli",
+        "WHERE DateCloture IS NULL",
+        "ORDER BY NomCli;"
+      ]],
+      "ordered": [0],
+      "indice": "Le nom est dans CLIENT, la date de clôture dans DOSSIER : reliez-les par IdCli."
+    },
+    {
+      "id": "x02",
+      "theme": "Dates",
+      "enonce": "Combien d'offres ont été acceptées en 2023 ?",
+      "correction": [
+        "SELECT COUNT(*)",
+        "FROM OFFRE",
+        "WHERE AcceptationClient = 'Accepté'",
+        "AND YEAR(DateEmissionOffre) = 2023;"
+      ],
+      "indice": "Deux conditions : le statut de l'offre et l'année de la date d'émission."
+    },
+    {
+      "id": "x03",
+      "theme": "Jointures et regroupements",
+      "enonce": "Pour chaque ville, afficher le nombre de dossiers ouverts par les clients qui y habitent.",
+      "correction": [
+        "SELECT VilleCli, COUNT(*)",
+        "FROM CLIENT, DOSSIER",
+        "WHERE CLIENT.IdCli = DOSSIER.IdCli",
+        "GROUP BY VilleCli;"
+      ],
+      "indice": "Jointure CLIENT–DOSSIER, puis regroupement par ville."
+    },
+    {
+      "id": "x04",
+      "theme": "Mises à jour",
+      "enonce": "Le client n° 1012 a changé de numéro de téléphone : enregistrer le 06 11 22 33 44.",
+      "correction": "UPDATE CLIENT SET TelCli = '06 11 22 33 44' WHERE IdCli = 1012;",
+      "indice": "UPDATE … SET … WHERE : sans WHERE, tous les clients seraient modifiés."
+    }
+  ]
+}
