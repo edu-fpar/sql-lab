@@ -4,6 +4,8 @@
   const I18N = window.I18N || { lang: "fr", add() {}, t: (s, v) => (v ? s.replace(/\{(\w+)\}/g, (m, k) => (v[k] !== undefined ? v[k] : m)) : s), n: (c, a, b, v) => (c > 1 ? b : a).replace(/\{(\w+)\}/g, (m, k) => (k === "n" ? c : v && v[k] !== undefined ? v[k] : m)) };
   const tr = I18N.t, trn = I18N.n;
   I18N.add({
+    "📖 Aide": "📖 Help",
+    "Documentation : guide par profil et par thème": "Documentation: guide by profile and by topic",
     // ---- index.html (texte statique, traduit par I18N.dom)
     "Afficher / masquer la liste des questions": "Show / hide the question list",
     "Afficher ou masquer la liste des questions": "Show or hide the question list",
@@ -347,6 +349,8 @@
     $("editor").placeholder = tr("Écrivez votre requête ici, puis Ctrl + Entrée pour l'exécuter"); // textarea ignorée par I18N.dom
     if (I18N.toggle) I18N.toggle($("btnLang"));
     else $("btnLang").hidden = true;
+    // documentation : absente des paquets SCORM, on pointe alors vers le site public
+    $("btnDocs").href = (CONFIG.scorm ? "https://edu-fpar.github.io/sql-lab/" : "") + (I18N.lang === "en" ? "docs/#/en/" : "docs/");
     try {
       state.SQL = await initSqlJs({ locateFile: (f) => SQLJS_DIR + f });
       state.catalogue = await (await fetch("exercices/catalogue.json")).json();

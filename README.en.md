@@ -1,7 +1,7 @@
 # SQL Lab – SQL practice for business students
 
 *[Version française](README.md)* · **[Open the app (English demo)](https://edu-fpar.github.io/sql-lab/?lang=en#demo-en/intro)** ·
-[Teacher space](https://edu-fpar.github.io/sql-lab/create.html?lang=en) · **[Guide by profile and by topic](GUIDE.en.md)**
+[Teacher space](https://edu-fpar.github.io/sql-lab/create.html?lang=en) · **[Documentation](https://edu-fpar.github.io/sql-lab/docs/#/en/)** (by profile and by topic, [sources](docs/en/))
 
 A static web app (HTML + JavaScript): students write their queries, which run **in the browser**
 with SQLite ([sql.js](https://sql.js.org)). No PHP/MySQL server is needed, so it can be hosted on

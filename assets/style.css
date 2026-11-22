@@ -539,3 +539,4 @@ svg.dg.cn-on .dg-link:not(.cn-link) { opacity: .22; }
 .lg.add { background: color-mix(in srgb, var(--accent) 30%, transparent); border: 1px solid var(--accent); }
 .lg.del { background: color-mix(in srgb, var(--ko) 30%, transparent); }
 .cinema-dialog.cn-schema .cn-sql code { font-family: inherit; }
+a.btn, a.btn:hover { text-decoration: none; }

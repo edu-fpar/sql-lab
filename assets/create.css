@@ -84,3 +84,4 @@ fieldset.depart legend { font-size: .88rem; color: var(--muted); padding: 0 .3re
 #schemaDialog .se-canvas { height: 460px; }
 #processDialog .dlg-body { flex: 1; overflow: auto; padding: .8rem 1rem; }
 #processDialog .pe-canvas { height: 520px; }
+a.btn, a.btn:hover { text-decoration: none; }

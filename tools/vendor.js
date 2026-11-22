@@ -18,11 +18,17 @@ const FILES = {
   "codemirror/show-hint.css": "codemirror/addon/hint/show-hint.css",
   "codemirror/sql-hint.js": "codemirror/addon/hint/sql-hint.js",
   "codemirror/placeholder.js": "codemirror/addon/display/placeholder.js",
+  // documentation (docs/index.html)
+  "docsify/docsify.min.js": "docsify/lib/docsify.min.js",
+  "docsify/search.min.js": "docsify/lib/plugins/search.min.js",
+  "docsify/zoom-image.min.js": "docsify/lib/plugins/zoom-image.min.js",
+  "docsify/vue.css": "docsify/lib/themes/vue.css",
 };
 const LICENCES = {
   "sql.js/LICENSE": "sql.js/LICENSE",
   "fflate/LICENSE": "fflate/LICENSE",
   "codemirror/LICENSE": "codemirror/LICENSE",
+  "docsify/LICENSE": "docsify/LICENSE",
 };
 
 for (const [dest, src] of Object.entries({ ...FILES, ...LICENCES })) {
@@ -31,5 +37,7 @@ for (const [dest, src] of Object.entries({ ...FILES, ...LICENCES })) {
   if (!fs.existsSync(from)) { console.error("Manquant : " + from + " (lancez npm install)"); process.exit(1); }
   fs.mkdirSync(path.dirname(to), { recursive: true });
   fs.copyFileSync(from, to);
+  // pas de police Google : aucune ressource externe, même dans la documentation
+  if (dest === "docsify/vue.css") fs.writeFileSync(to, fs.readFileSync(to, "utf8").replace(/@import url\([^)]*fonts\.googleapis[^)]*\);?/g, ""));
   console.log("lib/" + dest);
 }

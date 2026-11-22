@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SQL Lab – Documentation</title>
+  <meta name="description" content="Documentation de SQL Lab : par profil (étudiant, enseignant, établissement, chercheur, EdTech, développeur) et par thème. Documentation in English included.">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="SQL Lab">
+  <meta property="og:title" content="SQL Lab – Documentation">
+  <meta property="og:description" content="S'entraîner au SQL, comprendre ses erreurs, ajouter des questions, utiliser sa propre base, citer ou intégrer SQL Lab.">
+  <meta property="og:url" content="https://edu-fpar.github.io/sql-lab/docs/">
+  <meta property="og:image" content="https://edu-fpar.github.io/sql-lab/docs/img/fr/cinema-sql.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="stylesheet" href="../lib/docsify/vue.css">
+  <style>
+    :root { --theme-color: #1f5fbf; --base-font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+    body { font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+    .markdown-section { max-width: 920px; }
+    .markdown-section img { border: 1px solid #dde1e7; border-radius: 8px; box-shadow: 0 4px 14px rgba(0,0,0,.08); margin: .6rem 0; }
+    .markdown-section table { display: table; width: 100%; }
+    .markdown-section td, .markdown-section th { vertical-align: top; }
+    .app-nav { right: 70px; }
+    .app-nav a { font-weight: 600; }
+    .sidebar .app-name-link { font-weight: 700; }
+    .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: .8rem; margin: 1rem 0 1.5rem; }
+    .cards a { display: block; padding: .8rem 1rem; border: 1px solid #dde1e7; border-radius: 10px; color: inherit !important; text-decoration: none !important; background: #fff; }
+    .cards a:hover { border-color: var(--theme-color); box-shadow: 0 4px 14px rgba(31,95,191,.12); }
+    .cards b { display: block; font-size: 1.05rem; margin-bottom: .25rem; color: var(--theme-color); }
+    .cards span { color: #5d6676; font-size: .9rem; line-height: 1.45; }
+  </style>
+</head>
+<body>
+  <div id="app">Chargement… / Loading…</div>
+  <script>
+    window.$docsify = {
+      name: "📖 SQL Lab",
+      nameLink: { "/en/": "#/en/", "/": "#/" },
+      repo: "",
+      loadSidebar: true,
+      loadNavbar: true,
+      alias: {
+        // les alias s'appliquent en cascade : la règle française ne doit pas capturer /en/_sidebar.md
+        "/en/.+/_sidebar.md": "/en/_sidebar.md",
+        "/en/.+/_navbar.md": "/en/_navbar.md",
+        "/(profils|themes|reference)/_sidebar.md": "/_sidebar.md",
+        "/(profils|themes|reference)/_navbar.md": "/_navbar.md",
+      },
+      subMaxLevel: 2,
+      maxLevel: 3,
+      auto2top: true,
+      relativePath: false,
+      noEmoji: true,
+      externalLinkTarget: "_blank",
+      search: {
+        paths: "auto",
+        depth: 3,
+        placeholder: { "/en/": "Search", "/": "Rechercher" },
+        noData: { "/en/": "No results", "/": "Aucun résultat" },
+      },
+      plugins: [
+        function (hook, vm) {
+          // langue de la page (lecteurs d'écran, césure)
+          hook.doneEach(function () {
+            document.documentElement.lang = vm.route.path.indexOf("/en/") === 0 ? "en" : "fr";
+          });
+        },
+      ],
+    };
+  </script>
+  <script src="../lib/docsify/docsify.min.js"></script>
+  <script src="../lib/docsify/search.min.js"></script>
+  <script src="../lib/docsify/zoom-image.min.js"></script>
+</body>
+</html>

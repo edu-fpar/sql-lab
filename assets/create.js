@@ -7,6 +7,8 @@
   const EN = () => I18N.lang === "en";
   const numLocale = () => (EN() ? "en-GB" : "fr-FR");
   I18N.add({
+    "📖 Aide": "📖 Help",
+    "Documentation : guide par profil et par thème": "Documentation: guide by profile and by topic",
     // ---- page (HTML statique, traduite par I18N.dom)
     "SQL Lab – Créer des questions": "SQL Lab – Create questions",
     "Espace enseignant de SQL Lab : préparer un prompt pour son IA, vérifier les questions générées, les partager par fichier ou par lien.": "SQL Lab teacher space: prepare a prompt for your AI, check the generated questions, share them as a file or a link.",
@@ -346,6 +348,7 @@
   async function init() {
     translatePage();
     if (I18N.toggle) I18N.toggle($("btnLang"));
+    if (I18N.lang === "en") $("btnDocs").href = "docs/#/en/profiles/teacher";
     try {
       state.SQL = await initSqlJs({ locateFile: (f) => SQLJS_DIR + f });
       state.catalogue = await (await fetch("exercices/catalogue.json")).json();
