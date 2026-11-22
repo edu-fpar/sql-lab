@@ -526,3 +526,15 @@ svg.dg.cn-on .dg-link:not(.cn-link) { opacity: .22; }
   .dg-link.cn-now, .cn-mark.cn-hot, .cn-sql mark.cn-new, .cn-comment { animation: none; }
 }
 .cn-launch { float: right; margin: 0 0 .4rem .6rem; }
+.cn-mark.cn-add { fill: color-mix(in srgb, var(--accent) 26%, transparent); stroke: var(--accent); stroke-width: 1.2; animation: cn-pop .6s ease; }
+.cn-mark.cn-del { fill: color-mix(in srgb, var(--ko) 18%, transparent); }
+.cn-strike { stroke: var(--ko); stroke-width: 2; animation: cn-draw .7s ease forwards; stroke-dasharray: 400; stroke-dashoffset: 400; }
+@keyframes cn-draw { to { stroke-dashoffset: 0; } }
+@keyframes cn-pop { from { opacity: 0; } to { opacity: 1; } }
+.cn-sql s.cn-del { color: var(--ko); text-decoration-thickness: 2px; }
+.cinema-dialog.cn-schema .cn-sql { font-family: inherit; font-size: .9rem; }
+.cinema-dialog .dg-box { animation: cn-pop .45s ease; }
+@media (prefers-reduced-motion: reduce) { .cn-strike { animation: none; stroke-dashoffset: 0; } .cinema-dialog .dg-box, .cn-mark.cn-add { animation: none; } }
+.lg.add { background: color-mix(in srgb, var(--accent) 30%, transparent); border: 1px solid var(--accent); }
+.lg.del { background: color-mix(in srgb, var(--ko) 30%, transparent); }
+.cinema-dialog.cn-schema .cn-sql code { font-family: inherit; }

@@ -608,6 +608,187 @@
     return { phases: PHASES_WRITE, steps };
   }
 
+  // ------------------------------------------------------------ évolution d'un schéma
+  const PHASES_SCHEMA = [
+    ["lecture", "Règles de gestion"], ["retraits", "Ce qui ne tient plus"], ["entites", "Nouvelles tables"],
+    ["liens", "Clés étrangères (1 → n)"], ["associations", "Tables de liaison (n ↔ n)"], ["bilan", "Schéma final"],
+  ];
+
+  /** Commentaires remplacés par l'enseignant : { "jointures": "…", "filtres.2": "…" } (texte brut, échappé) */
+  function override(out, q) {
+    const over = q && q.cinema;
+    if (!over || typeof over !== "object") return;
+    for (const st of out.steps) if (typeof over[st.phase] === "string") st.text = esc(over[st.phase]);
+    for (const [k, v] of Object.entries(over)) {
+      const m = /^(\w+)\.(\d+)$/.exec(k);
+      if (!m || typeof v !== "string") continue;
+      const list = out.steps.filter((s) => s.phase === m[1]);
+      if (list[+m[2] - 1]) list[+m[2] - 1].text = esc(v);
+    }
+  }
+
+  /**
+   * Correction pas à pas d'une question « schéma ».
+   * depart : { tables:[{name, cols:[{name, pk, fk:"TABLE"|null}]}] } ; q.solution : format schemacheck
+   */
+  function schemaPlan(depart, q) {
+    const SC = global.SQLSchemaCheck;
+    const sol = q && q.solution;
+    if (!SC || !sol || !Array.isArray(sol.tables)) return null;
+    const norm = (s) => String(s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z0-9]/g, "");
+    const first = (spec) => String(spec).split("|")[0].trim();
+    const same = (spec, name) => String(spec).split("|").some((a) => norm(a) === norm(name));
+    const findT = (schema, t) => schema.tables.find((x) => [t.nom, ...(t.alias || [])].some((n) => norm(n) === norm(x.name)));
+    const steps = [];
+    let cur = clone(depart);
+    const toDiagram = (s) => s.tables.map((t) => ({ name: t.name, cols: t.cols.map((c) => ({ name: c.name, pk: !!c.pk, fk: c.fk ? c.fk + "." : undefined })) }));
+    const snap = (phase, title, text, focus = {}, fresh = []) => steps.push({
+      phase, title, text, edit: clone(cur), schema: toDiagram(cur), fresh,
+      focus: { main: [], inter: [], sub: [], cols: {}, aliases: {}, links: [], now: [], ...focus },
+    });
+    const colsMap = (t, list, kind) => ({ [t]: Object.fromEntries(list.map((c) => [c, kind])) });
+    const refName = (ref) => { const t = cur.tables.find((x) => norm(x.name) === norm(ref)); return t ? t.name : ref; };
+
+    const info = sol.tables.map((t) => {
+      const existing = findT(depart, t);
+      const pk = (t.pk || []).map(first);
+      const fk = Object.entries(t.fk || {}).map(([k, v]) => [first(k), v]);
+      const fkInPk = fk.filter(([k]) => pk.some((p) => norm(p) === norm(k)));
+      const kind = existing ? "modif" : pk.length >= 2 && fkInPk.length >= 2 ? "assoc" : "entite";
+      return { t, existing, pk, fk, fkInPk, kind, name: existing ? existing.name : t.nom,
+        attrs: (t.attributs || []).map(first), interdits: t.interdits || [], role: t.role || "" };
+    });
+
+    // 1. lecture
+    {
+      const n = info.filter((x) => x.kind !== "modif").length;
+      snap("lecture", "Je lis les règles de gestion",
+        `Je repère, dans le schéma de départ, les tables concernées par les nouvelles règles. Pour chaque règle, je cherche le <strong>type de lien</strong> :` +
+        `<ul><li>« un … est lié à <em>un seul</em> … » : relation un à plusieurs, une <strong>clé étrangère</strong> suffit (du côté « plusieurs ») ;</li>` +
+        `<li>« un … peut être lié à <em>plusieurs</em> …, et inversement » : relation plusieurs à plusieurs, il faut une <strong>nouvelle table</strong> ;</li>` +
+        `<li>un nouvel objet à décrire, avec ses propres informations : une nouvelle table.</li></ul>` +
+        (n ? `<p>Ici, ${n} ${plural(n, "nouvelle table", "nouvelles tables")} à créer.</p>` : ""),
+        { main: depart.tables.map((t) => t.name) });
+    }
+
+    // 2. ce qui ne tient plus
+    for (const x of info.filter((i) => i.kind === "modif" && i.interdits.length)) {
+      const T = cur.tables.find((t) => t.name === x.name);
+      if (!T) continue;
+      const gone = T.cols.filter((c) => x.interdits.some((spec) => same(spec, c.name))).map((c) => c.name);
+      if (!gone.length) continue;
+      const where = info.filter((o) => o !== x && gone.some((g) => o.pk.some((p) => norm(p) === norm(g)) || o.fk.some(([k]) => norm(k) === norm(g)) || o.attrs.some((a) => norm(a) === norm(g))));
+      let text = `${listFr(gone.map((g) => code(g)))} ne ${plural(gone.length, "peut", "peuvent")} plus rester dans ${tb(x.name)} : dans une ligne, une colonne ne contient qu'<em>une seule</em> valeur, or la nouvelle règle en demande plusieurs.`;
+      if (where.length) text += ` L'information sera reprise dans ${listFr(where.map((o) => tb(o.name)))}.`;
+      snap("retraits", "Ce qui ne tient plus", text, { main: [x.name], cols: colsMap(x.name, gone, "del") });
+      T.cols = T.cols.filter((c) => !gone.includes(c.name));
+    }
+    for (const name of sol.tablesSupprimees || []) {
+      const T = cur.tables.find((t) => norm(t.name) === norm(name));
+      if (!T) continue;
+      snap("retraits", "Une table disparaît", `La table ${tb(T.name)} n'a plus lieu d'être avec les nouvelles règles : je la supprime, avec les flèches qui y mènent.`,
+        { sub: [T.name], cols: colsMap(T.name, T.cols.map((c) => c.name), "del") });
+      cur.tables = cur.tables.filter((t) => t !== T);
+      for (const t of cur.tables) for (const c of t.cols) if (c.fk && norm(c.fk) === norm(T.name)) c.fk = null;
+    }
+
+    // 3. nouvelles tables (objets à décrire) : d'abord celles qui ne dépendent de rien
+    const ents = info.filter((x) => x.kind === "entite").sort((a, b) => a.fk.length - b.fk.length);
+    for (const x of ents) {
+      cur = SC.solutionSchema(cur, { tables: [x.t] });
+      const own = x.fk.filter(([k]) => !x.pk.some((p) => norm(p) === norm(k)));
+      const weak = x.fkInPk;
+      let text = `${x.role ? "Il faut " + esc(x.role) + " : " : ""}je crée la table ${tb(x.name)}. Sa clé primaire ${listFr(x.pk.map((p) => `<u>${esc(p)}</u>`))} identifie chaque ligne`;
+      text += x.attrs.length ? ` ; elle porte ${listFr(x.attrs.map(code))}.` : ".";
+      if (weak.length) text += ` Sa clé contient ${listFr(weak.map(([k, r]) => `<i>#${esc(k)}</i> (${tb(refName(r))})`))} : une ligne de ${tb(x.name)} n'existe qu'à l'intérieur de ${plural(weak.length, "cette table", "ces tables")}.`;
+      if (own.length) text += ` Chaque ligne est rattachée à un seul ${listFr(own.map(([, r]) => tb(refName(r))))} : relation un à plusieurs, d'où la clé étrangère ${listFr(own.map(([k]) => `<i>#${esc(k)}</i>`))} et la flèche.`;
+      const links = x.fk.map(([, r]) => [x.name, refName(r)]);
+      snap("entites", "Une nouvelle table", text, {
+        main: [x.name], inter: x.fk.map(([, r]) => refName(r)),
+        cols: { [x.name]: { ...Object.fromEntries(x.pk.map((p) => [p, "add"])), ...Object.fromEntries(x.attrs.map((a) => [a, "sel"])), ...Object.fromEntries(x.fk.map(([k]) => [k, "join"])) } },
+        links, now: links,
+      }, [x.name]);
+    }
+
+    // 4. tables existantes qui gagnent une clé étrangère ou un attribut
+    for (const x of info.filter((i) => i.kind === "modif")) {
+      const before = clone(cur.tables.find((t) => t.name === x.name) || { cols: [] });
+      const had = (n) => before.cols.some((c) => norm(c.name) === norm(n));
+      const hadFk = (n) => before.cols.some((c) => norm(c.name) === norm(n) && c.fk);
+      const newFk = x.fk.filter(([k]) => !hadFk(k));
+      const newAttrs = x.attrs.filter((a) => !had(a));
+      cur = SC.solutionSchema(cur, { tables: [x.t] });
+      if (!newFk.length && !newAttrs.length) continue;
+      let text = "";
+      for (const [k, r] of newFk) {
+        text += `<p>Chaque ligne de ${tb(x.name)} est liée à <em>un seul</em> ${tb(refName(r))}, qui peut l'être à plusieurs : relation <strong>un à plusieurs</strong>. ` +
+          `J'ajoute la clé étrangère <i>#${esc(k)}</i> dans ${tb(x.name)}, du côté « plusieurs » : la flèche part de ${tb(x.name)} vers ${tb(refName(r))}.</p>`;
+      }
+      if (newAttrs.length) text += `<p>J'ajoute ${listFr(newAttrs.map(code))} dans ${tb(x.name)} : ${plural(newAttrs.length, "c'est une information", "ce sont des informations")} sur chaque ligne de cette table.</p>`;
+      const links = newFk.map(([, r]) => [x.name, refName(r)]);
+      snap("liens", newFk.length ? "Une clé étrangère" : "Un nouvel attribut", text, {
+        main: [x.name], inter: newFk.map(([, r]) => refName(r)),
+        cols: { [x.name]: { ...Object.fromEntries(newFk.map(([k]) => [k, "join"])), ...Object.fromEntries(newAttrs.map((a) => [a, "add"])) } },
+        links, now: links,
+      });
+    }
+
+    // 5. tables de liaison (plusieurs à plusieurs)
+    for (const x of info.filter((i) => i.kind === "assoc")) {
+      const refs = [...new Set(x.fkInPk.map(([, r]) => refName(r)))];
+      cur = SC.solutionSchema(cur, { tables: [{ ...x.t, fk: {}, attributs: [] }] });
+      const pkTxt = x.pk.map((p) => `<u>${esc(p)}</u>`).join(" + ");
+      let text = x.role ? `Règle : il faut ${esc(x.role)}. ` : "";
+      text += refs.length >= 3
+        ? `Le lien concerne ${refs.length} tables à la fois (${listFr(refs.map(tb))}). `
+        : `Un ${tb(refs[0] || "?")} peut être lié à plusieurs ${tb(refs[1] || refs[0] || "?")}, et inversement : relation <strong>plusieurs à plusieurs</strong>. `;
+      text += `Une clé étrangère ne suffit pas (il faudrait plusieurs valeurs dans une case) : je crée la table ${tb(x.name)}. Sa clé primaire <strong>associe</strong> les clés des tables reliées : ${pkTxt}.`;
+      snap("associations", "Une table de liaison", text, {
+        main: [x.name], inter: refs, cols: { [x.name]: Object.fromEntries(x.pk.map((p) => [p, "add"])) },
+      }, [x.name]);
+      cur = SC.solutionSchema(cur, { tables: [x.t] });
+      const links = x.fk.map(([, r]) => [x.name, refName(r)]);
+      let t2 = `Chaque partie de la clé est aussi une <strong>clé étrangère</strong> : ${listFr(x.fk.map(([k, r]) => `<i>#${esc(k)}</i> renvoie à ${tb(refName(r))}`))}. D'où ${plural(links.length, "la flèche", "les flèches")}.`;
+      if (x.attrs.length) t2 += ` ${listFr(x.attrs.map(code))} dépend${x.attrs.length > 1 ? "ent" : ""} à la fois de ${listFr(refs.map(tb))} : ${plural(x.attrs.length, "l'attribut se place", "les attributs se placent")} dans ${tb(x.name)}, la table du lien.`;
+      snap("associations", "Les clés étrangères de la table de liaison", t2, {
+        main: [x.name], inter: refs,
+        cols: { [x.name]: { ...Object.fromEntries(x.fk.map(([k]) => [k, "join"])), ...Object.fromEntries(x.attrs.map((a) => [a, "sel"])) } },
+        links, now: links,
+      });
+    }
+
+    // 6. bilan
+    cur = SC.solutionSchema(depart, sol);
+    const changed = info.map((x) => x.name);
+    const allLinks = info.flatMap((x) => x.fk.map(([, r]) => [x.name, refName(r)]));
+    let text = `Le schéma final : ${listFr(changed.map(tb))} ${plural(changed.length, "a été créée ou modifiée", "ont été créées ou modifiées")}.` +
+      `<p>Pour vérifier : chaque nouvelle règle est-elle traduite ? chaque table a-t-elle une clé primaire ? chaque flèche part-elle d'une clé étrangère vers une clé primaire ?</p>` +
+      `<p class="muted small">Les noms peuvent varier : la vérification accepte les noms équivalents et reconnaît une table à sa clé primaire.</p>`;
+    if ((q.variantes || []).length) text += `<p class="muted small">Une autre solution est aussi acceptée : voir la correction.</p>`;
+    snap("bilan", "Le schéma final", text, { main: changed, links: allLinks });
+
+    const out = { kind: "schema", phases: PHASES_SCHEMA, steps };
+    override(out, q);
+    return out;
+  }
+
+  function renderSchemaText(st) {
+    const marks = st.focus.cols || {};
+    return st.edit.tables.map((t) => {
+      const m = marks[t.name] || {};
+      const cols = t.cols.map((c) => {
+        let n = esc((c.fk ? "#" : "") + c.name);
+        if (c.fk) n = `<i>${n}</i>`;
+        if (c.pk) n = `<u>${n}</u>`;
+        if (m[c.name] === "del") n = `<s class="cn-del">${n}</s>`;
+        else if (m[c.name] && st.phase !== "bilan") n = `<mark class="cn-new">${n}</mark>`;
+        return n;
+      }).join(", ");
+      const line = `<strong>${esc(t.name)}</strong> (${cols})`;
+      return st.fresh.includes(t.name) ? `<mark class="cn-new">${line}</mark>` : line;
+    }).join("\n");
+  }
+
   /** Point d'entrée sans DOM */
   function plan(sql, schema, q) {
     global.SQLCinemaSchema = schema;
@@ -620,17 +801,7 @@
     out.parsed = Q;
     out.sql = list[0];
     out.more = list.length - 1;
-    // commentaires remplacés par l'enseignant : { "jointures": "…", "filtres.2": "…" } (texte brut, échappé)
-    const over = q && q.cinema;
-    if (over && typeof over === "object") {
-      for (const st of out.steps) if (typeof over[st.phase] === "string") st.text = esc(over[st.phase]);
-      for (const [k, v] of Object.entries(over)) {
-        const m = /^(\w+)\.(\d+)$/.exec(k);
-        if (!m) continue;
-        const list2 = out.steps.filter((s) => s.phase === m[1]);
-        if (list2[+m[2] - 1] && typeof v === "string") list2[+m[2] - 1].text = esc(v);
-      }
-    }
+    override(out, q);
     return out;
   }
 
@@ -710,24 +881,53 @@
     open({ q, schema, engine, ex, sql }) {
       const P = plan(sql, schema, q);
       if (!P) return false;
-      this.plan = P;
       this.engine = engine;
+      this.setMode("sql");
+      this.show(P, q);
+      this.diagram.load(schema, ex && ex.schemaGrid, "layout:" + (ex ? ex.id : "x"));
+      this.go(0);
+      return true;
+    }
+
+    /** Question « schéma » : depart = schéma de départ (format schemacheck) */
+    openSchema({ q, depart }) {
+      const P = schemaPlan(depart, q);
+      if (!P || !P.steps.length) return false;
+      this.setMode("schema");
+      this.show(P, q);
+      // disposition calculée une fois sur le schéma final : les tables ne bougent plus ensuite
+      this.layout = null;
+      this.diagram.load(P.steps[P.steps.length - 1].schema, null, "cinema-schema");
+      this.layout = { ...this.diagram.pos };
+      this.go(0);
+      return true;
+    }
+
+    setMode(mode) {
+      this.mode = mode;
+      const base = { fit: true, maxFit: 1.2, onOpenTable: mode === "sql" ? this.opts.onOpenTable : null };
+      const store = mode === "sql" ? (this.opts.store || {}) : { load: () => this.layout, save: (k, p) => { this.layout = { ...p }; } };
+      if (!this.diagram) this.diagram = new SchemaDiagram(this.els.diagram, { ...base, ...store });
+      else this.diagram.opts = { ...base, ...store };
+    }
+
+    show(P, q) {
+      this.plan = P;
       this.q = q;
       const els = this.els;
-      els.title.textContent = "Correction pas à pas" + (q.id ? ` – ${q.id}` : "");
+      els.title.textContent = (P.kind === "schema" ? "Construction du schéma pas à pas" : "Correction pas à pas") + (q.id ? ` – ${q.id}` : "");
       els.enonce.textContent = q.enonce || "";
       els.strip.innerHTML = P.phases.map(([k, label], n) => {
         const used = P.steps.some((s) => s.phase === k);
-        return `<li data-phase="${k}" class="${used ? "" : "skip"}" ${used ? "" : 'title="Pas nécessaire pour cette requête"'}><span class="n">${n + 1}</span>${esc(label)}</li>`;
+        return `<li data-phase="${k}" class="${used ? "" : "skip"}" ${used ? "" : 'title="Pas nécessaire ici"'}><span class="n">${n + 1}</span>${esc(label)}</li>`;
       }).join("");
+      els.dialog.classList.toggle("cn-schema", P.kind === "schema");
+      const legend = els.dialog.querySelector("#cnLegend");
+      if (legend) legend.innerHTML = P.kind === "schema"
+        ? '<i class="lg add"></i>nouveau <i class="lg join"></i>clé étrangère <i class="lg del"></i>retiré <i class="lg inter"></i>table reliée'
+        : '<i class="lg sel"></i>affiché <i class="lg filt"></i>filtre <i class="lg join"></i>jointure <i class="lg inter"></i>table de passage';
       if (!els.dialog.open) els.dialog.showModal();
-      if (!this.diagram) {
-        this.diagram = new SchemaDiagram(els.diagram, { ...(this.opts.store || {}), fit: true, maxFit: 1.2, onOpenTable: this.opts.onOpenTable });
-      }
-      this.diagram.load(schema, ex && ex.schemaGrid, "layout:" + (ex ? ex.id : "x"));
-      this.go(0);
       els.next.focus();
-      return true;
     }
 
     go(i) {
@@ -737,7 +937,8 @@
       const st = P.steps[this.i];
       const els = this.els;
       els.comment.innerHTML = `<h3>${esc(st.title)}</h3><div>${st.text}</div>`;
-      els.sql.innerHTML = renderSql(P, st);
+      els.sql.innerHTML = P.kind === "schema" ? renderSchemaText(st) : renderSql(P, st);
+      if (st.schema) this.diagram.load(st.schema, null, "cinema-schema");
       els.count.textContent = `${this.i + 1} / ${P.steps.length}`;
       els.prev.disabled = els.first.disabled = this.i === 0;
       els.next.disabled = this.i === P.steps.length - 1;
@@ -813,5 +1014,5 @@
     }
   }
 
-  global.SQLCinema = { plan, build, masks, statements, renderSql, Player };
+  global.SQLCinema = { plan, schemaPlan, build, masks, statements, renderSql, renderSchemaText, Player };
 })(typeof window !== "undefined" ? window : globalThis);

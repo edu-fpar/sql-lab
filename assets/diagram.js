@@ -307,6 +307,10 @@
             const isHot = !!f.hot && f.hot.some(([a, b]) => low(a) === low(t.name) && low(b) === low(col));
             const r = el("rect", { x: 2, y: HEAD + PADY + i * ROW + 1, width: t.w - 4, height: ROW - 2, rx: 3, class: "cn-mark cn-" + kind + (isHot ? " cn-hot" : "") });
             g.insertBefore(r, first);
+            if (kind === "del") {
+              const y = HEAD + PADY + i * ROW + ROW / 2;
+              el("line", { x1: PADX - 3, x2: t.w - PADX + 3, y1: y, y2: y, class: "cn-mark cn-strike" }, g);
+            }
           }
         }
         const akey = f.aliases && Object.keys(f.aliases).find((k) => low(k) === low(t.name));

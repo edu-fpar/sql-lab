@@ -939,7 +939,8 @@
     if (isSchema(q)) {
       const depart = schemaDepart(q);
       const sols = [q.solution, ...(q.variantes || [])];
-      $("correction").innerHTML = sols.map((sol, i) =>
+      const cineS = window.SQLCinema ? `<button class="btn small cn-launch" type="button" data-cinema>🎬 Construction pas à pas</button>` : "";
+      $("correction").innerHTML = cineS + sols.map((sol, i) =>
         `<p class="muted small">${i === 0 ? "Correction" : sol.partiel ? "Réponse acceptée seulement en partie" : "Autre solution acceptée"}</p>` +
         `<div class="schema-text">${SQLSchemaCheck.toText(SQLSchemaCheck.solutionSchema(depart, sol), true).split("\n").map((l) => `<div>${l}</div>`).join("")}</div>`).join("") +
         `<p class="muted small">Les noms peuvent varier : la vérification accepte les noms équivalents et reconnaît une table à sa clé primaire.</p>`;
@@ -961,7 +962,8 @@
       const els = Object.fromEntries(Object.entries(ids).map(([k, id]) => [k, $(id)]));
       state.cinema = new SQLCinema.Player(els, { store: diagramStore });
     }
-    state.cinema.open({ q, schema: state.schema, engine: state.engine, ex: state.ex, sql: lines(q.correction) });
+    if (isSchema(q)) state.cinema.openSchema({ q, depart: schemaDepart(q) });
+    else state.cinema.open({ q, schema: state.schema, engine: state.engine, ex: state.ex, sql: lines(q.correction) });
   }
 
   function autoGrow() {
