@@ -147,10 +147,10 @@
       "correction": [
         "SELECT CodeTransport, HeureDepartPrevue, LieuDepart, LieuArrivee",
         "FROM TRANSPORT",
-        "WHERE Date = '14/02/2025'",
+        "WHERE DateTransport = '14/02/2025'",
         "ORDER BY HeureDepartPrevue;"
       ],
-      "indice": "Une date s'écrit entre apostrophes : Date = '14/02/2025'. Les heures 'hh:mm' se trient correctement par ordre alphabétique."
+      "indice": "Une date s'écrit entre apostrophes : DateTransport = '14/02/2025'. Les heures 'hh:mm' se trient correctement par ordre alphabétique."
     },
     {
       "id": "q08",
@@ -161,42 +161,42 @@
         2
       ],
       "correction": [
-        "SELECT CodeTransport, Date, HeureDepartPrevue, CodePatient, Immatriculation",
+        "SELECT CodeTransport, DateTransport, HeureDepartPrevue, CodePatient, Immatriculation",
         "FROM TRANSPORT",
-        "WHERE Date >= NOW()",
-        "ORDER BY Date, HeureDepartPrevue;"
+        "WHERE DateTransport >= NOW()",
+        "ORDER BY DateTransport, HeureDepartPrevue;"
       ],
       "variantes": [
         [
-          "SELECT CodeTransport, Date, HeureDepartPrevue, CodePatient, Immatriculation",
+          "SELECT CodeTransport, DateTransport, HeureDepartPrevue, CodePatient, Immatriculation",
           "FROM TRANSPORT",
-          "WHERE Date >= '14/03/2025'",
-          "ORDER BY Date, HeureDepartPrevue;"
+          "WHERE DateTransport >= '14/03/2025'",
+          "ORDER BY DateTransport, HeureDepartPrevue;"
         ]
       ],
       "indice": "NOW() (ou CURDATE()) donne la date du jour, ici le 14/03/2025. Remarquez que les transports lointains n'ont pas encore de véhicule."
     },
     {
       "id": "q09",
-      "cinema": {"+filtres":"« Février 2025 » contient **deux** informations : le mois et l'année. La base contient aussi février 2024 : avec `MONTH(Date) = 2` seul, vous obtiendriez 29 transports au lieu de 18.","+filtres.3":"Cette condition compare **deux colonnes de la même ligne**, sans aucune valeur entre apostrophes : c'est permis. « Partis plus tard que prévu » se traduit par « heure réelle > heure prévue ».\nLa comparaison fonctionne parce que les heures sont écrites sur 5 caractères ('07:30', '09:05') : comme textes, elles se rangent alors dans l'ordre chronologique.","+resultat":"Vous devez obtenir 18 transports. Un transport parti exactement à l'heure n'est pas retenu : `>` et non `>=`."},
+      "cinema": {"+filtres":"« Février 2025 » contient **deux** informations : le mois et l'année. La base contient aussi février 2024 : avec `MONTH(DateTransport) = 2` seul, vous obtiendriez 29 transports au lieu de 18.","+filtres.3":"Cette condition compare **deux colonnes de la même ligne**, sans aucune valeur entre apostrophes : c'est permis. « Partis plus tard que prévu » se traduit par « heure réelle > heure prévue ».\nLa comparaison fonctionne parce que les heures sont écrites sur 5 caractères ('07:30', '09:05') : comme textes, elles se rangent alors dans l'ordre chronologique.","+resultat":"Vous devez obtenir 18 transports. Un transport parti exactement à l'heure n'est pas retenu : `>` et non `>=`."},
       "theme": "Dates",
       "enonce": "Afficher le code, la date, l'heure de départ prévue et l'heure de départ réelle des transports de février 2025 partis plus tard que prévu.",
       "correction": [
-        "SELECT CodeTransport, Date, HeureDepartPrevue, HeureDepartReelle",
+        "SELECT CodeTransport, DateTransport, HeureDepartPrevue, HeureDepartReelle",
         "FROM TRANSPORT",
-        "WHERE YEAR(Date) = 2025",
-        "AND MONTH(Date) = 2",
+        "WHERE YEAR(DateTransport) = 2025",
+        "AND MONTH(DateTransport) = 2",
         "AND HeureDepartReelle > HeureDepartPrevue;"
       ],
       "variantes": [
         [
-          "SELECT CodeTransport, Date, HeureDepartPrevue, HeureDepartReelle",
+          "SELECT CodeTransport, DateTransport, HeureDepartPrevue, HeureDepartReelle",
           "FROM TRANSPORT",
-          "WHERE Date BETWEEN '01/02/2025' AND '28/02/2025'",
+          "WHERE DateTransport BETWEEN '01/02/2025' AND '28/02/2025'",
           "AND HeureDepartReelle > HeureDepartPrevue;"
         ]
       ],
-      "indice": "MONTH(Date) = 2 ne suffit pas : il faut aussi YEAR(Date) = 2025 (février 2024 existe aussi). Une condition peut comparer deux colonnes entre elles."
+      "indice": "MONTH(DateTransport) = 2 ne suffit pas : il faut aussi YEAR(DateTransport) = 2025 (février 2024 existe aussi). Une condition peut comparer deux colonnes entre elles."
     },
     {
       "id": "q10",
@@ -252,7 +252,7 @@
         "WHERE TRANSPORT.CodePatient = PATIENT.CodePatient",
         "AND TRANSPORT.Immatriculation = VEHICULE.Immatriculation",
         "AND VEHICULE.CodeType = TYPE_VEHICULE.CodeType",
-        "AND Date = '14/02/2025'",
+        "AND DateTransport = '14/02/2025'",
         "ORDER BY HeureDepartPrevue;"
       ],
       "variantes": [
@@ -262,7 +262,7 @@
           "INNER JOIN PATIENT ON TRANSPORT.CodePatient = PATIENT.CodePatient",
           "INNER JOIN VEHICULE ON TRANSPORT.Immatriculation = VEHICULE.Immatriculation",
           "INNER JOIN TYPE_VEHICULE ON VEHICULE.CodeType = TYPE_VEHICULE.CodeType",
-          "WHERE Date = '14/02/2025'",
+          "WHERE DateTransport = '14/02/2025'",
           "ORDER BY HeureDepartPrevue;"
         ]
       ],
@@ -326,7 +326,7 @@
         "FROM TRANSPORT, VEHICULE, TYPE_VEHICULE",
         "WHERE TRANSPORT.Immatriculation = VEHICULE.Immatriculation",
         "AND VEHICULE.CodeType = TYPE_VEHICULE.CodeType",
-        "AND YEAR(Date) = 2024",
+        "AND YEAR(DateTransport) = 2024",
         "GROUP BY DesignType;"
       ],
       "variantes": [
@@ -335,7 +335,7 @@
           "FROM TRANSPORT",
           "INNER JOIN VEHICULE ON TRANSPORT.Immatriculation = VEHICULE.Immatriculation",
           "INNER JOIN TYPE_VEHICULE ON VEHICULE.CodeType = TYPE_VEHICULE.CodeType",
-          "WHERE Date BETWEEN '01/01/2024' AND '31/12/2024'",
+          "WHERE DateTransport BETWEEN '01/01/2024' AND '31/12/2024'",
           "GROUP BY DesignType;"
         ]
       ],
@@ -355,7 +355,7 @@
         "FROM SALARIE, EFFECTUER, TRANSPORT",
         "WHERE SALARIE.NumSal = EFFECTUER.NumSal",
         "AND EFFECTUER.CodeTransport = TRANSPORT.CodeTransport",
-        "AND YEAR(Date) = 2024",
+        "AND YEAR(DateTransport) = 2024",
         "GROUP BY SALARIE.NumSal, NomSal",
         "HAVING COUNT(*) > 50",
         "ORDER BY COUNT(*) DESC;"
@@ -366,7 +366,7 @@
           "FROM SALARIE S",
           "INNER JOIN EFFECTUER E ON S.NumSal = E.NumSal",
           "INNER JOIN TRANSPORT T ON E.CodeTransport = T.CodeTransport",
-          "WHERE YEAR(T.Date) = 2024",
+          "WHERE YEAR(T.DateTransport) = 2024",
           "GROUP BY S.NumSal, NomSal",
           "HAVING COUNT(*) > 50",
           "ORDER BY COUNT(*) DESC;"
@@ -382,13 +382,13 @@
         0
       ],
       "correction": [
-        "SELECT MONTH(Date), COUNT(*)",
+        "SELECT MONTH(DateTransport), COUNT(*)",
         "FROM TRANSPORT",
-        "WHERE YEAR(Date) = 2024",
-        "GROUP BY MONTH(Date)",
-        "ORDER BY MONTH(Date);"
+        "WHERE YEAR(DateTransport) = 2024",
+        "GROUP BY MONTH(DateTransport)",
+        "ORDER BY MONTH(DateTransport);"
       ],
-      "indice": "On peut regrouper sur une expression : GROUP BY MONTH(Date)."
+      "indice": "On peut regrouper sur une expression : GROUP BY MONTH(DateTransport)."
     },
     {
       "id": "q18",
@@ -398,7 +398,7 @@
         "SELECT PATIENT.CodePatient, NomPatient, PrenomPatient, COUNT(*)",
         "FROM PATIENT, TRANSPORT",
         "WHERE PATIENT.CodePatient = TRANSPORT.CodePatient",
-        "AND YEAR(Date) = 2024",
+        "AND YEAR(DateTransport) = 2024",
         "GROUP BY PATIENT.CodePatient, NomPatient, PrenomPatient",
         "HAVING COUNT(*) >= 20;"
       ],
@@ -407,7 +407,7 @@
           "SELECT PATIENT.CodePatient, NomPatient, PrenomPatient, COUNT(*)",
           "FROM PATIENT",
           "INNER JOIN TRANSPORT ON PATIENT.CodePatient = TRANSPORT.CodePatient",
-          "WHERE YEAR(Date) = 2024",
+          "WHERE YEAR(DateTransport) = 2024",
           "GROUP BY PATIENT.CodePatient, NomPatient, PrenomPatient",
           "HAVING COUNT(*) >= 20;"
         ]

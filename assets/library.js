@@ -9,6 +9,10 @@
   const I18N = global.I18N || { lang: "fr", add() {}, t: (s, v) => (v ? s.replace(/\{(\w+)\}/g, (m, k) => (v[k] !== undefined ? v[k] : m)) : s), n: (c, a, b, v) => (c > 1 ? b : a).replace(/\{(\w+)\}/g, (m, k) => (k === "n" ? c : v && v[k] !== undefined ? v[k] : m)) };
   const tr = I18N.t, trn = I18N.n;
   I18N.add({
+    "Inspiré du sujet DCG UE8 session {a}. Données entièrement fictives.": "Inspired by the DCG UE8 exam, {a} session. Entirely fictitious data.",
+    "Inspiré du sujet DCG UE8 session {a}, dossier {d}. Données entièrement fictives.": "Inspired by the DCG UE8 exam, {a} session, part {d}. Entirely fictitious data.",
+    "Inspiré du sujet DCG UE8 session {a}, dossiers {d}. Données entièrement fictives.": "Inspired by the DCG UE8 exam, {a} session, parts {d}. Entirely fictitious data.",
+    "Source : {s}": "Source: {s}",
     "stockage du navigateur indisponible": "browser storage unavailable",
     "Ma base": "My database",
     "Base trop volumineuse ({n} Mo, maximum 100 Mo).": "Database too large ({n} MB, maximum 100 MB).",
@@ -229,7 +233,22 @@
     await store.put({ id: exercise.id, exercise, db: bytes, savedAt: new Date().toISOString() });
   }
 
-  const api = { FORMAT, store, list, load, save, readExerciseFile, normalizeExercise, analyzeDb, exerciseZip, isZip, slug };
+  /**
+   * Mention de la source d'un exercice (« Inspiré du sujet DCG UE8 session 2024, dossier 3.
+   * Données entièrement fictives. »), traduite selon la langue d'interface quand elle suit ce modèle.
+   */
+  function sourceText(ex) {
+    const s = String((ex && ex.source) || "").trim();
+    const m = /^Inspiré du sujet DCG UE8 session (\d{4})(?:, (dossiers?) ([^.]+))?\. Données entièrement fictives\.$/.exec(s);
+    if (!m) return s;
+    if (!m[2]) return tr("Inspiré du sujet DCG UE8 session {a}. Données entièrement fictives.", { a: m[1] });
+    const d = m[3].replace(/ et /g, I18N.lang === "fr" ? " et " : I18N.lang === "es" ? " y " : " and ");
+    return m[2] === "dossiers"
+      ? tr("Inspiré du sujet DCG UE8 session {a}, dossiers {d}. Données entièrement fictives.", { a: m[1], d })
+      : tr("Inspiré du sujet DCG UE8 session {a}, dossier {d}. Données entièrement fictives.", { a: m[1], d });
+  }
+
+  const api = { FORMAT, store, list, load, save, readExerciseFile, normalizeExercise, analyzeDb, exerciseZip, isZip, slug, sourceText };
   global.SQLLibrary = api;
   if (typeof module !== "undefined" && module.exports) module.exports = api;
 })(typeof window !== "undefined" ? window : globalThis);

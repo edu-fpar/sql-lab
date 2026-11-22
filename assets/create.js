@@ -8,6 +8,7 @@
   const LANG_NAME = () => ({ en: "English", es: "Spanish (español)" }[I18N.lang] || "English");
   const numLocale = () => ({ fr: "fr-FR", en: "en-GB", es: "es-ES" }[I18N.lang] || "fr-FR");
   I18N.add({
+    "Source de l'exercice : {s} Les questions doivent rester cohérentes avec ces données fictives.": "Exercise source: {s} The questions must stay consistent with this fictitious data.",
     "📖 Aide": "📖 Help",
     "Documentation : guide par profil et par thème": "Documentation: guide by profile and by topic",
     // ---- page (HTML statique, traduite par I18N.dom)
@@ -811,6 +812,7 @@
     }).join("");
     db.close();
     $("schemaSummary").textContent = t("· {n} tables · {titre}", { n: tables.length, titre: state.ex.titre });
+    $("baseSource").textContent = SQLLibrary.sourceText(state.ex);
   }
 
   // ---------------------------------------------------------------- 1. prompt
@@ -846,6 +848,7 @@
       if (s) out.push("", t("<<<DÉBUT DU MODE D'EMPLOI"), s.trim(), t("FIN DU MODE D'EMPLOI>>>"));
     }
     out.push("", t("## Base de données à utiliser (n'utiliser que ces tables, colonnes et valeurs)"), "", state.schemaMd.trim(), "");
+    if (state.ex.source) out.push(t("Source de l'exercice : {s} Les questions doivent rester cohérentes avec ces données fictives.", { s: SQLLibrary.sourceText(state.ex) }), "");
     out.push(t("## Demande de l'enseignant"));
     out.push(t("- Valeur du champ \"exercice\" : \"{id}\"", { id: ex.id }));
     out.push(t("- Titre du pack : {v}", { v: $("pTitre").value.trim() || t("(à proposer)") }));

@@ -551,7 +551,7 @@
               "CatCode|CodeCat|CodeCategorie|NumCat"
             ],
             "attributs": [
-              "CatIntitule|CatLibelle|IntituleCat|LibelleCat|CatIntitulé"
+              "CatIntitule|CatLibelle|IntituleCat|LibelleCat|CatIntitule"
             ]
           },
           {
@@ -585,7 +585,7 @@
               "NatCode|CodeNat|CodeNature|NumNat"
             ],
             "attributs": [
-              "NatIntitule|NatLibelle|IntituleNat|LibelleNat|NatIntitulé"
+              "NatIntitule|NatLibelle|IntituleNat|LibelleNat|NatIntitule"
             ]
           },
           {
@@ -623,7 +623,7 @@
                 "CatCode|CodeCat|CodeCategorie|NumCat"
               ],
               "attributs": [
-                "CatIntitule|CatLibelle|IntituleCat|LibelleCat|CatIntitulé"
+                "CatIntitule|CatLibelle|IntituleCat|LibelleCat|CatIntitule"
               ]
             },
             {
@@ -659,7 +659,7 @@
                 "NatCode|CodeNat|CodeNature|NumNat"
               ],
               "attributs": [
-                "NatIntitule|NatLibelle|IntituleNat|LibelleNat|NatIntitulé"
+                "NatIntitule|NatLibelle|IntituleNat|LibelleNat|NatIntitule"
               ]
             },
             {
@@ -726,7 +726,7 @@
               "PersNum|NumPers|NumPersonnel": "PERSONNEL"
             },
             "attributs": [
-              "DateEcheance|DateEch|Echeance|DateEchéance"
+              "DateEcheance|DateEch|Echeance|DateEcheance"
             ]
           },
           {
@@ -789,7 +789,7 @@
                 "PersNum|NumPers|NumPersonnel": "PERSONNEL"
               },
               "attributs": [
-                "DateEcheance|DateEch|Echeance|DateEchéance"
+                "DateEcheance|DateEch|Echeance|DateEcheance"
               ]
             },
             {
@@ -851,7 +851,7 @@
                 "PersNum|NumPers|NumPersonnel": "PERSONNEL"
               },
               "attributs": [
-                "DateEcheance|DateEch|Echeance|DateEchéance"
+                "DateEcheance|DateEch|Echeance|DateEcheance"
               ]
             },
             {
@@ -915,7 +915,7 @@
                 "PersNum|NumPers|NumPersonnel": "PERSONNEL"
               },
               "attributs": [
-                "DateEcheance|DateEch|Echeance|DateEchéance"
+                "DateEcheance|DateEch|Echeance|DateEcheance"
               ]
             },
             {
@@ -980,7 +980,7 @@
                 "PersNum|NumPers|NumPersonnel": "PERSONNEL"
               },
               "attributs": [
-                "DateEcheance|DateEch|Echeance|DateEchéance"
+                "DateEcheance|DateEch|Echeance|DateEcheance"
               ]
             },
             {
@@ -1044,7 +1044,7 @@
                 "PersNum|NumPers|NumPersonnel": "PERSONNEL"
               },
               "attributs": [
-                "DateEcheance|DateEch|Echeance|DateEchéance"
+                "DateEcheance|DateEch|Echeance|DateEcheance"
               ]
             },
             {
@@ -1107,7 +1107,7 @@
                 "PersNum|NumPers|NumPersonnel": "PERSONNEL"
               },
               "attributs": [
-                "DateEcheance|DateEch|Echeance|DateEchéance"
+                "DateEcheance|DateEch|Echeance|DateEcheance"
               ]
             },
             {
@@ -1170,7 +1170,7 @@
                 "PersNum|NumPers|NumPersonnel": "PERSONNEL"
               },
               "attributs": [
-                "DateEcheance|DateEch|Echeance|DateEchéance"
+                "DateEcheance|DateEch|Echeance|DateEcheance"
               ]
             },
             {

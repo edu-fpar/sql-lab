@@ -4,6 +4,12 @@
   "use strict";
   if (!global.I18N) return;
   global.I18N.add({
+    "Pour aller plus loin": "Para ir más lejos",
+    "Inspiré du sujet DCG UE8 session {a}. Données entièrement fictives.": "Inspirado en el examen DCG UE8, convocatoria {a}. Datos totalmente ficticios.",
+    "Inspiré du sujet DCG UE8 session {a}, dossier {d}. Données entièrement fictives.": "Inspirado en el examen DCG UE8, convocatoria {a}, parte {d}. Datos totalmente ficticios.",
+    "Inspiré du sujet DCG UE8 session {a}, dossiers {d}. Données entièrement fictives.": "Inspirado en el examen DCG UE8, convocatoria {a}, partes {d}. Datos totalmente ficticios.",
+    "Source : {s}": "Fuente: {s}",
+    "Source de l'exercice : {s} Les questions doivent rester cohérentes avec ces données fictives.": "Fuente del ejercicio: {s} Las preguntas deben ser coherentes con estos datos ficticios.",
     "comparaison de dates : la date s'écrit entre apostrophes, au format jj/mm/aaaa ou aaaa-mm-jj.": "comparación de fechas: la fecha va entre comillas simples, con el formato dd/mm/aaaa o aaaa-mm-dd.",
     "Je relie {a} et {b} en égalisant {x} et {y}.": "Uno {a} y {b} igualando {x} y {y}.",
     "Il s'agit d'ajouter des lignes calculées par une requête : INSERT INTO … SELECT. Je repère la table touchée : {t}. Une requête de mise à jour ne modifie qu'<strong>une seule table</strong>.": "Se trata de añadir filas calculadas por una consulta: INSERT INTO … SELECT. Localizo la tabla afectada: {t}. Una consulta de actualización modifica <strong>una sola tabla</strong>.",

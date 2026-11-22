@@ -559,3 +559,16 @@ a.btn, a.btn:hover { text-decoration: none; }
 
 /* énoncé long dans la fenêtre pas à pas : hauteur limitée, défilement */
 #cnEnonce { max-height: 4.6em; overflow-y: auto; padding-right: .3rem; }
+
+/* source de l'exercice, visible dans le titre du bloc Contexte */
+.ctx-source { display: block; margin-top: .15rem; font-size: .78rem; font-weight: 400; color: var(--muted); }
+.ctx-source:empty { display: none; }
+
+/* pour aller plus loin */
+.plus-loin { margin-top: .8rem; border: 1px solid color-mix(in srgb, #7c3aed 40%, var(--border)); border-radius: 10px; background: color-mix(in srgb, #7c3aed 7%, var(--surface)); padding: .45rem .75rem; }
+.plus-loin summary { cursor: pointer; font-weight: 700; color: #7c3aed; }
+.plus-loin p { margin: .35rem 0; line-height: 1.5; }
+.plus-loin ul { margin: .3rem 0; padding-left: 1.2rem; }
+.cn-note.cn-plus { border-color: color-mix(in srgb, #7c3aed 45%, var(--border)); background: color-mix(in srgb, #7c3aed 9%, var(--surface)); }
+.cn-note.cn-plus .cn-note-title { color: #7c3aed; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .plus-loin summary, :root:not([data-theme="light"]) .cn-note.cn-plus .cn-note-title { color: #b892ff; } }

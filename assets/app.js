@@ -5,6 +5,7 @@
   const tr = I18N.t, trn = I18N.n;
   I18N.add({
     "📖 Aide": "📖 Help",
+    "Pour aller plus loin": "Going further",
     "🎬 Correction commentée pas à pas": "🎬 Annotated step-by-step solution",
     "🎬 Construction commentée pas à pas": "🎬 Annotated step-by-step build",
     "Correction commentée pas à pas": "Annotated step-by-step solution",
@@ -658,7 +659,7 @@
     store.set("lastEx", exId);
     $("exercice").value = exId;
     $("contexte").textContent = state.ex.contexte || "";
-    $("source").textContent = state.ex.source || "";
+    $("source").textContent = SQLLibrary.sourceText(state.ex);
     $("todayNote").textContent = tr("Date du jour simulée : {d}", { d: frDate(state.ex.aujourdhui) });
     renderSchema();
     loadInlineDiagram();
@@ -844,7 +845,7 @@
     const n = ex.questions.filter((q) => !isIntro(q)).length;
     $("qIntro").innerHTML =
       `<p>${esc(ex.contexte || "")}</p>` +
-      (ex.source ? `<p class="muted small">${esc(ex.source)}</p>` : "") +
+      (ex.source ? `<p class="muted small">${esc(SQLLibrary.sourceText(ex))}</p>` : "") +
       `<h3>${tr("La base de données")}</h3>` +
       `<p>${tr("Elle contient {n} tables. Observez le diagramme : chaque flèche part d'une <i>#clé étrangère</i> et pointe vers la <u>clé primaire</u> de la table liée. C'est ce lien qui permet les jointures. Cliquez sur une table pour voir son contenu :", { n: state.schema.length })}</p>` +
       `<ul class="tables">${tables}</ul>` +
@@ -1143,14 +1144,20 @@
       $("correction").innerHTML = cineS + sols.map((sol, i) =>
         `<p class="muted small">${i === 0 ? tr("Correction") : sol.partiel ? tr("Réponse acceptée seulement en partie") : tr("Autre solution acceptée")}</p>` +
         `<div class="schema-text">${SQLSchemaCheck.toText(SQLSchemaCheck.solutionSchema(depart, sol), true).split("\n").map((l) => `<div>${l}</div>`).join("")}</div>`).join("") +
-        `<p class="muted small">${tr("Les noms peuvent varier : la vérification accepte les noms équivalents et reconnaît une table à sa clé primaire.")}</p>`;
+        `<p class="muted small">${tr("Les noms peuvent varier : la vérification accepte les noms équivalents et reconnaît une table à sa clé primaire.")}</p>` + plusLoin(q);
       return;
     }
     const blocks = [q.correction, ...(q.variantes || [])];
     const cine = window.SQLCinema && SQLCinema.plan(lines(q.correction), state.schema, q)
       ? `<button class="btn small cn-launch" type="button" data-cinema>${tr(q.cinema ? "🎬 Correction commentée pas à pas" : "🎬 Correction pas à pas")}</button>` : "";
     $("correction").innerHTML = cine + blocks.map((b, i) =>
-      `<p class="muted small">${i === 0 ? tr("Correction") : tr("Autre écriture possible")}</p><pre><code>${esc(lines(b))}</code></pre>`).join("");
+      `<p class="muted small">${i === 0 ? tr("Correction") : tr("Autre écriture possible")}</p><pre><code>${esc(lines(b))}</code></pre>`).join("") + plusLoin(q);
+  }
+
+  /** Encadré « Pour aller plus loin » (champ allerPlusLoin : texte avec **gras**, `code`, listes « - ») */
+  function plusLoin(q) {
+    if (!q.allerPlusLoin || !window.SQLCinema) return "";
+    return `<details class="plus-loin"><summary><i class="i i-microscope" aria-hidden="true"></i> ${tr("Pour aller plus loin")}</summary>${SQLCinema.mini(q.allerPlusLoin)}</details>`;
   }
 
   /** Copie l'adresse directe de la question affichée (avec la langue d'interface) */

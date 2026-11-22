@@ -108,6 +108,7 @@
       if (Array.isArray(raw.variantes)) q.variantes = raw.variantes.filter((v) => v && Array.isArray(v.tables));
       if (raw.indice) q.indice = str(raw.indice, MAX_TEXT);
       if (raw.annale) q.annale = str(raw.annale, 20);
+      if (typeof raw.allerPlusLoin === "string" && raw.allerPlusLoin.trim()) q.allerPlusLoin = str(raw.allerPlusLoin, MAX_TEXT);
       if (raw.cinema && typeof raw.cinema === "object" && !Array.isArray(raw.cinema)) {
         q.cinema = {};
         for (const [k, v] of Object.entries(raw.cinema)) if (/^\+?[a-z]+(\.\d+)?$/.test(k) && typeof v === "string") q.cinema[k] = str(v, MAX_TEXT);
@@ -123,6 +124,7 @@
     if (raw.indice) q.indice = str(raw.indice, MAX_TEXT);
     if (raw.annale) q.annale = str(raw.annale, 20);
     // commentaires du mode cinéma remplacés par l'enseignant : { phase: "texte" } ou { "phase.n": "texte" }
+    if (typeof raw.allerPlusLoin === "string" && raw.allerPlusLoin.trim()) q.allerPlusLoin = str(raw.allerPlusLoin, MAX_TEXT);
     if (raw.cinema && typeof raw.cinema === "object" && !Array.isArray(raw.cinema)) {
       q.cinema = {};
       for (const [k, v] of Object.entries(raw.cinema)) if (/^\+?[a-z]+(\.\d+)?$/.test(k) && typeof v === "string") q.cinema[k] = str(v, MAX_TEXT);

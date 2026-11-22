@@ -323,12 +323,12 @@
     },
     {
       "id": "q15",
-      "cinema": {"+tables":"Le kilométrage est dans TOURNEE, mais le véhicule n'est pas lié à la tournée : il est lié au chauffeur pour une journée. Le chemin est donc TOURNEE → EFFECTUER → AFFECTER, et EFFECTUER rejoint AFFECTER par « même chauffeur, même jour ».","+select":"Un alias qui contient des espaces ou une apostrophe s'écrit entre **guillemets doubles** (\"Numéro d'immatriculation\"). Les apostrophes simples sont réservées aux valeurs (textes, dates).","+jointures.2":"Vérification : sans `E.DateJour = A.DateJour`, JP-451-JG totalise 162 165 km au lieu de 7 587, car chaque tournée est comptée pour toutes les affectations du chauffeur. Un total aberrant signale presque toujours une jointure incomplète.","+groupe.2":"« **Au moins** 5000 » s'écrit `>= 5000`. GH-302-KL a parcouru exactement 5000 km en mars : avec `> 5000`, il disparaîtrait du résultat (4 véhicules attendus)."},
+      "cinema": {"+tables":"Le kilométrage est dans TOURNEE, mais le véhicule n'est pas lié à la tournée : il est lié au chauffeur pour une journée. Le chemin est donc TOURNEE → EFFECTUER → AFFECTER, et EFFECTUER rejoint AFFECTER par « même chauffeur, même jour ».","+select":"`AS` donne un nom lisible aux colonnes calculées. Choisissez un alias **simple** : un seul mot, sans espace, accent ni apostrophe (`NumImmatriculation`, `KmMars`). Sinon il faut l'entourer de guillemets doubles, source d'erreurs fréquentes. Le nom des colonnes n'est pas vérifié par l'application : seul le contenu compte.","+jointures.2":"Vérification : sans `E.DateJour = A.DateJour`, JP-451-JG totalise 162 165 km au lieu de 7 587, car chaque tournée est comptée pour toutes les affectations du chauffeur. Un total aberrant signale presque toujours une jointure incomplète.","+groupe.2":"« **Au moins** 5000 » s'écrit `>= 5000`. GH-302-KL a parcouru exactement 5000 km en mars : avec `> 5000`, il disparaîtrait du résultat (4 véhicules attendus)."},
       "theme": "Jointures et regroupements",
       "annale": "2018",
       "enonce": "Afficher le nombre de kilomètres théoriques effectués par véhicule au cours du mois de mars 2018. Seuls les véhicules ayant parcouru au moins 5000 km devront être affichés. La requête devra produire le tableau suivant : Numéro d'immatriculation | Kms théoriques parcourus en mars (par exemple XV-447-DP 6205 ; ER-784-AJ 5402 ; JP-451-JG 7587…).",
       "correction": [
-        "SELECT A.NumImmat AS \"Numéro d'immatriculation\", SUM(T.NbKMTheor) AS \"Kms théoriques parcourus en mars\"",
+        "SELECT A.NumImmat AS NumImmatriculation, SUM(T.NbKMTheor) AS KmMars",
         "FROM TOURNEE T, EFFECTUER E, AFFECTER A",
         "WHERE T.CodeTourn = E.CodeTourn",
         "AND E.NumSal = A.NumSal",
@@ -339,7 +339,7 @@
       ],
       "variantes": [
         [
-          "SELECT A.NumImmat AS \"Numéro d'immatriculation\", SUM(T.NbKMTheor) AS \"Kms théoriques parcourus en mars\"",
+          "SELECT A.NumImmat AS NumImmatriculation, SUM(T.NbKMTheor) AS KmMars",
           "FROM TOURNEE T",
           "INNER JOIN EFFECTUER E ON T.CodeTourn = E.CodeTourn",
           "INNER JOIN AFFECTER A ON E.NumSal = A.NumSal AND E.DateJour = A.DateJour",
@@ -349,7 +349,7 @@
           "HAVING SUM(T.NbKMTheor) >= 5000;"
         ]
       ],
-      "indice": "Le kilométrage est dans TOURNEE, la tournée effectuée dans EFFECTUER et le véhicule dans AFFECTER : EFFECTUER et AFFECTER se relient sur le chauffeur ET sur la date. « Au moins 5000 » s'écrit >= 5000 (un véhicule a fait exactement 5000 km). Un alias contenant des espaces ou une apostrophe s'écrit entre guillemets doubles : AS \"Numéro d'immatriculation\" (les crochets [ ] du corrigé sont une écriture Access)."
+      "indice": "Le kilométrage est dans TOURNEE, la tournée effectuée dans EFFECTUER et le véhicule dans AFFECTER : EFFECTUER et AFFECTER se relient sur le chauffeur ET sur la date. « Au moins 5000 » s'écrit >= 5000 (un véhicule a fait exactement 5000 km). Un alias contenant des espaces ou une apostrophe s'écrit entre guillemets doubles : AS NumImmatriculation (les crochets [ ] du corrigé sont une écriture Access)."
     },
     {
       "id": "q16",

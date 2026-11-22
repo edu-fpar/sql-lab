@@ -22,6 +22,7 @@
   const trn = (n, one, many, v) => tr((I18N.lang === "fr" ? n > 1 : n !== 1) ? many : one, { n, ...(v || {}) });
   I18N.add({
     "Point de méthode": "Method tip",
+    "Pour aller plus loin": "Going further",
     "comparaison de dates : la date s'écrit entre apostrophes, au format jj/mm/aaaa ou aaaa-mm-jj.": "date comparison: the date goes between quotes, as dd/mm/yyyy or yyyy-mm-dd.",
     "Je relie {a} et {b} en égalisant {x} et {y}.": "I link {a} and {b} by matching {x} and {y}.",
     "Il s'agit d'ajouter des lignes calculées par une requête : INSERT INTO … SELECT. Je repère la table touchée : {t}. Une requête de mise à jour ne modifie qu'<strong>une seule table</strong>.": "The task is to add rows computed by a query: INSERT INTO … SELECT. I identify the table affected: {t}. An update query changes <strong>only one table</strong>.",
@@ -874,6 +875,8 @@
    * Texte brut, avec **gras**, `code` et listes « - ».
    */
   function override(out, q) {
+    // « Pour aller plus loin » (champ allerPlusLoin) : à la dernière étape
+    if (q && typeof q.allerPlusLoin === "string" && q.allerPlusLoin.trim() && out.steps.length) out.steps[out.steps.length - 1].plus = mini(q.allerPlusLoin);
     const over = q && q.cinema;
     if (!over || typeof over !== "object") return;
     for (const [k, v] of Object.entries(over)) {
@@ -1235,7 +1238,8 @@
       const st = P.steps[this.i];
       const els = this.els;
       els.comment.innerHTML = `<h3>${esc(st.title)}</h3><div>${st.text}</div>` +
-        (st.notes ? `<aside class="cn-note"><p class="cn-note-title"><i class="i i-lightbulb" aria-hidden="true"></i> ${esc(tr("Point de méthode"))}</p>${st.notes}</aside>` : "");
+        (st.notes ? `<aside class="cn-note"><p class="cn-note-title"><i class="i i-lightbulb" aria-hidden="true"></i> ${esc(tr("Point de méthode"))}</p>${st.notes}</aside>` : "") +
+        (st.plus ? `<aside class="cn-note cn-plus"><p class="cn-note-title"><i class="i i-microscope" aria-hidden="true"></i> ${esc(tr("Pour aller plus loin"))}</p>${st.plus}</aside>` : "");
       els.sql.innerHTML = P.kind === "schema" ? renderSchemaText(st) : renderSql(P, st);
       if (st.schema) this.diagram.load(st.schema, null, "cinema-schema");
       els.count.textContent = `${this.i + 1} / ${P.steps.length}`;
@@ -1313,5 +1317,5 @@
     }
   }
 
-  global.SQLCinema = { plan, schemaPlan, build, masks, statements, renderSql, renderSchemaText, Player };
+  global.SQLCinema = { plan, schemaPlan, build, masks, statements, renderSql, renderSchemaText, Player, mini };
 })(typeof window !== "undefined" ? window : globalThis);

@@ -124,6 +124,19 @@ initSqlJs().then((SQL) => {
     for (const p of checkCinema(q, dschema)) { console.log(`✗ ${q.id} cinema : ${p}`); fails++; }
   }
 
+  // noms simples pour les étudiants : identifiants sans accent ni espace, pas de mot réservé du SQL,
+  // pas d'alias entre guillemets ou crochets dans les corrections
+  const RESERVES = new Set("ADD ALL ALTER AND AS ASC BETWEEN BY CASE CHECK COLUMN CREATE CROSS DATE DAY DEFAULT DELETE DESC DISTINCT DROP ELSE END EXISTS FROM FULL GROUP HAVING IN INDEX INNER INSERT INTO IS JOIN KEY LEFT LIKE LIMIT MONTH NOT NULL ON OR ORDER OUTER PRIMARY REFERENCES RIGHT SELECT SET TABLE THEN TIME TO UNION UNIQUE UPDATE USER VALUES VIEW WHERE YEAR".split(" "));
+  const nomOk = (n) => /^[A-Za-z_][A-Za-z0-9_]*$/.test(n) && !RESERVES.has(n.toUpperCase());
+  for (const t of dschema) {
+    if (!nomOk(t.name)) { console.log(`✗ nom de table à simplifier : ${t.name}`); fails++; }
+    for (const c of t.cols) if (!nomOk(c.name)) { console.log(`✗ nom de colonne à simplifier : ${t.name}.${c.name}`); fails++; }
+  }
+  for (const q of data.questions) {
+    const sqls = [q.correction, ...(q.variantes || [])].filter((x) => typeof x === "string" || Array.isArray(x)).map((x) => [].concat(x).join("\n"));
+    for (const s of sqls) if (/\bAS\s*("|\[|`)/i.test(s)) { console.log(`✗ ${q.id} : alias entre guillemets ou crochets (préférer un alias simple)`); fails++; break; }
+  }
+
   for (const q of data.questions) {
     if (q.type === "schema") { fails += testSchema(q, base); continue; }
     if (q.type === "processus") { fails += testProcess(q); continue; }
