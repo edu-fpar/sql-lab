@@ -1,4 +1,4 @@
-# 🔬 Academic, researcher
+# Academic, researcher
 
 ## Cite this software
 APA style:

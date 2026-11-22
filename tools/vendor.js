@@ -41,3 +41,4 @@ for (const [dest, src] of Object.entries({ ...FILES, ...LICENCES })) {
   if (dest === "docsify/vue.css") fs.writeFileSync(to, fs.readFileSync(to, "utf8").replace(/@import url\([^)]*fonts\.googleapis[^)]*\);?/g, ""));
   console.log("lib/" + dest);
 }
+require("./icons.js").build();

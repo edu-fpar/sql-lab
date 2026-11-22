@@ -1,11 +1,11 @@
 - [Home](en/)
 - **By profile**
-  - [🎓 Student](en/profiles/student)
-  - [🧑‍🏫 Teacher, trainer](en/profiles/teacher)
-  - [🏫 Institution](en/profiles/institution)
-  - [🔬 Academic, researcher](en/profiles/researcher)
-  - [🏢 EdTech, publisher](en/profiles/edtech)
-  - [🛠 Developer](en/profiles/developer)
+  - [<i class="i i-graduation-cap"></i> Student](en/profiles/student)
+  - [<i class="i i-presentation"></i> Teacher, trainer](en/profiles/teacher)
+  - [<i class="i i-school"></i> Institution](en/profiles/institution)
+  - [<i class="i i-microscope"></i> Academic, researcher](en/profiles/researcher)
+  - [<i class="i i-building-2"></i> EdTech, publisher](en/profiles/edtech)
+  - [<i class="i i-code-xml"></i> Developer](en/profiles/developer)
 - **By topic**
   - [Queries and checking](en/topics/queries)
   - [Relational schema](en/topics/schema)

@@ -1,4 +1,4 @@
-# 🛠 Developer, contributor
+# Developer, contributor
 
 ## Run it locally
 ```

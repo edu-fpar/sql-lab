@@ -1,6 +1,6 @@
 # Correction pas à pas
 
-Dans la correction d'une question SQL, le bouton **🎬 Correction pas à pas** rejoue le
+Dans la correction d'une question SQL, le bouton **<i class="i i-clapperboard"></i> Correction pas à pas** rejoue le
 raisonnement, dans l'ordre où on le mène (qui n'est pas l'ordre d'écriture) : tables évidentes →
 tables de passage → alias → colonnes à afficher → jointures → filtres → regroupement → tri →
 résultat. Une frise montre où l'on en est (les phases inutiles pour la requête sont barrées), le
@@ -10,7 +10,7 @@ mise à jour ont leur propre déroulé : table, valeurs, lignes visées, résult
 
 ![Correction pas à pas : la jointure en cours est animée sur le schéma](../img/fr/cinema-sql.png)
 
-Les questions de **schéma** ont le même mode (**🎬 Construction pas à pas**) : règles de gestion →
+Les questions de **schéma** ont le même mode (**<i class="i i-clapperboard"></i> Construction pas à pas**) : règles de gestion →
 ce qui ne tient plus (colonne barrée) → nouvelles tables → clés étrangères (relation un à
 plusieurs) → tables de liaison (plusieurs à plusieurs, clé composée puis flèches) → schéma final.
 Le diagramme évolue à chaque étape.

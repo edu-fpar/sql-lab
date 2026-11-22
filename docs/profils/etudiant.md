@@ -1,4 +1,4 @@
-# 🎓 Étudiant
+# Étudiant
 
 ## Me tester sur le SQL
 1. Ouvrez l'[application](https://edu-fpar.github.io/sql-lab/) et choisissez un exercice
@@ -21,7 +21,7 @@ Voir [Requêtes et correction automatique](themes/requetes).
   la réponse, et un double-clic sur une table du diagramme montre son contenu.
 
 ## Revoir une correction pas à pas
-Dans **Correction**, le bouton **🎬 Correction pas à pas** rejoue le raisonnement :
+Dans **Correction**, le bouton **<i class="i i-clapperboard"></i> Correction pas à pas** rejoue le raisonnement :
 
 - d'abord les tables qui contiennent l'information ;
 - puis les tables de passage, les alias, les colonnes à afficher, les jointures, les filtres,
@@ -33,7 +33,7 @@ par étape ou lancer la lecture automatique. Voir [Correction pas à pas](themes
 ## M'entraîner au schéma relationnel et aux processus
 - **Questions de schéma** : faites évoluer le schéma de départ (ajoutez des tables, déplacez des
   attributs, tracez les clés étrangères en tirant le rond ●), puis **Vérifier le schéma**.
-  Le bouton **🎬 Construction pas à pas** de la correction montre comment raisonner.
+  Le bouton **<i class="i i-clapperboard"></i> Construction pas à pas** de la correction montre comment raisonner.
 - **Questions de processus** : dessinez le schéma événements-résultats (événements, opérations,
   synchronisations). Les synchronisations sont vérifiées automatiquement ; une liste
   d'auto-évaluation vous aide à comparer le reste avec le corrigé.
@@ -44,7 +44,7 @@ Sur un autre ordinateur, ou en navigation privée, vous repartez de zéro. Dans 
 SCORM), c'est la plateforme qui garde votre progression.
 
 ## Faire les questions données par mon professeur
-Votre professeur vous donne un **lien** (ouvrez-le simplement) ou un **fichier** (menu ☰ →
-*Importer un fichier*). Ses questions s'ajoutent à la fin de la liste (groupe ★).
+Votre professeur vous donne un **lien** (ouvrez-le simplement) ou un **fichier** (menu <i class="i i-menu"></i> →
+*Importer un fichier*). Ses questions s'ajoutent à la fin de la liste (groupe <i class="i i-star"></i>).
 
 ![L'écran d'une question](../img/fr/question.png)

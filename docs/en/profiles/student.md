@@ -1,4 +1,4 @@
-# 🎓 Student
+# Student
 
 ## Test myself on SQL
 1. Open the [app](https://edu-fpar.github.io/sql-lab/?lang=en#demo-en/intro) and choose an
@@ -20,7 +20,7 @@ updates, then schema and process design. See [Queries and automatic checking](en
   double-click on a table of the diagram shows its content.
 
 ## Replay a solution step by step
-In **Solution**, the **🎬 Step-by-step solution** button replays the reasoning:
+In **Solution**, the **<i class="i i-clapperboard"></i> Step-by-step solution** button replays the reasoning:
 
 - first the tables that hold the information;
 - then linking tables, aliases, columns to display, joins, filters, grouping and sorting.
@@ -30,7 +30,7 @@ autoplay. See [Step-by-step solutions](en/topics/step-by-step).
 
 ## Practise schema and process design
 - **Schema questions**: evolve the starting schema (add tables, move attributes, draw foreign
-  keys by dragging the ● handle), then **Check the schema**. The **🎬 Step-by-step build** button
+  keys by dragging the ● handle), then **Check the schema**. The **<i class="i i-clapperboard"></i> Step-by-step build** button
   in the solution shows how to reason.
 - **Process questions**: draw the event-driven process diagram (events, operations,
   synchronisations). Synchronisations are checked automatically; a self-assessment checklist
@@ -42,7 +42,7 @@ in private browsing, you start from scratch. In Moodle (SCORM package), the plat
 progress.
 
 ## Do the questions my teacher gave me
-Your teacher gives you a **link** (just open it) or a **file** (☰ menu → *Import a file*). The
-questions are added at the end of the list (★ group).
+Your teacher gives you a **link** (just open it) or a **file** (<i class="i i-menu"></i> menu → *Import a file*). The
+questions are added at the end of the list (<i class="i i-star"></i> group).
 
 ![The question screen](../../img/en/question.png)

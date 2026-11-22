@@ -1,4 +1,4 @@
-# 🏢 EdTech, éditeur, organisme de formation
+# EdTech, éditeur, organisme de formation
 
 ## L'intégrer dans mon logiciel ou ma plateforme
 Sur le plan technique, l'intégration est simple :

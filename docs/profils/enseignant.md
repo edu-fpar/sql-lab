@@ -1,4 +1,4 @@
-# 🧑‍🏫 Enseignant, formateur
+# Enseignant, formateur
 
 ## L'utiliser en cours tel quel
 Il n'y a rien à installer. Donnez à vos étudiants le lien de l'application, ou un lien direct
@@ -11,7 +11,7 @@ L'application marche sur ordinateur et sur téléphone.
 
 ## Projeter une correction en classe
 La **correction pas à pas** est faite pour être projetée. On avance au clavier (← →), on
-discute de chaque étape, et la frise montre où l'on en est. Le diagramme agrandi (bouton ⤢)
+discute de chaque étape, et la frise montre où l'on en est. Le diagramme agrandi (bouton <i class="i i-maximize-2"></i>)
 et le déplacement des tables aident à expliquer les jointures.
 
 ## Ajouter des questions

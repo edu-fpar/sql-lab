@@ -26,7 +26,7 @@ Un enseignant peut ajouter ses propres questions sur une base existante, sans to
      (GitHub, Gist « raw »… : le site doit autoriser CORS). Les étudiants récupèrent la dernière
      version à chaque ouverture du lien.
 
-Côté étudiant, les questions importées s'ajoutent en fin de liste (groupe ★), sont conservées dans
+Côté étudiant, les questions importées s'ajoutent en fin de liste (groupe <i class="i i-star"></i>), sont conservées dans
 le navigateur et peuvent être retirées. Un pack de même titre et même auteur remplace le précédent.
 Les corrections importées ne s'exécutent que dans la base en mémoire du navigateur, et tous les
 textes sont affichés comme du texte : un fichier malveillant ne peut rien abîmer.

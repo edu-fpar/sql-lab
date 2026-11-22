@@ -1,4 +1,4 @@
-# 🧑‍🏫 Teacher, trainer
+# Teacher, trainer
 
 ## Use it in class as is
 There is nothing to install. Give your students the link to the app, or a direct link to a
@@ -11,7 +11,7 @@ It works on computers and phones.
 
 ## Project a solution in class
 The **step-by-step solution** is designed to be projected. You move with the keyboard (← →),
-discuss each step, and the timeline shows where you are. The full-size diagram (⤢) and
+discuss each step, and the timeline shows where you are. The full-size diagram (<i class="i i-maximize-2"></i>) and
 draggable tables help explain joins.
 
 ## Add questions

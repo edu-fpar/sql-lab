@@ -1,4 +1,4 @@
-# 🏢 EdTech, publisher, training company
+# EdTech, publisher, training company
 
 ## Integrate it into my software or platform
 Technically, integration is simple:

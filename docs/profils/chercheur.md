@@ -1,4 +1,4 @@
-# 🔬 Universitaire, chercheur
+# Universitaire, chercheur
 
 ## Citer ce logiciel
 Format APA :

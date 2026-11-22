@@ -19,12 +19,12 @@ compte, aucune donnée envoyée. L'application propose :
 ## Qui êtes-vous ?
 
 <div class="cards">
-  <a href="#/profils/etudiant"><b>🎓 Étudiant</b><span>Me tester sur le SQL, comprendre mes erreurs, revoir une correction pas à pas.</span></a>
-  <a href="#/profils/enseignant"><b>🧑‍🏫 Enseignant, formateur</b><span>Utiliser en cours, ajouter des questions, ma propre base, noter dans Moodle.</span></a>
-  <a href="#/profils/etablissement"><b>🏫 Établissement</b><span>Déployer dans le LMS, héberger en interne, conformité RGPD.</span></a>
-  <a href="#/profils/chercheur"><b>🔬 Universitaire, chercheur</b><span>Citer ce logiciel, l'utiliser dans une expérimentation, l'adapter.</span></a>
-  <a href="#/profils/edtech"><b>🏢 EdTech, éditeur</b><span>L'intégrer dans mon logiciel, licence commerciale, exercices sur mesure.</span></a>
-  <a href="#/profils/developpeur"><b>🛠 Développeur</b><span>Lancer en local, ajouter un exercice, traduire, signaler un problème.</span></a>
+  <a href="#/profils/etudiant"><b><i class="i i-graduation-cap"></i> Étudiant</b><span>Me tester sur le SQL, comprendre mes erreurs, revoir une correction pas à pas.</span></a>
+  <a href="#/profils/enseignant"><b><i class="i i-presentation"></i> Enseignant, formateur</b><span>Utiliser en cours, ajouter des questions, ma propre base, noter dans Moodle.</span></a>
+  <a href="#/profils/etablissement"><b><i class="i i-school"></i> Établissement</b><span>Déployer dans le LMS, héberger en interne, conformité RGPD.</span></a>
+  <a href="#/profils/chercheur"><b><i class="i i-microscope"></i> Universitaire, chercheur</b><span>Citer ce logiciel, l'utiliser dans une expérimentation, l'adapter.</span></a>
+  <a href="#/profils/edtech"><b><i class="i i-building-2"></i> EdTech, éditeur</b><span>L'intégrer dans mon logiciel, licence commerciale, exercices sur mesure.</span></a>
+  <a href="#/profils/developpeur"><b><i class="i i-code-xml"></i> Développeur</b><span>Lancer en local, ajouter un exercice, traduire, signaler un problème.</span></a>
 </div>
 
 ## Par thème

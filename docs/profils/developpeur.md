@@ -1,4 +1,4 @@
-# 🛠 Développeur, contributeur
+# Développeur, contributeur
 
 ## Le lancer en local
 ```

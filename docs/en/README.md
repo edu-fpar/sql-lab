@@ -18,12 +18,12 @@ browser**: nothing to install, no account, no data sent anywhere. It offers:
 ## Who are you?
 
 <div class="cards">
-  <a href="#/en/profiles/student"><b>🎓 Student</b><span>Test myself on SQL, understand my mistakes, replay a solution step by step.</span></a>
-  <a href="#/en/profiles/teacher"><b>🧑‍🏫 Teacher, trainer</b><span>Use it in class, add questions, use my own database, grade in Moodle.</span></a>
-  <a href="#/en/profiles/institution"><b>🏫 Institution</b><span>Deploy in the LMS, host in-house, GDPR compliance.</span></a>
-  <a href="#/en/profiles/researcher"><b>🔬 Academic, researcher</b><span>Cite this software, use it in a study, adapt it.</span></a>
-  <a href="#/en/profiles/edtech"><b>🏢 EdTech, publisher</b><span>Integrate it into my product, commercial license, custom exercises.</span></a>
-  <a href="#/en/profiles/developer"><b>🛠 Developer</b><span>Run it locally, add an exercise, translate, report a problem.</span></a>
+  <a href="#/en/profiles/student"><b><i class="i i-graduation-cap"></i> Student</b><span>Test myself on SQL, understand my mistakes, replay a solution step by step.</span></a>
+  <a href="#/en/profiles/teacher"><b><i class="i i-presentation"></i> Teacher, trainer</b><span>Use it in class, add questions, use my own database, grade in Moodle.</span></a>
+  <a href="#/en/profiles/institution"><b><i class="i i-school"></i> Institution</b><span>Deploy in the LMS, host in-house, GDPR compliance.</span></a>
+  <a href="#/en/profiles/researcher"><b><i class="i i-microscope"></i> Academic, researcher</b><span>Cite this software, use it in a study, adapt it.</span></a>
+  <a href="#/en/profiles/edtech"><b><i class="i i-building-2"></i> EdTech, publisher</b><span>Integrate it into my product, commercial license, custom exercises.</span></a>
+  <a href="#/en/profiles/developer"><b><i class="i i-code-xml"></i> Developer</b><span>Run it locally, add an exercise, translate, report a problem.</span></a>
 </div>
 
 ## By topic

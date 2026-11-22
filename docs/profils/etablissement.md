@@ -1,4 +1,4 @@
-# 🏫 Établissement, service numérique
+# Établissement, service numérique
 
 ## Déployer dans le LMS
 - **Paquet SCORM 1.2**, un par exercice, compatible avec Moodle, Chamilo et les autres LMS

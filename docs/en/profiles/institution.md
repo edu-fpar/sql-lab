@@ -1,4 +1,4 @@
-# 🏫 Institution, IT department
+# Institution, IT department
 
 ## Deploy in the LMS
 - **SCORM 1.2 package**, one per exercise, compatible with Moodle, Chamilo and other SCORM LMSs.

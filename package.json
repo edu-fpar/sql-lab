@@ -12,6 +12,7 @@
     "codemirror": "5.65.16",
     "docsify": "4.13.1",
     "fflate": "0.8.2",
+    "lucide-static": "0.469.0",
     "sql.js": "1.10.3"
   }
 }

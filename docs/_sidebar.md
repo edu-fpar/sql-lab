@@ -1,11 +1,11 @@
 - [Accueil](/)
 - **Par profil**
-  - [🎓 Étudiant](profils/etudiant)
-  - [🧑‍🏫 Enseignant, formateur](profils/enseignant)
-  - [🏫 Établissement](profils/etablissement)
-  - [🔬 Universitaire, chercheur](profils/chercheur)
-  - [🏢 EdTech, éditeur](profils/edtech)
-  - [🛠 Développeur](profils/developpeur)
+  - [<i class="i i-graduation-cap"></i> Étudiant](profils/etudiant)
+  - [<i class="i i-presentation"></i> Enseignant, formateur](profils/enseignant)
+  - [<i class="i i-school"></i> Établissement](profils/etablissement)
+  - [<i class="i i-microscope"></i> Universitaire, chercheur](profils/chercheur)
+  - [<i class="i i-building-2"></i> EdTech, éditeur](profils/edtech)
+  - [<i class="i i-code-xml"></i> Développeur](profils/developpeur)
 - **Par thème**
   - [Requêtes et correction](themes/requetes)
   - [Schéma relationnel](themes/schema)

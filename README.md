@@ -181,7 +181,7 @@ se dessine dans l'application puis se recopie depuis le brouillon (ou s'écrit d
 
 ## Correction pas à pas (« mode cinéma »)
 
-Dans la correction d'une question SQL, le bouton **🎬 Correction pas à pas** rejoue le
+Dans la correction d'une question SQL, le bouton **Correction pas à pas** rejoue le
 raisonnement, dans l'ordre où on le mène (qui n'est pas l'ordre d'écriture) : tables évidentes →
 tables de passage → alias → colonnes à afficher → jointures → filtres → regroupement → tri →
 résultat. Une frise montre où l'on en est (les phases inutiles pour la requête sont barrées), le
@@ -191,7 +191,7 @@ mise à jour ont leur propre déroulé : table, valeurs, lignes visées, résult
 
 ![Correction pas à pas : la jointure en cours est animée sur le schéma](docs/img/fr/cinema-sql.png)
 
-Les questions de **schéma** ont le même mode (**🎬 Construction pas à pas**) : règles de gestion →
+Les questions de **schéma** ont le même mode (**Construction pas à pas**) : règles de gestion →
 ce qui ne tient plus (colonne barrée) → nouvelles tables → clés étrangères (relation un à
 plusieurs) → tables de liaison (plusieurs à plusieurs, clé composée puis flèches) → schéma final.
 Le diagramme évolue à chaque étape.
@@ -346,7 +346,7 @@ puis ouvrir http://localhost:8765. UwAmp convient aussi.
 
 Le dossier `docs/` est un site [docsify](https://docsify.js.org) (embarqué dans `lib/docsify`, sans CDN) :
 guide par profil, par thème et référence, en français et en anglais (`docs/en/`). Il est servi
-par GitHub Pages à `/sql-lab/docs/` et accessible depuis le bouton **📖 Aide** de l'application.
+par GitHub Pages à `/sql-lab/docs/` et accessible depuis le bouton **Aide** de l'application.
 
 ## Captures d'écran
 
