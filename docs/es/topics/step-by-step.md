@@ -11,6 +11,6 @@ nada.
 - **Presentación**: una línea de tiempo de pasos, un diagrama animado, la consulta o el esquema
   construidos progresivamente, reproducción automática.
 
-![Solución paso a paso de una consulta](../../img/en/cinema-sql.png)
+![Solución paso a paso de una consulta](../../img/es/cinema-sql.png)
 
-![Construcción del esquema paso a paso](../../img/en/cinema-schema.png)
+![Construcción del esquema paso a paso](../../img/es/cinema-schema.png)

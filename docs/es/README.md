@@ -15,7 +15,7 @@ enviar datos a ningún sitio. Ofrece:
 - un espacio del profesor para crear preguntas con IA, usar tu propia base de datos y exportar
   a SCORM.
 
-![Una pregunta: enunciado, editor, resultado comparado con el esperado y diagrama del esquema](../img/en/question.png)
+![Una pregunta: enunciado, editor, resultado comparado con el esperado y diagrama del esquema](../img/es/question.png)
 
 ## ¿Quién eres?
 

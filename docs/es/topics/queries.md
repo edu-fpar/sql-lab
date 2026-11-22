@@ -12,8 +12,8 @@
 - **Fechas estilo examen** en SQLite: `YEAR()`, `MONTH()`, `DATEDIFF()`, `NOW()` («hoy»
   simulado), `'2025-03-15'`, `'15/06/2024'`, `#15/06/2024#`.
 
-![Una pregunta resuelta](../../img/en/question.png)
+![Una pregunta resuelta](../../img/es/question.png)
 
-![Un diagnóstico de error](../../img/en/diagnostic.png)
+![Un diagnóstico de error](../../img/es/diagnostic.png)
 
-![Fechas estilo examen](../../img/en/dates.png)
+![Fechas estilo examen](../../img/es/dates.png)

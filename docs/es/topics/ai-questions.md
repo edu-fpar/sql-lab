@@ -12,4 +12,4 @@
 - **Preguntas de esquema**: se dibujan en el editor, y la plantilla de corrección se deduce del
   dibujo.
 
-![El espacio del profesor](../../img/en/creation.png)
+![El espacio del profesor](../../img/es/creation.png)

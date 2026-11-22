@@ -8,4 +8,4 @@ emisión, sincronizaciones.
 - El resto se compara con la solución modelo mediante una lista de autoevaluación.
 - El diagrama se puede exportar en PNG o SVG.
 
-![Una pregunta de procesos comprobada](../../img/en/processus.png)
+![Una pregunta de procesos comprobada](../../img/es/processus.png)

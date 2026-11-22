@@ -350,7 +350,7 @@ par GitHub Pages à `/sql-lab/docs/` et accessible depuis le bouton **Aide** de 
 
 ## Captures d'écran
 
-`node tools/captures.js fr` (ou `en`) régénère les captures de `docs/img/` avec Edge ou Chrome
+`node tools/captures.js fr` (ou `en`, `es`) régénère les captures de `docs/img/` avec Edge ou Chrome
 sans fenêtre, à partir du serveur local (profil temporaire, rien n'est écrit dans le navigateur).
 
 ## Publier sur GitHub Pages

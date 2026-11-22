@@ -52,4 +52,4 @@ Los comentarios de la solución paso a paso se generan automáticamente. Para su
 añade un campo a la pregunta: `"cinema": { "passages": "Tu explicación…" }`. Una pregunta
 también puede aceptar varias soluciones (`variantes`).
 
-![La solución paso a paso, para proyectar en clase](../../img/en/cinema-sql.png)
+![La solución paso a paso, para proyectar en clase](../../img/es/cinema-sql.png)

@@ -58,4 +58,4 @@ guarda tu progreso.
 Tu profesor te da un **enlace** (basta con abrirlo) o un **archivo** (<i class="i i-menu"></i> menú → *Importar un archivo*). Las
 preguntas se añaden al final de la lista (grupo <i class="i i-star"></i>).
 
-![La pantalla de una pregunta](../../img/en/question.png)
+![La pantalla de una pregunta](../../img/es/question.png)

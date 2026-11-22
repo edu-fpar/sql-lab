@@ -8,6 +8,6 @@
   compara la *estructura*: tablas, claves, referencias, atributos que hay que retirar. Se aceptan
   nombres equivalentes, y una tabla se reconoce por su clave primaria.
 
-![El diagrama a pantalla completa](../../img/en/diagramme.png)
+![El diagrama a pantalla completa](../../img/es/diagramme.png)
 
-![Una pregunta de esquema](../../img/en/schema.png)
+![Una pregunta de esquema](../../img/es/schema.png)

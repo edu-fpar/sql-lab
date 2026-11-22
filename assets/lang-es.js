@@ -4,6 +4,7 @@
   "use strict";
   if (!global.I18N) return;
   global.I18N.add({
+    "· {n} tables · {titre}": "· {n} tablas · {titre}",
     "{t} questions": "{t} preguntas",
     "Question {n} / {t}": "Pregunta {n} / {t}",
     "Votre résultat contient {n} colonne(s) de plus que demandé : ce n'est pas une erreur, mais tenez-vous en à ce qui est demandé.": "Tu resultado contiene {n} columna(s) más de las pedidas: no es un error, pero limítate a lo que se pide.",

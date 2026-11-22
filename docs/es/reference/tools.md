@@ -52,9 +52,8 @@ modo que la documentación tampoco hace llamadas externas.
 
 ## Capturas de pantalla
 
-`node tools/captures.js en` (o `fr`) regenera `docs/img/en/` con Edge o Chrome sin interfaz, a
-partir del servidor local (perfil temporal, no se escribe nada en tu navegador). La
-documentación en español usa las capturas en inglés.
+`node tools/captures.js es` (o `fr`, `en`) regenera `docs/img/es/` con Edge o Chrome sin
+interfaz, a partir del servidor local (perfil temporal, no se escribe nada en tu navegador).
 
 ## Publicar en GitHub Pages
 

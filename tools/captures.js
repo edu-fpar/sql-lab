@@ -115,7 +115,7 @@ async function main() {
     }
 
     // 9. espace enseignant
-    await go(`${BASE}create.html`);
+    await go(`${BASE}create.html#${S.ex}`);
     await shot("creation");
   } finally {
     proc.kill();
@@ -144,6 +144,18 @@ const SCENES = {
       "AND RENTAL.RentalId = RENTAL_LINE.RentalId", "AND CategoryId = 2;"].join("\n"),
     date: "q06",
     dateSql: ["SELECT RentalId, StartDate, ReturnDate", "FROM RENTAL", "WHERE MONTH(StartDate) = 4", "AND YEAR(StartDate) = 2025;"].join("\n"),
+    schema: "s01", schemaStep: 6,
+    process: "p01",
+  },
+  es: {
+    ex: "demo-es",
+    join: "q11",
+    joinSql: ["SELECT DISTINCT Apellido, Nombre", "FROM CLIENTE, ALQUILER, LINEA_ALQUILER, BICICLETA", "WHERE CLIENTE.IdCliente = ALQUILER.IdCliente",
+      "AND ALQUILER.IdAlquiler = LINEA_ALQUILER.IdAlquiler", "AND LINEA_ALQUILER.IdBicicleta = BICICLETA.IdBicicleta", "AND IdCategoria = 2;"].join("\n"),
+    joinBad: ["SELECT DISTINCT Apellido, Nombre", "FROM CLIENTE, ALQUILER, LINEA_ALQUILER, BICICLETA", "WHERE CLIENTE.IdCliente = ALQUILER.IdCliente",
+      "AND ALQUILER.IdAlquiler = LINEA_ALQUILER.IdAlquiler", "AND IdCategoria = 2;"].join("\n"),
+    date: "q06",
+    dateSql: ["SELECT IdAlquiler, FechaInicio, FechaDevolucion", "FROM ALQUILER", "WHERE MONTH(FechaInicio) = 4", "AND YEAR(FechaInicio) = 2025;"].join("\n"),
     schema: "s01", schemaStep: 6,
     process: "p01",
   },

@@ -147,6 +147,7 @@
     "◫ schéma": "◫ schema",
     "Énoncé (règles de gestion à modéliser)": "Question (business rules to model)",
     "Schéma de départ donné à l'étudiant": "Starting schema given to the student",
+    "· {n} tables · {titre}": "· {n} tables · {titre}",
     "Départ décrit dans le fichier ({n} tables) :": "Starting point described in the file ({n} tables):",
     "Remplacer par des tables de la base": "Replace with tables from the database",
     "Solution attendue": "Expected solution",
@@ -809,7 +810,7 @@
       }).join(", ") + ")</li>";
     }).join("");
     db.close();
-    $("schemaSummary").textContent = `· ${tables.length} tables · ${state.ex.titre}`;
+    $("schemaSummary").textContent = t("· {n} tables · {titre}", { n: tables.length, titre: state.ex.titre });
   }
 
   // ---------------------------------------------------------------- 1. prompt
