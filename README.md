@@ -1,5 +1,7 @@
 # SQL Lab – entraînement SQL pour l'UE8 du DCG
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.24464411.svg)](https://doi.org/10.5281/zenodo.24464411)
+
 *[English version](README.en.md)* · *[Documentación en español](https://edu-fpar.github.io/sql-lab/docs/#/es/)* · **[Ouvrir l'application](https://edu-fpar.github.io/sql-lab/)** ·
 [Espace enseignant](https://edu-fpar.github.io/sql-lab/create.html) · **[Documentation](https://edu-fpar.github.io/sql-lab/docs/)** (par profil et par thème, [sources](docs/))
 
@@ -395,4 +397,4 @@ Le `.gitignore` exclut déjà `annales/` (sujets d'origine), `node_modules/` et 
 
 **Citer cet outil** (bouton *Cite this repository* de GitHub, d'après [CITATION.cff](CITATION.cff)) :
 
-> Parlant, F. (2026). *SQL Lab* [Logiciel pédagogique]. https://github.com/edu-fpar/sql-lab
+> Parlant, F. (2026). *SQL Lab* [Logiciel pédagogique]. Zenodo. https://doi.org/10.5281/zenodo.24464411

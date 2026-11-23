@@ -1,5 +1,7 @@
 # SQL Lab – SQL practice for business students
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.24464411.svg)](https://doi.org/10.5281/zenodo.24464411)
+
 *[Version française](README.md)* · **[Open the app (English demo)](https://edu-fpar.github.io/sql-lab/?lang=en#demo-en/intro)** ·
 [Teacher space](https://edu-fpar.github.io/sql-lab/create.html?lang=en) · **[Documentation](https://edu-fpar.github.io/sql-lab/docs/#/en/)** (by profile and by topic, [sources](docs/en/))
 
@@ -216,4 +218,4 @@ Screenshots: `node tools/captures.js en` regenerates `docs/img/en/` with headles
 
 **How to cite** (GitHub's *Cite this repository* button, from [CITATION.cff](CITATION.cff)):
 
-> Parlant, F. (2026). *SQL Lab* [Educational software]. https://github.com/edu-fpar/sql-lab
+> Parlant, F. (2026). *SQL Lab* [Educational software]. Zenodo. https://doi.org/10.5281/zenodo.24464411
