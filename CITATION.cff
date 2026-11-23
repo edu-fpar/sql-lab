@@ -6,6 +6,9 @@ abstract: "Browser-based SQL practice for business students: queries checked aga
 authors:
   - family-names: Parlant
     given-names: François
+    orcid: "https://orcid.org/0009-0002-8059-6408"
+version: "1.0.0"
+date-released: "2026-11-23"
 license: CC-BY-NC-SA-4.0
 repository-code: "https://github.com/edu-fpar/sql-lab"
 url: "https://edu-fpar.github.io/sql-lab/"
