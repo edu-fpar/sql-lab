@@ -379,9 +379,9 @@
     const incoming = CONFIG.locked || incomingEx ? null : await readIncomingPack(); // ?pack=URL ou #pack=…
     const [exId, qId] = incomingEx && incomingEx.exercise ? [incomingEx.exercise.id, "intro"]
       : incoming && !incoming.error ? [incoming.exId, incoming.qId] : parseHash();
-    // interface en anglais sans exercice imposé : premier exercice en anglais du catalogue
-    const enEx = I18N.lang !== "fr" && state.catalogue.find((e) => e.langue === I18N.lang); // exercice dans la langue de l'interface
-    const defaultEx = enEx ? enEx.id : store.get("lastEx", state.catalogue[0].id);
+    // sans exercice imposé : premier exercice du catalogue dans la langue de l'interface
+    // (en français, le dernier exercice ouvert reste prioritaire)
+    const defaultEx = I18N.lang !== "fr" ? firstEx() : store.get("lastEx", firstEx());
     await loadExercise(CONFIG.locked ? CONFIG.exercice : exId || defaultEx, qId);
     if (incomingEx) notifyExercise(incomingEx);
     if (incoming) notifyImport(incoming);
@@ -398,6 +398,8 @@
   }
 
   const knownEx = (id) => state.exercises.some((e) => e.id === id);
+  /** Premier exercice du catalogue dans la langue de l'interface (français si "langue" est absent) */
+  const firstEx = () => (state.catalogue.find((e) => (e.langue || "fr") === I18N.lang) || state.catalogue[0]).id;
 
   // ---------------------------------------------------------------- plateforme (SCORM)
   /** Reprend la progression mémorisée par la plateforme (elle fait foi, poste partagé ou non) */
@@ -486,7 +488,7 @@
     await SQLLibrary.store.del(id);
     state.exercises = await SQLLibrary.list(state.catalogue);
     renderExerciseSelect();
-    await loadExercise(state.catalogue[0].id);
+    await loadExercise(firstEx());
     notice(tr("Exercice retiré de ce navigateur."), "ok");
   }
 
@@ -537,7 +539,7 @@
     history.replaceState(null, "", location.pathname);
     if (!n.pack || !n.pack.questions.length) return { error: tr("Le lien ne contient aucune question exploitable. ") + n.errors.join(" ") };
     let exId = n.pack.exercice;
-    if (!knownEx(exId)) exId = store.get("lastEx", state.catalogue[0].id);
+    if (!knownEx(exId)) exId = store.get("lastEx", firstEx());
     const key = savePack(exId, n.pack, source);
     return { exId, qId: `${key}.${n.pack.questions[0].id}`, pack: n.pack, key };
   }
@@ -641,7 +643,7 @@
   }
 
   async function loadExercise(exId, qId) {
-    if (!knownEx(exId)) exId = state.catalogue[0].id;
+    if (!knownEx(exId)) exId = firstEx();
     $("loading").hidden = false;
     $("loading").classList.remove("error");
     $("loading").textContent = tr("Chargement de la base…");

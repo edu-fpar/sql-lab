@@ -1280,7 +1280,7 @@
       await SQLLibrary.store.del(state.ex.id);
       state.exercises = await SQLLibrary.list(state.catalogue);
       renderExerciseSelect();
-      await loadExercise(state.catalogue[0].id);
+      await loadExercise((state.catalogue.find((e) => (e.langue || "fr") === I18N.lang) || state.catalogue[0]).id);
     });
     $("dlScorm").addEventListener("click", async () => {
       const bad = state.pack ? state.pack.questions.filter((_, i) => statusOf(i).cls === "ko").length : 0;
