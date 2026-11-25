@@ -62,6 +62,7 @@ construction de schéma et de processus, et une correction pas à pas animée.
 ```
 index.html                  application étudiant
 create.html                 espace enseignant (prompt IA, vérification, partage)
+intro.html                  visite guidée en vidéo (canvas animé, FR/EN/ES), ouverte au premier lancement
 skill/sql-lab-questions/    mode d'emploi du format de questions, pour les IA
 exemples/                   pack de questions et exercice personnel d'exemple
 lib/                        bibliothèques embarquées (sql.js, CodeMirror, fflate) : aucun CDN
@@ -77,6 +78,7 @@ assets/
   scormbuild.js             construction d'un paquet SCORM
   create.js, create.css     espace enseignant
   app.js, style.css         interface
+  intro-launcher.js         vidéo de présentation dans l'application (premier lancement, bouton 🎬 Intro)
 exercices/
   catalogue.json            liste des exercices proposés dans le menu
   dcg2024/

@@ -13,6 +13,7 @@
     "assets/style.css",
     "assets/i18n.js",
     "assets/lang-es.js",
+    "assets/intro-launcher.js", // inactif en SCORM, mais référencé par index.html
     "assets/compat.js",
     "assets/compare.js",
     "assets/engine.js",

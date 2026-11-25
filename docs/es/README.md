@@ -17,6 +17,12 @@ enviar datos a ningún sitio. Ofrece:
 
 ![Una pregunta: enunciado, editor, resultado comparado con el esperado y diagrama del esquema](../img/es/question.png)
 
+## Visita guiada en vídeo
+
+<iframe class="video-frame" src="../intro.html?embed=doc&lang=es" title="Visita guiada en vídeo" loading="lazy"></iframe>
+
+Un minuto para descubrir cada herramienta, con voz y subtítulos en español, francés e inglés. [Abrir la página del vídeo](../intro.html?lang=es ':ignore')
+
 ## ¿Quién eres?
 
 <div class="cards">

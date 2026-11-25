@@ -16,6 +16,12 @@ compte, aucune donnée envoyée. L'application propose :
 
 ![Une question : énoncé, éditeur, résultat comparé à l'attendu et diagramme du schéma](img/fr/question.png)
 
+## Visite guidée en vidéo
+
+<iframe class="video-frame" src="../intro.html?embed=doc&lang=fr" title="Visite guidée en vidéo" loading="lazy"></iframe>
+
+Une minute pour découvrir chaque outil, avec voix et sous-titres en français, anglais et espagnol. [Ouvrir la page de la vidéo](../intro.html?lang=fr ':ignore')
+
 ## Qui êtes-vous ?
 
 <div class="cards">

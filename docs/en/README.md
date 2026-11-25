@@ -15,6 +15,12 @@ browser**: nothing to install, no account, no data sent anywhere. It offers:
 
 ![A question: statement, editor, result compared with the expected one, and the schema diagram](../img/en/question.png)
 
+## Guided video tour
+
+<iframe class="video-frame" src="../intro.html?embed=doc&lang=en" title="Guided video tour" loading="lazy"></iframe>
+
+One minute to discover every tool, with voice and captions in English, French and Spanish. [Open the video page](../intro.html?lang=en ':ignore')
+
 ## Who are you?
 
 <div class="cards">

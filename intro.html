@@ -1,0 +1,962 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SQL Lab – Visite guidée</title>
+<style>
+/* Page de présentation vidéo de SQL Lab.
+   Un seul fichier, aucune bibliothèque : la « vidéo » est dessinée sur un canvas
+   (API Canvas 2D) et la voix vient de la synthèse vocale du navigateur (Web Speech API).
+   Couleurs reprises de assets/style.css pour rester dans l'identité de l'application. */
+:root{
+ --bg:#f5f6f8;--surface:#fff;--surface-2:#f0f2f5;--border:#dde1e7;--text:#1d2330;--muted:#5d6676;
+ --accent:#1f5fbf;--accent-soft:#e5eefb;--ok:#1d7a46;--ok-soft:#e4f4ea;--warn:#9a5b00;--warn-soft:#fdf1dc;
+ --ko:#b3261e;--ko-soft:#fbe7e5;--code-bg:#f6f8fa;--radius:12px;
+ --mono:ui-monospace,"Cascadia Code",Consolas,"Liberation Mono",monospace;color-scheme:light}
+@media (prefers-color-scheme:dark){:root{
+ --bg:#14171c;--surface:#1c2027;--surface-2:#242933;--border:#333a46;--text:#e6e9ef;--muted:#9aa3b2;
+ --accent:#6ea1ff;--accent-soft:#1f2d47;--ok:#5cc98a;--ok-soft:#173325;--warn:#f0b45a;--warn-soft:#3a2c14;
+ --ko:#ff8a80;--ko-soft:#3d1d1b;--code-bg:#181c22;color-scheme:dark}}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{margin:0}
+body{background:var(--bg);color:var(--text);font:16px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+a{color:var(--accent)}
+h1,h2,h3{margin:0;line-height:1.2}
+code{font-family:var(--mono);background:var(--code-bg);padding:0 .3em;border-radius:4px;font-size:.92em}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:6px}
+.wrap{max-width:1180px;margin:0 auto;padding:0 20px}
+button{font:inherit;color:inherit}
+
+/* ---------- bandeau ---------- */
+.top{background:var(--surface);border-bottom:1px solid var(--border)}
+.top .wrap{display:flex;align-items:center;gap:14px;min-height:68px;flex-wrap:wrap;padding-block:8px}
+.brand{display:flex;align-items:center;gap:12px;text-decoration:none;color:inherit;margin-right:auto}
+.logo{width:42px;height:42px;border-radius:10px;background:linear-gradient(#2f74d8,#1f5fbf);color:#fff;display:grid;place-items:center;font:800 13px system-ui;letter-spacing:.02em}
+.brand b{display:block;font-size:18px}
+.brand small{display:block;color:var(--muted);font-size:13px}
+.langs{display:flex;border:1px solid var(--border);border-radius:8px;overflow:hidden}
+.langs button{border:0;background:transparent;padding:6px 11px;cursor:pointer;font-size:14px;font-weight:600;color:var(--muted)}
+.langs button[aria-pressed=true]{background:var(--accent);color:#fff}
+.btn{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--border);background:var(--surface);border-radius:8px;padding:8px 14px;font-weight:600;text-decoration:none;color:var(--text);cursor:pointer;font-size:15px}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+@media (prefers-color-scheme:dark){.btn.primary{color:#0b1220}}
+.btn svg,.tb svg,.ib svg{width:18px;height:18px}
+
+/* ---------- en-tête ---------- */
+.hero{padding:36px 0 20px}
+.hero h1{font-size:clamp(28px,4vw,40px);letter-spacing:-.02em}
+.hero p{color:var(--muted);max-width:760px;margin-top:8px}
+
+/* ---------- lecteur ---------- */
+.player{position:relative;border-radius:var(--radius);overflow:hidden;background:#071226;aspect-ratio:16/9;box-shadow:0 12px 40px rgba(7,18,38,.25)}
+.player canvas{display:block;width:100%;height:100%;cursor:pointer}
+.big{position:absolute;inset:0;margin:auto;width:92px;height:92px;border-radius:50%;border:0;background:rgba(31,95,191,.92);color:#fff;cursor:pointer;display:grid;place-items:center;box-shadow:0 8px 30px rgba(0,0,0,.4)}
+.big svg{width:40px;height:40px;margin-left:5px}
+.end{position:absolute;left:0;right:0;bottom:9%;display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.end .btn{font-size:17px;padding:12px 20px}
+.end .ghost{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.35);color:#fff}
+.cap{min-height:3.2em;margin:12px 0 4px;text-align:center;font-size:18px;font-weight:500;text-wrap:balance}
+.ctrl{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.ib,.tb{border:1px solid var(--border);background:var(--surface);border-radius:8px;height:40px;display:inline-flex;align-items:center;justify-content:center;gap:6px;cursor:pointer}
+.ib{width:44px}
+.tb{padding:0 12px;font-size:14px;font-weight:600}
+.tb[aria-pressed=true]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+.prog{flex:1 1 240px;position:relative;height:40px;cursor:pointer;touch-action:none}
+.prog::before{content:"";position:absolute;left:0;right:0;top:17px;height:6px;border-radius:3px;background:var(--border)}
+.fill{position:absolute;left:0;top:17px;height:6px;border-radius:3px;background:var(--accent);pointer-events:none}
+.mk{position:absolute;top:13px;width:2px;height:14px;background:var(--muted);opacity:.55;pointer-events:none}
+.time{font:600 14px var(--mono);color:var(--muted);min-width:96px;text-align:center}
+.chaps{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.chaps button{border:1px solid var(--border);background:var(--surface);border-radius:999px;padding:5px 12px;font-size:14px;cursor:pointer;color:var(--muted)}
+.chaps button[aria-current=true]{background:var(--accent);border-color:var(--accent);color:#fff}
+@media (prefers-color-scheme:dark){.chaps button[aria-current=true]{color:#0b1220}}
+
+/* ---------- coulisses (mode d'observation de l'animation) ---------- */
+.dbgp{margin-top:14px;border:1px dashed var(--accent);border-radius:var(--radius);background:var(--surface);padding:14px 16px;font:13px/1.5 var(--mono)}
+.dbgp .hd{font-weight:700;color:var(--accent);margin-bottom:8px;font-size:14px}
+.dbgp .hint{color:var(--muted);font-family:system-ui,sans-serif;margin-bottom:10px}
+.dbgp .row{display:grid;grid-template-columns:150px 120px 1fr 48px;gap:10px;align-items:center}
+.dbgp .bar{height:8px;border-radius:4px;background:var(--surface-2);overflow:hidden}
+.dbgp .bar i{display:block;height:100%;background:var(--accent)}
+.dbgp .row.on{color:var(--text)}.dbgp .row.off{color:var(--muted);opacity:.6}
+.dbgp .row.done .bar i{background:var(--ok)}
+
+/* ---------- outils ---------- */
+section.blk{padding:44px 0 8px}
+section.blk h2{font-size:26px;letter-spacing:-.01em}
+section.blk>.wrap>p{color:var(--muted);margin:6px 0 20px;max-width:760px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;display:flex;flex-direction:column;gap:10px}
+.card h3{font-size:18px;display:flex;align-items:center;gap:10px}
+.card h3 .n{width:28px;height:28px;border-radius:8px;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;font-size:14px;flex:none}
+.card p{margin:0;color:var(--muted);font-size:15px}
+.card .acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:auto;padding-top:4px}
+.card .acts .btn{font-size:14px;padding:6px 12px}
+.making{display:grid;gap:12px;padding:0;margin:0;list-style:none}
+.making li{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 18px;display:grid;grid-template-columns:34px 1fr;gap:12px;align-items:start}
+.making li b.k{width:34px;height:34px;border-radius:9px;background:var(--ok-soft);color:var(--ok);display:grid;place-items:center;font-size:15px}
+.making li span{color:var(--muted)}
+.making li strong{color:var(--text)}
+footer{padding:40px 0;color:var(--muted);font-size:14px}
+footer .wrap{display:flex;gap:16px;justify-content:space-between;flex-wrap:wrap;border-top:1px solid var(--border);padding-top:18px}
+@media (max-width:640px){.dbgp .row{grid-template-columns:110px 1fr 44px}.dbgp .row .rg{display:none}.cap{font-size:16px}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+/* ---------- page intégrée (iframe) : ?embed=app (accueil de l'application) ou ?embed=doc (documentation) ---------- */
+.embed .top,.embed .hero,.embed section.blk,.embed footer,.embed .langs{display:none!important}
+.embedbar{display:none}
+.embed-app{--bg:#071226;--surface:#1c2027;--surface-2:#242933;--border:#333a46;--text:#e6e9ef;--muted:#9aa3b2;--accent:#6ea1ff;--accent-soft:#1f2d47;--ok:#5cc98a;--ok-soft:#173325;color-scheme:dark;background:#071226;color:#e6e9ef;min-height:100vh}
+.embed-app .wrap{max-width:min(1180px,calc((100vh - 230px) * 16 / 9))}
+.embed-app .embedbar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0}
+.embed-app .embedbar .brand{margin:0}
+.embed-app .embedbar .brand small{color:#9aa3b2}
+.embed-app .player{box-shadow:none}
+.skip{display:inline-flex;align-items:center;gap:8px;border:1px solid rgba(255,255,255,.3);background:rgba(255,255,255,.08);color:#fff;border-radius:8px;padding:8px 14px;font-weight:600;cursor:pointer}
+.skip svg{width:16px;height:16px}
+/* la documentation est en thème clair : la vidéo intégrée le suit, même si le système est en sombre */
+.embed-doc{--bg:#fff;--surface:#fff;--surface-2:#f0f2f5;--border:#dde1e7;--text:#1d2330;--muted:#5d6676;--accent:#1f5fbf;--accent-soft:#e5eefb;--ok:#1d7a46;--ok-soft:#e4f4ea;color-scheme:light;background:transparent;color:#1d2330}
+:root:has(.embed-doc){color-scheme:light;overflow:hidden}
+.embed-doc .wrap{max-width:none;padding:0}
+.embed-doc .player{box-shadow:none}
+</style>
+</head>
+<body>
+
+<header class="top">
+ <div class="wrap">
+  <a class="brand" href="index.html" data-app><span class="logo">SQL</span><span><b>SQL Lab</b><small data-t="tagline">Visite guidée en vidéo</small></span></a>
+  <div class="langs" role="group" aria-label="Langue / Language / Idioma">
+   <button type="button" data-lang="fr" aria-pressed="false">FR</button><button type="button" data-lang="en" aria-pressed="false">EN</button><button type="button" data-lang="es" aria-pressed="false">ES</button>
+  </div>
+  <a class="btn primary" href="index.html" data-app><span data-t="openApp">Ouvrir l'application</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+ </div>
+</header>
+
+<main>
+ <div class="wrap hero">
+  <h1 data-t="h1">SQL Lab en une minute</h1>
+  <p data-t="lead"></p>
+ </div>
+
+ <div class="wrap">
+  <div class="embedbar">
+   <span class="brand"><span class="logo">SQL</span><span><b>SQL Lab</b><small data-t="tagline">Visite guidée en vidéo</small></span></span>
+   <button class="skip" id="skip" type="button"><span data-t="skip">Passer l'introduction</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 6 6 6-6 6M13 6l6 6-6 6"/></svg></button>
+  </div>
+  <div class="player">
+   <canvas id="cv" width="1280" height="720" aria-hidden="true"></canvas>
+   <button class="big" id="big" type="button" hidden data-ta="playL"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15l12.5-7.5z"/></svg></button>
+   <div class="end" id="end" hidden>
+    <button class="btn primary" id="start" type="button" hidden data-t="start">Commencer</button>
+    <a class="btn primary" href="index.html" data-app data-t="openApp">Ouvrir l'application</a>
+    <button class="btn ghost" id="replay" type="button" data-t="replay">Revoir</button>
+   </div>
+  </div>
+  <p class="cap" id="cap" aria-live="polite"></p>
+  <div class="ctrl">
+   <button class="ib" id="play" type="button"></button>
+   <div class="prog" id="prog" role="slider" tabindex="0" aria-valuemin="0" aria-valuemax="60" aria-valuenow="0" data-ta="progL"><div class="fill" id="fill"></div><div id="marks"></div></div>
+   <span class="time" id="time">0:00 / 1:00</span>
+   <button class="tb" id="snd" type="button" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z"/><path d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11"/></svg><span data-t="sound">Voix</span></button>
+   <button class="tb" id="dbg" type="button" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6 2 12l6 6M16 6l6 6-6 6"/></svg><span data-t="backstage">Coulisses</span></button>
+  </div>
+  <div class="chaps" id="chaps"></div>
+  <div class="dbgp" id="dbgp" hidden></div>
+ </div>
+
+ <section class="blk">
+  <div class="wrap">
+   <h2 data-t="toolsT">Les outils de SQL Lab</h2>
+   <p data-t="toolsP"></p>
+   <div class="grid" id="tools"></div>
+  </div>
+ </section>
+
+ <section class="blk">
+  <div class="wrap">
+   <h2 data-t="makeT">Comment cette vidéo est faite</h2>
+   <p data-t="makeP"></p>
+   <ul class="making" id="make"></ul>
+  </div>
+ </section>
+</main>
+
+<footer><div class="wrap"><span>© 2026 François Parlant · CC BY-NC-SA 4.0</span><span data-t="foot">Base d'exemple fictive (DCG 2024 – Crédit'Partner)</span></div></footer>
+
+<script>
+"use strict";
+{
+const $ = id => document.getElementById(id);
+
+/* =====================================================================
+   LA VIDÉO : animation dessinée sur canvas (60 s)
+   draw(ctx, t, lang) est déterministe : l'image ne dépend que de t.
+   On peut donc avancer, reculer, sauter à un chapitre sans fichier vidéo.
+   ===================================================================== */
+const INTRO = (() => {
+ const W = 1280, H = 720, DUR = 60;
+ const FT = 'system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif';
+ const FM = '"Cascadia Code",Consolas,"Liberation Mono",ui-monospace,monospace';
+ const C = {
+  bg1:"#071226", bg2:"#0e2b58",
+  accent:"#1f5fbf", accent2:"#6ea1ff", accS:"#e5eefb",
+  ok:"#1d7a46", okL:"#5cc98a", okS:"#e4f4ea",
+  ko:"#b3261e", koL:"#ff8a80", koS:"#fbe7e5",
+  warn:"#9a5b00", warnL:"#f0b45a", warnS:"#fdf1dc",
+  pur:"#6542cc", purS:"#eee9fb",
+  ink:"#1d2330", muted:"#5d6676", line:"#dde1e7", surf:"#ffffff", surf2:"#f0f2f5", code:"#f6f8fa",
+  soft:"#b9cdf0",
+  rShow:"#dbe6f7", rFilter:"#ecdcc6", rJoin:"#bfe0cc"   // rôles des colonnes (correction pas à pas)
+ };
+
+ /* ---------- textes de la vidéo (FR / EN / ES) ---------- */
+ const TX = {
+  fr:{
+   sub:"Entraînement aux requêtes SQL · UE8 du DCG",
+   chips:["Requêtes SQL","Schéma relationnel","Processus","Correction pas à pas"],
+   stats:y=>`18 exercices  ·  ≈ 450 questions  ·  annales 2008 → ${y}`,
+   tagJ:"Jointures", tagA:"Annale 2024", qn:"Question 14 / 31",
+   q14:["Fournir la liste sans doublon des clients (numéro, nom, prénom, mail)","ayant déjà refusé une offre."],
+   btns:["Exécuter","Résultat attendu","Indice","Correction"],
+   compl:"Complétion : début d'un nom, ou Ctrl + Espace",
+   res:"Votre résultat", rows:n=>`${n} lignes`,
+   okT:"Bravo, c'est le résultat attendu !",
+   local1:"SQLite tourne dans votre navigateur", local2:["sql.js (WebAssembly)","aucun serveur, rien à installer","progression gardée sur l'appareil"],
+   q2:"Afficher les clients de Dijon et leurs dossiers (nom, numéro de dossier).",
+   koT:"Trop de lignes", koP:["Votre résultat : 1 050 lignes · attendu : 13.","Une jointure manque : chaque client est combiné","avec tous les dossiers (produit cartésien)."],
+   okP:"13 lignes · identique au résultat attendu",
+   trapsT:"Pièges repérés", traps:[["Doublons","DISTINCT"],["= NULL","IS NULL"],["Agrégat dans WHERE","HAVING"],["Mauvais ordre de tri","ORDER BY"],["Virgule décimale","7.5"],["Dates du DCG","YEAR(), #15/06/2024#"]],
+   tol:"Tolérés : alias, ordre des colonnes, casse",
+   tabs:["Diagramme","Schéma relationnel"],
+   legT:"Notation", leg:["clé primaire soulignée","#clé étrangère en italique","clé étrangère → clé primaire"],
+   intT:"Interactions", ints:["glisser : déplacer une table","double-clic : voir le contenu","−  +  ⤢ : zoom, plein écran"],
+   prodT:"PRODUIT · 6 lignes", prods:["Crédit auto","Crédit travaux","Prêt personnel","Crédit renouvelable","Regroupement de crédits","Location avec option d'achat"],
+   cinT:"Correction pas à pas – q14", close:"Fermer",
+   phases:["Tables","Tables de passage","Alias","Colonnes","Jointures","Filtres","Regroupement","Tri","Résultat"],
+   cin:{0:"CLIENT et OFFRE : les deux tables que l'énoncé désigne.",1:"Pour aller de CLIENT à OFFRE, on passe par DOSSIER : c'est une table de passage.",3:"On affiche le numéro, le nom, le prénom et le mail, sans doublon.",4:"Une jointure par flèche traversée. Je relie DOSSIER et CLIENT.",j2:"Puis OFFRE et DOSSIER : 3 tables, donc 2 jointures.",5:"On ne garde que les offres refusées.",8:"59 lignes : c'est le résultat attendu."},
+   legC:["affiché","filtre","jointure","table de passage"], resOk:"59 lignes ✓",
+   schT:"Question de schéma", schS:"Règle : un dossier peut avoir plusieurs emprunteurs.", chk:"✓  Points de contrôle 4 / 4",
+   proT:"Question de processus", lanes:["Patient","Standard"], ev:["Appel","Fiche patient","Transport créé"], op:"Création transport", act:"- Saisie de la demande", rule:"Toujours", sync:"A et B", proOk:"✓  Synchronisations justes",
+   t7:"Espace enseignant", t7s:"Créer ses propres questions, les vérifier, les partager",
+   steps:["Préparer la demande","Réponse de l'IA","Vérifier","Partager"],
+   copy:"Copier le prompt", copied:"✓ Copié",
+   checks:[["ok","q01 · 12 lignes"],["ok","q02 · 5 lignes"],["warn","q03 · tri à vérifier"],["ok","q04 · variante identique"]],
+   share:["Lien sans serveur","Fichier JSON","Exercice .zip","Paquet SCORM"], lms:"→ Moodle, Chamilo…",
+   langs:"Français · English · Español", ownDb:"Votre propre base : .sqlite, .sql, .zip",
+   end:"À vous de jouer", endS:"Choisissez un exercice et écrivez votre première requête."
+  },
+  en:{
+   sub:"SQL query practice · French DCG exam, UE8",
+   chips:["SQL queries","Relational schema","Process diagrams","Step-by-step solution"],
+   stats:y=>`18 exercises  ·  ≈ 450 questions  ·  past papers 2008 → ${y}`,
+   tagJ:"Joins", tagA:"Exam 2024", qn:"Question 14 / 31",
+   q14:["List the customers (number, last name, first name, email), without","duplicates, who have already refused an offer."],
+   btns:["Run","Expected result","Hint","Solution"],
+   compl:"Completion: start of a name, or Ctrl + Space",
+   res:"Your result", rows:n=>`${n} rows`,
+   okT:"Well done, this is the expected result!",
+   local1:"SQLite runs in your browser", local2:["sql.js (WebAssembly)","no server, nothing to install","progress kept on the device"],
+   q2:"Show the customers from Dijon and their files (name, file number).",
+   koT:"Too many rows", koP:["Your result: 1,050 rows · expected: 13.","A join is missing: each customer is combined","with every file (Cartesian product)."],
+   okP:"13 rows · same as the expected result",
+   trapsT:"Mistakes detected", traps:[["Duplicates","DISTINCT"],["= NULL","IS NULL"],["Aggregate in WHERE","HAVING"],["Wrong sort order","ORDER BY"],["Decimal comma","7.5"],["DCG-style dates","YEAR(), #15/06/2024#"]],
+   tol:"Tolerated: aliases, column order, case",
+   tabs:["Diagram","Relational schema"],
+   legT:"Notation", leg:["primary key underlined","#foreign key in italics","foreign key → primary key"],
+   intT:"Interactions", ints:["drag: move a table","double-click: see its content","−  +  ⤢ : zoom, full screen"],
+   prodT:"PRODUIT · 6 rows", prods:["Crédit auto","Crédit travaux","Prêt personnel","Crédit renouvelable","Regroupement de crédits","Location avec option d'achat"],
+   cinT:"Step-by-step solution – q14", close:"Close",
+   phases:["Tables","Linking tables","Aliases","Columns","Joins","Filters","Grouping","Sorting","Result"],
+   cin:{0:"CLIENT and OFFRE: the two tables named in the question.",1:"To go from CLIENT to OFFRE, we go through DOSSIER: a linking table.",3:"We display the number, last name, first name and email, without duplicates.",4:"One join per arrow crossed. I link DOSSIER and CLIENT.",j2:"Then OFFRE and DOSSIER: 3 tables, so 2 joins.",5:"We keep only the refused offers.",8:"59 rows: this is the expected result."},
+   legC:["displayed","filter","join","linking table"], resOk:"59 rows ✓",
+   schT:"Schema question", schS:"Rule: a file can have several borrowers.", chk:"✓  Checkpoints 4 / 4",
+   proT:"Process question", lanes:["Patient","Switchboard"], ev:["Call","Patient record","Transport created"], op:"Create transport", act:"- Record the request", rule:"Always", sync:"A and B", proOk:"✓  Synchronisations correct",
+   t7:"Teacher area", t7s:"Create your own questions, check them, share them",
+   steps:["Prepare the request","AI answer","Check","Share"],
+   copy:"Copy the prompt", copied:"✓ Copied",
+   checks:[["ok","q01 · 12 rows"],["ok","q02 · 5 rows"],["warn","q03 · sort to check"],["ok","q04 · variant matches"]],
+   share:["Serverless link","JSON file","Exercise .zip","SCORM package"], lms:"→ Moodle, Chamilo…",
+   langs:"Français · English · Español", ownDb:"Your own database: .sqlite, .sql, .zip",
+   end:"Your turn", endS:"Pick an exercise and write your first query."
+  },
+  es:{
+   sub:"Práctica de consultas SQL · examen DCG, UE8",
+   chips:["Consultas SQL","Esquema relacional","Procesos","Solución paso a paso"],
+   stats:y=>`18 ejercicios  ·  ≈ 450 preguntas  ·  exámenes 2008 → ${y}`,
+   tagJ:"Combinaciones", tagA:"Examen 2024", qn:"Pregunta 14 / 31",
+   q14:["Listar sin duplicados los clientes (número, apellido, nombre, correo)","que ya han rechazado una oferta."],
+   btns:["Ejecutar","Resultado esperado","Pista","Solución"],
+   compl:"Autocompletado: inicio de un nombre, o Ctrl + Espacio",
+   res:"Tu resultado", rows:n=>`${n} filas`,
+   okT:"¡Muy bien, es el resultado esperado!",
+   local1:"SQLite se ejecuta en tu navegador", local2:["sql.js (WebAssembly)","sin servidor, nada que instalar","progreso guardado en el dispositivo"],
+   q2:"Mostrar los clientes de Dijon y sus expedientes (apellido, número de expediente).",
+   koT:"Demasiadas filas", koP:["Tu resultado: 1050 filas · esperado: 13.","Falta una combinación: cada cliente se combina","con todos los expedientes (producto cartesiano)."],
+   okP:"13 filas · igual al resultado esperado",
+   trapsT:"Errores detectados", traps:[["Duplicados","DISTINCT"],["= NULL","IS NULL"],["Agregado en WHERE","HAVING"],["Orden incorrecto","ORDER BY"],["Coma decimal","7.5"],["Fechas del DCG","YEAR(), #15/06/2024#"]],
+   tol:"Se aceptan: alias, orden de columnas, mayúsculas",
+   tabs:["Diagrama","Esquema relacional"],
+   legT:"Notación", leg:["clave primaria subrayada","#clave foránea en cursiva","clave foránea → clave primaria"],
+   intT:"Interacciones", ints:["arrastrar: mover una tabla","doble clic: ver el contenido","−  +  ⤢ : zoom, pantalla completa"],
+   prodT:"PRODUIT · 6 filas", prods:["Crédit auto","Crédit travaux","Prêt personnel","Crédit renouvelable","Regroupement de crédits","Location avec option d'achat"],
+   cinT:"Solución paso a paso – q14", close:"Cerrar",
+   phases:["Tablas","Tablas intermedias","Alias","Columnas","Combinaciones","Filtros","Agrupación","Ordenación","Resultado"],
+   cin:{0:"CLIENT y OFFRE: las dos tablas que indica el enunciado.",1:"Para ir de CLIENT a OFFRE pasamos por DOSSIER: es una tabla intermedia.",3:"Mostramos número, apellido, nombre y correo, sin duplicados.",4:"Una combinación por flecha recorrida. Uno DOSSIER y CLIENT.",j2:"Luego OFFRE y DOSSIER: 3 tablas, así que 2 combinaciones.",5:"Solo conservamos las ofertas rechazadas.",8:"59 filas: es el resultado esperado."},
+   legC:["mostrado","filtro","combinación","tabla intermedia"], resOk:"59 filas ✓",
+   schT:"Pregunta de esquema", schS:"Regla: un expediente puede tener varios prestatarios.", chk:"✓  Puntos de control 4 / 4",
+   proT:"Pregunta de proceso", lanes:["Paciente","Centralita"], ev:["Llamada","Ficha del paciente","Traslado creado"], op:"Crear traslado", act:"- Registrar la solicitud", rule:"Siempre", sync:"A y B", proOk:"✓  Sincronizaciones correctas",
+   t7:"Espacio docente", t7s:"Crear tus propias preguntas, verificarlas, compartirlas",
+   steps:["Preparar la solicitud","Respuesta de la IA","Verificar","Compartir"],
+   copy:"Copiar el prompt", copied:"✓ Copiado",
+   checks:[["ok","q01 · 12 filas"],["ok","q02 · 5 filas"],["warn","q03 · revisar el orden"],["ok","q04 · variante idéntica"]],
+   share:["Enlace sin servidor","Archivo JSON","Ejercicio .zip","Paquete SCORM"], lms:"→ Moodle, Chamilo…",
+   langs:"Français · English · Español", ownDb:"Tu propia base: .sqlite, .sql, .zip",
+   end:"¡Tu turno!", endS:"Elige un ejercicio y escribe tu primera consulta."
+  }
+ };
+ /* Chapitres [début, titre] et sous-titres [début, fin, texte] : lus à voix haute par la synthèse vocale */
+ const CH = {
+  fr:[[0,"Bienvenue"],[6,"L'éditeur"],[14,"Le diagnostic"],[22,"Le diagramme"],[30,"Pas à pas"],[39,"Schémas et processus"],[47,"Enseignants"],[55,"À vous"]],
+  en:[[0,"Welcome"],[6,"The editor"],[14,"Feedback"],[22,"The diagram"],[30,"Step by step"],[39,"Schemas and processes"],[47,"Teachers"],[55,"Your turn"]],
+  es:[[0,"Bienvenida"],[6,"El editor"],[14,"El diagnóstico"],[22,"El diagrama"],[30,"Paso a paso"],[39,"Esquemas y procesos"],[47,"Docentes"],[55,"Tu turno"]]
+ };
+ const CAP = {
+  fr:[[0.4,5.8,"Bienvenue dans SQL Lab, l'entraînement aux requêtes SQL de l'UE8 du DCG, tiré des annales."],
+   [6.3,13.7,"Vous écrivez votre requête avec la complétion des noms. Elle s'exécute dans votre navigateur, sans serveur."],
+   [14.3,21.7,"Votre résultat est comparé à l'attendu. En cas d'écart, un conseil ciblé vous met sur la piste."],
+   [22.3,29.7,"Le schéma reste sous vos yeux : clés primaires soulignées, clés étrangères en italique, tables déplaçables."],
+   [30.3,38.7,"La correction pas à pas rejoue le raisonnement : tables, tables de passage, colonnes, jointures, puis filtres."],
+   [39.3,46.7,"Vous faites aussi évoluer le schéma relationnel et tracez des processus, vérifiés automatiquement."],
+   [47.3,54.7,"Les enseignants créent leurs questions avec une IA, les vérifient et les partagent par lien, fichier ou SCORM."],
+   [55.3,59.8,"À vous de jouer !"]],
+  en:[[0.4,5.8,"Welcome to SQL Lab, SQL query practice for the French DCG exam, built from past papers."],
+   [6.3,13.7,"You write your query with name completion. It runs in your browser, with no server."],
+   [14.3,21.7,"Your result is compared with the expected one. If they differ, targeted feedback points you in the right direction."],
+   [22.3,29.7,"The schema stays in view: primary keys underlined, foreign keys in italics, tables you can move."],
+   [30.3,38.7,"The step-by-step solution replays the reasoning: tables, linking tables, columns, joins, then filters."],
+   [39.3,46.7,"You also evolve relational schemas and draw process diagrams, checked automatically."],
+   [47.3,54.7,"Teachers create questions with any AI, check them, and share them by link, file or SCORM."],
+   [55.3,59.8,"Your turn!"]],
+  es:[[0.4,5.8,"Bienvenido a SQL Lab, la práctica de consultas SQL del examen DCG, basada en exámenes anteriores."],
+   [6.3,13.7,"Escribes tu consulta con autocompletado. Se ejecuta en tu navegador, sin servidor."],
+   [14.3,21.7,"Tu resultado se compara con el esperado. Si hay diferencias, un consejo preciso te orienta."],
+   [22.3,29.7,"El esquema siempre a la vista: claves primarias subrayadas, claves foráneas en cursiva, tablas movibles."],
+   [30.3,38.7,"La solución paso a paso reproduce el razonamiento: tablas, tablas intermedias, columnas, combinaciones y filtros."],
+   [39.3,46.7,"También haces evolucionar esquemas relacionales y dibujas procesos, verificados automáticamente."],
+   [47.3,54.7,"Los docentes crean preguntas con una IA, las verifican y las comparten por enlace, archivo o SCORM."],
+   [55.3,59.8,"¡Tu turno!"]]
+ };
+
+ /* ---------- outils de temps : progression et courbes d'accélération ---------- */
+ const cp = (x, a = 0, b = 1) => Math.max(a, Math.min(b, x));
+ const eo  = x => 1 - Math.pow(1 - x, 3);                                    // easeOutCubic : démarre vite, freine
+ const eio = x => x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2; // easeInOutCubic : doux aux deux bouts
+ const bk  = x => { if (x <= 0) return 0; const c1 = 1.70158, c3 = c1 + 1;    // easeOutBack : petit rebond
+  return 1 + c3 * Math.pow(x - 1, 3) + c1 * Math.pow(x - 1, 2); };
+ let TW = null, S0 = 0;  // journal des « coulisses » et début de la scène en cours
+ /* sg(k, a, b, nom) : progression de 0 à 1 entre les instants a et b (en secondes depuis le début de la scène).
+    Quand un nom est donné et que les coulisses sont ouvertes, la progression est notée dans le journal. */
+ function sg(k, a, b, name) { const v = cp((k - a) / (b - a)); if (TW && name) TW.push([name, S0 + a, S0 + b, v]); return v; }
+
+ /* ---------- primitives de dessin ---------- */
+ const fnt = (w, s, f = FT) => `${w} ${s}px ${f}`;
+ let X = TX.fr, LG = "fr";
+ function rr(c, x, y, w, h, r) { r = Math.min(r, w / 2, h / 2); c.beginPath(); c.moveTo(x + r, y);
+  c.arcTo(x + w, y, x + w, y + h, r); c.arcTo(x + w, y + h, x, y + h, r); c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath(); }
+ function tx(c, s, x, y, f, col, al = "left", bl = "alphabetic") { c.font = f; c.fillStyle = col; c.textAlign = al; c.textBaseline = bl; c.fillText(s, x, y); }
+ function fit(c, s, w) { if (c.measureText(s).width <= w) return s; while (s.length > 1 && c.measureText(s + "…").width > w) s = s.slice(0, -1); return s + "…"; }
+ function wrap(c, s, w, f) { c.font = f; const out = []; let line = "";
+  for (const word of s.split(" ")) { const tr = line ? line + " " + word : word; if (c.measureText(tr).width > w && line) { out.push(line); line = word; } else line = tr; }
+  if (line) out.push(line); return out; }
+ function pill(c, s, x, y, bg, fg, f, padX, h, center) { c.font = f; const w = c.measureText(s).width + padX * 2, x0 = center ? x - w / 2 : x;
+  rr(c, x0, y, w, h, h / 2); c.fillStyle = bg; c.fill(); tx(c, s, x0 + w / 2, y + h / 2 + 1, f, fg, "center", "middle"); return w; }
+ function fade(c, a, fn) { if (a <= 0) return; c.save(); c.globalAlpha *= Math.min(1, a); fn(); c.restore(); }
+ function card(c, x, y, w, h, r = 16) { c.save(); c.fillStyle = "rgba(0,0,0,.3)"; rr(c, x + 6, y + 14, w, h, r); c.fill(); c.restore();
+  rr(c, x, y, w, h, r); c.fillStyle = C.surf; c.fill(); }
+ function logo(c, x, y, s) { const g = c.createLinearGradient(x, y, x, y + s); g.addColorStop(0, "#3a80e6"); g.addColorStop(1, "#1f5fbf");
+  rr(c, x, y, s, s, s * .22); c.fillStyle = g; c.fill(); c.strokeStyle = "rgba(255,255,255,.3)"; c.lineWidth = Math.max(1, s / 50);
+  rr(c, x + s * .03, y + s * .03, s * .94, s * .94, s * .2); c.stroke(); tx(c, "SQL", x + s / 2, y + s * .52, fnt(800, Math.round(s * .32)), "#fff", "center", "middle"); }
+ function check(c, x, y, s, col) { c.save(); c.strokeStyle = col; c.lineWidth = s * .16; c.lineCap = "round"; c.lineJoin = "round";
+  c.beginPath(); c.moveTo(x - s * .35, y); c.lineTo(x - s * .08, y + s * .28); c.lineTo(x + s * .4, y - s * .3); c.stroke(); c.restore(); }
+ /* pointeur de souris dessiné (scène du diagramme) */
+ function pointer(c, x, y, down) { c.save(); c.translate(x, y); if (down) c.scale(.9, .9); c.beginPath(); c.moveTo(0, 0); c.lineTo(0, 24); c.lineTo(6, 18.5);
+  c.lineTo(10.5, 28); c.lineTo(14.5, 26); c.lineTo(10, 17); c.lineTo(17.5, 17); c.closePath(); c.fillStyle = "#fff"; c.fill(); c.strokeStyle = "#0b1220"; c.lineWidth = 1.6; c.stroke(); c.restore(); }
+ function ripple(c, x, y, p) { if (p <= 0 || p >= 1) return; c.save(); c.globalAlpha *= 1 - p; c.strokeStyle = C.accent; c.lineWidth = 3;
+  c.beginPath(); c.arc(x, y, 6 + 26 * eo(p), 0, 7); c.stroke(); c.restore(); }
+
+ /* fond : dégradé bleu nuit, grille de points qui glisse lentement, halo */
+ function bg(c, t) { const g = c.createLinearGradient(0, 0, W, H); g.addColorStop(0, C.bg1); g.addColorStop(1, C.bg2); c.fillStyle = g; c.fillRect(0, 0, W, H);
+  c.fillStyle = "rgba(255,255,255,.07)"; const ox = -(t * 6) % 32, oy = -(t * 3) % 32;
+  for (let x = ox; x < W; x += 32) for (let y = oy; y < H; y += 32) c.fillRect(Math.round(x), Math.round(y), 2, 2);
+  const r = c.createRadialGradient(W * .8, H * .08, 0, W * .8, H * .08, 780); r.addColorStop(0, "rgba(110,161,255,.2)"); r.addColorStop(1, "rgba(110,161,255,0)");
+  c.fillStyle = r; c.fillRect(0, 0, W, H); }
+
+ /* ---------- coloration SQL (mots-clés en bleu, chaînes en vert, nombres en violet) ---------- */
+ const KW = new Set("SELECT DISTINCT FROM WHERE AND OR NOT IN IS NULL GROUP BY HAVING ORDER ASC DESC INNER JOIN ON AS LIKE COUNT SUM AVG MIN MAX".split(" "));
+ function sql(c, s, x, y, size) { const re = /'[^']*'?|[A-Za-z_][A-Za-z0-9_]*|\d+(?:\.\d+)?|\s+|./g; let m; c.textAlign = "left"; c.textBaseline = "alphabetic";
+  while ((m = re.exec(s))) { const w = m[0]; let col = C.ink, wt = 400;
+   if (w[0] == "'") col = C.ok; else if (/^[A-Za-z]/.test(w) && KW.has(w.toUpperCase())) { col = C.accent; wt = 700; } else if (/^\d/.test(w)) col = C.pur;
+   c.font = fnt(wt, size, FM); c.fillStyle = col; c.fillText(w, x, y); x += c.measureText(w).width; }
+  return x; }
+ /* éditeur de requête : numéros de ligne, lignes surlignées, renvoie la position du curseur */
+ function editor(c, x, y, w, lines, size, o = {}) { const lh = Math.round(size * 1.55), n = Math.max(lines.length, o.minLines || 1), h = n * lh + 22;
+  rr(c, x, y, w, h, 10); c.fillStyle = C.code; c.fill(); c.strokeStyle = C.line; c.lineWidth = 1.5; c.stroke();
+  let cx = x + 44, cy = y + 11 + lh * .72;
+  lines.forEach((l, i) => { const top = y + 11 + lh * i, ly = top + lh * .72;
+   if (o.hl && o.hl[i]) { c.save(); c.globalAlpha *= o.hl[i]; c.fillStyle = o.hlCol || "rgba(29,122,70,.14)"; c.fillRect(x + 2, top, w - 4, lh); c.restore(); }
+   tx(c, String(i + 1), x + 28, ly, fnt(400, size - 3, FM), "#9aa3b2", "right"); cx = sql(c, l, x + 44, ly, size); cy = ly; });
+  return { cx, cy, h, lh }; }
+ function caret(c, x, y, size, k) { if (Math.floor(k * 2.4) % 2) return; c.fillStyle = C.ink; c.fillRect(x + 1, y - size * .85, 2, size * 1.05); }
+ /* bouton d'interface (enfoncé brièvement quand press passe de 0 à 1) */
+ function button(c, s, x, y, primary, press, size = 16) { c.font = fnt(600, size); const w = c.measureText(s).width + 34, h = size * 2.4;
+  const sc = press > 0 && press < 1 ? 1 - .07 * Math.sin(press * Math.PI) : 1; c.save(); c.translate(x + w / 2, y + h / 2); c.scale(sc, sc);
+  rr(c, -w / 2, -h / 2, w, h, 8); c.fillStyle = primary ? C.accent : C.surf2; c.fill(); if (!primary) { c.strokeStyle = C.line; c.lineWidth = 1.2; c.stroke(); }
+  tx(c, s, 0, 1, fnt(600, size), primary ? "#fff" : C.ink, "center", "middle"); c.restore(); return w; }
+
+ /* ---------- schéma relationnel : tables et flèches (notation française) ---------- */
+ // "_" = clé primaire (soulignée), "#" = clé étrangère (italique)
+ const TB = {
+  CLIENT:{ n:"CLIENT", cols:["_IdCli","NomCli","PrenomCli","AdCli","VilleCli","MailCli"] },
+  DOSSIER:{ n:"DOSSIER", cols:["_IdDoss","MontantAFinancer","DateCreation","DateCloture","#IdCli","#IdChargeClientele"] },
+  PIECEJOINTE:{ n:"PIECEJOINTE", cols:["_IdPJ","DesignationPJ","ConformitePJ","#IdDoss"] },
+  CHARGECLIENTELE:{ n:"CHARGECLIENTELE", cols:["_IdChargeClientele","NomChargeClientele","PrenomChargeClientele"] },
+  OFFRE:{ n:"OFFRE", cols:["_IdOffre","MontantOffre","TauxInteret","AcceptationClient","#IdProd","#IdDoss"] },
+  PRODUIT:{ n:"PRODUIT", cols:["_IdProd","DesignationProd"] },
+  CLIENT6:{ n:"CLIENT", cols:["_IdCli","NomCli","PrenomCli"] },
+  DOSSIER6:{ n:"DOSSIER", cols:["_IdDoss","MontantAFinancer","#IdCli"] },
+  EMPRUNTER:{ n:"EMPRUNTER", cols:["_#IdCli","_#IdDoss"] }
+ };
+ const FKS = [["DOSSIER","IdCli","CLIENT"],["DOSSIER","IdChargeClientele","CHARGECLIENTELE"],["PIECEJOINTE","IdDoss","DOSSIER"],["OFFRE","IdDoss","DOSSIER"],["OFFRE","IdProd","PRODUIT"]];
+ const colInfo = s => { const pk = s.includes("_"), fk = s.includes("#"); return { pk, fk, n: s.replace(/[_#]/g, "") }; };
+ const TW_ = {};  // largeurs mesurées une fois
+ function geo(c, key, x, y) { const T = TB[key];
+  if (!TW_[key]) { c.font = fnt(400, 14); let w = c.measureText(T.n).width + 40; T.cols.forEach(s => { w = Math.max(w, c.measureText((colInfo(s).fk ? "#" : "") + colInfo(s).n).width + 34); }); TW_[key] = Math.max(150, Math.ceil(w)); }
+  const w = TW_[key], h = 34 + 12 + T.cols.length * 24;
+  return { key, x, y, w, h, row: i => y + 34 + 6 + i * 24 + 12, idx: n => T.cols.findIndex(s => colInfo(s).n == n) }; }
+ /* o.border : "lit" (table utile), "pass" (table de passage, pointillés), "dim" (estompée) ; o.roles : {colonne: "show"|"filter"|"join"} ; o.strike : {colonne: 0..1} */
+ function table(c, g, o = {}) { const T = TB[g.key];
+  c.save(); if (o.border == "dim") c.globalAlpha *= .38;
+  rr(c, g.x, g.y, g.w, g.h, 8); c.fillStyle = C.surf; c.fill();
+  if (o.border == "lit") { c.shadowColor = "rgba(31,95,191,.35)"; c.shadowBlur = 14; }
+  c.lineWidth = o.border == "lit" || o.border == "pass" ? 3 : 1.4; c.strokeStyle = o.border == "lit" ? C.accent : o.border == "pass" ? C.warn : "#4a5262";
+  if (o.border == "pass") c.setLineDash([7, 5]); rr(c, g.x, g.y, g.w, g.h, 8); c.stroke(); c.setLineDash([]); c.shadowBlur = 0;
+  tx(c, T.n, g.x + g.w / 2, g.y + 22, fnt(700, 13), o.border == "lit" ? C.accent : o.border == "pass" ? C.warn : C.ink, "center");
+  c.fillStyle = "#4a5262"; c.fillRect(g.x + 1, g.y + 33, g.w - 2, 1.2);
+  T.cols.forEach((s, i) => { const ci = colInfo(s), ry = g.row(i), role = o.roles && o.roles[ci.n];
+   if (role) { const col = role == "show" ? C.rShow : role == "filter" ? C.rFilter : C.rJoin; rr(c, g.x + 6, ry - 11, g.w - 12, 22, 4); c.fillStyle = col; c.fill();
+    if (role == "join") { c.strokeStyle = C.ok; c.lineWidth = 1.4; c.stroke(); } }
+   const label = (ci.fk ? "#" : "") + ci.n, f = fnt(ci.pk ? 600 : 400, 14).replace(/^/, ci.fk ? "italic " : "");
+   const st = o.strike && o.strike[ci.n] || 0; c.save(); if (st) c.globalAlpha *= 1 - .55 * st;
+   tx(c, label, g.x + 14, ry + 5, f, C.ink); const lw = c.measureText(label).width;
+   if (ci.pk) { c.fillStyle = C.ink; c.fillRect(g.x + 14, ry + 8, lw, 1.3); }
+   c.restore();
+   if (st) { c.strokeStyle = C.ko; c.lineWidth = 2.4; c.beginPath(); c.moveTo(g.x + 10, ry); c.lineTo(g.x + 10 + (lw + 10) * st, ry); c.stroke(); } });
+  c.restore(); }
+ /* tracé d'une flèche clé étrangère → clé primaire, en angles droits */
+ function route(ga, ia, gb, ib) { const ya = ga.row(ia), yb = gb.row(ib);
+  if (gb.x + gb.w < ga.x - 16) { const x1 = ga.x, x2 = gb.x + gb.w, m = (x1 + x2) / 2; return [[x1, ya], [m, ya], [m, yb], [x2, yb]]; }
+  if (gb.x > ga.x + ga.w + 16) { const x1 = ga.x + ga.w, x2 = gb.x, m = (x1 + x2) / 2; return [[x1, ya], [m, ya], [m, yb], [x2, yb]]; }
+  const xr = Math.max(ga.x + ga.w, gb.x + gb.w) + 22; return [[ga.x + ga.w, ya], [xr, ya], [xr, yb], [gb.x + gb.w, yb]]; }
+ /* dessine la polyligne jusqu'à la fraction p de sa longueur ; pointe de flèche quand p = 1 ; renvoie le point atteint */
+ function path(c, pts, p, col, lw = 1.6, dash, dashOff = 0) { if (p <= 0) return pts[0];
+  const L = []; let tot = 0; for (let i = 1; i < pts.length; i++) { const d = Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]); L.push(d); tot += d; }
+  let rest = tot * p, end = pts[0]; c.save(); c.strokeStyle = col; c.lineWidth = lw; c.lineJoin = "round"; if (dash) { c.setLineDash(dash); c.lineDashOffset = dashOff; }
+  c.beginPath(); c.moveTo(pts[0][0], pts[0][1]);
+  for (let i = 1; i < pts.length && rest > 0; i++) { const f = Math.min(1, rest / L[i - 1]); end = [pts[i - 1][0] + (pts[i][0] - pts[i - 1][0]) * f, pts[i - 1][1] + (pts[i][1] - pts[i - 1][1]) * f]; c.lineTo(end[0], end[1]); rest -= L[i - 1]; }
+  c.stroke(); c.setLineDash([]);
+  if (p >= 1) { const a = pts[pts.length - 2], b = pts[pts.length - 1], an = Math.atan2(b[1] - a[1], b[0] - a[0]), s = 10 + lw;
+   c.fillStyle = col; c.beginPath(); c.moveTo(b[0], b[1]); c.lineTo(b[0] - s * Math.cos(an - .45), b[1] - s * Math.sin(an - .45)); c.lineTo(b[0] - s * Math.cos(an + .45), b[1] - s * Math.sin(an + .45)); c.closePath(); c.fill(); }
+  c.restore(); return end; }
+ function fkPts(G, f) { const ga = G[f[0]], gb = G[f[2]]; return route(ga, ga.idx(f[1]), gb, gb.idx(f[1])); }
+ /* grille de points de l'éditeur de diagramme */
+ function dots(c, x, y, w, h) { rr(c, x, y, w, h, 12); c.fillStyle = "#f7f8fa"; c.fill(); c.save(); c.clip(); c.fillStyle = "#cfd5de";
+  for (let i = x + 12; i < x + w; i += 20) for (let j = y + 12; j < y + h; j += 20) c.fillRect(i, j, 1.6, 1.6); c.restore(); c.strokeStyle = C.line; c.lineWidth = 1.2; rr(c, x, y, w, h, 12); c.stroke(); }
+
+ /* =================================================================
+    SCÈNES : chacune reçoit k, le temps écoulé depuis son début
+    ================================================================= */
+
+ /* ---------- 1. Ouverture ---------- */
+ function s1(c, k) {
+  const s = 124 * bk(sg(k, .1, .9, "logo"));
+  if (s > 0) logo(c, 640 - s / 2, 180 - s / 2, s);
+  const ta = sg(k, .7, 1.3, "titre");
+  fade(c, ta, () => tx(c, "SQL Lab", 640, 330 + (1 - eo(ta)) * 18, fnt(800, 78), "#fff", "center"));
+  const ul = eio(sg(k, .9, 1.7, "soulignement")); if (ul > 0) { c.fillStyle = C.accent2; rr(c, 640 - 130 * ul, 352, 260 * ul, 5, 2.5); c.fill(); }
+  const sa = sg(k, 1.3, 1.9, "sous-titre"); fade(c, sa, () => tx(c, X.sub, 640, 404, fnt(500, 27), C.soft, "center"));
+  // quatre pastilles, une par grand outil, qui arrivent avec un rebond
+  const cols = [[C.accent, "#fff"], [C.ok, "#fff"], [C.warnL, "#2a1a00"], [C.pur, "#fff"]], f = fnt(700, 19);
+  c.font = f; const ws = X.chips.map(s => c.measureText(s).width + 40), tot = ws.reduce((a, b) => a + b, 0) + 14 * 3; let x = 640 - tot / 2;
+  X.chips.forEach((s, i) => { const a = bk(sg(k, 2 + i * .2, 2.5 + i * .2, i == 0 ? "pastilles" : null)); if (a > 0) { c.save(); c.globalAlpha *= cp(a); c.translate(x + ws[i] / 2, 470); c.scale(a, a); pill(c, s, 0, -21, cols[i][0], cols[i][1], f, 20, 42, true); c.restore(); } x += ws[i] + 14; });
+  // compteur d'années des annales
+  const ya = sg(k, 2.9, 3.4, "chiffres"), yr = Math.round(2008 + 18 * eio(sg(k, 3, 4.4, "compteur")));
+  fade(c, ya, () => tx(c, X.stats(yr), 640, 580, fnt(600, 22, FM), "rgba(255,255,255,.75)", "center"));
+ }
+
+ /* ---------- 2. L'éditeur : saisie avec complétion, exécution, résultat ---------- */
+ const Q14 = ["SELECT DISTINCT CLIENT.IdCli, NomCli, PrenomCli, MailCli", "FROM CLIENT, DOSSIER, OFFRE", "WHERE CLIENT.IdCli = DOSSIER.IdCli", "AND DOSSIER.IdDoss = OFFRE.IdDoss", "AND AcceptationClient = 'Refusé';"];
+ const Q14F = Q14.join("\n"), AC = "AcceptationClient", CI = Q14F.indexOf(AC) + 2, CJ = Q14F.indexOf(AC) + AC.length;
+ /* frappe à 50 caractères/s ; après « Ac », la liste de complétion reste 0,7 s puis le nom complet est inséré d'un coup */
+ function typed(k) { const T0 = 1, CPS = 50, P = .7, n1 = (k - T0) * CPS;
+  if (n1 < CI) return { n: Math.max(0, Math.floor(n1)), pop: false };
+  const after = k - T0 - CI / CPS; if (after < P) return { n: CI, pop: true, pp: after / P };
+  return { n: Math.min(Q14F.length, CJ + Math.floor((after - P) * CPS)), pop: false }; }
+ const RES = [["1001","BLANCHARD","Isabelle"],["1002","GUERIN","Laurent"],["1003","LAURENT","Céline"],["1005","LEMAIRE","Pierre"],["1006","GARNIER","Yanis"],["1008","GARNIER","Mehdi"]];
+ function s2(c, k) {
+  const a = eo(sg(k, 0, .6, "carte")), x = 60 - (1 - a) * 50, y = 50, w = 740, h = 500;
+  fade(c, a, () => { card(c, x, y, w, h);
+   let px = x + 28; px += pill(c, X.tagJ, px, y + 26, C.accS, C.accent, fnt(600, 14), 12, 28) + 8; pill(c, X.tagA, px, y + 26, C.warnS, C.warn, fnt(600, 14), 12, 28);
+   tx(c, X.qn, x + w - 28, y + 46, fnt(400, 15), C.muted, "right");
+   X.q14.forEach((l, i) => tx(c, l, x + 28, y + 94 + i * 25, fnt(600, 18), C.ink));
+   const st = typed(k), lines = Q14F.slice(0, st.n).split("\n");
+   const e = editor(c, x + 28, y + 140, w - 56, lines, 17, { minLines: 5 });
+   if (st.n < Q14F.length) caret(c, e.cx, e.cy, 17, k);
+   // liste de complétion sous le curseur
+   const ha = sg(k, 3.9, 4.3, "aide"); fade(c, ha, () => tx(c, X.compl, x + 28, y + 140 + e.h + 26, fnt(400, 15), C.muted));
+   if (st.pop) fade(c, cp(st.pp * 5), () => { const bx = e.cx - 18, by = e.cy + 10; c.save(); c.shadowColor = "rgba(0,0,0,.25)"; c.shadowBlur = 16; rr(c, bx, by, 270, 64, 6); c.fillStyle = "#fff"; c.fill(); c.restore();
+    c.strokeStyle = C.line; c.lineWidth = 1; rr(c, bx, by, 270, 64, 6); c.stroke(); rr(c, bx + 4, by + 4, 262, 26, 4); c.fillStyle = C.accS; c.fill();
+    tx(c, AC, bx + 14, by + 22, fnt(700, 15, FM), C.accent); tx(c, "OFFRE", bx + 256, by + 22, fnt(400, 12), C.muted, "right");
+    tx(c, "AdCli", bx + 14, by + 50, fnt(400, 15, FM), C.ink); tx(c, "CLIENT", bx + 256, by + 50, fnt(400, 12), C.muted, "right"); });
+   // boutons ; « Exécuter » est enfoncé à 5,3 s
+   let bx = x + 28; const by = y + 340, press = sg(k, 5.25, 5.55);
+   X.btns.forEach((b, i) => { bx += button(c, b, bx, by, i == 0, i == 0 ? press : 0, 15) + 10; });
+   const ok = eo(sg(k, 6.3, 6.8, "bravo"));
+   fade(c, ok, () => { rr(c, x + 28, y + 414 + (1 - ok) * 8, w - 56, 58, 10); c.fillStyle = C.okS; c.fill(); c.strokeStyle = "#9fd1b3"; c.lineWidth = 1.4; c.stroke();
+    check(c, x + 54, y + 443 + (1 - ok) * 8, 18, C.ok); tx(c, X.okT, x + 76, y + 449 + (1 - ok) * 8, fnt(700, 18), C.ok); });
+  });
+  // résultat à droite : les lignes arrivent une par une
+  const r = eo(sg(k, 5.6, 6.1, "résultat")), rx = 830, ry = 50, rw = 390, rh = 320;
+  fade(c, r, () => { card(c, rx + (1 - r) * 30, ry, rw, rh); const X0 = rx + (1 - r) * 30;
+   tx(c, X.res, X0 + 22, ry + 40, fnt(700, 18), C.ink); tx(c, X.rows(59), X0 + rw - 22, ry + 40, fnt(400, 14), C.muted, "right");
+   const cx = [X0 + 22, X0 + 100, X0 + 240]; c.fillStyle = C.surf2; c.fillRect(X0 + 12, ry + 58, rw - 24, 34);
+   ["IdCli", "NomCli", "PrenomCli"].forEach((s, i) => tx(c, s, cx[i] + 4, ry + 80, fnt(600, 14), C.ink));
+   RES.forEach((row, j) => { const a2 = sg(k, 5.9 + j * .1, 6.1 + j * .1); fade(c, a2, () => { const yy = ry + 92 + j * 36;
+    c.fillStyle = C.line; c.fillRect(X0 + 12, yy + 35, rw - 24, 1); row.forEach((s, i) => tx(c, s, cx[i] + 4, yy + 23, fnt(400, 15), C.ink)); }); });
+  });
+  // encadré : l'exécution se fait dans le navigateur
+  const b = eo(sg(k, 6.6, 7.2, "encadré"));
+  fade(c, b, () => { const bx = 830, by = 400 + (1 - b) * 14; rr(c, bx, by, 390, 150, 14); c.fillStyle = "rgba(255,255,255,.08)"; c.fill(); c.strokeStyle = "rgba(255,255,255,.22)"; c.lineWidth = 1.2; c.stroke();
+   // petite icône de base de données
+   c.save(); c.strokeStyle = C.accent2; c.lineWidth = 2.4; c.beginPath(); c.ellipse(bx + 40, by + 34, 15, 6, 0, 0, 7); c.stroke();
+   c.beginPath(); c.moveTo(bx + 25, by + 34); c.lineTo(bx + 25, by + 58); c.ellipse(bx + 40, by + 58, 15, 6, 0, Math.PI, 0, true); c.lineTo(bx + 55, by + 34); c.stroke(); c.restore();
+   tx(c, X.local1, bx + 70, by + 44, fnt(700, 18), "#fff");
+   X.local2.forEach((s, i) => { check(c, bx + 80, by + 77 + i * 26, 12, C.okL); tx(c, s, bx + 96, by + 82 + i * 26, fnt(500, 15), C.soft); }); });
+ }
+
+ /* ---------- 3. Le diagnostic : erreur repérée, conseil, puis réussite ---------- */
+ const WQ = ["SELECT NomCli, IdDoss", "FROM CLIENT, DOSSIER", "WHERE VilleCli = 'Dijon';"], FIX = "AND CLIENT.IdCli = DOSSIER.IdCli;";
+ function s3(c, k) {
+  const a = eo(sg(k, 0, .6, "carte")), x = 60, y = 50 + (1 - a) * 30, w = 700, h = 560;
+  fade(c, a, () => { card(c, x, y, w, h);
+   pill(c, X.tagJ, x + 28, y + 26, C.accS, C.accent, fnt(600, 14), 12, 28);
+   wrap(c, X.q2, w - 56, fnt(600, 18)).forEach((l, i) => tx(c, l, x + 28, y + 94 + i * 25, fnt(600, 18), C.ink));
+   // correction de l'étudiant : le « ; » disparaît et la jointure s'écrit
+   let lines = WQ.slice(); const fx = k - 3.8;
+   if (fx > 0) { lines[2] = "WHERE VilleCli = 'Dijon'"; lines.push(FIX.slice(0, Math.min(FIX.length, Math.floor(fx * 40)))); }
+   const hl = fx > 0 ? { 3: 1 } : {};
+   const e = editor(c, x + 28, y + 150, w - 56, lines, 17, { minLines: 4, hl });
+   if (fx > -.6 && lines[3] !== FIX) caret(c, e.cx, e.cy, 17, k);
+   const p1 = sg(k, .9, 1.2), p2 = sg(k, 5.1, 5.4); button(c, X.btns[0], x + 28, y + 150 + e.h + 20, true, p1 > 0 && p1 < 1 ? p1 : p2, 15);
+   // panneau rouge puis vert
+   const ko = eo(sg(k, 1.3, 1.8, "conseil")) * (1 - sg(k, 5.5, 5.8)), ok = eo(sg(k, 5.7, 6.2, "réussite")), py = y + 360;
+   fade(c, ko, () => { rr(c, x + 28, py, w - 56, 150, 10); c.fillStyle = C.koS; c.fill(); c.fillStyle = C.ko; c.fillRect(x + 28, py, 5, 150);
+    tx(c, "✕  " + X.koT, x + 52, py + 36, fnt(700, 19), C.ko); X.koP.forEach((l, i) => tx(c, l, x + 52, py + 70 + i * 26, fnt(400, 16), C.ink)); });
+   fade(c, ok, () => { rr(c, x + 28, py, w - 56, 100, 10); c.fillStyle = C.okS; c.fill(); c.fillStyle = C.ok; c.fillRect(x + 28, py, 5, 100);
+    check(c, x + 62, py + 32, 18, C.ok); tx(c, X.okT, x + 84, py + 39, fnt(700, 19), C.ok); tx(c, X.okP, x + 52, py + 74, fnt(400, 16), C.ink); });
+  });
+  // colonne des pièges repérés automatiquement
+  const ta = sg(k, 1.6, 2, "pièges");
+  fade(c, ta, () => tx(c, X.trapsT, 800, 92, fnt(800, 30), "#fff"));
+  X.traps.forEach(([trap, fixx], i) => { const ai = eo(sg(k, 2 + i * .32, 2.4 + i * .32)); fade(c, ai, () => { const yy = 120 + i * 66, xx = 800 + (1 - ai) * 24;
+   rr(c, xx, yy, 420, 52, 12); c.fillStyle = "rgba(255,255,255,.08)"; c.fill();
+   const pw = pill(c, trap, xx + 12, yy + 11, C.koS, C.ko, fnt(600, 15), 12, 30); tx(c, "→", xx + 24 + pw, yy + 32, fnt(700, 18), C.soft);
+   tx(c, fixx, xx + 50 + pw, yy + 32, fnt(600, 16, FM), C.okL); }); });
+  const tl = sg(k, 4.4, 4.9, "tolérances"); fade(c, tl, () => { check(c, 812, 532, 14, C.okL); tx(c, X.tol, 832, 538, fnt(500, 17), C.soft); });
+ }
+
+ /* ---------- 4. Le diagramme : tables, flèches, déplacement, contenu ---------- */
+ const POS = { CLIENT:[0,20], DOSSIER:[270,20], PIECEJOINTE:[560,20], CHARGECLIENTELE:[0,320], OFFRE:[290,290], PRODUIT:[580,320] };
+ function layout(c, ox, oy, extra = {}) { const G = {}; for (const kk in POS) { const d = extra[kk] || [0, 0]; G[kk] = geo(c, kk, ox + POS[kk][0] + d[0], oy + POS[kk][1] + d[1]); } return G; }
+ function s4(c, k) {
+  const a = eo(sg(k, 0, .6, "panneau")), px = 60, py = 50 + (1 - a) * 30, pw = 880, ph = 620;
+  fade(c, a, () => { card(c, px, py, pw, ph);
+   // onglets et boutons de zoom
+   rr(c, px + 20, py + 18, 340, 40, 9); c.fillStyle = C.surf2; c.fill(); rr(c, px + 24, py + 22, 130, 32, 7); c.fillStyle = "#fff"; c.fill();
+   tx(c, X.tabs[0], px + 89, py + 43, fnt(700, 15), C.ink, "center"); tx(c, X.tabs[1], px + 257, py + 43, fnt(500, 15), C.muted, "center");
+   ["−", "+", "⟲", "⤢"].forEach((s, i) => { const bx = px + pw - 190 + i * 44; rr(c, bx, py + 20, 36, 36, 7); c.fillStyle = C.surf2; c.fill(); tx(c, s, bx + 18, py + 44, fnt(600, 18), C.ink, "center"); });
+   dots(c, px + 20, py + 72, pw - 40, ph - 92);
+   // déplacement de CLIENT à la souris (4,2 → 5,2 s)
+   const drag = eio(sg(k, 4.2, 5.2, "glisser")), G = layout(c, px + 50, py + 80, { CLIENT: [0, 80 * drag] });
+   // les flèches se dessinent d'abord, les tables arrivent ensuite par-dessus
+   FKS.forEach((f, i) => path(c, fkPts(G, f), eio(sg(k, 1.9 + i * .22, 2.6 + i * .22, i == 0 ? "flèches" : null)), "#5d6676", 1.6));
+   Object.keys(POS).forEach((kk, i) => { const s = bk(sg(k, .4 + i * .14, .9 + i * .14, i == 0 ? "tables" : null)); if (s <= 0) return; const g = G[kk];
+    c.save(); c.globalAlpha *= cp(s); c.translate(g.x + g.w / 2, g.y + g.h / 2); c.scale(s, s); c.translate(-g.x - g.w / 2, -g.y - g.h / 2);
+    table(c, g, { border: kk == "CLIENT" && k > 4.1 && k < 5.3 ? "lit" : null }); c.restore(); });
+   // fenêtre du contenu de PRODUIT (double-clic)
+   const pop = eo(sg(k, 6.3, 6.7, "contenu"));
+   fade(c, pop, () => { const wx = px + 400, wy = py + 120 + (1 - pop) * 12; c.save(); c.shadowColor = "rgba(0,0,0,.3)"; c.shadowBlur = 24; rr(c, wx, wy, 420, 290, 12); c.fillStyle = "#fff"; c.fill(); c.restore();
+    c.strokeStyle = C.line; c.lineWidth = 1.2; rr(c, wx, wy, 420, 290, 12); c.stroke(); tx(c, X.prodT, wx + 20, wy + 34, fnt(700, 16), C.ink);
+    c.fillStyle = C.surf2; c.fillRect(wx + 12, wy + 50, 396, 30); tx(c, "IdProd", wx + 24, wy + 70, fnt(600, 14), C.ink); tx(c, "DesignationProd", wx + 110, wy + 70, fnt(600, 14), C.ink);
+    X.prods.forEach((s, i) => { const yy = wy + 80 + i * 33; tx(c, String(i + 1), wx + 24, yy + 22, fnt(400, 14), C.pur); tx(c, s, wx + 110, yy + 22, fnt(400, 14), C.ink); c.fillStyle = C.line; c.fillRect(wx + 12, yy + 32, 396, 1); }); });
+   // pointeur : il attrape CLIENT, le déplace, puis double-clique sur PRODUIT
+   const cu = sg(k, 3.5, 3.8, "pointeur"), ga = G.CLIENT, gp = G.PRODUIT;
+   if (cu > 0 && k < 7.2) { let mx, my; const hx = ga.x + ga.w / 2, hy = ga.y + 17;
+    if (k < 4.1) { const m = eio(sg(k, 3.5, 4.1)); mx = px + 700 + (hx - px - 700) * m; my = py + 560 + (hy - py - 560) * m; }
+    else if (k < 5.3) { mx = hx; my = hy; }
+    else { const m = eio(sg(k, 5.3, 5.9)); mx = hx + (gp.x + gp.w / 2 - hx) * m; my = hy + (gp.y + 17 - hy) * m; }
+    ripple(c, mx, my, sg(k, 4.1, 4.5)); ripple(c, mx, my, sg(k, 5.95, 6.3)); ripple(c, mx, my, sg(k, 6.1, 6.45));
+    fade(c, cu * (1 - sg(k, 6.8, 7.2)), () => pointer(c, mx, my, k > 4.1 && k < 5.25)); }
+  });
+  // légende à droite
+  const lx = 970;
+  fade(c, sg(k, 2.4, 2.8, "légende"), () => { tx(c, X.legT, lx, 98, fnt(800, 26), "#fff");
+   X.leg.forEach((s, i) => { const ai = eo(sg(k, 2.6 + i * .3, 3 + i * .3)); fade(c, ai, () => { const yy = 132 + i * 74; rr(c, lx, yy, 250, 60, 12); c.fillStyle = "rgba(255,255,255,.08)"; c.fill();
+    if (i == 0) { tx(c, "IdCli", lx + 16, yy + 27, fnt(600, 16), "#fff"); c.fillStyle = "#fff"; c.fillRect(lx + 16, yy + 31, 38, 1.5); }
+    else if (i == 1) tx(c, "#IdCli", lx + 16, yy + 27, "italic " + fnt(400, 16), "#fff");
+    else path(c, [[lx + 16, yy + 22], [lx + 66, yy + 22]], 1, "#fff", 2);
+    tx(c, s, lx + 16, yy + 50, fnt(500, 14), C.soft); }); }); });
+  fade(c, sg(k, 4, 4.4), () => { tx(c, X.intT, lx, 390, fnt(800, 22), "#fff");
+   X.ints.forEach((s, i) => fade(c, sg(k, 4.2 + i * .5, 4.6 + i * .5), () => { c.fillStyle = C.accent2; c.beginPath(); c.arc(lx + 6, 420 + i * 34, 4, 0, 7); c.fill(); tx(c, s, lx + 20, 426 + i * 34, fnt(500, 15), C.soft); })); });
+ }
+
+ /* ---------- 5. La correction pas à pas : le raisonnement rejoué ---------- */
+ const PH = [[0, .9], [1, 2.1], [3, 3.3], [4, 4.5], [5, 6.4], [8, 7.6]], J2 = 5.4, SKIP = [2, 6, 7];
+ const QS = {
+  0:["SELECT …", "FROM CLIENT, OFFRE"],
+  1:["SELECT …", "FROM CLIENT, DOSSIER, OFFRE"],
+  3:["SELECT DISTINCT CLIENT.IdCli, NomCli,", "       PrenomCli, MailCli", "FROM CLIENT, DOSSIER, OFFRE"],
+  4:["SELECT DISTINCT CLIENT.IdCli, NomCli,", "       PrenomCli, MailCli", "FROM CLIENT, DOSSIER, OFFRE", "WHERE CLIENT.IdCli = DOSSIER.IdCli"],
+  j2:["SELECT DISTINCT CLIENT.IdCli, NomCli,", "       PrenomCli, MailCli", "FROM CLIENT, DOSSIER, OFFRE", "WHERE CLIENT.IdCli = DOSSIER.IdCli", "AND DOSSIER.IdDoss = OFFRE.IdDoss"],
+  5:["SELECT DISTINCT CLIENT.IdCli, NomCli,", "       PrenomCli, MailCli", "FROM CLIENT, DOSSIER, OFFRE", "WHERE CLIENT.IdCli = DOSSIER.IdCli", "AND DOSSIER.IdDoss = OFFRE.IdDoss", "AND AcceptationClient = 'Refusé';"]
+ };
+ QS[8] = QS[5];
+ const QORD = [0, 1, 3, 4, "j2", 5, 8];
+ function s5(c, k) {
+  let ph = -1, tph = 0; for (const [p, t] of PH) if (k >= t) { ph = p; tph = t; }
+  const step = ph == 4 && k >= J2 ? "j2" : ph, since = step == "j2" ? k - J2 : k - tph;
+  if (TW) TW.push(["phase : " + (ph < 0 ? "—" : X.phases[ph]), S0 + tph, S0 + tph + 1, cp(since)]);
+  const a = eo(sg(k, 0, .5, "fenêtre")), x = 40, y = 36 + (1 - a) * 20, w = 1200, h = 648;
+  fade(c, a, () => { card(c, x, y, w, h);
+   tx(c, X.cinT, x + 28, y + 42, fnt(700, 21), C.ink); tx(c, X.q14.join(" "), x + 28, y + 68, fnt(400, 14), C.muted);
+   button(c, X.close, x + w - 120, y + 22, true, 0, 15);
+   // frise des phases
+   c.fillStyle = C.surf2; c.fillRect(x, y + 86, w, 56); let fx = x + 22;
+   X.phases.forEach((s, i) => { const skip = SKIP.includes(i), cur = i == ph, done = !skip && ph > i; c.font = fnt(500, 14); const pw = c.measureText(s).width + 46;
+    rr(c, fx, y + 98, pw, 32, 16); c.fillStyle = cur ? C.accS : "#fff"; c.fill(); c.strokeStyle = cur ? C.accent : done ? C.ok : C.line; c.lineWidth = cur ? 2 : 1.2; c.stroke();
+    c.beginPath(); c.arc(fx + 16, y + 114, 10, 0, 7); c.fillStyle = cur ? C.accent : done ? C.ok : skip ? "#e3e6eb" : "#e3e6eb"; c.fill();
+    tx(c, String(i + 1), fx + 16, y + 115, fnt(700, 11), cur || done ? "#fff" : C.muted, "center", "middle");
+    tx(c, s, fx + 32, y + 119, fnt(cur ? 700 : 500, 14), skip ? "#a8afba" : cur ? C.accent : done ? C.ok : C.muted);
+    if (skip) { c.fillStyle = "#a8afba"; c.fillRect(fx + 32, y + 114, c.measureText(s).width, 1.3); }
+    fx += pw + 7; });
+   // schéma animé à gauche (réduit à 78 %)
+   dots(c, x + 20, y + 154, 760, 474);
+   c.save(); c.translate(x + 40, y + 160); c.scale(.78, .78);
+   const G = layout(c, 0, 10), border = {}, roles = {};
+   if (ph >= 0) { for (const kk in POS) border[kk] = "dim"; border.CLIENT = "lit"; border.OFFRE = "lit"; }
+   if (ph >= 1) border.DOSSIER = "pass";
+   if (ph >= 3) roles.CLIENT = { IdCli: "show", NomCli: "show", PrenomCli: "show", MailCli: "show" };
+   if (ph >= 4) { roles.CLIENT.IdCli = "join"; roles.DOSSIER = { IdCli: "join" }; }
+   if (step == "j2" || ph >= 5) { roles.DOSSIER.IdDoss = "join"; roles.OFFRE = { IdDoss: "join" }; }
+   if (ph >= 5) roles.OFFRE.AcceptationClient = "filter";
+   FKS.forEach(f => { const j1 = f[0] == "DOSSIER" && f[2] == "CLIENT", j2 = f[0] == "OFFRE" && f[2] == "DOSSIER";
+    const on = (j1 && ph >= 4) || (j2 && (step == "j2" || ph >= 5)); if (on) return;
+    c.save(); if (ph >= 0) c.globalAlpha *= .35; path(c, fkPts(G, f), 1, "#8a93a3", 1.6); c.restore(); });
+   for (const kk in POS) table(c, G[kk], { border: border[kk], roles: roles[kk] });
+   // flèches de jointure : vertes, en pointillés qui avancent (lineDashOffset)
+   if (ph >= 4) path(c, fkPts(G, FKS[0]), eio(sg(k, 4.5, 5, "jointure 1")), C.ok, 3.4, [10, 7], -k * 40);
+   if (step == "j2" || ph >= 5) path(c, fkPts(G, FKS[3]), eio(sg(k, J2, J2 + .5, "jointure 2")), C.ok, 3.4, [10, 7], -k * 40);
+   c.restore();
+   // légende des couleurs
+   let lx = x + 40; [[C.rShow], [C.rFilter], [C.rJoin], [null]].forEach(([col], i) => { if (col) { rr(c, lx, y + 600, 26, 14, 3); c.fillStyle = col; c.fill(); }
+    else { c.setLineDash([5, 3]); c.strokeStyle = C.warn; c.lineWidth = 2; rr(c, lx, y + 600, 26, 14, 3); c.stroke(); c.setLineDash([]); }
+    tx(c, X.legC[i], lx + 34, y + 612, fnt(400, 14), C.muted); c.font = fnt(400, 14); lx += 54 + c.measureText(X.legC[i]).width; });
+   // panneau d'explication et requête qui se construit
+   const rx = x + 806, rw = 370;
+   if (ph >= 0) { const ea = eo(cp(since / .4));
+    fade(c, ea, () => { const title = (X.phases[ph] + (ph == 4 ? (step == "j2" ? " 2 / 2" : " 1 / 2") : "")).toUpperCase();
+     tx(c, title, rx, y + 186 + (1 - ea) * 8, fnt(800, 18), C.accent);
+     wrap(c, X.cin[step], rw, fnt(400, 17)).forEach((l, i) => tx(c, l, rx, y + 218 + i * 25 + (1 - ea) * 8, fnt(400, 17), C.ink)); });
+    const lines = QS[step], prev = QS[QORD[QORD.indexOf(step) - 1]] || [], qy = y + 330;
+    rr(c, rx, qy, rw, 30 + lines.length * 26, 10); c.fillStyle = C.code; c.fill(); c.strokeStyle = C.line; c.lineWidth = 1.2; c.stroke();
+    lines.forEach((l, i) => { const neu = step != 8 && prev[i] !== l; if (neu) { c.save(); c.globalAlpha *= .9; c.fillStyle = "#f3e3c8"; c.fillRect(rx + 10, qy + 12 + i * 26, rw - 20, 25); c.restore(); }
+     sql(c, l, rx + 16, qy + 31 + i * 26, 14); });
+    if (ph == 8) fade(c, eo(cp(since / .4)), () => pill(c, X.resOk, rx, qy + 60 + lines.length * 26, C.ok, "#fff", fnt(700, 17), 18, 40)); }
+  });
+ }
+
+ /* ---------- 6. Questions de schéma et de processus ---------- */
+ function ellipse(c, x, y, rx, ry, s, a = 1) { fade(c, a, () => { c.beginPath(); c.ellipse(x, y, rx, ry, 0, 0, 7); c.fillStyle = "#fff"; c.fill(); c.strokeStyle = C.ink; c.lineWidth = 1.6; c.stroke();
+  tx(c, s, x, y + 1, fnt(500, 15), C.ink, "center", "middle"); }); }
+ function s6(c, k) {
+  // ----- à gauche : faire évoluer le schéma -----
+  const a = eo(sg(k, 0, .6, "cartes")), x = 50, y = 60 + (1 - a) * 24, w = 570, h = 600;
+  fade(c, a, () => { card(c, x, y, w, h); pill(c, X.schT, x + 24, y + 22, C.accS, C.accent, fnt(700, 14), 12, 30);
+   tx(c, X.schS, x + 24, y + 86, fnt(600, 17), C.ink);
+   dots(c, x + 20, y + 106, w - 40, 400);
+   const gc = geo(c, "CLIENT6", x + 50, y + 130), gd = geo(c, "DOSSIER6", x + 340, y + 130), ge = geo(c, "EMPRUNTER", x + 200, y + 340);
+   table(c, gc); table(c, gd, { strike: { IdCli: eio(sg(k, 3.6, 4.1, "retrait #IdCli")) } });
+   // nouvelle table de liaison EMPRUNTER (clé composée)
+   const es = bk(sg(k, 1.3, 1.9, "EMPRUNTER")); if (es > 0) { c.save(); c.globalAlpha *= cp(es); c.translate(ge.x + ge.w / 2, ge.y + ge.h / 2); c.scale(es, es); c.translate(-ge.x - ge.w / 2, -ge.y - ge.h / 2); table(c, ge, { border: "lit" }); c.restore(); }
+   // les deux clés étrangères sont « tirées » depuis le rond ●
+   const r1 = [[ge.x, ge.row(0)], [gc.x + gc.w / 2, ge.row(0)], [gc.x + gc.w / 2, gc.y + gc.h]], r2 = [[ge.x + ge.w, ge.row(1)], [gd.x + gd.w / 2, ge.row(1)], [gd.x + gd.w / 2, gd.y + gd.h]];
+   [[r1, 2.1], [r2, 2.8]].forEach(([r, t0], i) => { const p = eio(sg(k, t0, t0 + .6, "flèche " + (i + 1))); if (p <= 0) return; const e = path(c, r, p, C.ink, 1.8);
+    c.beginPath(); c.arc(r[0][0], r[0][1], 5, 0, 7); c.fillStyle = "#fff"; c.fill(); c.strokeStyle = C.accent; c.lineWidth = 2; c.stroke();
+    if (p < 1) { c.beginPath(); c.arc(e[0], e[1], 6, 0, 7); c.fillStyle = C.accent; c.fill(); } });
+   const ck = eo(sg(k, 4.8, 5.3, "contrôle")); fade(c, ck, () => pill(c, X.chk, x + 24, y + 528 + (1 - ck) * 8, C.okS, C.ok, fnt(700, 17), 18, 44));
+  });
+  // ----- à droite : schéma événements-résultats -----
+  const b = eo(sg(k, .3, .9)), X0 = 660, Y0 = 60 + (1 - b) * 24, W0 = 570;
+  fade(c, b, () => { card(c, X0, Y0, W0, 600); pill(c, X.proT, X0 + 24, Y0 + 22, C.warnS, C.warn, fnt(700, 14), 12, 30);
+   const lx = X0 + 20, lw = 265, top = Y0 + 70;
+   X.lanes.forEach((s, i) => { c.fillStyle = C.surf2; c.fillRect(lx + i * lw, top, lw, 36); c.strokeStyle = C.line; c.lineWidth = 1.2; c.strokeRect(lx + i * lw + .5, top + .5, lw, 510);
+    tx(c, s, lx + i * lw + lw / 2, top + 24, fnt(700, 15), C.ink, "center"); });
+   const c1 = lx + lw / 2, c2 = lx + lw * 1.5;
+   ellipse(c, c1, top + 100, 90, 28, X.ev[0], eo(sg(k, .9, 1.3, "événements")));
+   ellipse(c, c2, top + 100, 90, 28, X.ev[1], eo(sg(k, 1.1, 1.5)));
+   // synchronisation (trapèze) avec sa condition
+   const sa = eo(sg(k, 1.5, 1.9, "synchronisation")); fade(c, sa, () => { const sy = top + 215; c.beginPath(); c.moveTo(c2 - 80, sy - 22); c.lineTo(c2 + 80, sy - 22); c.lineTo(c2 + 58, sy + 22); c.lineTo(c2 - 58, sy + 22); c.closePath();
+    c.fillStyle = "#fff"; c.fill(); c.strokeStyle = C.ink; c.lineWidth = 1.6; c.stroke(); tx(c, X.sync, c2, sy + 1, fnt(700, 15), C.ink, "center", "middle"); });
+   const pa = eio(sg(k, 2, 2.6, "flèches A et B")), sy = top + 215;
+   path(c, [[c1, top + 128], [c1, sy], [c2 - 72, sy]], pa, C.ink, 1.6); path(c, [[c2, top + 128], [c2, sy - 22]], pa, C.ink, 1.6);
+   fade(c, sg(k, 2.6, 2.9, "lettres"), () => { tx(c, "A", c2 - 100, sy - 8, fnt(800, 16), C.accent, "center"); tx(c, "B", c2 + 14, sy - 34, fnt(800, 16), C.accent, "center"); });
+   // opération : nom, actions, règle d'émission
+   const oa = eo(sg(k, 3, 3.4, "opération")); fade(c, oa, () => { const ox = c2 - 115, oy = top + 290; c.fillStyle = "#fff"; c.fillRect(ox, oy, 230, 104); c.fillStyle = "#ecdcc6"; c.fillRect(ox, oy, 230, 30);
+    c.strokeStyle = C.ink; c.lineWidth = 1.6; c.strokeRect(ox, oy, 230, 104); c.beginPath(); c.moveTo(ox, oy + 30); c.lineTo(ox + 230, oy + 30); c.moveTo(ox, oy + 76); c.lineTo(ox + 230, oy + 76); c.stroke();
+    tx(c, X.op, ox + 10, oy + 21, fnt(700, 15), C.ink); tx(c, X.act, ox + 10, oy + 57, fnt(400, 14), C.ink); tx(c, X.rule, c2, oy + 96, fnt(400, 13), C.ink, "center"); });
+   path(c, [[c2, sy + 22], [c2, top + 290]], eio(sg(k, 3.3, 3.6)), C.ink, 1.6);
+   path(c, [[c2, top + 394], [c2, top + 442]], eio(sg(k, 3.9, 4.2, "résultat")), C.ink, 1.6);
+   ellipse(c, c2, top + 470, 96, 28, X.ev[2], eo(sg(k, 4.1, 4.5)));
+   const po = eo(sg(k, 5, 5.5, "vérification")); fade(c, po, () => pill(c, X.proOk, lx + 14, top + 452 + (1 - po) * 8, C.okS, C.ok, fnt(700, 15), 14, 38));
+  });
+ }
+
+ /* ---------- 7. L'espace enseignant : préparer, vérifier, partager ---------- */
+ const JS = ['{ "questions": [', '  { "id": "q01",', '    "enonce": "…",', '    "correction":', '      "SELECT …" },', '  …', '] }'];
+ function s7(c, k) {
+  const ta = eo(sg(k, 0, .5, "titre")); fade(c, ta, () => { tx(c, X.t7, 60, 104 - (1 - ta) * 10, fnt(800, 42), "#fff"); tx(c, X.t7s, 60, 140, fnt(500, 21), C.soft); });
+  for (let i = 0; i < 4; i++) { const a = eo(sg(k, .3 + i * .25, .8 + i * .25, i == 0 ? "cartes" : null)), x = 60 + i * 300, y = 176 + (1 - a) * 20, w = 260, h = 310;
+   fade(c, a, () => { card(c, x, y, w, h, 14); c.beginPath(); c.arc(x + 32, y + 34, 15, 0, 7); c.fillStyle = C.accent; c.fill(); tx(c, String(i + 1), x + 32, y + 35, fnt(800, 15), "#fff", "center", "middle");
+    tx(c, fit((c.font = fnt(700, 17), c), X.steps[i], w - 70), x + 56, y + 40, fnt(700, 17), C.ink);
+    if (i == 0) { [200, 170, 190, 120, 180].forEach((bw, j) => { rr(c, x + 22, y + 76 + j * 22, bw, 9, 4.5); c.fillStyle = "#e3e7ee"; c.fill(); });
+     const cp1 = sg(k, 1.7, 2, "copier"); const done = k > 2.05; c.font = fnt(600, 15); const lbl = done ? X.copied : X.copy;
+     button(c, lbl, x + 22, y + 214, !done, cp1, 15); if (done) { /* bouton passé au vert */ c.font = fnt(600, 15); const bw = c.measureText(lbl).width + 34; rr(c, x + 22, y + 214, bw, 36, 8); c.fillStyle = C.ok; c.fill(); tx(c, lbl, x + 22 + bw / 2, y + 233, fnt(600, 15), "#fff", "center", "middle"); } }
+    if (i == 1) { const n = Math.floor(sg(k, 2.4, 3.6, "réponse IA") * JS.join("").length); let used = 0; rr(c, x + 18, y + 66, w - 36, 220, 10); c.fillStyle = C.code; c.fill();
+     JS.forEach((l, j) => { const part = l.slice(0, Math.max(0, n - used)); used += l.length; tx(c, part, x + 30, y + 92 + j * 26, fnt(400, 13, FM), j == 0 || j == 6 ? C.muted : C.ink); }); }
+    if (i == 2) X.checks.forEach(([st, s], j) => fade(c, eo(sg(k, 3.8 + j * .35, 4.1 + j * .35, j == 0 ? "vérifications" : null)), () => { const yy = y + 78 + j * 50;
+     rr(c, x + 18, yy, w - 36, 40, 8); c.fillStyle = st == "ok" ? C.okS : C.warnS; c.fill();
+     if (st == "ok") check(c, x + 38, yy + 20, 14, C.ok); else tx(c, "⚠", x + 38, yy + 21, fnt(700, 17), C.warn, "center", "middle");
+     tx(c, s, x + 56, yy + 26, fnt(500, 14), C.ink); }));
+    if (i == 3) { const cols = [[C.accS, C.accent], [C.surf2, C.ink], [C.surf2, C.ink], [C.purS, C.pur]];
+     X.share.forEach((s, j) => fade(c, bk(sg(k, 5.2 + j * .25, 5.6 + j * .25, j == 0 ? "partage" : null)), () => { rr(c, x + 18, y + 72 + j * 50, w - 36, 40, 8); c.fillStyle = cols[j][0]; c.fill(); tx(c, s, x + 34, y + 98 + j * 50, fnt(600, 15), cols[j][1]); }));
+     fade(c, sg(k, 6.3, 6.7), () => tx(c, X.lms, x + 22, y + 290, fnt(600, 14), C.pur)); }
+   });
+   // flèches entre les étapes
+   if (i < 3) path(c, [[x + 266, 330], [x + 294, 330]], eio(sg(k, 1.4 + i * 1.3, 1.8 + i * 1.3)), "#fff", 2.4); }
+  const la = eo(sg(k, 6.4, 6.9, "langues")); fade(c, la, () => { let px = 60; px += pill(c, X.langs, px, 532 + (1 - la) * 10, "rgba(255,255,255,.12)", "#fff", fnt(600, 17), 18, 42) + 14;
+   pill(c, X.ownDb, px, 532 + (1 - la) * 10, "rgba(255,255,255,.12)", "#fff", fnt(600, 17), 18, 42); });
+ }
+
+ /* ---------- 8. Conclusion ---------- */
+ function s8(c, k) {
+  const s = 100 * bk(sg(k, 0, .7, "logo")); if (s > 0) logo(c, 640 - s / 2, 170 - s / 2, s);
+  const a = eo(sg(k, .4, 1.1, "titre")); fade(c, a, () => { tx(c, X.end, 640, 320 - (1 - a) * 14, fnt(800, 66), "#fff", "center"); tx(c, X.endS, 640, 370, fnt(500, 24), C.soft, "center"); });
+  const e = eo(sg(k, 1.1, 1.6, "éditeur")); fade(c, e, () => { const q = "SELECT * FROM PRODUIT;", n = Math.floor(sg(k, 1.6, 2.5, "frappe") * q.length);
+   const r = editor(c, 400, 420, 480, [q.slice(0, n)], 20); caret(c, r.cx, r.cy, 20, k); });
+ }
+
+ /* ---------- montage : début, fin, fonction, nom ---------- */
+ const SC = [[0, 6, s1, "1 · ouverture"], [6, 14, s2, "2 · éditeur"], [14, 22, s3, "3 · diagnostic"], [22, 30, s4, "4 · diagramme"], [30, 39, s5, "5 · pas à pas"], [39, 47, s6, "6 · schéma et processus"], [47, 55, s7, "7 · enseignant"], [55, DUR + .01, s8, "8 · conclusion"]];
+ function draw(c, t, lang, log) {
+  LG = TX[lang] ? lang : "fr"; X = TX[LG]; TW = log || null; c.save(); bg(c, t);
+  for (const [a, b, f] of SC) if (t >= a && t < b) {
+   const k = t - a, d = b - a, al = (a == 0 ? 1 : sg(k, 0, .45)) * (b > DUR ? 1 : 1 - sg(k, d - .45, d));   // fondu enchaîné
+   S0 = a; c.save(); c.globalAlpha = al; f(c, k, d); c.restore(); }
+  if (t > 6 && t < 55) tx(c, "SQL Lab", W - 30, H - 22, fnt(700, 15), "rgba(255,255,255,.45)", "right");
+  c.restore(); TW = null; }
+ const sceneAt = t => SC.find(s => t >= s[0] && t < s[1]) || SC[SC.length - 1];
+ return { W, H, DUR, CH, CAP, draw, sceneAt };
+})();
+
+/* =====================================================================
+   TEXTES DE LA PAGE (FR / EN / ES)
+   ===================================================================== */
+const DOC = { fr:"docs/#/themes/", en:"docs/#/en/topics/", es:"docs/#/es/topics/" };
+const DOCK = { requetes:{en:"queries",es:"queries"}, schema:{en:"schema",es:"schema"}, processus:{en:"process",es:"process"}, "pas-a-pas":{en:"step-by-step",es:"step-by-step"},
+ "questions-ia":{en:"ai-questions",es:"ai-questions"}, partage:{en:"sharing",es:"sharing"}, scorm:{en:"scorm",es:"scorm"}, bases:{en:"databases",es:"databases"}, technique:{en:"technical",es:"technical"} };
+const UI = {
+ fr:{ tagline:"Visite guidée en vidéo", openApp:"Ouvrir l'application", skip:"Passer l'introduction", start:"Commencer", h1:"SQL Lab en une minute",
+  lead:"Une présentation animée de chaque outil de l'application. Activez la voix pour l'entendre commentée, ou ouvrez les coulisses pour voir comment chaque animation est réglée.",
+  replay:"Revoir", sound:"Voix", backstage:"Coulisses", play:"Lecture", pause:"Pause", playL:"Lire la vidéo", progL:"Position dans la vidéo",
+  toolsT:"Les outils de SQL Lab", toolsP:"Chaque carte correspond à un chapitre de la vidéo. « Voir » y amène directement ; « Documentation » ouvre la page détaillée.",
+  watch:"Voir", docs:"Documentation",
+  tools:[
+   ["Éditeur et exécution",1,"Coloration syntaxique et complétion des noms de tables et de colonnes (CodeMirror 5). La requête est exécutée par SQLite compilé en WebAssembly (sql.js) : tout se passe dans le navigateur, sans serveur. Les requêtes d'écriture repartent d'une copie neuve de la base.",["requetes"]],
+   ["Comparaison et diagnostic",2,"Le résultat est comparé à l'attendu, avec des tolérances (alias, ordre des colonnes, casse, arrondi). En cas d'écart, un conseil ciblé : jointure oubliée, doublons, tri, = NULL, agrégat dans WHERE. Les dates « à la DCG » (YEAR(), #15/06/2024#) sont réécrites pour SQLite.",["requetes"]],
+   ["Diagramme du schéma",3,"Notation française : clé primaire soulignée, clé étrangère en italique avec #, flèche vers la clé primaire. Tables déplaçables, zoom, plein écran, double-clic pour voir le contenu, onglet Schéma relationnel.",["schema"]],
+   ["Correction pas à pas",4,"Le raisonnement rejoué dans l'ordre où on le mène : tables, tables de passage, alias, colonnes, jointures, filtres, regroupement, tri. Les étapes sont générées à partir de la correction ; l'enseignant peut y ajouter ses commentaires.",["pas-a-pas"]],
+   ["Schémas et processus",5,"Faire évoluer un schéma relationnel dans un éditeur graphique, corrigé par points de contrôle. Tracer un schéma événements-résultats dont la grammaire et les synchronisations sont vérifiées automatiquement.",["schema","processus"]],
+   ["Espace enseignant et partage",6,"Préparer un prompt pour n'importe quelle IA, importer et vérifier les questions, puis les partager : lien sans serveur, fichier JSON, exercice sur sa propre base (.zip), paquet SCORM pour Moodle. Interface en français, anglais et espagnol.",["questions-ia","partage","scorm"]]
+  ],
+  docNames:{requetes:"Requêtes",schema:"Schéma",processus:"Processus","pas-a-pas":"Pas à pas","questions-ia":"Questions et IA",partage:"Partage",scorm:"SCORM"},
+  makeT:"Comment cette vidéo est faite", makeP:"Aucun fichier vidéo, aucune bibliothèque : tout tient dans intro.html, à côté de l'application.",
+  make:[["1","Un canvas redessiné","Chaque image est dessinée par l'API Canvas 2D du navigateur, environ 60 fois par seconde : rectangles arrondis, texte, dégradés. Il n'y a pas d'éléments à inspecter, seulement des pixels."],
+   ["2","Une fonction du temps","draw(t) dessine l'image de l'instant t, et rien d'autre ne compte. C'est ce qui permet de reculer, d'avancer et de sauter aux chapitres."],
+   ["3","Des créneaux et des courbes","sg(t, début, fin) donne une progression de 0 à 1 pour chaque élément, adoucie par une courbe d'accélération (easeOutCubic, easeOutBack pour le rebond)."],
+   ["4","Une voix de synthèse","Le bouton Voix lit chaque sous-titre avec la synthèse vocale du navigateur (Web Speech API), dans la langue choisie, avec les voix installées sur l'appareil."],
+   ["5","Les coulisses","Le bouton Coulisses (touche D) affiche la scène, le temps et la progression de chaque animation. En pause, les touches , et . avancent image par image."]],
+  dbgHint:"Chaque ligne est une animation nommée dans le code : son créneau (début → fin) et sa progression. En pause : , et . pour avancer image par image, ← → pour 5 s.",
+  scene:"scène", foot:"Base d'exemple fictive (DCG 2024 – Crédit'Partner)" },
+ en:{ tagline:"Guided video tour", openApp:"Open the app", skip:"Skip intro", start:"Get started", h1:"SQL Lab in one minute",
+  lead:"An animated tour of every tool in the app. Turn on the voice to hear it narrated, or open the backstage view to see how each animation is timed.",
+  replay:"Watch again", sound:"Voice", backstage:"Backstage", play:"Play", pause:"Pause", playL:"Play the video", progL:"Video position",
+  toolsT:"The tools in SQL Lab", toolsP:"Each card matches a chapter of the video. “Watch” jumps straight to it; “Documentation” opens the detailed page.",
+  watch:"Watch", docs:"Documentation",
+  tools:[
+   ["Editor and execution",1,"Syntax highlighting and completion of table and column names (CodeMirror 5). Queries run on SQLite compiled to WebAssembly (sql.js): everything happens in the browser, with no server. Write queries start from a fresh copy of the database.",["requetes"]],
+   ["Comparison and feedback",2,"The result is compared with the expected one, with tolerances (aliases, column order, case, rounding). When they differ, targeted feedback: missing join, duplicates, sorting, = NULL, aggregate in WHERE. DCG-style dates (YEAR(), #15/06/2024#) are rewritten for SQLite.",["requetes"]],
+   ["Schema diagram",3,"French notation: primary key underlined, foreign key in italics with #, arrow to the primary key. Movable tables, zoom, full screen, double-click to see the content, Relational schema tab.",["schema"]],
+   ["Step-by-step solution",4,"The reasoning replayed in the order you actually follow: tables, linking tables, aliases, columns, joins, filters, grouping, sorting. Steps are generated from the solution; teachers can add their own comments.",["pas-a-pas"]],
+   ["Schemas and processes",5,"Evolve a relational schema in a graphical editor, marked by checkpoints. Draw an event-result process diagram whose grammar and synchronisations are checked automatically.",["schema","processus"]],
+   ["Teacher area and sharing",6,"Prepare a prompt for any AI, import and check the questions, then share them: serverless link, JSON file, exercise on your own database (.zip), SCORM package for Moodle. Interface in French, English and Spanish.",["questions-ia","partage","scorm"]]
+  ],
+  docNames:{requetes:"Queries",schema:"Schema",processus:"Process","pas-a-pas":"Step by step","questions-ia":"AI questions",partage:"Sharing",scorm:"SCORM"},
+  makeT:"How this video is made", makeP:"No video file, no library: everything fits in intro.html, next to the app.",
+  make:[["1","A redrawn canvas","Each frame is drawn with the browser's Canvas 2D API, about 60 times per second: rounded rectangles, text, gradients. There are no elements to inspect, only pixels."],
+   ["2","A function of time","draw(t) draws the frame for instant t, and nothing else matters. That is what makes rewinding, skipping and chapters possible."],
+   ["3","Time slots and curves","sg(t, start, end) gives each element a progress from 0 to 1, smoothed by an easing curve (easeOutCubic, easeOutBack for the bounce)."],
+   ["4","A synthetic voice","The Voice button reads each caption with the browser's speech synthesis (Web Speech API), in the chosen language, using the voices installed on the device."],
+   ["5","Backstage","The Backstage button (D key) shows the scene, the time and the progress of each animation. While paused, the , and . keys step frame by frame."]],
+  dbgHint:"Each row is an animation named in the code: its time slot (start → end) and its progress. While paused: , and . to step frame by frame, ← → for 5 s.",
+  scene:"scene", foot:"Fictional sample database (DCG 2024 – Crédit'Partner)" },
+ es:{ tagline:"Visita guiada en vídeo", openApp:"Abrir la aplicación", skip:"Saltar la introducción", start:"Empezar", h1:"SQL Lab en un minuto",
+  lead:"Una presentación animada de cada herramienta de la aplicación. Activa la voz para oírla comentada, o abre los entresijos para ver cómo se ajusta cada animación.",
+  replay:"Ver de nuevo", sound:"Voz", backstage:"Entresijos", play:"Reproducir", pause:"Pausa", playL:"Reproducir el vídeo", progL:"Posición en el vídeo",
+  toolsT:"Las herramientas de SQL Lab", toolsP:"Cada tarjeta corresponde a un capítulo del vídeo. «Ver» lleva directamente a él; «Documentación» abre la página detallada.",
+  watch:"Ver", docs:"Documentación",
+  tools:[
+   ["Editor y ejecución",1,"Resaltado de sintaxis y autocompletado de tablas y columnas (CodeMirror 5). La consulta se ejecuta con SQLite compilado a WebAssembly (sql.js): todo ocurre en el navegador, sin servidor. Las consultas de escritura parten de una copia nueva de la base.",["requetes"]],
+   ["Comparación y diagnóstico",2,"El resultado se compara con el esperado, con tolerancias (alias, orden de columnas, mayúsculas, redondeo). Si hay diferencias, un consejo preciso: combinación olvidada, duplicados, orden, = NULL, agregado en WHERE. Las fechas «estilo DCG» (YEAR(), #15/06/2024#) se reescriben para SQLite.",["requetes"]],
+   ["Diagrama del esquema",3,"Notación francesa: clave primaria subrayada, clave foránea en cursiva con #, flecha hacia la clave primaria. Tablas movibles, zoom, pantalla completa, doble clic para ver el contenido, pestaña Esquema relacional.",["schema"]],
+   ["Solución paso a paso",4,"El razonamiento reproducido en el orden en que se hace: tablas, tablas intermedias, alias, columnas, combinaciones, filtros, agrupación, ordenación. Los pasos se generan a partir de la solución; el docente puede añadir sus comentarios.",["pas-a-pas"]],
+   ["Esquemas y procesos",5,"Hacer evolucionar un esquema relacional en un editor gráfico, corregido por puntos de control. Dibujar un esquema eventos-resultados cuya gramática y sincronizaciones se verifican automáticamente.",["schema","processus"]],
+   ["Espacio docente y compartir",6,"Preparar un prompt para cualquier IA, importar y verificar las preguntas, y compartirlas: enlace sin servidor, archivo JSON, ejercicio sobre tu propia base (.zip), paquete SCORM para Moodle. Interfaz en francés, inglés y español.",["questions-ia","partage","scorm"]]
+  ],
+  docNames:{requetes:"Consultas",schema:"Esquema",processus:"Procesos","pas-a-pas":"Paso a paso","questions-ia":"Preguntas e IA",partage:"Compartir",scorm:"SCORM"},
+  makeT:"Cómo está hecho este vídeo", makeP:"Ningún archivo de vídeo, ninguna biblioteca: todo cabe en intro.html, junto a la aplicación.",
+  make:[["1","Un canvas redibujado","Cada imagen se dibuja con la API Canvas 2D del navegador, unas 60 veces por segundo: rectángulos redondeados, texto, degradados. No hay elementos que inspeccionar, solo píxeles."],
+   ["2","Una función del tiempo","draw(t) dibuja la imagen del instante t, y nada más cuenta. Eso permite retroceder, avanzar y saltar a los capítulos."],
+   ["3","Intervalos y curvas","sg(t, inicio, fin) da a cada elemento un progreso de 0 a 1, suavizado por una curva de aceleración (easeOutCubic, easeOutBack para el rebote)."],
+   ["4","Una voz sintética","El botón Voz lee cada subtítulo con la síntesis de voz del navegador (Web Speech API), en el idioma elegido, con las voces instaladas en el dispositivo."],
+   ["5","Los entresijos","El botón Entresijos (tecla D) muestra la escena, el tiempo y el progreso de cada animación. En pausa, las teclas , y . avanzan imagen por imagen."]],
+  dbgHint:"Cada fila es una animación con nombre en el código: su intervalo (inicio → fin) y su progreso. En pausa: , y . para avanzar imagen por imagen, ← → para 5 s.",
+  scene:"escena", foot:"Base de ejemplo ficticia (DCG 2024 – Crédit'Partner)" }
+};
+let LANG = "fr";
+/* Mode intégré : ?embed=app (vidéo d'accueil dans l'application) ou ?embed=doc (dans la documentation) */
+const EMBED = (p => ["app", "doc"].includes(p) ? p : "")(new URLSearchParams(location.search).get("embed"));
+/* « Ouvrir l'application » : l'exercice de démonstration dans la langue choisie */
+const APP = { fr:"index.html?lang=fr", en:"index.html?lang=en#demo-en/intro", es:"index.html?lang=es#demo-es/intro" };
+const t = k => (UI[LANG][k] !== undefined ? UI[LANG][k] : UI.fr[k]);
+const docUrl = key => LANG == "fr" ? DOC.fr + key : DOC[LANG] + ((DOCK[key] || {})[LANG] || key);
+const esc = s => String(s).replace(/[&<>"]/g, ch => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;" }[ch]));
+
+/* Langue : ?lang=, sinon le choix enregistré par l'application (même clé que assets/i18n.js), sinon le navigateur */
+const LKEY = "sqllab:lang";
+function detectLang() {
+ const u = new URLSearchParams(location.search).get("lang"); if (["fr", "en", "es"].includes(u)) return u;
+ try { const s = JSON.parse(localStorage.getItem(LKEY)); if (["fr", "en", "es"].includes(s)) return s; } catch (e) { /* stockage indisponible */ }
+ const n = navigator.language || "fr"; return /^es\b/i.test(n) ? "es" : /^fr\b/i.test(n) ? "fr" : "en";
+}
+
+/* =====================================================================
+   LECTEUR
+   ===================================================================== */
+const ICON = { play:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15l12.5-7.5z"/></svg>', pause:'<svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4.5" width="4" height="15" rx="1"/><rect x="14" y="4.5" width="4" height="15" rx="1"/></svg>' };
+const RM = !!(window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches);
+const VP = { t:0, playing:false, last:0, snd:false, cap:-1, ctx:null, raf:0, dbg:false };
+const hasTTS = typeof speechSynthesis != "undefined" && typeof SpeechSynthesisUtterance != "undefined";
+const mmss = s => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, "0")}`;
+function stopSpeech() { try { if (hasTTS) speechSynthesis.cancel(); } catch (e) { /* rien */ } }
+function speak(s) { try { if (!hasTTS) return; speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(s), loc = { fr:"fr-FR", en:"en-US", es:"es-ES" }[LANG];
+ u.lang = loc; u.rate = 1.05; const v = speechSynthesis.getVoices().find(v => v.lang && v.lang.toLowerCase().startsWith(LANG)); if (v) u.voice = v; speechSynthesis.speak(u); } catch (e) { /* rien */ } }
+function setup() { const cv = $("cv"), k = Math.min(2, window.devicePixelRatio || 1); cv.width = INTRO.W * k; cv.height = INTRO.H * k;
+ VP.ctx = cv.getContext("2d"); VP.ctx.setTransform(k, 0, 0, k, 0, 0);
+ $("marks").innerHTML = INTRO.CH.fr.slice(1).map(c => `<span class="mk" style="left:${c[0] / INTRO.DUR * 100}%"></span>`).join("");
+ if (!hasTTS) $("snd").hidden = true; }
+function render() { if (!VP.ctx) return; const tt = VP.t, D = INTRO.DUR, log = VP.dbg ? [] : null;
+ try { INTRO.draw(VP.ctx, tt, LANG, log); } catch (e) { console.error(e); }
+ $("fill").style.width = (tt / D * 100) + "%"; $("time").textContent = `${mmss(tt)} / ${mmss(D)}`; $("prog").setAttribute("aria-valuenow", Math.round(tt));
+ const caps = INTRO.CAP[LANG], ci = caps.findIndex(c => tt >= c[0] && tt < c[1]);
+ if (ci !== VP.cap) { VP.cap = ci; $("cap").textContent = ci >= 0 ? caps[ci][2] : ""; if (ci >= 0 && VP.snd && VP.playing) speak(caps[ci][2]); }
+ let ch = 0; INTRO.CH[LANG].forEach((c, i) => { if (tt >= c[0]) ch = i; });
+ document.querySelectorAll("#chaps button").forEach((b, i) => b.setAttribute("aria-current", i == ch));
+ if (VP.dbg) renderDbg(tt, log); }
+/* coulisses : scène en cours et journal des animations nommées */
+function renderDbg(tt, log) { const sc = INTRO.sceneAt(tt);
+ const rows = log.map(([n, a, b, v]) => `<div class="row ${v >= 1 ? "done on" : v > 0 ? "on" : "off"}"><span>${esc(n)}</span><span class="rg">${a.toFixed(2)} → ${b.toFixed(2)} s</span><span class="bar"><i style="width:${(v * 100).toFixed(1)}%"></i></span><span>${v.toFixed(2)}</span></div>`).join("");
+ $("dbgp").innerHTML = `<div class="hd">t = ${tt.toFixed(2)} s · ${t("scene")} ${esc(sc[3])} (${sc[0]} → ${Math.min(INTRO.DUR, sc[1]).toFixed(0)} s, k = ${(tt - sc[0]).toFixed(2)} s)</div><div class="hint">${esc(t("dbgHint"))}</div>${rows}`; }
+function loop(now) { if (!VP.playing) return; VP.t = Math.min(INTRO.DUR, VP.t + (now - VP.last) / 1000); VP.last = now; render();
+ if (VP.t >= INTRO.DUR) { pause(); $("end").hidden = false; } else VP.raf = requestAnimationFrame(loop); }
+function play() { if (VP.t >= INTRO.DUR - .05) { VP.t = 0; VP.cap = -1; } $("end").hidden = true; $("big").hidden = true; VP.playing = true; VP.last = performance.now();
+ $("play").innerHTML = ICON.pause; $("play").setAttribute("aria-label", t("pause")); cancelAnimationFrame(VP.raf); VP.raf = requestAnimationFrame(loop); }
+function pause() { VP.playing = false; cancelAnimationFrame(VP.raf); $("play").innerHTML = ICON.play; $("play").setAttribute("aria-label", t("play")); stopSpeech(); }
+function seek(x) { VP.t = Math.max(0, Math.min(INTRO.DUR, x)); VP.cap = -1; stopSpeech(); if (VP.t < INTRO.DUR) $("end").hidden = true; render(); }
+
+/* =====================================================================
+   PAGE : langue, chapitres, cartes des outils, coulisses
+   ===================================================================== */
+function applyLang() {
+ document.documentElement.lang = LANG; document.title = "SQL Lab – " + t("tagline");
+ document.querySelectorAll("[data-t]").forEach(e => { e.textContent = t(e.dataset.t); });
+ document.querySelectorAll("[data-ta]").forEach(e => e.setAttribute("aria-label", t(e.dataset.ta)));
+ document.querySelectorAll(".langs button").forEach(b => b.setAttribute("aria-pressed", b.dataset.lang == LANG));
+ document.querySelectorAll("[data-app]").forEach(a => { a.setAttribute("href", APP[LANG]); if (EMBED == "doc") a.target = "_top"; });
+ $("play").setAttribute("aria-label", VP.playing ? t("pause") : t("play"));
+ $("chaps").innerHTML = INTRO.CH[LANG].map(c => `<button type="button" data-sec="${c[0]}">${esc(c[1])}</button>`).join("");
+ $("tools").innerHTML = t("tools").map(([title, ch, txt, docs], i) => `<article class="card"><h3><span class="n">${i + 1}</span>${esc(title)}</h3><p>${esc(txt)}</p>
+  <div class="acts"><button class="btn" type="button" data-sec="${INTRO.CH.fr[ch][0]}">${ICON.play}${esc(t("watch"))}</button>${docs.map(d => `<a class="btn" href="${docUrl(d)}">${esc(t("docs"))} · ${esc(t("docNames")[d])}</a>`).join("")}</div></article>`).join("");
+ $("make").innerHTML = t("make").map(([n, a, b]) => `<li><b class="k">${n}</b><div><strong>${esc(a)}</strong><br><span>${esc(b)}</span></div></li>`).join("");
+ VP.cap = -1; render(); }
+function setLang(l) { LANG = l; try { localStorage.setItem(LKEY, JSON.stringify(l)); } catch (e) { /* rien */ } stopSpeech(); applyLang(); }
+
+document.querySelectorAll(".langs button").forEach(b => b.addEventListener("click", () => setLang(b.dataset.lang)));
+document.addEventListener("click", e => { const b = e.target.closest("[data-sec]"); if (!b) return; seek(+b.dataset.sec + .01); if (!VP.playing) play();
+ if (!b.closest("#chaps") && !EMBED) document.querySelector(".player").scrollIntoView({ behavior: RM ? "auto" : "smooth", block: "center" }); });
+$("play").addEventListener("click", () => VP.playing ? pause() : play());
+$("cv").addEventListener("click", () => VP.playing ? pause() : play());
+$("big").addEventListener("click", play);
+$("replay").addEventListener("click", () => { seek(0); play(); });
+$("snd").addEventListener("click", () => { VP.snd = !VP.snd; $("snd").setAttribute("aria-pressed", VP.snd);
+ if (VP.snd) { const c = INTRO.CAP[LANG].find(c => VP.t >= c[0] && VP.t < c[1]); if (c) speak(c[2]); if (!VP.playing) play(); } else stopSpeech(); });
+function toggleDbg() { VP.dbg = !VP.dbg; $("dbg").setAttribute("aria-pressed", VP.dbg); $("dbgp").hidden = !VP.dbg; render(); }
+$("dbg").addEventListener("click", toggleDbg);
+{ let drag = false; const pr = $("prog"), at = e => { const r = pr.getBoundingClientRect(); seek((e.clientX - r.left) / r.width * INTRO.DUR); };
+ pr.addEventListener("pointerdown", e => { drag = true; try { pr.setPointerCapture(e.pointerId); } catch (_) { /* rien */ } at(e); });
+ pr.addEventListener("pointermove", e => { if (drag) at(e); });
+ pr.addEventListener("pointerup", () => { drag = false; }); pr.addEventListener("pointercancel", () => { drag = false; }); }
+document.addEventListener("keydown", e => { if (e.ctrlKey || e.metaKey || e.altKey || /INPUT|TEXTAREA|SELECT/.test(e.target.tagName)) return;
+ if (e.key == " " && !/^(BUTTON|A)$/.test(e.target.tagName)) { VP.playing ? pause() : play(); e.preventDefault(); }
+ else if (e.key == "ArrowRight" || e.key == "ArrowLeft") { seek(VP.t + (e.key == "ArrowRight" ? 5 : -5)); e.preventDefault(); }
+ else if ((e.key == "," || e.key == ".") && !VP.playing) { seek(VP.t + (e.key == "." ? 1 : -1) / 30); e.preventDefault(); }   // image par image
+ else if (e.key == "d" || e.key == "D") toggleDbg();
+ else if (e.key == "Escape" && EMBED == "app") closeEmbed(); });
+/* fermeture demandée à l'application (assets/intro-launcher.js écoute ce message) */
+function closeEmbed() { pause(); try { parent.postMessage({ sqllab: "intro-close" }, location.origin); } catch (e) { /* rien */ } }
+$("skip").addEventListener("click", closeEmbed);
+$("start").addEventListener("click", closeEmbed);
+
+/* démarrage : lecture automatique sauf si l'utilisateur limite les animations */
+if (EMBED) document.body.classList.add("embed", "embed-" + EMBED);
+if (EMBED == "doc" && window.ResizeObserver) new ResizeObserver(() => { try { parent.postMessage({ sqllab: "intro-height", h: document.documentElement.scrollHeight }, location.origin); } catch (e) { /* rien */ } }).observe(document.body);
+if (EMBED == "app") { $("start").hidden = false; document.querySelector(".end [data-app]").hidden = true; }
+try { localStorage.setItem("sqllab:introSeen", "1"); } catch (e) { /* vue : l'application ne la relancera pas d'elle-même */ }
+LANG = detectLang(); setup(); applyLang();
+if (RM || EMBED == "doc") { VP.t = 2.6; render(); $("big").hidden = false; $("play").innerHTML = ICON.play; } else play();
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { if (!VP.playing) render(); });
+if (hasTTS && speechSynthesis.getVoices().length == 0) speechSynthesis.addEventListener("voiceschanged", () => {}, { once: true });
+}
+</script>
+</body>
+</html>
