@@ -2,7 +2,7 @@
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.24464411.svg)](https://doi.org/10.5281/zenodo.24464411)
 
-*[Version française](README.md)* · **[Open the app (English demo)](https://edu-fpar.github.io/sql-lab/?lang=en#demo-en/intro)** ·
+*[Version française](README.md)* · *[Versión en español](README.es.md)* · **[Open the app (English demo)](https://edu-fpar.github.io/sql-lab/?lang=en#demo-en/intro)** ·
 [Teacher space](https://edu-fpar.github.io/sql-lab/create.html?lang=en) · **[Documentation](https://edu-fpar.github.io/sql-lab/docs/#/en/)** (by profile and by topic, [sources](docs/en/))
 
 A static web app (HTML + JavaScript): students write their queries, which run **in the browser**

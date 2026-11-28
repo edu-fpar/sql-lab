@@ -2,7 +2,7 @@
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.24464411.svg)](https://doi.org/10.5281/zenodo.24464411)
 
-*[English version](README.en.md)* · *[Documentación en español](https://edu-fpar.github.io/sql-lab/docs/#/es/)* · **[Ouvrir l'application](https://edu-fpar.github.io/sql-lab/)** ·
+*[English version](README.en.md)* · *[Versión en español](README.es.md)* · *[Documentación en español](https://edu-fpar.github.io/sql-lab/docs/#/es/)* · **[Ouvrir l'application](https://edu-fpar.github.io/sql-lab/)** ·
 [Espace enseignant](https://edu-fpar.github.io/sql-lab/create.html) · **[Documentation](https://edu-fpar.github.io/sql-lab/docs/)** (par profil et par thème, [sources](docs/))
 
 Application web statique (HTML + JavaScript) : les étudiants écrivent leurs requêtes,
